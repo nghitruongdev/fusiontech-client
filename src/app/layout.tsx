@@ -1,5 +1,8 @@
+import Navbar from "@components/layout/Navbar";
 import "./globals.css";
 import { Inter, Open_Sans } from "next/font/google";
+import Footer from "@components/layout/Footer";
+import { NextAuthProvider } from "./providers";
 
 const inter = Inter({ subsets: ["latin"] });
 const open_sans = Open_Sans({
@@ -17,10 +20,15 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        // className={`${open_sans.variable} font-sans`}
         <html lang="en">
             {/* <body className={inter.className}> */}
-            <body>{children}</body>
+            <body className={`${open_sans.variable} font-sans`}>
+                <NextAuthProvider>
+                    <Navbar />
+                </NextAuthProvider>
+                <main>{children}</main>
+                <Footer />
+            </body>
         </html>
     );
 }
