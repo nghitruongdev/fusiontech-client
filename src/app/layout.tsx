@@ -6,6 +6,7 @@ import { NextAuthProvider } from "./providers";
 import { Refine } from "@refinedev/core";
 import dataProvider from "@refinedev/simple-rest";
 import { API_URL } from "@/constants";
+import RefineLayout from "./RefineLayout";
 
 const inter = Inter({ subsets: ["latin"] });
 const open_sans = Open_Sans({
@@ -24,15 +25,14 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en">
-            {/* <body className={inter.className}> */}
             <body className={`${open_sans.variable} font-sans`}>
-                {/* <Refine dataProvider={dataProvider(API_URL)}> */}
-                <NextAuthProvider>
-                    <Navbar />
-                </NextAuthProvider>
-                <main>{children}</main>
-                <Footer />
-                {/* </Refine> */}
+                <RefineLayout>
+                    <NextAuthProvider>
+                        <Navbar />
+                    </NextAuthProvider>
+                    <main>{children}</main>
+                    <Footer />
+                </RefineLayout>
             </body>
         </html>
     );
