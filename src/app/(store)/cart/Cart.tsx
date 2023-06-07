@@ -11,8 +11,11 @@ import { MdOutlineAdd } from "react-icons/md";
 import { TbReload } from "react-icons/tb";
 import { HiMinusSm } from "react-icons/hi";
 import FormatPrice from "@/components/client/FormatPrice";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { IoMdClose } from "react-icons/io";
+type Props = {
+    children: ReactNode;
+};
 const Cart = () => {
     const [warningMsg, setWarningMsg] = useState(false);
 
