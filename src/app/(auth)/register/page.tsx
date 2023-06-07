@@ -5,7 +5,7 @@ import { Laptop2Icon } from "lucide-react";
 const LoginPage = () => {
     return (
         <AuthPage
-            type="login"
+            type="register"
             formProps={{
                 defaultValues: {
                     email: "demo@refine.dev",

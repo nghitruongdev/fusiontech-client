@@ -1,12 +1,9 @@
-import Navbar from "@components/layout/Navbar";
+import Header from "@components/layout/Header";
 import "./globals.css";
 import { Inter, Open_Sans } from "next/font/google";
-import Footer from "@components/layout/Footer";
 import { NextAuthProvider } from "./providers";
-import { Refine } from "@refinedev/core";
-import dataProvider from "@refinedev/simple-rest";
-import { API_URL } from "@/constants";
 import RefineLayout from "./RefineLayout";
+import Footer from "@components/layout/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 const open_sans = Open_Sans({
@@ -28,7 +25,7 @@ export default function RootLayout({
             <body className={`${open_sans.variable} font-sans`}>
                 <RefineLayout>
                     <NextAuthProvider>
-                        <Navbar />
+                        <Header />
                     </NextAuthProvider>
                     <main>{children}</main>
                     <Footer />

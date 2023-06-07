@@ -19,14 +19,14 @@ type Props = {
 };
 
 const RefineLayout = ({ children }: Props) => {
-    const { t, i18n } = useTranslation();
-    const i18nProvider = {
-        translate: (key: string, params: object) => t(key, params),
-        changeLocale: (lang: string) => i18n.changeLanguage(lang),
-        getLocale: () => i18n.language,
-    };
+    // const { t, i18n } = useTranslation();
+    // const i18nProvider = {
+    //     translate: (key: string, params: object) => t(key, params),
+    //     changeLocale: (lang: string) => i18n.changeLanguage(lang),
+    //     getLocale: () => i18n.language,
+    // };
     return (
-        <ChakraProvider theme={RefineThemes.Purple}>
+        <ChakraProvider theme={RefineThemes.Blue}>
             <ColorModeScript
                 initialColorMode={refineTheme.config.initialColorMode}
             />
@@ -35,7 +35,7 @@ const RefineLayout = ({ children }: Props) => {
                 authProvider={authProvider}
                 routerProvider={routerProvider}
                 notificationProvider={notificationProvider}
-                i18nProvider={i18nProvider}
+                // i18nProvider={i18nProvider}
                 options={{
                     syncWithLocation: true,
                     warnWhenUnsavedChanges: true,
