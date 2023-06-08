@@ -16,7 +16,7 @@ import {
 
 const solutions = [
     {
-        name: "Analytics",
+        name: "Download",
         description: "Get a better understanding of your traffic",
         href: "#",
         icon: ChartPieIcon,
@@ -54,9 +54,17 @@ const solutions = [
 export default function Example() {
     return (
         <Popover className="relative">
-            <Popover.Button className="inline-flex items-center gap-x-1 text-sm font-semibold leading-6 text-gray-900">
-                <span>Solutions</span>
-                <ChevronDownIcon className="h-5 w-5" aria-hidden="true" />
+            {/* <Popover.Button className="inline-flex items-center gap-x-2 navBarHover text-sm font-semibold leading-6 text-gray-900"> */}
+            <Popover.Button className="inline-flex items-center gap-x-2 navBarHover">
+                {/* <div className="flex items-center gap-2 navBarHover"> */}
+                <div className="w-4 grid grid-cols-2 gap-[2px]">
+                    <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+                    <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+                    <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+                    <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+                </div>
+                <p className="font-semibold ">Departments</p>
+                {/* </div> */}
             </Popover.Button>
 
             <Transition
@@ -68,9 +76,8 @@ export default function Example() {
                 leaveFrom="opacity-100 translate-y-0"
                 leaveTo="opacity-0 translate-y-1"
             >
-                <Popover.Panel className="absolute left-1/2 z-10 mt-5 flex w-screen max-w-max -translate-x-1/2 px-4">
-                    <div className="bg-white">Hello there</div>
-                    {/* <div className="w-screen max-w-md flex-auto overflow-hidden rounded-3xl bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
+                <Popover.Panel className="absolute -left-full z-10 mt-4 flex w-screen max-w-max px-4">
+                    <div className="w-screen max-w-max grid grid-cols-3 overflow-hidden rounded-2xl mx-4 rounded-t-none bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
                         <div className="p-4">
                             {solutions.map((item) => (
                                 <div
@@ -79,26 +86,30 @@ export default function Example() {
                                 >
                                     <div className="mt-1 flex h-11 w-11 flex-none items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
                                         <item.icon
-                                            className="h-6 w-6 text-gray-600 group-hover:text-indigo-600"
+                                            className="h-6 w-6 text-gray-600 group-hover:bg-white group-hover:text-blue"
                                             aria-hidden="true"
                                         />
                                     </div>
                                     <div>
                                         <a
                                             href={item.href}
-                                            className="font-semibold text-gray-900"
+                                            className="font-semibold text-gray-900 hover:text-blue"
                                         >
                                             {item.name}
                                             <span className="absolute inset-0" />
                                         </a>
-                                        <p className="mt-1 text-gray-600">
+                                        <p className="mt-1 text-gray-600 hover:text-lightBlue">
                                             {item.description}
                                         </p>
                                     </div>
                                 </div>
                             ))}
                         </div>
-                    </div> */}
+                        <div className="bg-gray-400">Xin chào cả nhà</div>
+                        <div className="p-4 bg-red-400 m-8 rounded-3xl">
+                            Hello There
+                        </div>
+                    </div>
                 </Popover.Panel>
             </Transition>
         </Popover>

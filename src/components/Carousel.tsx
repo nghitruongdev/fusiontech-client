@@ -40,6 +40,7 @@ export default function CaptionCarousel() {
     const hoverIconColor = {
         bg: "gray.50",
         opacity: "0.4",
+        color: "gray.800",
     };
     // This list contains all the data for carousels
     // This can be static or loaded from a server
@@ -68,7 +69,8 @@ export default function CaptionCarousel() {
             height="full"
             width={"full"}
             overflow={"hidden"}
-            color="gray.500"
+            // color="gray.500"
+            color="whiteAlpha.800"
             role="group"
             cursor="pointer"
         >
@@ -88,7 +90,7 @@ export default function CaptionCarousel() {
             <IconButton
                 aria-label="left-arrow"
                 variant="ghost"
-                color={"gray.400"}
+                color={"whiteAlpha.500"}
                 _hover={hoverIconColor}
                 position="absolute"
                 left={side}
@@ -104,7 +106,7 @@ export default function CaptionCarousel() {
                 aria-label="right-arrow"
                 variant="ghost"
                 position="absolute"
-                color="gray.400"
+                color="whiteAlpha.500"
                 display="none"
                 _groupHover={{
                     display: "block",

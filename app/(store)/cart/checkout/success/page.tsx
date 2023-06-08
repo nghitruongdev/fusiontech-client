@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-const page = () => {
+const SuccessPage = () => {
     return (
         <div className="flex flex-col gap-2 items-center justify-center">
             <h1 className="text-2xl text-hoverBg font-semibold">
@@ -15,4 +15,4 @@ const page = () => {
         </div>
     );
 };
-export default page;
+export default SuccessPage;

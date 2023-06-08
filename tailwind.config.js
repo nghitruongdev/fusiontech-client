@@ -17,10 +17,10 @@ module.exports = {
                 "2xl": "1400px",
             },
         },
-        maxWidth: {
-            container: "1520px",
-            contentContainer: "1280px",
-        },
+        // maxWidth: {
+        //     container: "1520px",
+        //     contentContainer: "1280px",
+        // },
         extend: {
             screens: {
                 xs: "320px",
@@ -96,7 +96,8 @@ module.exports = {
                 "accordion-up": "accordion-up 0.2s ease-out",
             },
             fontFamily: {
-                sans: ["var(--font-open_sans)", ...fontFamily.sans],
+                // sans: ["var(--font-open_sans)", ...fontFamily.sans],
+                sans: ["Inter var", ...fontFamily.sans],
             },
         },
     },

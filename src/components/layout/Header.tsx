@@ -11,6 +11,23 @@ import { FaPlaceOfWorship } from "react-icons/fa";
 import { MdOutlineLocationOn } from "react-icons/md";
 import NavbarUserInfo from "./NavbarUserInfo";
 import BannerNavbar from "./BannerNavbar";
+import MenuContainer from "@components/ui/MenuContainer";
+import {
+    Button,
+    Flex,
+    Menu,
+    MenuButton,
+    MenuItem,
+    MenuList,
+    Popover,
+    PopoverArrow,
+    PopoverBody,
+    PopoverCloseButton,
+    PopoverContent,
+    PopoverHeader,
+    PopoverTrigger,
+} from "@chakra-ui/react";
+import FlyoutMenu from "@components/ui/FlyoutMenu";
 
 const Header = () => {
     return (
@@ -33,17 +50,48 @@ const Header = () => {
                         {/* ==================== Logo End ==================== */}
 
                         {/* ==================== Departments Start ==================== */}
-                        <div className="navBarHover">
-                            <div className="w-4 grid grid-cols-2 gap-[2px]">
-                                <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
-                                <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
-                                <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
-                                <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
-                            </div>
-                            <p className="text-base font-semibold ">
-                                Departments
-                            </p>
-                        </div>
+                        <Departments />
+                        {/* <Menu>
+                            <MenuButton className="navBarHover">
+                                <div className="flex items-center gap-2 ">
+                                    <div className="w-4 grid grid-cols-2 gap-[2px]">
+                                        <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+                                        <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+                                        <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+                                        <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+                                    </div>
+                                    <p className="font-semibold ">
+                                        Departments
+                                    </p>
+                                </div>
+                            </MenuButton>
+                            <div className="bg-red-400">Hello there</div> */}
+                        {/* <MenuList rounded={"lg"} mt={2} className="">
+                                <div className="w-screen max-w-md flex-auto overflow-hidden rounded-3xl bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
+                                    {[
+                                        "Download",
+                                        "Create a Copy",
+                                        "Mark as Draft",
+                                        "Delete",
+                                        "Attend a Workshop",
+                                    ].map((item) => (
+                                        <MenuItem
+                                            key={item}
+                                            borderLeft="3px solid transparent"
+                                            _hover={{
+                                                bg: "gray.50",
+                                                borderLeft: " 3px solid purple",
+                                            }}
+                                            className="hover:font-semibold"
+                                        >
+                                            <span className="text-gray-900 text-sm my-1">
+                                                {item}
+                                            </span>
+                                        </MenuItem>
+                                    ))}
+                                </div>
+                            </MenuList>
+                        </Menu> */}
                         {/* ==================== Departments End ==================== */}
 
                         {/* ==================== Services Start ==================== */}
@@ -138,4 +186,52 @@ const NavbarBottom = () => {
     );
 };
 
+const Departments = () => {
+    return (
+        // <>
+        //     <Popover isLazy placement="top-start">
+        //         <PopoverTrigger>
+        //             <div className="flex items-center gap-2 navBarHover">
+        //                 <div className="w-4 grid grid-cols-2 gap-[2px]">
+        //                     <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+        //                     <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+        //                     <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+        //                     <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+        //                 </div>
+        //                 <p className="font-semibold ">Departments</p>
+        //             </div>
+        //         </PopoverTrigger>
+
+        //         <PopoverContent
+        //             overflow={"hidden"}
+        //             className=" text-black"
+        //             w="50%"
+        //         >
+        //             {/* <PopoverHeader fontWeight="semibold">
+        //                 Popover placement
+        //             </PopoverHeader> */}
+        //             {/* <PopoverArrow /> */}
+        //             {/* <PopoverCloseButton /> */}
+        //             <PopoverBody className="text-black bg-red-400">
+        //                 {/* <div className="w-screen max-w-max flex-auto overflow-hidden rounded-3xl bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
+        //                     Lorem ipsum dolor sit amet, consectetur adipisicing
+        //                     elit, sed do eiusmod tempor incididunt ut labore et
+        //                     dolore.
+        //                 </div> */}
+        //                 <div className="w-full">
+        //                     Lorem ipsum dolor sit, amet consectetur adipisicing
+        //                     elit. Dolorem nesciunt alias perspiciatis rerum,
+        //                     atque cum consequuntur iusto accusamus porro impedit
+        //                     molestias ut eius architecto quasi quisquam a
+        //                     praesentium eum voluptatem.
+        //                 </div>
+        //             </PopoverBody>
+        //         </PopoverContent>
+        //     </Popover>
+        // </>
+        <>
+            <FlyoutMenu />
+        </>
+    );
+};
 export default Header;

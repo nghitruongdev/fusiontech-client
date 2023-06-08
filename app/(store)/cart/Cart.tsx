@@ -85,79 +85,73 @@ const Cart = () => {
                             </p>
                             {/* Cart Items */}
                             <div>
-                                {
-                                    <div className="flex items-center justify-between gap-4 border-b-[1px] border-b-zinc-200 pb-4">
-                                        <div className="w-3/4 flex items-center gap-4">
-                                            <Image
-                                                className="w-32"
-                                                width={500}
-                                                height={500}
-                                                alt="productImg"
-                                                src={
-                                                    "https://i.ibb.co/1r28gMk/1.webp"
-                                                }
-                                            />
-                                            <div className="mx-4">
-                                                <h2 className="text-base text-zinc-900">
-                                                    Canon ABC 2023{" "}
-                                                </h2>
-                                                <p className="text-sm text-zinc-500 text-clip">
-                                                    Lorem ipsum dolor, sit amet
-                                                    consectetur adipisicing
-                                                    elit. Doloremque natus autem
-                                                    excepturi quibusdam dicta
-                                                    recusandae, vero earum eius,
-                                                    quo quam magni dolorem
-                                                    tenetur hic nisi laborum
-                                                    pariatur placeat vitae!
-                                                    Tempore.
-                                                </p>
-                                                <p className="text-sm text-zinc-500">
-                                                    Price: $240.00
-                                                </p>
-                                                <p className="text-sm text-zinc-500 flex items-center gap-1">
-                                                    <span className="bg-blue rounded-full text-white text-xs w-4 h-4 flex items-center justify-center">
-                                                        <TbReload className="rotate-180" />
-                                                    </span>
-                                                    Free 30-day returns
-                                                </p>
-                                                <div className="mt-2 flex items-center gap-6">
-                                                    <button className="text-sm underline underline-offset-2 decoration-[1px] text-zinc-600 hover:no-underline hover:text-blue duration-300">
-                                                        Remove
+                                <div className="flex items-center justify-between gap-4 border-b-[1px] border-b-zinc-200 pb-4">
+                                    <div className="w-3/4 flex items-center gap-4">
+                                        <Image
+                                            className="w-32"
+                                            width={500}
+                                            height={500}
+                                            alt="productImg"
+                                            src={
+                                                "https://i.ibb.co/1r28gMk/1.webp"
+                                            }
+                                        />
+                                        <div className="mx-4">
+                                            <h2 className="text-base text-zinc-900">
+                                                Canon ABC 2023{" "}
+                                            </h2>
+                                            <p className="text-sm text-zinc-500 text-clip">
+                                                Lorem ipsum dolor, sit amet
+                                                consectetur adipisicing elit.
+                                                Doloremque natus autem excepturi
+                                                quibusdam dicta recusandae, vero
+                                                earum eius, quo quam magni
+                                                dolorem tenetur hic nisi laborum
+                                                pariatur placeat vitae! Tempore.
+                                            </p>
+                                            <p className="text-sm text-zinc-500">
+                                                Price: $240.00
+                                            </p>
+                                            <p className="text-sm text-zinc-500 flex items-center gap-1">
+                                                <span className="bg-blue rounded-full text-white text-xs w-4 h-4 flex items-center justify-center">
+                                                    <TbReload className="rotate-180" />
+                                                </span>
+                                                Free 30-day returns
+                                            </p>
+                                            <div className="mt-2 flex items-center gap-6">
+                                                <button className="text-sm underline underline-offset-2 decoration-[1px] text-zinc-600 hover:no-underline hover:text-blue duration-300">
+                                                    Remove
+                                                </button>
+                                                <div className="w-28 h-9 border border-zinc-400 rounded-full text-base font-semibold text-black flex items-center justify-between px-3">
+                                                    <button className="text-base w-5 h-5 text-zinc-600 hover:-bg[#74767c] hover:text-white rounded-full flex items-center justify-center cursor-pointer duration-200">
+                                                        <HiMinusSm />
                                                     </button>
-                                                    <div className="w-28 h-9 border border-zinc-400 rounded-full text-base font-semibold text-black flex items-center justify-between px-3">
-                                                        <button className="text-base w-5 h-5 text-zinc-600 hover:-bg[#74767c] hover:text-white rounded-full flex items-center justify-center cursor-pointer duration-200">
-                                                            <HiMinusSm />
-                                                        </button>
-                                                        <span className="">
-                                                            5
-                                                        </span>
-                                                        <button className="text-base w-5 h-5 text-zinc-600 hover:-bg[#74767c] hover:text-white rounded-full flex items-center justify-center cursor-pointer duration-200">
-                                                            <MdOutlineAdd />
-                                                        </button>
-                                                    </div>
+                                                    <span className="">5</span>
+                                                    <button className="text-base w-5 h-5 text-zinc-600 hover:-bg[#74767c] hover:text-white rounded-full flex items-center justify-center cursor-pointer duration-200">
+                                                        <MdOutlineAdd />
+                                                    </button>
                                                 </div>
                                             </div>
-                                            {/* Button */}
                                         </div>
-                                        <div className="w-1/4 text-right flex flex-col items-end gap-1">
-                                            <p className="font-semibold text-xl text-green-500">
-                                                <FormatPrice amount={3 * 5} />
+                                        {/* Button */}
+                                    </div>
+                                    <div className="w-1/4 text-right flex flex-col items-end gap-1">
+                                        <p className="font-semibold text-xl text-green-500">
+                                            <FormatPrice amount={3 * 5} />
+                                        </p>
+                                        <p className="text-sm line-through text-zinc-500">
+                                            <FormatPrice amount={3 * 5} />
+                                        </p>
+                                        <div className="flex items-center text-xs gap-2">
+                                            <p className="bg-green-200 text-[8px] uppercase px-2 py-[1px]">
+                                                You save
                                             </p>
-                                            <p className="text-sm line-through text-zinc-500">
-                                                <FormatPrice amount={3 * 5} />
+                                            <p className="text-[#2a8703] font-semibold">
+                                                <FormatPrice amount={0} />
                                             </p>
-                                            <div className="flex items-center text-xs gap-2">
-                                                <p className="bg-green-200 text-[8px] uppercase px-2 py-[1px]">
-                                                    You save
-                                                </p>
-                                                <p className="text-[#2a8703] font-semibold">
-                                                    <FormatPrice amount={0} />
-                                                </p>
-                                            </div>
                                         </div>
                                     </div>
-                                }
+                                </div>
                                 <button className="w-44 bg-red-500 text-white h-10 rounded-full text-base font-semibold hover:bg-red-800 duration-300 mt-4">
                                     Reset Cart
                                 </button>

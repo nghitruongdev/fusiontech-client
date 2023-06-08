@@ -1,8 +1,8 @@
-import Cart from "@/app/(store)/cart/Cart";
+import Cart from "app/(store)/cart/Cart";
 
 const CartPage = () => {
     return (
-        <div className="max-w-contentContainer mx-auto">
+        <div className="mx-4">
             <Cart />
         </div>
     );
