@@ -34,7 +34,8 @@ module.exports = {
                 "2xl": "1440px",
             },
             colors: {
-                blue: "#0071dc",
+                primaryBlue: "#0071dc",
+                hoverPrimaryBlue: "#004f9a",
                 lightBlue: "#e6f1fc",
                 yellow: "#ffc220",
                 hoverBg: "#004f9a",

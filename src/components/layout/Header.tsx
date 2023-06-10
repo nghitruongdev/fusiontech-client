@@ -2,7 +2,7 @@
 import Image from "next/image";
 import { logo } from "public/assets/images/index";
 import { IoSearchOutline } from "react-icons/io5";
-import { AiOutlineUser, AiOutlineHeart } from "react-icons/ai";
+import { AiOutlineHeart } from "react-icons/ai";
 import { BsCart2 } from "react-icons/bs";
 import Link from "next/link";
 import { phoneImg } from "public/assets/images";
@@ -11,29 +11,13 @@ import { FaPlaceOfWorship } from "react-icons/fa";
 import { MdOutlineLocationOn } from "react-icons/md";
 import NavbarUserInfo from "./NavbarUserInfo";
 import BannerNavbar from "./BannerNavbar";
-import MenuContainer from "@components/ui/MenuContainer";
-import {
-    Button,
-    Flex,
-    Menu,
-    MenuButton,
-    MenuItem,
-    MenuList,
-    Popover,
-    PopoverArrow,
-    PopoverBody,
-    PopoverCloseButton,
-    PopoverContent,
-    PopoverHeader,
-    PopoverTrigger,
-} from "@chakra-ui/react";
 import FlyoutMenu from "@components/ui/FlyoutMenu";
 
 const Header = () => {
     return (
         <>
             <BannerNavbar />
-            <div className="w-full bg-blue text-white sticky top-0 z-50">
+            <div className="w-full bg-primaryBlue text-white sticky top-0 z-50">
                 <div className="w-full h-full border-b-[1px] border-b-white">
                     <div className="mx-auto max-w-container px-4 h-20 flex items-center justify-between gap-2 ">
                         {/* ==================== Logo Start ==================== */}

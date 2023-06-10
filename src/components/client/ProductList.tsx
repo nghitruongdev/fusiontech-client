@@ -22,7 +22,7 @@ const ProductList = ({ products }: any) => {
                     {/* Description Start */}
                     <div className="px-2 py-4 flex flex-col justify-center">
                         <div className="flex justify-between py-2">
-                            <button className="w-20 h-9 bg-blue text-white rounded-full flex gap-1 items-center justify-center hover:bg-[#004f9a] duration-300">
+                            <button className="w-20 h-9 bg-primaryBlue text-white rounded-full flex gap-1 items-center justify-center hover:bg-hoverPrimaryBlue duration-300">
                                 <span>
                                     <GoPlus />
                                 </span>{" "}
