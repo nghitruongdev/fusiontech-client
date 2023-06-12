@@ -12,12 +12,21 @@ import { MdOutlineLocationOn } from "react-icons/md";
 import NavbarUserInfo from "./NavbarUserInfo";
 import BannerNavbar from "./BannerNavbar";
 import FlyoutMenu from "@components/ui/FlyoutMenu";
+import CategoryDropdown from "./CategoryDropdown";
+import { NavigationMenuTrigger } from "@radix-ui/react-navigation-menu";
+import {
+    Popover,
+    PopoverBody,
+    PopoverContent,
+    PopoverTrigger,
+} from "@chakra-ui/react";
+import { PopoverDemo } from "./TailwindMenu";
 
 const Header = () => {
     return (
         <>
             <BannerNavbar />
-            <div className="w-full bg-primaryBlue text-white sticky top-0 z-50">
+            <div className="w-full bg-blue-600 text-white sticky top-0 z-50">
                 <div className="w-full h-full border-b-[1px] border-b-white">
                     <div className="mx-auto max-w-container px-4 h-20 flex items-center justify-between gap-2 ">
                         {/* ==================== Logo Start ==================== */}
@@ -34,7 +43,27 @@ const Header = () => {
                         {/* ==================== Logo End ==================== */}
 
                         {/* ==================== Departments Start ==================== */}
-                        <Departments />
+                        {/* <div className="navBarHover">
+                            <CategoryDropdown
+                                trigger={
+                                    <>
+                                        <NavigationMenuTrigger className="flex items-center gap-2">
+                                            <div className="w-4 grid grid-cols-2 gap-[2px]">
+                                                <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+                                                <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+                                                <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+                                                <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+                                            </div>
+                                            <p className="font-semibold ">
+                                                Departments
+                                            </p>
+                                        </NavigationMenuTrigger>
+                                    </>
+                                }
+                            />
+                        </div> */}
+                        <PopoverDemo />
+                        {/* <Departments /> */}
                         {/* <Menu>
                             <MenuButton className="navBarHover">
                                 <div className="flex items-center gap-2 ">
@@ -172,49 +201,33 @@ const NavbarBottom = () => {
 
 const Departments = () => {
     return (
-        // <>
-        //     <Popover isLazy placement="top-start">
-        //         <PopoverTrigger>
-        //             <div className="flex items-center gap-2 navBarHover">
-        //                 <div className="w-4 grid grid-cols-2 gap-[2px]">
-        //                     <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
-        //                     <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
-        //                     <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
-        //                     <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
-        //                 </div>
-        //                 <p className="font-semibold ">Departments</p>
-        //             </div>
-        //         </PopoverTrigger>
-
-        //         <PopoverContent
-        //             overflow={"hidden"}
-        //             className=" text-black"
-        //             w="50%"
-        //         >
-        //             {/* <PopoverHeader fontWeight="semibold">
-        //                 Popover placement
-        //             </PopoverHeader> */}
-        //             {/* <PopoverArrow /> */}
-        //             {/* <PopoverCloseButton /> */}
-        //             <PopoverBody className="text-black bg-red-400">
-        //                 {/* <div className="w-screen max-w-max flex-auto overflow-hidden rounded-3xl bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
-        //                     Lorem ipsum dolor sit amet, consectetur adipisicing
-        //                     elit, sed do eiusmod tempor incididunt ut labore et
-        //                     dolore.
-        //                 </div> */}
-        //                 <div className="w-full">
-        //                     Lorem ipsum dolor sit, amet consectetur adipisicing
-        //                     elit. Dolorem nesciunt alias perspiciatis rerum,
-        //                     atque cum consequuntur iusto accusamus porro impedit
-        //                     molestias ut eius architecto quasi quisquam a
-        //                     praesentium eum voluptatem.
-        //                 </div>
-        //             </PopoverBody>
-        //         </PopoverContent>
-        //     </Popover>
-        // </>
         <>
-            <FlyoutMenu />
+            <Popover isLazy placement="top-start">
+                <PopoverTrigger>
+                    <div className="flex items-center gap-2 navBarHover">
+                        <div className="w-4 grid grid-cols-2 gap-[2px]">
+                            <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+                            <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+                            <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+                            <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+                        </div>
+                        <p className="font-semibold ">Departments</p>
+                    </div>
+                </PopoverTrigger>
+
+                <PopoverContent
+                    overflow={"hidden"}
+                    className=" text-black"
+                    w="50%"
+                >
+                    {/* <PopoverHeader fontWeight="semibold">
+                        Popover placement
+                    </PopoverHeader> */}
+                    {/* <PopoverArrow /> */}
+                    {/* <PopoverCloseButton /> */}
+                    <PopoverBody className="text-black bg-red-400"></PopoverBody>
+                </PopoverContent>
+            </Popover>
         </>
     );
 };

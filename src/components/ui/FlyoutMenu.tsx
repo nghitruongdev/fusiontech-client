@@ -77,8 +77,9 @@ export default function Example() {
                 leaveTo="opacity-0 translate-y-1"
             >
                 <Popover.Panel className="absolute -left-full z-10 mt-4 flex w-screen max-w-max px-4">
-                    <div className="w-screen max-w-max grid grid-cols-3 overflow-hidden rounded-2xl mx-4 rounded-t-none bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
-                        <div className="p-4">
+                    <div className="max-w-screen grid grid-cols-3 overflow-hidden rounded-2xl mx-4 rounded-t-none bg-white text-sm leading-6 shadow-lg ring-1 ring-gray-900/5">
+                        <div>Hello theree</div>
+                        {/* <div className="p-4">
                             {solutions.map((item) => (
                                 <div
                                     key={item.name}
@@ -104,11 +105,7 @@ export default function Example() {
                                     </div>
                                 </div>
                             ))}
-                        </div>
-                        <div className="bg-gray-400">Xin chào cả nhà</div>
-                        <div className="p-4 bg-red-400 m-8 rounded-3xl">
-                            Hello There
-                        </div>
+                        </div> */}
                     </div>
                 </Popover.Panel>
             </Transition>

@@ -27,8 +27,8 @@ const HomePage = async () => {
     const products: Product[] = await getProducts();
     return (
         <>
-            <main className="bg-lightBlue">
-                <div className="max-w-contentContainer mx-auto bg-white">
+            <main className="">
+                <div className="max-w-contentContainer mx-auto">
                     <Banner />
                     <ProductList products={products} />
                 </div>

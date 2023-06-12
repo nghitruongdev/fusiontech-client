@@ -24,7 +24,7 @@ import { HomeIcon, Building } from "lucide-react";
 import React, { ReactNode, useState } from "react";
 import { BsChatSquareQuote } from "react-icons/bs";
 import { RiFileShredLine, RiShutDownLine } from "react-icons/ri";
-import AddressBox from "./AddressBox";
+import AddressBox from "./box";
 
 export const AddressModalList = () => {
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -69,8 +69,8 @@ export const AddressModalList = () => {
                 <Flex as="label" flexGrow="1" gap="2">
                     <Radio value={value} />
                     <AddressBox
-                        className={`flex-1 ${
-                            isSelected ? "border-sky-600" : ""
+                        className={`flex-1 text-center ${
+                            isSelected ? "border-blue-600" : ""
                         }`}
                         isDefault={isDefault}
                     />
@@ -91,7 +91,7 @@ export const AddressModalList = () => {
             <AddressBox
                 onClick={onOpen}
                 showCheck
-                className="border-sky-600 bg-sky-50 text-gray-700"
+                className="border-blue-600 text-gray-700"
             />
 
             <Modal

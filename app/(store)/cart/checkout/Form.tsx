@@ -3,7 +3,7 @@ import { Box, Input, Textarea, useBoolean, useSteps } from "@chakra-ui/react";
 import FormInput from "@components/ui/FormInput";
 import { Check, PencilIcon } from "lucide-react";
 import React, { useState } from "react";
-import AddressSection from "./(address)/section";
+import AddressSection from "../../checkout/(form)/(address)/section";
 import { CreditCardIcon } from "@heroicons/react/20/solid";
 import { BiMoneyWithdraw } from "react-icons/bi";
 

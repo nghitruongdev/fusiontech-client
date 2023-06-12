@@ -113,13 +113,13 @@ const Cart = () => {
                                                 Price: $240.00
                                             </p>
                                             <p className="text-sm text-zinc-500 flex items-center gap-1">
-                                                <span className="bg-blue rounded-full text-white text-xs w-4 h-4 flex items-center justify-center">
+                                                <span className="bg-primaryBlue rounded-full text-white text-xs w-4 h-4 flex items-center justify-center">
                                                     <TbReload className="rotate-180" />
                                                 </span>
                                                 Free 30-day returns
                                             </p>
                                             <div className="mt-2 flex items-center gap-6">
-                                                <button className="text-sm underline underline-offset-2 decoration-[1px] text-zinc-600 hover:no-underline hover:text-blue duration-300">
+                                                <button className="text-sm underline underline-offset-2 decoration-[1px] text-zinc-600 hover:no-underline hover:text-primaryBlue duration-300">
                                                     Remove
                                                 </button>
                                                 <div className="w-28 h-9 border border-zinc-400 rounded-full text-base font-semibold text-black flex items-center justify-between px-3">
@@ -161,7 +161,7 @@ const Cart = () => {
                 </div>
                 <div className="w-1/3 p-4 mt-24 h-[500px] border-[1px] border-zinc-400 rounded-md flex flex-col justify-center gap-4">
                     <div className="w-full flex flex-col gap-4 border-b-[1px] border-b-zinc-200 pb-4">
-                        <button className="bg-blue hover:bg-hoverBg w-full text-white h-10 font-semibold duration-300 rounded-full">
+                        <button className="bg-primaryBlue hover:bg-hoverBg w-full text-white h-10 font-semibold duration-300 rounded-full">
                             Continue to checkout
                         </button>
                         <p className="text-sm text-center text-red-500 -mt-4 font-semibold">

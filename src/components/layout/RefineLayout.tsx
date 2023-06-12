@@ -12,7 +12,6 @@ import {
     notificationProvider,
     refineTheme,
 } from "@refinedev/chakra-ui";
-import { appWithTranslation, useTranslation } from "next-i18next";
 
 type Props = {
     children: ReactNode;

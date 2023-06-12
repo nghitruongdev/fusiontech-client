@@ -7,10 +7,6 @@ import {
 } from "components/ui/accordion";
 import { TbReload } from "react-icons/tb";
 import Image from "next/image";
-import { ScrollArea } from "components/ui/scroll-area";
-import { Divider } from "@chakra-ui/react";
-import { Separator } from "components/ui/separator";
-import Link from "next/link";
 
 const ProductListOverview = () => {
     const tags = Array.from({ length: 10 }).map(
@@ -22,7 +18,7 @@ const ProductListOverview = () => {
             <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="item-1">
                     <AccordionTrigger>
-                        <h4 className=" font-medium leading-none">
+                        <h4 className=" font-semibold text-md text-zinc-700 py-0">
                             Xem chi tiết (16 sản phẩm)
                         </h4>
                     </AccordionTrigger>
@@ -45,6 +41,7 @@ const ProductListOverview = () => {
         </>
     );
 };
+
 export default ProductListOverview;
 
 const ProductBox = () => {
