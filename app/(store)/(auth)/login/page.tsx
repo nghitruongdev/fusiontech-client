@@ -12,7 +12,7 @@ const LoginPage = () => {
                     password: "demodemo",
                 },
             }}
-            providers={[{ name: "google", label: "withGoogle" }]}
+            providers={[{ name: "Google", label: "withGoogle" }]}
             title={
                 <ThemedTitleV2
                     collapsed={false}

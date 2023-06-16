@@ -5,6 +5,7 @@ import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import { Refine } from "@refinedev/core";
 import dataProvider from "@refinedev/simple-rest";
 import routerProvider from "@refinedev/nextjs-router/app";
+import { useSession } from "next-auth/react";
 import {
     RefineThemes,
     notificationProvider,
@@ -18,6 +19,7 @@ const RefineProvider = ({ children }: { children: React.ReactNode }) => {
     //     changeLocale: (lang: string) => i18n.changeLanguage(lang),
     //     getLocale: () => i18n.language,
     // };
+    const { data: session, status, update } = useSession();
     return (
         <ChakraProvider theme={RefineThemes.Blue}>
             <ColorModeScript
@@ -25,7 +27,7 @@ const RefineProvider = ({ children }: { children: React.ReactNode }) => {
             />
             <Refine
                 dataProvider={dataProvider(API_URL)}
-                authProvider={authProvider}
+                authProvider={authProvider({ session, status })}
                 routerProvider={routerProvider}
                 notificationProvider={notificationProvider}
                 // i18nProvider={i18nProvider}

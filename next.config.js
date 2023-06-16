@@ -7,6 +7,11 @@ module.exports = {
     },
     reactStrictMode: true,
     images: {
-        domains: ["i.ibb.co", "images.pexels.com", "lh3.googleusercontent.com"],
+        domains: [
+            "i.ibb.co",
+            "images.pexels.com",
+            "lh3.googleusercontent.com",
+            "i.pravatar.cc",
+        ],
     },
 };

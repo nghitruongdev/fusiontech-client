@@ -2,6 +2,9 @@ import OrderOverview from "./(side bar)/OrderOverviewNew";
 import CheckoutForm from "./(form)/index";
 import { ShippingAddress } from "@/interfaces";
 import { APP_API } from "@/constants";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
+import { redirect } from "next/navigation";
 
 // const getShippingAddress = async (): Promise<ShippingAddress[]> => {
 //     // const res = await fetch(`http://localhost:3000/api/products/${_id}`);
@@ -18,6 +21,10 @@ import { APP_API } from "@/constants";
 //     return res.json();
 // };
 const CheckoutPage = async () => {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+        redirect("/api/auth/signin?to=/cart/checkout");
+    }
     // const addresses: ShippingAddress[] = await getShippingAddress();
     return (
         <div className="min-h-[500px] flex bg-gray-50 w-4/5 mx-auto max-w-7xl">

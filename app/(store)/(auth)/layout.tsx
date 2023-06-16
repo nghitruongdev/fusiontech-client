@@ -7,7 +7,7 @@ type Props = {
 };
 
 async function checkAuth(authCookie: string | undefined) {
-    return await authProvider.check(authCookie);
+    // return await authProvider.check(authCookie);
 }
 
 export default async function ProtectedLayout({
@@ -18,8 +18,8 @@ export default async function ProtectedLayout({
     const cookieStore = cookies();
     const auth = cookieStore.get("auth");
 
-    const { authenticated } = await checkAuth(auth?.value);
-
+    // const { authenticated } = await checkAuth(auth?.value);
+    const authenticated = true;
     if (authenticated) {
         return redirect("/");
     } else {
