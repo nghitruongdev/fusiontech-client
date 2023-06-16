@@ -1,9 +1,7 @@
-import Header from "@components/layout/Header";
 import "./globals.css";
 import { Inter, Open_Sans } from "next/font/google";
-import { NextAuthProvider } from "../src/providers";
-import RefineLayout from "../src/components/layout/RefineLayout";
-import Footer from "@components/layout/Footer";
+import RefineProvider from "@/providers/RefineProvider";
+import NextAuthProvider from "@/providers/NextAuthProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 const open_sans = Open_Sans({
@@ -23,13 +21,9 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={`${inter.className} font-sans`}>
-                <RefineLayout>
-                    <NextAuthProvider>
-                        <Header />
-                    </NextAuthProvider>
-                    <main>{children}</main>
-                    <Footer />
-                </RefineLayout>
+                <NextAuthProvider>
+                    <RefineProvider>{children}</RefineProvider>
+                </NextAuthProvider>
             </body>
         </html>
     );

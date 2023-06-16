@@ -13,3 +13,15 @@ export interface Product {
 export interface Category {
     name: string;
 }
+
+export interface ShippingAddress {
+    id: number | null;
+    name: string;
+    phone: string;
+    address: string;
+    ward: string;
+    district: string;
+    province: string;
+    default?: boolean;
+    user?: any;
+}

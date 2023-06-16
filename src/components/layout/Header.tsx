@@ -11,16 +11,13 @@ import { FaPlaceOfWorship } from "react-icons/fa";
 import { MdOutlineLocationOn } from "react-icons/md";
 import NavbarUserInfo from "./NavbarUserInfo";
 import BannerNavbar from "./BannerNavbar";
-import FlyoutMenu from "@components/ui/FlyoutMenu";
-import CategoryDropdown from "./CategoryDropdown";
-import { NavigationMenuTrigger } from "@radix-ui/react-navigation-menu";
 import {
     Popover,
     PopoverBody,
     PopoverContent,
     PopoverTrigger,
 } from "@chakra-ui/react";
-import { PopoverDemo } from "./TailwindMenu";
+import { CategoryDropdown } from "./CategoryDropdown";
 
 const Header = () => {
     return (
@@ -62,7 +59,7 @@ const Header = () => {
                                 }
                             />
                         </div> */}
-                        <PopoverDemo />
+                        <CategoryDropdown />
                         {/* <Departments /> */}
                         {/* <Menu>
                             <MenuButton className="navBarHover">

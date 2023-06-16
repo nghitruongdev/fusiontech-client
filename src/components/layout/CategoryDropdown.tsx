@@ -1,108 +1,136 @@
-"use client";
-
-import { Portal } from "@headlessui/react";
+import {
+    ChartPieIcon,
+    CursorArrowRaysIcon,
+    FingerPrintIcon,
+    SquaresPlusIcon,
+    ArrowPathIcon,
+} from "@heroicons/react/20/solid";
 import { cn } from "components/lib/utils";
 import {
-    NavigationMenu,
-    NavigationMenuContent,
-    NavigationMenuItem,
-    NavigationMenuLink,
-    NavigationMenuList,
-    NavigationMenuTrigger,
-} from "components/ui/navigation-menu";
-import React, { ReactNode } from "react";
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@components/ui/shadcn/popover";
+import { FaLaptop } from "react-icons/fa";
 
-const components = [];
-const CategoryDropdown = ({ trigger }: { trigger: ReactNode }) => {
+const solutions = [
+    {
+        name: "Laptop",
+        description: "Get a better understanding of your traffic",
+        href: "#",
+        icon: ChartPieIcon,
+    },
+    {
+        name: "Điện thoại",
+        description: "Speak directly to your customers",
+        href: "#",
+        icon: CursorArrowRaysIcon,
+    },
+    {
+        name: "Thiết bị âm thanh",
+        description: "Your customers' data will be safe and secure",
+        href: "#",
+        icon: FingerPrintIcon,
+    },
+    {
+        name: "Phụ kiện khác",
+        description: "Connect with third-party tools",
+        href: "#",
+        icon: SquaresPlusIcon,
+    },
+    {
+        name: "Phụ kiện khác",
+        description: "Connect with third-party tools",
+        href: "#",
+        icon: SquaresPlusIcon,
+    },
+    {
+        name: "Phụ kiện khác",
+        description: "Connect with third-party tools",
+        href: "#",
+        icon: SquaresPlusIcon,
+    },
+    {
+        name: "Phụ kiện khác",
+        description: "Connect with third-party tools",
+        href: "#",
+        icon: SquaresPlusIcon,
+    },
+];
+export function CategoryDropdown() {
     return (
-        <NavigationMenu>
-            <NavigationMenuList>
-                <NavigationMenuItem className="">
-                    {trigger}
-                    {/* <NavigationMenuTrigger>{trigger}</NavigationMenuTrigger> */}
-                    <Portal>
-                        <div className="mt-4">
-                            {" "}
-                            <NavigationMenuContent>
-                                <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-                                    <li className="row-span-6">
-                                        <NavigationMenuLink asChild>
-                                            <a
-                                                className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
-                                                href="#"
-                                            >
-                                                {/* <Icons.logo className="h-6 w-6" /> */}
-                                                <div className="mb-2 mt-4 text-lg font-medium">
-                                                    shadcn/ui
-                                                </div>
-                                                <p className="text-sm leading-tight text-muted-foreground">
-                                                    Beautifully designed
-                                                    components built with Radix
-                                                    UI and Tailwind CSS.
-                                                </p>
-                                            </a>
-                                        </NavigationMenuLink>
-                                    </li>
-                                    <ListItem href="/docs" title="Laptop">
-                                        Re-usable components built using Radix
-                                        UI and Tailwind CSS.
-                                    </ListItem>
-                                    <ListItem
-                                        href="/docs/installation"
-                                        title="Điện thoại"
-                                    >
-                                        How to install dependencies and
-                                        structure your app.
-                                    </ListItem>
-                                    <ListItem
-                                        href="/docs/primitives/typography"
-                                        title="Phụ kiện âm thanh"
-                                    >
-                                        Styles for headings, paragraphs,
-                                        lists...etc
-                                    </ListItem>
-                                    <ListItem
-                                        href="/docs/primitives/typography"
-                                        title="Đồ chơi công nghệ"
-                                    >
-                                        Styles for headings, paragraphs,
-                                        lists...etc
-                                    </ListItem>
-                                </ul>
-                            </NavigationMenuContent>
-                        </div>
-                    </Portal>
-                </NavigationMenuItem>
-            </NavigationMenuList>
-        </NavigationMenu>
-    );
-};
-export default CategoryDropdown;
-
-const ListItem = React.forwardRef<
-    React.ElementRef<"a">,
-    React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, ...props }, ref) => {
-    return (
-        <li>
-            <NavigationMenuLink asChild>
-                <a
-                    ref={ref}
-                    className={cn(
-                        "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-                        className,
-                    )}
-                    {...props}
-                >
-                    <div className="text-sm font-medium leading-none">
-                        {title}
+        <Popover>
+            <PopoverTrigger>
+                <div className="flex items-center gap-2 navBarHover">
+                    <div className="w-4 grid grid-cols-2 gap-[2px]">
+                        <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+                        <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+                        <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+                        <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
                     </div>
-                    <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-                        {children}
-                    </p>
-                </a>
-            </NavigationMenuLink>
-        </li>
+                    <p className="font-semibold ">Departments</p>
+                </div>
+            </PopoverTrigger>
+            <PopoverContent className="border-0 w-screen bg-transparent pt-3 shadow-none">
+                <div className="h-[500px] grid grid-cols-6">
+                    <div className=""></div>
+                    <div className=" col-span-5 h-full flex p-4 bg-white rounded-lg rounded-t-none border mr-4 shadow-lg">
+                        <div className="grid grid-cols-2 gap-4 max-w-[500px]">
+                            <div className="bg-zinc-100 rounded-md">
+                                <a
+                                    className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md hover:shadow-md"
+                                    href="#"
+                                >
+                                    {/* <Icons.logo className="h-6 w-6" /> */}
+                                    <div className="mb-2 mt-4 text-lg font-medium">
+                                        shadcn/ui
+                                    </div>
+                                    <p className="text-sm leading-tight text-muted-foreground">
+                                        Beautifully designed components built
+                                        with Radix UI and Tailwind CSS.
+                                    </p>
+                                </a>
+                            </div>
+                            {/* md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr] */}
+                            <div className=" rounded-md">
+                                {[...solutions].map((item) => (
+                                    <a
+                                        key={item.name}
+                                        className={cn(
+                                            "block select-none space-y-1 p-3 rounded-md rounded-r-none leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+                                        )}
+                                    >
+                                        <div className="text-sm font-medium leading-none flex items-center">
+                                            <FaLaptop className="w-5 h-5 mr-2 text-zinc-500" />
+                                            {item.name}
+                                        </div>
+                                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                                            {item.description}
+                                        </p>
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                        <div className=" flex-1 p-4  grid grid-cols-3 gap-4 bg-accent rounded-r-md">
+                            <div className="">
+                                <p className="text-md font-medium leading-none text-center text-blue-600">
+                                    Phân loại sản phẩm
+                                </p>
+                            </div>
+                            <div className="">
+                                <p className="text-md font-medium leading-none text-center text-blue-600">
+                                    Tìm theo thương hiệu
+                                </p>
+                            </div>
+                            <div className="">
+                                <p className="text-md font-medium leading-none text-center text-blue-600">
+                                    Sản phẩm nổi bật
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </PopoverContent>
+        </Popover>
     );
-});
-ListItem.displayName = "ListItem";
+}

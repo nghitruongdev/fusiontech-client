@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env NODE_OPTIONS=--max_old_space_size=4096 next dev",
+    "dev": "cross-env NODE_OPTIONS=--max_old_space_size=4096 refine dev",
     "build": "refine build && rm -rf .next/cache",
     "start": "refine start",
     "lint": "eslint '**/*.{js,jsx,ts,tsx}'",
@@ -34,6 +34,7 @@
     "@refinedev/simple-rest": "^4.0.0",
     "@tabler/icons": "^1.1.0",
     "@tanstack/react-table": "^8.9.2",
+    "axios": "^1.4.0",
     "class-variance-authority": "^0.6.0",
     "clsx": "^1.2.1",
     "lucide-react": "^0.240.0",
@@ -43,8 +44,10 @@
     "nookies": "^2.5.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "react-hook-form": "^7.44.3",
     "react-icons": "^4.9.0",
     "server-only": "^0.0.1",
+    "swr": "^2.1.5",
     "tailwind-merge": "^1.13.0",
     "tailwindcss-animate": "^1.0.5"
   },

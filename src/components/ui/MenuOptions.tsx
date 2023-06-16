@@ -10,6 +10,7 @@ import {
     PopoverContent,
     PopoverTrigger,
     Stack,
+    useDisclosure,
 } from "@chakra-ui/react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 
@@ -18,12 +19,14 @@ export type MenuItem = ButtonProps & {
 };
 
 function MenuOptions({ items }: { items: MenuItem[] }) {
+    const disclosure = useDisclosure();
+    const { onClose } = disclosure;
     return (
         /**
          * You may move the Popover outside Flex.
          */
         <Flex justifyContent="center" mt={4}>
-            <Popover placement="bottom" isLazy>
+            <Popover placement="bottom" isLazy {...disclosure}>
                 <PopoverTrigger>
                     <IconButton
                         aria-label="More server options"
@@ -36,19 +39,22 @@ function MenuOptions({ items }: { items: MenuItem[] }) {
                     <PopoverArrow />
                     <PopoverBody>
                         <Stack>
-                            {items.map(({ text, ...item }) => (
-                                <>
-                                    <Button
-                                        w="194px"
-                                        variant="ghost"
-                                        justifyContent="space-between"
-                                        fontWeight="normal"
-                                        fontSize="sm"
-                                        {...item}
-                                    >
-                                        {text}
-                                    </Button>
-                                </>
+                            {items.map(({ text, onClick, ...item }) => (
+                                <Button
+                                    key={text}
+                                    w="200px"
+                                    variant="ghost"
+                                    justifyContent="space-between"
+                                    fontWeight="normal"
+                                    fontSize="sm"
+                                    onClick={(event) => {
+                                        onClick?.(event);
+                                        onClose();
+                                    }}
+                                    {...item}
+                                >
+                                    {text}
+                                </Button>
                             ))}
                         </Stack>
                     </PopoverBody>

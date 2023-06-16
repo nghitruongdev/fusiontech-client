@@ -1,47 +1,33 @@
-import Form from "./Form";
-const CheckoutPage = () => {
+import OrderOverview from "./(side bar)/OrderOverviewNew";
+import CheckoutForm from "./(form)/index";
+import { ShippingAddress } from "@/interfaces";
+import { APP_API } from "@/constants";
+
+// const getShippingAddress = async (): Promise<ShippingAddress[]> => {
+//     // const res = await fetch(`http://localhost:3000/api/products/${_id}`);
+//     // The return value is *not* serialized
+//     // You can return Date, Map, Set, etc.
+
+//     // Recommendation: handle errors
+//     const res = await fetch(`${APP_API.shippingAddress}`);
+//     if (!res.ok) {
+//         // This will activate the closest `error.js` Error Boundary
+//         throw new Error("Failed to fetch data");
+//     }
+
+//     return res.json();
+// };
+const CheckoutPage = async () => {
+    // const addresses: ShippingAddress[] = await getShippingAddress();
     return (
-        <>
-            <div className="mx-auto flex min-h-[500px]">
-                <div className="w-2/3 p-4">
-                    <Form />
-                </div>
-                <div className="w-1/3 bg-lightBlue mx-4 rounded-2xl">
-                    {/*====================Cart Sumamry====================*/}
-                    <p className="">Order Summary</p>
-                    <div className="">
-                        <div>Image product</div>
-                        <p>Product title</p>
-                        <p>Price</p>
-                        <p>Quantity</p>
-                    </div>
-
-                    {/*====================Order Sumamry====================*/}
-                    <p>Divider</p>
-                    <Discount />
-                    <p>Subtotal</p>
-                    <p>Shipping</p>
-                    <p className="">Taxes</p>
-                    <p>Discount</p>
-
-                    <p className="">Divider</p>
-                    <p className="">Total Amount</p>
-                    <button>Dat hang</button>
-                </div>
+        <div className="min-h-[500px] flex bg-gray-50 w-4/5 mx-auto max-w-7xl">
+            <div className=" w-3/4 p-4">
+                <CheckoutForm />
             </div>
-        </>
+            <div className="w-2/5  p-4">
+                <OrderOverview />
+            </div>
+        </div>
     );
 };
-
-const Discount = () => {
-    return (
-        <>
-            <p className="">Coupon Code</p>
-            <p className="">Enter code to get a discount instantly</p>
-            <input type="text" placeholder="Enter discount code or select" />
-            <button>Apply</button>
-        </>
-    );
-};
-
 export default CheckoutPage;
