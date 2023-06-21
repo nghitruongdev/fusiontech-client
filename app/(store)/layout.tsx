@@ -13,9 +13,11 @@ export default function StoreLayout({
 }) {
     return (
         <>
+            {/* <Suspense fallback={<Loading />}> */}
             <Header />
             <main>{children}</main>
             <Footer />
+            {/* </Suspense> */}
         </>
     );
 }

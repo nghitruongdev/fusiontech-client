@@ -11,11 +11,16 @@ export interface Product {
 }
 
 export interface Category {
+    id: string | undefined;
     name: string;
 }
 
+export interface User {
+    id: string | undefined;
+    _links: _links;
+}
 export interface ShippingAddress {
-    id: number | null;
+    id: string | number | undefined;
     name: string;
     phone: string;
     address: string;
@@ -24,4 +29,29 @@ export interface ShippingAddress {
     province: string;
     default?: boolean;
     user?: any;
+    _links?: _links;
+}
+
+export interface _links {
+    self: {
+        href: string;
+    };
+    [key: string]: {
+        href: string;
+    };
+}
+
+export interface ICheckout {
+    id?: string | undefined;
+    userId: string;
+    addressId: number;
+    items: ICartItem[];
+    email?: string;
+    note?: string;
+}
+
+export interface ICartItem {
+    variantId: string | number;
+    quantity: number;
+    price: number;
 }

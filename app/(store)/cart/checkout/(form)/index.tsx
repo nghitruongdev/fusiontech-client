@@ -10,15 +10,21 @@ import {
     RadioGroup,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { ShippingAddress } from "@/interfaces";
 import AddressSection from "./(address)";
+import { useForm } from "@refinedev/react-hook-form";
+import { ICheckout } from "@/interfaces";
+import { HttpError } from "@refinedev/core";
+import ChakraFormInput from "@components/ui/ChakraFormInput";
+import { UseFormRegister, UseFormSetValue } from "react-hook-form";
 
-type Props = {
-    addresses?: ShippingAddress[];
-};
-
-const CheckoutForm = ({ addresses }: Props) => {
-    const [value, setValue] = useState("1");
+const CheckoutForm = ({
+    register,
+    setValue,
+}: {
+    register: UseFormRegister<ICheckout>;
+    setValue: UseFormSetValue<ICheckout>;
+}) => {
+    const [payment, setPayment] = useState("1");
 
     return (
         <>
@@ -31,7 +37,9 @@ const CheckoutForm = ({ addresses }: Props) => {
                         Địa chỉ giao hàng
                     </h4>
                     <div className="justify-around grid grid-cols-2 gap-4 min-h-[100px] mb-4">
-                        <AddressSection />
+                        <AddressSection
+                            setAddressId={setValue.bind(this, "addressId")}
+                        />
                     </div>
                 </div>
 
@@ -41,33 +49,41 @@ const CheckoutForm = ({ addresses }: Props) => {
                         Thông tin liên hệ
                     </h4>
                     <div className="mb-2">
-                        <FormControl>
+                        <ChakraFormInput
+                            helperText="Hoá đơn điện tử sẽ được gửi đến địa chỉ email
+                                của bạn."
+                            helperTextProps={{
+                                color: "blackAlpha.400",
+                                lineHeight: "base",
+                                fontSize: "sm",
+                            }}
+                        >
                             <Input
                                 placeholder="Nhập địa chỉ email "
                                 fontSize={"sm"}
                                 bg="whiteAlpha.900"
                                 shadow="sm"
+                                {...register("email")}
                             />
-                            <FormHelperText className="text-muted-foreground text-sm leading-tight">
-                                Hoá đơn điện tử sẽ được gửi đến địa chỉ email
-                                của bạn.
-                            </FormHelperText>
-                        </FormControl>
+                        </ChakraFormInput>
                     </div>
                     <div className="mb-4">
-                        <FormControl>
-                            <FormLabel className="">
-                                <div className="text-lg font-semibold mb-2">
-                                    Ghi chú
-                                </div>
-                            </FormLabel>
+                        <ChakraFormInput
+                            label="Ghi chú"
+                            labelProps={{
+                                mb: "2",
+                                fontWeight: "semibold",
+                                fontSize: "lg",
+                            }}
+                        >
                             <ChakraTextarea
                                 bg="whiteAlpha.900"
                                 fontSize={"sm"}
                                 placeholder="Nhập nội dung ghi chú"
                                 shadow={"sm"}
+                                {...register("note")}
                             />
-                        </FormControl>
+                        </ChakraFormInput>
                     </div>
                 </div>
 
@@ -78,30 +94,24 @@ const CheckoutForm = ({ addresses }: Props) => {
                         Phương thức thanh toán
                     </h4>
                     <div className="mb-4">
-                        <RadioGroup onChange={setValue} value={value}>
+                        <RadioGroup onChange={setPayment} value={payment}>
                             <div className="flex space-x-8 justify-start">
                                 {[
                                     "Thẻ Visa/ Mastercard",
                                     "Ví điện tử",
                                     "Thanh toán trả sau",
                                 ].map((item, idx) => (
-                                    <>
-                                        <Radio value={item} key={idx}>
-                                            <span className="text-md font-medium leading-tight text-zinc-600">
-                                                {item}
-                                            </span>
-                                        </Radio>
-                                    </>
-                                ))}{" "}
+                                    <Radio value={item} key={idx}>
+                                        <span className="text-md font-medium leading-tight text-zinc-600">
+                                            {item}
+                                        </span>
+                                    </Radio>
+                                ))}
                             </div>
                         </RadioGroup>
                     </div>
                 </div>
             </div>
-            {/* <div className="px-6 py-3 border rounded-md bg-white"></div> */}
-            {/* <div className="px-8 py-4">
-
-            </div> */}
         </>
     );
 };

@@ -3,7 +3,6 @@ import { authProvider } from "@/providers/authProvider";
 import { API_URL } from "@/constants";
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import { Refine } from "@refinedev/core";
-import dataProvider from "@refinedev/simple-rest";
 import routerProvider from "@refinedev/nextjs-router/app";
 import { useSession } from "next-auth/react";
 import {
@@ -11,6 +10,7 @@ import {
     notificationProvider,
     refineTheme,
 } from "@refinedev/chakra-ui";
+import { springDataProvider } from "@/rest-data-provider";
 
 const RefineProvider = ({ children }: { children: React.ReactNode }) => {
     // const { t, i18n } = useTranslation();
@@ -26,7 +26,7 @@ const RefineProvider = ({ children }: { children: React.ReactNode }) => {
                 initialColorMode={refineTheme.config.initialColorMode}
             />
             <Refine
-                dataProvider={dataProvider(API_URL)}
+                dataProvider={springDataProvider(API_URL)}
                 authProvider={authProvider({ session, status })}
                 routerProvider={routerProvider}
                 notificationProvider={notificationProvider}

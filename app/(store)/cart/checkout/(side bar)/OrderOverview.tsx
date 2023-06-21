@@ -1,51 +1,102 @@
-import { Input } from "@components/ui/shadcn//input";
-import ProductListOverview from "./ProductListOverview";
+"use client";
+import { Input } from "@components/ui/shadcn/input";
+import CartList from "./CartList";
 import { Button } from "@components/ui/shadcn/button";
+import { Separator } from "@components/ui/shadcn/separator";
+import { ICartItem } from "@/interfaces";
+import { Badge } from "@components/ui/shadcn/badge";
+import { SaveButton } from "@refinedev/chakra-ui";
+import { Spinner } from "@chakra-ui/react";
+import ButtonPrimary from "@components/ButtonPrimary";
 
-const OrderOverview = () => {
+const OrderOverview = ({
+    cartItems,
+    isSubmitting,
+    checkoutHandler,
+}: {
+    cartItems: ICartItem[];
+    isSubmitting: boolean;
+    checkoutHandler: () => Promise<void> | void;
+}) => {
+    const subTotal = cartItems
+        .map((item) => item.price * item.quantity)
+        .reduce((prev, curr) => prev + curr, 0);
+    const discount = 0;
+    const shippingFee = 0;
+    const total = subTotal - discount + shippingFee;
     return (
         <>
-            <p className="mx-8 flex justify-between items-center">
-                Thông tin đơn hàng{" "}
+            <div className="flex items-end justify-between font-semibold text-lg mt-4 py-2 mx-2">
+                <h2 className="text-2xl font-[700]">Đơn hàng</h2>
+                {/* <p className="text-2xl font-semibold">Đơn hàng</p> */}
                 <a
-                    className="text-blue-500 text-sm font-medium text-end leading-none"
+                    className="text-blue-500 text-sm font-medium text-end mr-4"
                     href="/"
                 >
-                    {" "}
                     Chỉnh sửa
                 </a>
-            </p>
-            <div className="bg-white p-4 mx-4 rounded-lg shadow-md">
-                <ProductListOverview />
-                <div className="flex justify-between">
-                    <p className="">Tổng tạm tính</p>
-                    <p className="">60.000.000 VNĐ</p>
+            </div>
+            <div className="bg-white p-4 mx-2 rounded-lg shadow-md space-y-2">
+                <CartList items={cartItems} />
+                <div className="grid gap-4">
+                    <div className="flex justify-between items-center">
+                        <p className="text-muted text-sm text-zinc-500">
+                            Tổng tạm tính
+                        </p>
+                        <p className="font-medium text-md text-zinc-600">
+                            {subTotal} VNĐ
+                        </p>
+                    </div>
+                    <div className="flex justify-between">
+                        <p className="text-muted text-sm text-zinc-500">
+                            Phí vận chuyển
+                        </p>
+                        <p className="font-medium text-md text-zinc-600">
+                            Miễn phí
+                        </p>
+                    </div>
+                    <div className="flex justify-between">
+                        <div className="">
+                            <p className="text-muted text-sm text-zinc-500">
+                                Mã giảm giá
+                            </p>
+                            <Badge
+                                className="text-xs font-base ml-2"
+                                variant="outline"
+                            >
+                                ABCDEF
+                            </Badge>
+                        </div>
+
+                        <p className="font-medium text-md text-red-500">
+                            -500.000 VNĐ
+                        </p>
+                    </div>
                 </div>
-                <div className="flex justify-between">
-                    <p className="">Phí vận chuyển</p>
-                    <p className="">Miễn phí</p>
-                </div>
-                <div className="flex justify-between">
-                    <p className="">Mã giảm giá</p>
-                    <p className="">ABCDEF</p>
-                    <p className="">-500.000 VNĐ</p>
-                </div>
-                <hr />
-                <div className="flex justify-between">
-                    <p className="">Thành tiền</p>
-                    <p className="text-center">
-                        50.500.000 VNĐ <br />
-                        <span className="text-muted text-sm text-zinc-500">
+
+                <Separator />
+                <div className="flex justify-between mb-3 mt-4 items-center">
+                    <p className="text-muted text-sm text-zinc-500">
+                        Thành tiền
+                    </p>
+                    <p className="text-end font-bold text-zinc-950 text-lg">
+                        {total} <br />
+                        <span className="text-sm text-muted text-zinc-500 font-normal leading-tight">
                             (Đã bao gồm VAT)
                         </span>
                     </p>
                 </div>
-                <button className="w-full rounded-md bg-blue-600 hover:bg-blue-700 px-4 py-3 mt-3 text-white text-base font-[500]">
-                    Xác nhận đặt hàng
+                <button
+                    className="flex items-center justify-center gap-4 w-full rounded-md bg-blue-600 hover:bg-blue-700 px-4 py-2 text-white text-sm leading-loose font-[500] shadow-blue-500 shadow-md"
+                    onClick={checkoutHandler}
+                    disabled={isSubmitting}
+                >
+                    {isSubmitting ? "Loading...." : "Xác nhận đặt hàng"}
+                    {isSubmitting && <Spinner size={"sm"} speed="0.3s" />}
                 </button>
             </div>
 
-            <div className="p-4 m-5 rounded-lg bg-white shadow-md">
+            <div className="p-4 m-4 mx-2 rounded-lg bg-white shadow-md">
                 <Discount />
             </div>
         </>
@@ -55,17 +106,17 @@ const OrderOverview = () => {
 const Discount = () => {
     return (
         <>
-            <div className="flex justify-between items-center">
+            <div className="">
                 {" "}
-                <p className="">Mã giảm giá</p>
-                <span className="text-zinc-500 text-sm text-muted">
+                <p className="font-medium">Mã giảm giá</p>
+                <p className="text-zinc-500 text-sm text-muted">
                     Nhập mã để được nhận giảm giá
-                </span>
+                </p>
             </div>
             <hr className="my-2" />
             <div className="flex gap-2 mt-4">
-                <Input placeholder="Mã giảm giá" className="outline-none" />
-                <Button className="bg-blue-600 hover:bg-blue-700 px-8">
+                <Input placeholder="Mã giảm giá" className="shadow-md" />
+                <Button className="bg-blue-600 hover:bg-blue-700 px-6 shadow-md shadow-blue-500">
                     Thêm
                 </Button>
             </div>

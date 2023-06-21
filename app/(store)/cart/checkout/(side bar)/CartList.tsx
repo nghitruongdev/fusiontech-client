@@ -7,8 +7,9 @@ import {
 } from "@components/ui/shadcn/accordion";
 import { TbReload } from "react-icons/tb";
 import Image from "next/image";
+import { ICartItem } from "@/interfaces";
 
-const ProductListOverview = () => {
+const CartList = ({ items }: { items: ICartItem[] }) => {
     const tags = Array.from({ length: 10 }).map(
         (_, i, a) => `v1.2.0-beta.${a.length - i}`,
     );
@@ -19,22 +20,20 @@ const ProductListOverview = () => {
                 <AccordionItem value="item-1">
                     <AccordionTrigger>
                         <h4 className=" font-semibold text-md text-zinc-700 py-0">
-                            Xem chi tiết (16 sản phẩm)
+                            Xem chi tiết ({items.length} sản phẩm)
                         </h4>
                     </AccordionTrigger>
                     <AccordionContent className="bg-transparent">
-                        {Array.from({ length: 50 }).map((_, i, a) => (
-                            <div
-                                className="h-[100px] rounded-md bg-gray-50 mt-2"
-                                key={i}
-                            >
-                                <ProductBox />
-                            </div>
+                        {items.map((item) => (
+                            <CartItemBox
+                                item={item}
+                                key={`${item.variantId}-${Math.random()}`}
+                            />
                         ))}
 
-                        <div className="h-[100px] rounded-md bg-gray-50 mt-2">
+                        {/* <div className="h-[100px] rounded-md bg-gray-50 mt-2">
                             <ProductBox />
-                        </div>
+                        </div> */}
                     </AccordionContent>
                 </AccordionItem>
             </Accordion>
@@ -42,12 +41,16 @@ const ProductListOverview = () => {
     );
 };
 
-export default ProductListOverview;
+export default CartList;
 
-const ProductBox = () => {
+const CartItemBox = ({
+    item: { variantId, quantity, price },
+}: {
+    item: ICartItem;
+}) => {
     return (
         <>
-            <div className="flex gap-4 h-full px-2 py-2">
+            <div className="flex gap-2 px-2 py-2 min-h-[100px] rounded-md bg-gray-50 mt-3 border-[1px] border-gray-100">
                 <div className="flex items-center justify-center">
                     <Image
                         className="w-32"
@@ -57,17 +60,17 @@ const ProductBox = () => {
                         src={"https://i.ibb.co/1r28gMk/1.webp"}
                     />
                 </div>
-                <div className="w-full">
-                    <div className="flex justify-between items-center w-full">
+                <div className="w-full flex flex-col gap-1">
+                    <div className="w-full">
                         <h2 className="text-base text-zinc-900 font-[500]">
                             Canon ABC 2023
                         </h2>
-                        <p className="text-base text-zinc-900 font-[500]">
-                            $240.00
-                        </p>
+                        <p className="text-sm text-zinc-500">${price}</p>
                     </div>
 
-                    <p className="text-sm text-zinc-500">Số lượng: 5</p>
+                    <p className="text-sm text-zinc-500">
+                        Số lượng: {quantity}
+                    </p>
                     <p className="text-sm text-zinc-500 flex items-center gap-1">
                         Free 30-day returns
                         <span className="bg-primaryBlue rounded-full text-white text-xs w-4 h-4 flex items-center justify-center">
@@ -75,7 +78,6 @@ const ProductBox = () => {
                         </span>
                     </p>
                 </div>
-                {/* Button */}
             </div>
         </>
     );

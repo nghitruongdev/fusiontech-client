@@ -1,16 +1,10 @@
 import { ShippingAddress } from "@/interfaces";
-import {
-    Flex,
-    Portal,
-    useBoolean,
-    useDisclosure,
-    Radio,
-} from "@chakra-ui/react";
+import { Flex, useBoolean, Radio, Spinner } from "@chakra-ui/react";
 import MenuOptions, { MenuItem } from "@components/ui/MenuOptions";
-import { Check, PencilIcon, Plus } from "lucide-react";
+import { BaseKey } from "@refinedev/core";
+import { Check, LoaderIcon, Plus } from "lucide-react";
 import { BsChatSquareQuote } from "react-icons/bs";
 import { RiFileShredLine, RiShutDownLine } from "react-icons/ri";
-import { AddressModalForm } from "./modal";
 
 const hoverBorderColor = "hover:border-blue-700";
 
@@ -28,9 +22,10 @@ const AddressBox = ({
     isDefault?: boolean;
 }) => {
     const [hover, setHover] = useBoolean();
+
     return (
         <div
-            className={`group border ${hoverBorderColor} rounded-md bg-white flex items-center justify-start text-start leading-tight relative cursor-pointer ${className} h-[150px] shadow-lg`}
+            className={`group border ${hoverBorderColor} rounded-md bg-white flex items-center justify-start text-start leading-tight relative cursor-pointer h-[150px] shadow-lg hover:bg-blue-50 hover:text-blue-600 ${className}`}
             onMouseEnter={setHover.on}
             onMouseLeave={setHover.off}
             onClick={onClick}
@@ -66,10 +61,25 @@ const AddressBox = ({
     );
 };
 
+const LoadingAddressBox = () => {
+    return (
+        <div
+            className={`group border ${hoverBorderColor} rounded-md bg-white flex items-center justify-center leading-tight relative cursor-pointer h-[150px] shadow-lg`}
+        >
+            <Spinner
+                thickness="2px"
+                speed="0.65s"
+                emptyColor="gray.200"
+                color="blue.600"
+                size="xl"
+            />
+        </div>
+    );
+};
 const EmptyAddressBox = () => {
     return (
         <div
-            className={`border shadow-md border-gray-300 bg-gray-100 p-4 rounded-md text-gray-500 flex justify-center items-center cursor-pointer hover:text-blue-600 hover:bg-blue-100 ${hoverBorderColor}`}
+            className={`border text-sm shadow-md border-gray-300 min-h-[150px] bg-gray-50 p-4 rounded-md text-gray-400 flex justify-center items-center cursor-pointer hover:text-blue-600 hover:bg-blue-50 ${hoverBorderColor}`}
         >
             <Plus />
             Thêm mới địa chỉ
@@ -84,37 +94,37 @@ const AddressRadioBox = ({
     isDefault,
     setDefaultAddress,
     openEditModal,
+    deleteAddress,
 }: {
     value: string;
     isSelected?: boolean;
     isDefault?: boolean;
     address: ShippingAddress;
     setDefaultAddress: (addressId: number) => void;
-    openEditModal: (current: ShippingAddress) => void;
+    openEditModal: (id: BaseKey | undefined) => void;
+    deleteAddress: (address: ShippingAddress) => void;
 }) => {
-    // const isDefault = defaultAddress === value;
-
     const items: MenuItem[] = [
         {
-            text: "Edit",
+            text: "Chỉnh sửa",
             rightIcon: <BsChatSquareQuote />,
-            onClick: openEditModal.bind(this, address),
+            onClick: openEditModal.bind(this, address?.id),
             w: "150px",
         },
         {
             text: "Đặt mặc định",
             rightIcon: <RiFileShredLine />,
             onClick: setDefaultAddress.bind(this, +value),
-
             w: "150px",
-            // isDisabled: isDefault,
+            display: `${isDefault && "none"}`,
         },
         {
-            text: "Delete",
+            text: "Xoá địa chỉ",
             rightIcon: <RiShutDownLine />,
             colorScheme: "red",
-            onClick: () => {},
+            onClick: deleteAddress.bind(this, address),
             w: "150px",
+            isDisabled: isDefault,
         },
     ];
 
@@ -138,4 +148,4 @@ const AddressRadioBox = ({
     );
 };
 
-export { AddressBox, EmptyAddressBox, AddressRadioBox };
+export { AddressBox, EmptyAddressBox, LoadingAddressBox, AddressRadioBox };

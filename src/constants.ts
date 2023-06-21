@@ -1,17 +1,30 @@
 export const API_URL = "http://localhost:8080/api";
-
-export const APP_API = {
+export const fakeUserId = "d0e27c38-74e3-43a4-a148-841927b3eb0d";
+export const RESOURCE_API = {
     url: API_URL,
     users: {
         url: ``,
         defaultAddress: {
             update: (uid: string, aid: number) =>
-                `/users/${uid}/defaultAddress/${aid}`,
+                `users/${uid}/defaultAddress/${aid}`,
         },
     },
-    shippingAddress: {
-        url: `/shippingAddresses`,
-        search: ``,
+    shippingAddress: () => {
+        const name = "shippingAddresses";
+        const searchUrl = `${name}/search`;
+        return {
+            name,
+            findAllByUserId: `${searchUrl}/findAllByUserId`,
+            defaultAddressByUserId: `${searchUrl}/findDefaultShippingAddressByUserId`,
+        };
+    },
+    orders: () => {
+        const name = "orders";
+        const searchUrl = `${name}/search`;
+        return {
+            name,
+            checkout: "cart/checkout",
+        };
     },
 };
 

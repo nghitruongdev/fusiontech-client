@@ -17,7 +17,9 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@chakra-ui/react";
-import { CategoryDropdown } from "./CategoryDropdown";
+import CategoryNavigation, { CategoryMenuButton } from "./CategoryNavigation";
+import { Suspense } from "react";
+import { CategoryDropDown } from "./CategoryDropdown";
 
 const Header = () => {
     return (
@@ -28,39 +30,25 @@ const Header = () => {
                     <div className="mx-auto max-w-container px-4 h-20 flex items-center justify-between gap-2 ">
                         {/* ==================== Logo Start ==================== */}
                         <Link href="/">
-                            <div className="navBarHover">
-                                <Image
+                            <div className="navBarHover flex items-center justify-center border-2">
+                                {/* <Image
                                     src={logo}
                                     alt="Website logo"
                                     className="w-44"
-                                />
+                                /> */}
+                                <h1 className="font-extrabold text-3xl">
+                                    FusionTech
+                                </h1>
                             </div>
                         </Link>
 
                         {/* ==================== Logo End ==================== */}
 
                         {/* ==================== Departments Start ==================== */}
-                        {/* <div className="navBarHover">
-                            <CategoryDropdown
-                                trigger={
-                                    <>
-                                        <NavigationMenuTrigger className="flex items-center gap-2">
-                                            <div className="w-4 grid grid-cols-2 gap-[2px]">
-                                                <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
-                                                <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
-                                                <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
-                                                <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
-                                            </div>
-                                            <p className="font-semibold ">
-                                                Departments
-                                            </p>
-                                        </NavigationMenuTrigger>
-                                    </>
-                                }
-                            />
-                        </div> */}
-                        <CategoryDropdown />
-                        {/* <Departments /> */}
+                        <Suspense fallback={<CategoryMenuButton />}>
+                            {/* <CategoryNavigation /> */}
+                            <CategoryDropDown />
+                        </Suspense>
                         {/* <Menu>
                             <MenuButton className="navBarHover">
                                 <div className="flex items-center gap-2 ">

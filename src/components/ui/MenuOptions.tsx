@@ -41,7 +41,7 @@ function MenuOptions({ items }: { items: MenuItem[] }) {
                         <Stack>
                             {items.map(({ text, onClick, ...item }) => (
                                 <Button
-                                    key={text}
+                                    key={`${Date.now()}-${Math.random()}`}
                                     w="200px"
                                     variant="ghost"
                                     justifyContent="space-between"

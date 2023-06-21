@@ -1,8 +1,8 @@
 import { Product } from "@/interfaces";
 import Banner from "@components/client/Banner";
 import ProductList from "@components/client/ProductList";
-import Head from "next/head";
 import { Metadata } from "next";
+import { Suspense } from "react";
 
 async function getProducts(): Promise<Product[]> {
     const res = await fetch("http://localhost:3000/api/products");
@@ -29,7 +29,9 @@ const HomePage = async () => {
         <>
             <main className="">
                 <div className="max-w-contentContainer mx-auto">
-                    <Banner />
+                    <Suspense>
+                        <Banner />
+                    </Suspense>
                     <ProductList products={products} />
                 </div>
             </main>

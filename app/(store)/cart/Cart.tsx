@@ -1,4 +1,3 @@
-"use client";
 import {
     phoneImg,
     ship1Img,
@@ -13,18 +12,19 @@ import { HiMinusSm } from "react-icons/hi";
 import FormatPrice from "@/components/client/FormatPrice";
 import { ReactNode, useEffect, useState } from "react";
 import { IoMdClose } from "react-icons/io";
+import Link from "next/link";
 type Props = {
     children: ReactNode;
 };
 const Cart = () => {
-    const [warningMsg, setWarningMsg] = useState(false);
+    // const [warningMsg, setWarningMsg] = useState(false);
 
-    useEffect(() => {
-        setWarningMsg(true);
-        let oldPrice = 0;
-        let savings = 0;
-        let amt = 0;
-    }, []);
+    // useEffect(() => {
+    //     setWarningMsg(true);
+    //     let oldPrice = 0;
+    //     let savings = 0;
+    //     let amt = 0;
+    // }, []);
 
     return (
         <div className="w-full py-10 bg-white text-black">
@@ -161,13 +161,16 @@ const Cart = () => {
                 </div>
                 <div className="w-1/3 p-4 mt-24 h-[500px] border-[1px] border-zinc-400 rounded-md flex flex-col justify-center gap-4">
                     <div className="w-full flex flex-col gap-4 border-b-[1px] border-b-zinc-200 pb-4">
-                        <button className="bg-primaryBlue hover:bg-hoverBg w-full text-white h-10 font-semibold duration-300 rounded-full">
-                            Continue to checkout
-                        </button>
-                        <p className="text-sm text-center text-red-500 -mt-4 font-semibold">
-                            Please sign in for checkout
+                        <Link href="/cart/checkout">
+                            <p className="flex items-center justify-center bg-primaryBlue hover:bg-hoverBg w-full text-white h-10 font-semibold duration-300 rounded-full">
+                                Continue to checkout
+                            </p>
+                        </Link>
+
+                        <p className="text-sm text-center text-red-500 -mt-4 font-normal">
+                            Bạn cần đăng nhập để đặt hàng
                         </p>
-                        {warningMsg && (
+                        {true && (
                             <div className="bg-[#002d58] text-white p-2 rounded-lg flex items-center justify-between gap-4">
                                 <Image
                                     className="w-8"
@@ -179,7 +182,7 @@ const Cart = () => {
                                     Checkout now for extra savings!
                                 </p>
                                 <IoMdClose
-                                    onClick={() => setWarningMsg(false)}
+                                    // onClick={() => setWarningMsg(false)}
                                     className="text-3xl hover:text-red-400 cursor-pointer duration-200"
                                 />
                             </div>
