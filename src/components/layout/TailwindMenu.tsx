@@ -7,6 +7,7 @@ import {
 } from "@heroicons/react/20/solid";
 import { cn } from "components/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "components/ui/popover";
+import { FaLaptop } from "react-icons/fa";
 
 const solutions = [
     {
@@ -70,7 +71,7 @@ export function PopoverDemo() {
                 <div className="h-[500px] grid grid-cols-6">
                     <div className=""></div>
                     <div className=" col-span-5 h-full flex p-4 bg-white rounded-lg rounded-t-none border mr-4 shadow-lg">
-                        <div className="grid grid-cols-2 gap-4 max-w-[500px]">
+                        <div className="grid grid-cols-2 gap-4 max-w-[500px] ">
                             <div className="bg-zinc-100 rounded-md">
                                 <a
                                     className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md hover:shadow-md"
@@ -95,8 +96,8 @@ export function PopoverDemo() {
                                                 "block select-none space-y-1 p-3 rounded-md rounded-r-none leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
                                             )}
                                         >
-                                            <div className="text-sm font-medium leading-none">
-                                                {item.name}
+                                            <div className="text-sm font-medium leading-none flex items-center">                                           
+                                                <FaLaptop className="w-5 h-5 mr-2 text-zinc-500" />{item.name}
                                             </div>
                                             <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
                                                 {item.description}
@@ -108,17 +109,17 @@ export function PopoverDemo() {
                         </div>
                         <div className=" flex-1 p-4  grid grid-cols-3 gap-4 bg-accent rounded-r-md">
                             <div className="">
-                                <p className="text-md font-medium leading-none text-center">
+                                <p className="text-md font-medium leading-none text-center text-blue-600">
                                     Phân loại sản phẩm
                                 </p>
                             </div>
                             <div className="">
-                                <p className="text-md font-medium leading-none text-center">
+                                <p className="text-md font-medium leading-none text-center text-blue-600">
                                     Tìm theo thương hiệu
                                 </p>
                             </div>
                             <div className="">
-                                <p className="text-md font-medium leading-none text-center">
+                                <p className="text-md font-medium leading-none text-center text-blue-600">
                                     Sản phẩm nổi bật
                                 </p>
                             </div>

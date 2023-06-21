@@ -4,6 +4,7 @@ import { Product } from "@/interfaces";
 import { Badge } from "components/ui/badge";
 import ProductSpecification from "./ProductSpecification";
 import Review from "./(review)/Review";
+import Description from "./(description)/Description";
 
 async function getData(_id: number): Promise<Product[]> {
     // const res = await fetch(`http://localhost:3000/api/products/${_id}`);
@@ -186,12 +187,14 @@ const ProductDetails = async ({ params: { _id } }: Props) => {
                 </div>
                 <div className="flex border-t shadow-lg rounded-md p-4 mt-4">
                     <div className="w-2/3">
-                        <div className="h-[600px]">
+                        <div className="inline-block">
                             <p className="font-bold text-xl mb-2">
                                 Mô tả sản phẩm
                             </p>
+                            <Description />
+                            <hr />
                         </div>
-                        <div className="">
+                        <div className="mt-4">
                             <p className="font-bold text-2xl mb-2">
                                 Đánh giá sản phẩm
                             </p>

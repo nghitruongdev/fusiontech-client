@@ -50,7 +50,7 @@ const ratingSummary = [
     { id: 4, rating: 2, percentage: "75%" },
     { id: 5, rating: 1, percentage: "55%" },
 ];
-
+ 
 const Review = () => {
     return (
         <>
