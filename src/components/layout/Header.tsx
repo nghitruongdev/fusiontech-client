@@ -1,6 +1,4 @@
-"use client";
 import Image from "next/image";
-import { logo } from "public/assets/images/index";
 import { IoSearchOutline } from "react-icons/io5";
 import { AiOutlineHeart } from "react-icons/ai";
 import { BsCart2 } from "react-icons/bs";
@@ -10,21 +8,22 @@ import { FiChevronDown } from "react-icons/fi";
 import { FaPlaceOfWorship } from "react-icons/fa";
 import { MdOutlineLocationOn } from "react-icons/md";
 import NavbarUserInfo from "./NavbarUserInfo";
-import BannerNavbar from "./BannerNavbar";
-import {
-    Popover,
-    PopoverBody,
-    PopoverContent,
-    PopoverTrigger,
-} from "@chakra-ui/react";
-import CategoryNavigation, { CategoryMenuButton } from "./CategoryNavigation";
 import { Suspense } from "react";
-import { CategoryDropDown } from "./CategoryDropdown";
+import { CategoryDropDown, CategoryDropDownButton } from "./CategoryDropdown";
+import { Category } from "@/interfaces";
 
-const Header = () => {
+const getCategories = async () => {
+    const response = await fetch("http://localhost:3000/api/categories");
+    if (!!!response.ok) {
+    }
+
+    return response.json();
+};
+const Header = async () => {
+    const categories = ((await getCategories()) ?? []) as Category[];
     return (
         <>
-            <BannerNavbar />
+            {/* <BannerNavbar /> */}
             <div className="w-full bg-blue-600 text-white sticky top-0 z-50">
                 <div className="w-full h-full border-b-[1px] border-b-white">
                     <div className="mx-auto max-w-container px-4 h-20 flex items-center justify-between gap-2 ">
@@ -45,9 +44,8 @@ const Header = () => {
                         {/* ==================== Logo End ==================== */}
 
                         {/* ==================== Departments Start ==================== */}
-                        <Suspense fallback={<CategoryMenuButton />}>
-                            {/* <CategoryNavigation /> */}
-                            <CategoryDropDown />
+                        <Suspense fallback={<CategoryDropDownButton />}>
+                            <CategoryDropDown categories={categories} />
                         </Suspense>
                         {/* <Menu>
                             <MenuButton className="navBarHover">
@@ -184,36 +182,36 @@ const NavbarBottom = () => {
     );
 };
 
-const Departments = () => {
-    return (
-        <>
-            <Popover isLazy placement="top-start">
-                <PopoverTrigger>
-                    <div className="flex items-center gap-2 navBarHover">
-                        <div className="w-4 grid grid-cols-2 gap-[2px]">
-                            <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
-                            <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
-                            <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
-                            <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
-                        </div>
-                        <p className="font-semibold ">Departments</p>
-                    </div>
-                </PopoverTrigger>
+// const Departments = () => {
+//     return (
+//         <>
+//             <Popover isLazy placement="top-start">
+//                 <PopoverTrigger>
+//                     <div className="flex items-center gap-2 navBarHover">
+//                         <div className="w-4 grid grid-cols-2 gap-[2px]">
+//                             <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+//                             <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+//                             <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+//                             <span className="w-1.5 h-1.5 border-[1px] border-white inline-flex"></span>
+//                         </div>
+//                         <p className="font-semibold ">Departments</p>
+//                     </div>
+//                 </PopoverTrigger>
 
-                <PopoverContent
-                    overflow={"hidden"}
-                    className=" text-black"
-                    w="50%"
-                >
-                    {/* <PopoverHeader fontWeight="semibold">
-                        Popover placement
-                    </PopoverHeader> */}
-                    {/* <PopoverArrow /> */}
-                    {/* <PopoverCloseButton /> */}
-                    <PopoverBody className="text-black bg-red-400"></PopoverBody>
-                </PopoverContent>
-            </Popover>
-        </>
-    );
-};
+//                 <PopoverContent
+//                     overflow={"hidden"}
+//                     className=" text-black"
+//                     w="50%"
+//                 >
+//                     {/* <PopoverHeader fontWeight="semibold">
+//                         Popover placement
+//                     </PopoverHeader> */}
+//                     {/* <PopoverArrow /> */}
+//                     {/* <PopoverCloseButton /> */}
+//                     <PopoverBody className="text-black bg-red-400"></PopoverBody>
+//                 </PopoverContent>
+//             </Popover>
+//         </>
+//     );
+// };
 export default Header;

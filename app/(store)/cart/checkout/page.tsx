@@ -6,29 +6,17 @@ import { HttpError, useCustom, useCustomMutation } from "@refinedev/core";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import OrderOverview from "./(side bar)/OrderOverview";
-import { API_URL, RESOURCE_API } from "@/constants";
+import { API_URL, RESOURCE_API, fakeUserId } from "@/constants";
 import { Spinner } from "@chakra-ui/react";
-
-// const getShippingAddress = async (): Promise<ShippingAddress[]> => {
-//     // const res = await fetch(`http://localhost:3000/api/products/${_id}`);
-//     // The return value is *not* serialized
-//     // You can return Date, Map, Set, etc.
-
-//     // Recommendation: handle errors
-//     const res = await fetch(`${APP_API.shippingAddress}`);
-//     if (!res.ok) {
-//         // This will activate the closest `error.js` Error Boundary
-//         throw new Error("Failed to fetch data");
-//     }
-
-//     return res.json();
-// };
+import { redirect, useRouter } from "next/navigation";
+import { RedirectType } from "next/dist/client/components/redirect";
 
 const CheckoutPage = () => {
     // const session = await getServerSession(authOptions);
     // if (!session) {
     //     redirect("/api/auth/signin?to=/cart/checkout");
     // }
+    const router = useRouter();
     const { data: session, status } = useSession({
         required: true,
     });
@@ -55,28 +43,44 @@ const CheckoutPage = () => {
     const { mutateAsync } = useCustomMutation({
         mutationOptions: {},
     });
-    useEffect(() => setValue("items", cartItems), []);
+    useEffect(() => setValue("items", cartItems), [data?.data]);
+    useEffect(() => {
+        setValue("userId", fakeUserId);
+        router.prefetch("/cart/checkout/success");
+    }, []);
 
     const checkoutHandler = () => {
         console.log("checkout button clicked");
         const url = `${API_URL}/${RESOURCE_API.orders().checkout}`;
+        console.log("url", url);
         handleSubmit(async (data) => {
             console.log("data", data);
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth", // Smooth scrolling animation
+            });
             await new Promise((resolve) => setTimeout(resolve, 3000));
-            // mutateAsync(
-            //     {
-            //         url,
-            //         method: "post",
-            //         values: {
-            //             data,
-            //         },
-            //     },
-            //     {
-            //         onSettled(data, error, variables, context) {
-            //             console.log("Done submitting the order");
-            //         },
-            //     },
-            // );
+
+            mutateAsync(
+                {
+                    url,
+                    method: "post",
+                    values: {
+                        ...data,
+                    },
+                },
+
+                {
+                    onSettled(data, error, variables, context) {
+                        console.log("Done submitting the order");
+                    },
+                    onSuccess(data, variables, context) {
+                        router.replace(
+                            `/cart/checkout/success?oid=${data?.data}`,
+                        );
+                    },
+                },
+            );
             console.log("Last in handle submit");
         })();
 

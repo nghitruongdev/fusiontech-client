@@ -4,17 +4,10 @@ import {
     CursorArrowRaysIcon,
     FingerPrintIcon,
     SquaresPlusIcon,
-    ArrowPathIcon,
-    ChevronDownIcon,
 } from "@heroicons/react/20/solid";
-import { FaLaptop } from "react-icons/fa";
 import {
-    Box,
     Button,
-    ChakraComponent,
     Menu,
-    MenuButton,
-    MenuButtonProps,
     MenuItem,
     MenuList,
     Popover,
@@ -24,127 +17,90 @@ import {
     PopoverContent,
     PopoverHeader,
     PopoverTrigger,
-    forwardRef,
+    useDisclosure,
 } from "@chakra-ui/react";
+import { Laptop } from "lucide-react";
+import { Category } from "@/interfaces";
 
-const solutions = [
-    {
-        name: "Laptop",
-        description: "Get a better understanding of your traffic",
-        href: "#",
-        icon: ChartPieIcon,
-    },
-    {
-        name: "Điện thoại",
-        description: "Speak directly to your customers",
-        href: "#",
-        icon: CursorArrowRaysIcon,
-    },
-    {
-        name: "Thiết bị âm thanh",
-        description: "Your customers' data will be safe and secure",
-        href: "#",
-        icon: FingerPrintIcon,
-    },
-    {
-        name: "Phụ kiện khác",
-        description: "Connect with third-party tools",
-        href: "#",
-        icon: SquaresPlusIcon,
-    },
-    {
-        name: "Phụ kiện khác",
-        description: "Connect with third-party tools",
-        href: "#",
-        icon: SquaresPlusIcon,
-    },
-    {
-        name: "Phụ kiện khác",
-        description: "Connect with third-party tools",
-        href: "#",
-        icon: SquaresPlusIcon,
-    },
-    {
-        name: "Phụ kiện khác",
-        description: "Connect with third-party tools",
-        href: "#",
-        icon: SquaresPlusIcon,
-    },
-];
-export function CategoryDropDown() {
+export function CategoryDropDown({ categories }: { categories: Category[] }) {
     return (
-        // <>
-        //     <Menu isLazy>
-        //         {({ isOpen }) => (
-        //             <>
-        //                 <MenuButton
-        //                     as={CatMenuButton}
-        //                     className={`navBarHover font-semibold`}
-        //                     isActive={isOpen}
-        //                 />
-        //                 <div className="relative">
-        //                     <MenuList
-        //                         color="gray.700"
-        //                         fontSize="sm"
-        //                         fontWeight="normal"
-        //                         lineHeight="base"
-        //                         minW={"200px"}
-        //                         mt="2"
-        //                     >
-        //                         <MenuItem>Download</MenuItem>
-        //                         <MenuItem onClick={() => alert("Kagebunshin")}>
-        //                             Create a Copy
-        //                         </MenuItem>
-        //                     </MenuList>
-        //                     <div className="absolute right-0 top-0 h-[400px] bg-red-500">
-        //                         Hello there
-        //                     </div>
-        //                 </div>
-        //             </>
-        //         )}
-        //     </Menu>
-        // </>
         <>
             <Popover isLazy>
-                <PopoverTrigger>
-                    <Button>Danh mục</Button>
-                </PopoverTrigger>
-                <PopoverContent>
-                    <PopoverArrow />
-                    <PopoverCloseButton />
-                    <PopoverHeader>Confirmation!</PopoverHeader>
-                    <PopoverBody>
-                        Are you sure you want to have that milkshake?
-                    </PopoverBody>
-                </PopoverContent>
+                {({ isOpen }) => (
+                    <>
+                        <PopoverTrigger>
+                            <Button variant={"unstyled"}>
+                                <div
+                                    className={`group navBarHover text-white font-semibold   ${
+                                        isOpen && "navBarActive"
+                                    }`}
+                                >
+                                    <div
+                                        className={`w-4 grid grid-cols-2 gap-[2px]`}
+                                    >
+                                        {Array.from({ length: 4 }).map(
+                                            (_, idx) => (
+                                                <span
+                                                    key={idx}
+                                                    className={`  w-1.5 h-1.5 border-[1px] border-white inline-flex ${
+                                                        isOpen && "bg-white"
+                                                    }`}
+                                                ></span>
+                                            ),
+                                        )}
+                                    </div>
+                                    Danh mục
+                                </div>
+                            </Button>
+                        </PopoverTrigger>
+
+                        <PopoverContent
+                            color="black"
+                            mt="3"
+                            w="200px"
+                            pos="relative"
+                        >
+                            <div className="absolute top-0 right-0 h-[500px] w-[300px]">
+                                Hello there
+                            </div>
+                            <PopoverBody>
+                                <Menu isOpen>
+                                    <MenuList>
+                                        {categories.map((item) => (
+                                            <MenuItem key={`${Math.random()}`}>
+                                                <Laptop className="mr-2" />
+                                                {item.name}
+                                            </MenuItem>
+                                        ))}
+                                    </MenuList>
+                                </Menu>
+                            </PopoverBody>
+                        </PopoverContent>
+                    </>
+                )}
             </Popover>
         </>
     );
 }
 
-const CatMenuButton = forwardRef<
-    MenuButtonProps & {
-        isActive?: boolean;
-    },
-    "div"
->(({ isActive, ...props }, ref) => (
-    <Box
-        ref={ref}
-        {...props}
-        className={`navBarHover font-semibold group ${
-            isActive && "navBarActive"
-        }`}
-    >
-        <div className={`w-4 grid grid-cols-2 gap-[2px]`}>
-            {Array.from({ length: 4 }).map((_, idx) => (
-                <span
-                    key={idx}
-                    className={` group-hover:bg-white w-1.5 h-1.5 border-[1px] border-white inline-flex ${
-                        isActive && "bg-white"
-                    }`}
-                ></span>
-            ))}
+export function CategoryDropDownButton({ isOpen }: { isOpen?: boolean }) {
+    return (
+        <div
+            className={`group navBarHover text-white font-semibold   ${
+                isOpen && "navBarActive"
+            }`}
+        >
+            <div className={`w-4 grid grid-cols-2 gap-[2px]`}>
+                {Array.from({ length: 4 }).map((_, idx) => (
+                    <span
+                        key={idx}
+                        className={`  w-1.5 h-1.5 border-[1px] border-white inline-flex ${
+                            isOpen && "bg-white"
+                        }`}
+                    ></span>
+                ))}
+            </div>
+            Danh mục
         </div>
-        Danh mục
-    </Box>
-));
+    );
+}
