@@ -10,9 +10,8 @@ import {
     notificationProvider,
     refineTheme,
 } from "@refinedev/chakra-ui";
-import { springDataProvider } from "@/rest-data-provider";
+import { dataProvider } from "@/rest-data-provider";
 
-export const dataProvider = springDataProvider(API_URL);
 const RefineProvider = ({ children }: { children: React.ReactNode }) => {
     // const { t, i18n } = useTranslation();
     // const i18nProvider = {
@@ -21,6 +20,7 @@ const RefineProvider = ({ children }: { children: React.ReactNode }) => {
     //     getLocale: () => i18n.language,
     // };
     const { data: session, status, update } = useSession();
+
     return (
         <ChakraProvider theme={RefineThemes.Blue}>
             <ColorModeScript

@@ -68,7 +68,7 @@ const SuccessPage = async ({
                                     FusionTech Store
                                 </p>
                             </h2>
-                            <div className="w-10/12 text-start mx-auto mt-8 bg-red-500">
+                            <div className="w-10/12 text-start mx-auto mt-8">
                                 {[
                                     { title: "Mã đơn hàng", content: oid },
                                     {

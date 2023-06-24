@@ -10,7 +10,7 @@ import { MdOutlineAdd } from "react-icons/md";
 import { TbReload } from "react-icons/tb";
 import { HiMinusSm } from "react-icons/hi";
 import FormatPrice from "@/components/client/FormatPrice";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode } from "react";
 import { IoMdClose } from "react-icons/io";
 import Link from "next/link";
 type Props = {

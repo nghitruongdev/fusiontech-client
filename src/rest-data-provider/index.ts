@@ -2,6 +2,7 @@ import { DataProvider, MetaQuery } from "@refinedev/core";
 import { axiosInstance, generateSort, generateFilter } from "./utils";
 import { AxiosInstance } from "axios";
 import { stringify } from "query-string";
+import { API_URL } from "@/constants";
 
 type MethodTypes = "get" | "delete" | "head" | "options";
 type MethodTypesWithBody = "post" | "put" | "patch";
@@ -220,3 +221,5 @@ export const springDataProvider = (
         });
     },
 });
+
+export const dataProvider = springDataProvider(API_URL);

@@ -1,9 +1,13 @@
 import Cart from "app/(store)/cart/Cart";
+import { Suspense } from "react";
 
-const CartPage = () => {
+const CartPage = async () => {
+    // await new Promise((res) => setTimeout(res, 3000));
     return (
         <div className="mx-4">
-            <Cart />
+            <Suspense fallback={<>Your cart will be available in a minute</>}>
+                <Cart />
+            </Suspense>
         </div>
     );
 };

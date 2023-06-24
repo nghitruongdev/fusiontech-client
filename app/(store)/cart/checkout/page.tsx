@@ -8,8 +8,7 @@ import { useEffect } from "react";
 import OrderOverview from "./(side bar)/OrderOverview";
 import { API_URL, RESOURCE_API, fakeUserId } from "@/constants";
 import { Spinner } from "@chakra-ui/react";
-import { redirect, useRouter } from "next/navigation";
-import { RedirectType } from "next/dist/client/components/redirect";
+import { useRouter } from "next/navigation";
 
 const CheckoutPage = () => {
     // const session = await getServerSession(authOptions);
@@ -25,6 +24,7 @@ const CheckoutPage = () => {
         url: "http://localhost:3000/api/cart/items",
         method: "get",
     });
+
     const cartItems = (data?.data ?? []) as ICartItem[];
 
     const {
@@ -67,6 +67,7 @@ const CheckoutPage = () => {
                     method: "post",
                     values: {
                         ...data,
+                        payment: {},
                     },
                 },
 
