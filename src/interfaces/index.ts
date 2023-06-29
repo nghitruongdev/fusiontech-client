@@ -1,3 +1,5 @@
+import { StringDecoder } from "string_decoder";
+
 export interface Product {
     _id: number;
     title: string;
@@ -61,11 +63,12 @@ export interface IOrder {
     total: number | undefined;
     note: string;
     email: string;
-    status: string;
+    status: string | IOrderStatus;
+    purchasedAt?: string;
     userId: string;
     addressId: number;
-    purchasedAt?: string;
-    payment: {
+    paymentId: number;
+    payment?: {
         id: string;
         amount: number;
         paidAt: string;
@@ -75,11 +78,18 @@ export interface IOrder {
     _links?: _links;
 }
 
-export interface IFullOrderStatus {
+export interface IOrderStatus {
     id: number;
     name: string;
     detailName: string;
-    group: string;
+    group:
+        | "VERIFY"
+        | "PROCESSING"
+        | "ON_DELIVERY"
+        | "COMPLETED"
+        | "FAILED"
+        | "CANCELLED";
+    isChangeable: boolean;
 }
 
 export interface IOrderStatusGroup {
@@ -99,4 +109,11 @@ export enum PaymentMethod {
 
 export interface IPayment {
     status: PaymentStatus;
+}
+
+export interface IProblemResponse {
+    data: {
+        title: string;
+        detail: string;
+    };
 }

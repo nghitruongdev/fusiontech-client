@@ -28,10 +28,10 @@ export const springDataProvider = (
 
         if (!!filters) {
             console.warn("Filter is currently not supported.");
-            throw Error("Filter is not supported");
+            // throw Error("Filter is not supported");
         }
         const queryFilters = generateFilter(filters);
-
+        console.log("queryFilters", queryFilters);
         const query: {
             // _start?: number;
             // _end?: number;
@@ -77,12 +77,13 @@ export const springDataProvider = (
         const { headers, method } = meta ?? {};
         const requestMethod = (method as MethodTypes) ?? "get";
 
-        const { data } = await httpClient[requestMethod](
-            `${apiUrl}/${resource}/search/many?${stringify({
-                ids: ids.join(","),
-            })}`,
-            { headers },
-        );
+        const url = `${apiUrl}/${resource}/search/many?${stringify({
+            ids: ids.join(","),
+        })}`;
+        const { data } = await httpClient[requestMethod](url, { headers });
+
+        console.log("url", url);
+
         const fetchData =
             data?._embedded?.[meta?._embeddedResource ?? resource] ?? data;
         return {

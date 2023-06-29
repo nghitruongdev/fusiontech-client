@@ -1,5 +1,6 @@
 import { API_URL } from "@/constants";
 import StatusTabs from "./StatusTabs";
+import { IOrderStatusGroup } from "@/interfaces";
 
 const getStatusGroups = async () => {
     const response = await fetch(`${API_URL}/orders/statuses/groups`);
@@ -9,8 +10,9 @@ const getStatusGroups = async () => {
 
     return response.json();
 };
+
 const OrderLayout = async ({ children }: { children: React.ReactNode }) => {
-    const statusGroups = await getStatusGroups();
+    const statusGroups = (await getStatusGroups()) as IOrderStatusGroup[];
 
     return (
         <>

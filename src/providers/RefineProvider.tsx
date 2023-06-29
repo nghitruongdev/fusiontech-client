@@ -1,6 +1,5 @@
 "use client";
 import { authProvider } from "@/providers/authProvider";
-import { API_URL } from "@/constants";
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import { Refine } from "@refinedev/core";
 import routerProvider from "@refinedev/nextjs-router/app";
@@ -13,12 +12,6 @@ import {
 import { dataProvider } from "@/rest-data-provider";
 
 const RefineProvider = ({ children }: { children: React.ReactNode }) => {
-    // const { t, i18n } = useTranslation();
-    // const i18nProvider = {
-    //     translate: (key: string, params: object) => t(key, params),
-    //     changeLocale: (lang: string) => i18n.changeLanguage(lang),
-    //     getLocale: () => i18n.language,
-    // };
     const { data: session, status, update } = useSession();
 
     return (

@@ -1,26 +1,26 @@
 "use client";
-import { AuthPage, ThemedTitleV2 } from "@refinedev/chakra-ui";
-import { Laptop2Icon } from "lucide-react";
+import LoginForm from "../(form)/LoginForm";
 
 const LoginPage = () => {
     return (
-        <AuthPage
-            type="login"
-            formProps={{
-                defaultValues: {
-                    email: "demo@refine.dev",
-                    password: "demodemo",
-                },
-            }}
-            providers={[{ name: "Google", label: "withGoogle" }]}
-            title={
-                <ThemedTitleV2
-                    collapsed={false}
-                    text="FusionTech Store"
-                    icon={<Laptop2Icon />}
-                />
-            }
-        />
+        // <AuthPage
+        //     type="login"
+        //     formProps={{
+        //         defaultValues: {
+        //             email: "demo@refine.dev",
+        //             password: "demodemo",
+        //         },
+        //     }}
+        //     providers={[{ name: "Google", label: "withGoogle" }]}
+        //     title={
+        //         <ThemedTitleV2
+        //             collapsed={false}
+        //             text="FusionTech Store"
+        //             icon={<Laptop2Icon />}
+        //         />
+        //     }
+        // />
+        <LoginForm />
     );
 };
 export default LoginPage;

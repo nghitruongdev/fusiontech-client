@@ -19,12 +19,13 @@ export default async function ProtectedLayout({
     const auth = cookieStore.get("auth");
 
     // const { authenticated } = await checkAuth(auth?.value);
-    const authenticated = true;
-    if (authenticated) {
-        return redirect("/");
-    } else {
-        return <>{children}</>;
-    }
+    // const authenticated = true;
+    // if (authenticated) {
+    //     return redirect("/");
+    // } else {
+    //     return <>{children}</>;
+    // }
+    return <>{children}</>;
 }
 
 // export const getServerSideProps = async (context) => {

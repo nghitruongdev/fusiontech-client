@@ -1,7 +1,6 @@
 import "./globals.css";
 import { Inter, Open_Sans } from "next/font/google";
 import NextAuthProvider from "@/providers/NextAuthProvider";
-import RefineProvider from "@/providers/RefineProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 const open_sans = Open_Sans({
@@ -21,9 +20,7 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={`${inter.className} font-sans`}>
-                <NextAuthProvider>
-                    <RefineProvider>{children}</RefineProvider>
-                </NextAuthProvider>
+                <NextAuthProvider>{children}</NextAuthProvider>
             </body>
         </html>
     );

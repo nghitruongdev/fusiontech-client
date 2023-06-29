@@ -12,20 +12,22 @@ import ship3Img from "./ship/ship3.png";
 import notFoundImg from "./404Img.png";
 import emptyCart from "./empty-cart.png";
 import warningImg from "./warning.png";
+import loginImg from "./loginIcon.png";
 
 export {
-  logo,
-  phoneImg,
-  sliderImgOne,
-  sliderImgTwo,
-  sliderImgThree,
-  sliderImgFour,
-  sliderImgFive,
-  bannerImg,
-  ship1Img,
-  ship2Img,
-  ship3Img,
-  notFoundImg,
-  emptyCart,
-  warningImg,
+    logo,
+    phoneImg,
+    sliderImgOne,
+    sliderImgTwo,
+    sliderImgThree,
+    sliderImgFour,
+    sliderImgFive,
+    bannerImg,
+    ship1Img,
+    ship2Img,
+    ship3Img,
+    notFoundImg,
+    emptyCart,
+    warningImg,
+    loginImg,
 };

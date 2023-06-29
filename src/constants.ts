@@ -1,5 +1,13 @@
 export const API_URL = "http://localhost:8080/api";
 export const fakeUserId = "e9030127-ed84-44f4-9295-5230387a95f4";
+export const resources = {
+    categories: {
+        name: "Danh mục sản phẩm",
+    },
+    products: {
+        name: "Sản phẩm",
+    },
+};
 export const RESOURCE_API = {
     url: API_URL,
     users: {

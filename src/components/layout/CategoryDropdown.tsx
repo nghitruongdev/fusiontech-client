@@ -1,11 +1,5 @@
 "use client";
 import {
-    ChartPieIcon,
-    CursorArrowRaysIcon,
-    FingerPrintIcon,
-    SquaresPlusIcon,
-} from "@heroicons/react/20/solid";
-import {
     Button,
     Menu,
     MenuItem,
@@ -60,9 +54,6 @@ export function CategoryDropDown({ categories }: { categories: Category[] }) {
                             w="200px"
                             pos="relative"
                         >
-                            <div className="absolute top-0 right-0 h-[500px] w-[300px]">
-                                Hello there
-                            </div>
                             <PopoverBody>
                                 <Menu isOpen>
                                     <MenuList>

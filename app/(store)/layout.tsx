@@ -1,3 +1,4 @@
+import RefineProvider from "@/providers/RefineProvider";
 import Footer from "@components/layout/Footer";
 import Header from "@components/layout/Header";
 
@@ -13,11 +14,11 @@ export default function StoreLayout({
 }) {
     return (
         <>
-            {/* <Suspense fallback={<Loading />}> */}
-            <Header />
-            <main>{children}</main>
-            <Footer />
-            {/* </Suspense> */}
+            <RefineProvider>
+                <Header />
+                <main>{children}</main>
+                <Footer />
+            </RefineProvider>
         </>
     );
 }
