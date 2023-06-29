@@ -1,6 +1,6 @@
 "use client";
 
-import { IFullOrderStatus, IOrderStatusGroup } from "@/interfaces";
+import { IOrderStatusGroup } from "@/interfaces";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 

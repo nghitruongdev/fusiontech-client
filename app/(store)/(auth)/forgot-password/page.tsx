@@ -1,6 +1,4 @@
 "use client";
-import { AuthPage, ThemedTitleV2 } from "@refinedev/chakra-ui";
-import { Laptop2Icon } from "lucide-react";
 import ForgotPasswordForm from "../(form)/ForgotPasswordForm";
 
 const LoginPage = () => {
