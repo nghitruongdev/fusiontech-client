@@ -29,7 +29,6 @@ const HomePage = async () => {
         <>
             <main className="">
                 <div className="max-w-contentContainer mx-auto">
-                    aaaaaaaaaaa
                     <Banner />
                     <ProductList products={products} />
                 </div>
