@@ -1,10 +1,10 @@
-import { Product } from "@/interfaces";
+import { IProduct } from "@/interfaces";
 import Banner from "@components/client/Banner";
 import ProductList from "@components/client/ProductList";
 import { Metadata } from "next";
 import { Suspense } from "react";
 
-async function getProducts(): Promise<Product[]> {
+async function getProducts(): Promise<IProduct[]> {
     const res = await fetch("http://localhost:3000/api/products");
     // The return value is *not* serialized
     // You can return Date, Map, Set, etc.
@@ -24,7 +24,7 @@ const metadata: Metadata = {
     icons: "/favicon.ico",
 };
 const HomePage = async () => {
-    const products: Product[] = await getProducts();
+    const products: IProduct[] = await getProducts();
     return (
         <>
             <main className="">

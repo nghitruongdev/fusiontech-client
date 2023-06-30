@@ -40,7 +40,7 @@ export type CreateAddressProps = {
 
 export type EditAddressProps = CreateAddressProps;
 
-export default function useData({ userId }: Props) {
+export default function useCheckout({ userId }: Props) {
     const { mutate } = useCustomMutation();
     const { open, close } = useNotification();
     const addressAPI = RESOURCE_API.shippingAddress();

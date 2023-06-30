@@ -9,10 +9,10 @@ import { useModalForm } from "@refinedev/react-hook-form";
 import CreateAddressModal from "./(modal)/CreateModal";
 import AddressListModal from "./(modal)/ListModal";
 import EditAddressModal from "./(modal)/EditModal";
-import useData, {
+import useCheckout, {
     CreateAddressProps,
     EditAddressProps,
-} from "./(hooks)/useData";
+} from "./(hooks)/useCheckout";
 
 const AddressSection = ({
     setAddressId,
@@ -20,7 +20,9 @@ const AddressSection = ({
     setAddressId: (addressId: number) => void;
 }) => {
     const userId = fakeUserId;
-    const { user, addressList, defaultAddress, address } = useData({ userId });
+    const { user, addressList, defaultAddress, address } = useCheckout({
+        userId,
+    });
 
     const btnRef = React.useRef(null);
 

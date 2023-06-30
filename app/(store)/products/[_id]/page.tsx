@@ -1,12 +1,12 @@
 import { IoMdHeartEmpty } from "react-icons/io";
 import { BsStarFill, BsInfoCircle } from "react-icons/bs";
-import { Product } from "@/interfaces";
+import { IProduct } from "@/interfaces";
 import { Badge } from "@components/ui/shadcn/badge";
 import ProductSpecification from "./ProductSpecification";
 import Review from "./(review)/Review";
 import Description from "./Description";
 
-async function getData(_id: number): Promise<Product[]> {
+async function getData(_id: number): Promise<IProduct[]> {
     // const res = await fetch(`http://localhost:3000/api/products/${_id}`);
     // The return value is *not* serialized
     // You can return Date, Map, Set, etc.
@@ -29,8 +29,8 @@ type Props = {
 const ProductDetails = async ({ params: { _id } }: Props) => {
     const products = await getData(_id);
     const product = products.find(
-        (product: Product) => product._id == _id,
-    ) as Product;
+        (product: IProduct) => product._id == _id,
+    ) as IProduct;
     const isDiscount = false;
     return (
         <section className="bg-white">
@@ -90,7 +90,7 @@ const ProductDetails = async ({ params: { _id } }: Props) => {
                                     {product.brand}
                                 </p>
                                 <p className="text-2xl font-bold">
-                                    {product.title}
+                                    {product.name}
                                 </p>
                                 {/* <p className="text-base text-zinc-500">
                                 {product.description}
@@ -193,7 +193,7 @@ const ProductDetails = async ({ params: { _id } }: Props) => {
                             </p>
                             <Description />
                         </div>
-                        <div className="">
+                        <div className="mt-12">
                             <p className="font-bold text-2xl mb-2">
                                 Đánh giá sản phẩm
                             </p>

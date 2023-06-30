@@ -6,8 +6,8 @@ type PaginationProps = {
     current: number;
     pageCount: number;
     setCurrent: (page: number) => void;
-    pageSize?: number;
-    setPageSize?: (size: number) => void;
+    pageSize: number | undefined;
+    setPageSize: (size: number) => void | undefined;
 };
 
 export const Pagination: React.FC<PaginationProps> = ({

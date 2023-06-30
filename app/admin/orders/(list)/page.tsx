@@ -26,7 +26,7 @@ import {
 import { Pagination } from "@components/pagination";
 import { IOrder, IOrderStatus } from "@/interfaces";
 import { EditableControls, OrderStatus, statusColor } from "../OrderStatus";
-export default function OrderListPage() {
+export default function ListPage() {
     // return <ChakraUIListInferencer />;
     return <OrderList />;
 }

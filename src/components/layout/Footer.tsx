@@ -1,61 +1,4 @@
 "use client";
-// const Footer = () => {
-//     return (
-//         <>
-//             <FooterTop />
-//             <div className="w-full bg-hoverBg text-white pt-4 pb-6">
-//                 <div className="max-w-contentContainer mx-auto">
-//                     <ul className="w-full flex flex-wrap gap-1 justify-center text-sm text-zinc-200">
-//                         <li className="hover:text-white duration-200 ml-2 cursor-pointer">
-//                             All Departments
-//                         </li>
-//                         <li className="hover:text-white duration-200 ml-2 cursor-pointer">
-//                             All Departments
-//                         </li>
-//                         <li className="hover:text-white duration-200 ml-2 cursor-pointer">
-//                             All Departments
-//                         </li>
-//                         <li className="hover:text-white duration-200 ml-2 cursor-pointer">
-//                             All Departments
-//                         </li>
-//                         <li className="hover:text-white duration-200 ml-2 cursor-pointer">
-//                             All Departments
-//                         </li>
-//                         <li className="hover:text-white duration-200 ml-2 cursor-pointer">
-//                             All Departments
-//                         </li>
-//                         <li className="hover:text-white duration-200 ml-2 cursor-pointer">
-//                             All Departments
-//                         </li>
-//                         <li className="hover:text-white duration-200 ml-2 cursor-pointer">
-//                             All Departments
-//                         </li>
-//                         <li className="hover:text-white duration-200 ml-2 cursor-pointer">
-//                             All Departments
-//                         </li>
-//                     </ul>
-//                     <p className="text-sm text-zinc-300 text-center mt-4">
-//                         © 2023 FusionTech.com.vn All rights Reserved
-//                     </p>
-//                 </div>
-//             </div>
-//         </>
-//     );
-// };
-
-// const FooterTop = () => {
-//     return (
-//         <div className="w-full bg-lightBlue">
-//             <div className="py-10 flex flex-col gap-4 justify-center items-center"></div>
-//             <p className="font-medium">We love to hear what you think!</p>
-//             <button className="w-36 h-9 border-[1px] border-black bg-white rounded-full hover:border-[2px] transition-all duration-200">
-//                 Give feedback
-//             </button>
-//         </div>
-//     );
-// };
-
-// export default Footer;
 import {
     Box,
     chakra,
@@ -72,7 +15,7 @@ import {
     useColorModeValue,
 } from "@chakra-ui/react";
 import { ReactNode } from "react";
-import { FaInstagram, FaTwitter, FaYoutube } from "react-icons/fa";
+import { FaInstagram, FaTwitter, FaYoutube, FaFacebook } from "react-icons/fa";
 import { BiMailSend } from "react-icons/bi";
 
 const Logo = (props: any) => {
@@ -142,10 +85,20 @@ export default function Footer() {
                 >
                     <Stack spacing={6}>
                         <Box>
-                            <Logo
-                                color={useColorModeValue("gray.700", "white")}
-                            />
+                            <div className="navBarHover flex items-center justify-center border-2 w-40">
+                                {/* <Image
+                                    src={logo}
+                                    alt="Website logo"
+                                    className="w-44"
+                                /> */}
+                                <h1 className="font-extrabold text-xl">
+                                    FusionTech
+                                </h1>
+                            </div>
                         </Box>
+                        <h1 className="text-sm font-semibold">
+                            CÔNG TY CỔ PHẦN THƯƠNG MẠI ĐIỆN TỬ FUSIONTECH
+                        </h1>
                         <Text fontSize={"sm"}>
                             Copyright © {new Date().getFullYear()} FusionTech.
                             All Rights Reserved.
@@ -159,6 +112,9 @@ export default function Footer() {
                             </SocialButton>
                             <SocialButton label={"Instagram"} href={"#"}>
                                 <FaInstagram />
+                            </SocialButton>
+                            <SocialButton label={"Facebook"} href={"#"}>
+                                <FaFacebook />
                             </SocialButton>
                         </Stack>
                     </Stack>
@@ -205,16 +161,12 @@ export default function Footer() {
 function FooterSignup() {
     return (
         <Stack>
-            <Heading
-                fontSize="24px"
-                mb="15px"
-                className="yellow-gradient-color"
-            >
-                Be the first to know
+            <Heading fontSize="20px" mb="8px" className="yellow-gradient-color">
+                Địa chỉ trụ sở chính:
             </Heading>
-            <Text color="gray.400" mb="15px">
-                Get notified about the upcoming sessions, news, articles, jobs,
-                and opensource projects.
+            <Text color="gray.300" mb="15px">
+                Tòa nhà QTSC9 (toà T), đường Tô Ký, phường Tân Chánh Hiệp, quận
+                12, TP HCM
             </Text>
             {/* <ListHeader>Stay up to date</ListHeader>
                         <Stack direction={"row"}>

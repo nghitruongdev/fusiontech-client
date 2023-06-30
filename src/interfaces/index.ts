@@ -1,8 +1,6 @@
-import { StringDecoder } from "string_decoder";
-
-export interface Product {
+export interface IProduct {
     _id: number;
-    title: string;
+    name: string;
     isNew: boolean;
     oldPrice: string;
     price: number;
@@ -10,6 +8,16 @@ export interface Product {
     brand: string;
     category: string;
     image: string;
+}
+
+export interface IVariant {
+    id: number;
+    image: string;
+    price: number;
+    active: boolean;
+    availableQuantity?: number;
+    product?: IProduct;
+    _links: _links;
 }
 
 export interface Category {
@@ -78,6 +86,16 @@ export interface IOrder {
     _links?: _links;
 }
 
+export interface IOrderItem {
+    id: string;
+    price: number;
+    quantity: number;
+    variant: {
+        id: number;
+    };
+    _links: _links;
+}
+
 export interface IOrderStatus {
     id: number;
     name: string;
@@ -109,6 +127,26 @@ export enum PaymentMethod {
 
 export interface IPayment {
     status: PaymentStatus;
+}
+
+export interface IInventory {
+    id: string;
+    createdBy: string;
+    createdDate: string;
+    lastModifiedBy?: string;
+    lastModifiedDate?: string;
+    totalQuantity?: number;
+    items?: IInventoryDetail;
+    _links?: _links;
+}
+
+export interface IInventoryDetail {
+    id: string;
+    quantity: number;
+    variantId?: string;
+    variant?: IVariant;
+    inventory?: IInventory;
+    _links?: _links;
 }
 
 export interface IProblemResponse {

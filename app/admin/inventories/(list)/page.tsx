@@ -4,13 +4,7 @@ import React from "react";
 import { IResourceComponentsProps } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
 import { ColumnDef, flexRender } from "@tanstack/react-table";
-import {
-    List,
-    EditButton,
-    ShowButton,
-    MarkdownField,
-    DateField,
-} from "@refinedev/chakra-ui";
+import { List, EditButton, ShowButton, DateField } from "@refinedev/chakra-ui";
 import {
     TableContainer,
     Table,
@@ -21,13 +15,16 @@ import {
     Td,
     HStack,
 } from "@chakra-ui/react";
+import { IInventory } from "@/interfaces";
 import { Pagination } from "@components/pagination";
 
 export default function ListPage() {
-    return <ProductList />;
+    // return <ChakraUIListInferencer />;
+    return <InventoryList />;
 }
-const ProductList: React.FC<IResourceComponentsProps> = () => {
-    const columns = React.useMemo<ColumnDef<any>[]>(
+
+const InventoryList: React.FC<IResourceComponentsProps> = () => {
+    const columns = React.useMemo<ColumnDef<IInventory>[]>(
         () => [
             {
                 id: "id",
@@ -35,31 +32,35 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
                 header: "Id",
             },
             {
-                id: "name",
-                accessorKey: "name",
-                header: "Name",
+                id: "createdBy",
+                accessorKey: "createdBy",
+                header: "Tạo bởi",
             },
             {
-                id: "description",
-                accessorKey: "description",
-                header: "Description",
-                cell: function render({ getValue }) {
-                    return (
-                        <MarkdownField
-                            value={getValue<string>()?.slice(0, 80) + "..."}
-                        />
-                    );
+                id: "totalQuantity",
+                accessorKey: "totalQuantity",
+                header: "Số Lượng",
+            },
+            {
+                id: "lastModifiedBy",
+                accessorKey: "lastModifiedBy",
+                header: "Cập nhật bởi",
+                cell: function render({ getValue, row }) {
+                    return getValue<any>() ?? row.original.createdBy;
                 },
             },
+            // {
+            //     id: "createdDate",
+            //     accessorKey: "createdDate",
+            //     header: "Created Date",
+            //     cell: function render({ getValue }) {
+            //         return <DateField value={getValue<any>()} />;
+            //     },
+            // },
             {
-                id: "image",
-                accessorKey: "image",
-                header: "Image",
-            },
-            {
-                id: "publishDate",
-                accessorKey: "publishDate",
-                header: "Publish Date",
+                id: "lastModifiedDate",
+                accessorKey: "lastModifiedDate",
+                header: "Thời gian",
                 cell: function render({ getValue }) {
                     return <DateField value={getValue<any>()} />;
                 },
@@ -75,10 +76,10 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
                                 hideText
                                 recordItemId={getValue() as string}
                             />
-                            <EditButton
+                            {/* <EditButton
                                 hideText
                                 recordItemId={getValue() as string}
-                            />
+                            /> */}
                         </HStack>
                     );
                 },
@@ -95,18 +96,12 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
             setCurrent,
             pageCount,
             current,
-            setPageSize,
             pageSize,
+            setPageSize,
             tableQueryResult: { data: tableData },
         },
     } = useTable({
         columns,
-
-        refineCoreProps: {
-            sorters: {
-                initial: [],
-            },
-        },
     });
 
     setOptions((prev) => ({
@@ -115,7 +110,7 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
             ...prev.meta,
         },
     }));
-    console.log("tableData", tableData);
+
     return (
         <List>
             <TableContainer whiteSpace="pre-line">

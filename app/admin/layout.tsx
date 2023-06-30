@@ -62,6 +62,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                             canDelete: false,
                         },
                     },
+                    {
+                        name: "inventories",
+                        list: "/admin/inventories",
+                        create: "/admin/inventories/create",
+                        // edit: "/admin/inventories/edit/:id",
+                        show: "/admin/inventories/show/:id",
+                        meta: {
+                            canDelete: false,
+                        },
+                    },
+                    {
+                        name: "inventory-details",
+                        // list: "/admin/inventories",
+                        // create: "/admin/inventories/create",
+                        edit: "/admin/inventories/edit/:id",
+                        // show: "/admin/inventories/show/:id",
+                        meta: {
+                            canDelete: false,
+                        },
+                    },
                 ]}
             >
                 <ThemedLayoutV2>{children}</ThemedLayoutV2>;

@@ -3,6 +3,7 @@ import { axiosInstance, generateSort, generateFilter } from "./utils";
 import { AxiosInstance } from "axios";
 import { stringify } from "query-string";
 import { API_URL } from "@/constants";
+import page from "../../app/test/page";
 
 type MethodTypes = "get" | "delete" | "head" | "options";
 type MethodTypesWithBody = "post" | "put" | "patch";
@@ -28,10 +29,9 @@ export const springDataProvider = (
 
         if (!!filters) {
             console.warn("Filter is currently not supported.");
-            // throw Error("Filter is not supported");
         }
         const queryFilters = generateFilter(filters);
-        console.log("queryFilters", queryFilters);
+
         const query: {
             // _start?: number;
             // _end?: number;
@@ -74,16 +74,14 @@ export const springDataProvider = (
     },
 
     getMany: async ({ resource, ids, meta }) => {
-        const { headers, method } = meta ?? {};
+        const { headers, method, query } = meta ?? {};
         const requestMethod = (method as MethodTypes) ?? "get";
-
-        const url = `${apiUrl}/${resource}/search/many?${stringify({
+        const url = `${apiUrl}/${resource}/search/many?${stringify(
+            query,
+        )}&${stringify({
             ids: ids.join(","),
         })}`;
         const { data } = await httpClient[requestMethod](url, { headers });
-
-        console.log("url", url);
-
         const fetchData =
             data?._embedded?.[meta?._embeddedResource ?? resource] ?? data;
         return {
@@ -111,7 +109,6 @@ export const springDataProvider = (
 
         const { headers, method } = meta ?? {};
         const requestMethod = (method as MethodTypesWithBody) ?? "patch";
-
         const { data } = await httpClient[requestMethod](url, variables, {
             headers,
         });

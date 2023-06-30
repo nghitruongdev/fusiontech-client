@@ -1,4 +1,4 @@
-import { Product } from "@/interfaces";
+import { IProduct } from "@/interfaces";
 import Image from "next/image";
 import Link from "next/link";
 import { BsStarFill } from "react-icons/bs";
@@ -6,7 +6,7 @@ import { GoPlus } from "react-icons/go";
 const ProductList = ({ products }: any) => {
     return (
         <div className="py-6 px-4 grid grid-cols-4 gap-4">
-            {products.map((item: Product) => (
+            {products.map((item: IProduct) => (
                 <div
                     key={item._id}
                     className="border-[1px] border-gray-200 mb-6 group"
@@ -54,7 +54,7 @@ const ProductList = ({ products }: any) => {
                             </p>
                         </div>
                         <p className="text-lg font-semibold py-2 text-black">
-                            {item.title}
+                            {item.name}
                         </p>
                         <p className="text-base text-zinc-500">
                             {item.description.substring(0, 80)}...
