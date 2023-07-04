@@ -1,22 +1,7 @@
-import { IProduct } from "@/interfaces";
 import Banner from "@components/client/Banner";
 import ProductList from "@components/client/ProductList";
 import { Metadata } from "next";
 import { Suspense } from "react";
-
-async function getProducts(): Promise<IProduct[]> {
-    const res = await fetch("http://localhost:3000/api/products");
-    // The return value is *not* serialized
-    // You can return Date, Map, Set, etc.
-
-    // Recommendation: handle errors
-    if (!res.ok) {
-        // This will activate the closest `error.js` Error Boundary
-        throw new Error("Failed to fetch data");
-    }
-
-    return res.json();
-}
 
 const metadata: Metadata = {
     title: "FushionTech - Official Store",
@@ -24,7 +9,6 @@ const metadata: Metadata = {
     icons: "/favicon.ico",
 };
 const HomePage = async () => {
-    const products: IProduct[] = await getProducts();
     return (
         <>
             <main className="">
@@ -32,7 +16,9 @@ const HomePage = async () => {
                     <Suspense>
                         <Banner />
                     </Suspense>
-                    <ProductList products={products} />
+                    <Suspense fallback={<>Loading product list....</>}>
+                        <ProductList />
+                    </Suspense>
                 </div>
             </main>
         </>

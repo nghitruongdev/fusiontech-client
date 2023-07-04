@@ -1,4 +1,4 @@
-import { Category } from "@/interfaces";
+import { Category } from "types";
 import { NextRequest, NextResponse } from "next/server";
 
 const categories: Category[] = [

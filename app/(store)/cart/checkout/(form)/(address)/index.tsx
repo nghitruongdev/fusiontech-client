@@ -1,10 +1,10 @@
 "use client";
 import { Portal, useDisclosure } from "@chakra-ui/react";
 import { AddressBox, EmptyAddressBox } from "./AddressBox";
-import { ShippingAddress } from "@/interfaces";
+import { ShippingAddress } from "types";
 import React, { useEffect, useState } from "react";
 import { HttpError } from "@refinedev/core";
-import { fakeUserId } from "@/constants";
+import { fakeUserId } from "types/constants";
 import { useModalForm } from "@refinedev/react-hook-form";
 import CreateAddressModal from "./(modal)/CreateModal";
 import AddressListModal from "./(modal)/ListModal";

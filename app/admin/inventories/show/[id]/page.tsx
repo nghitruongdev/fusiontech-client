@@ -27,7 +27,7 @@ import {
     Tr,
 } from "@chakra-ui/react";
 import { TableCaption } from "@components/ui/shadcn/table";
-import { IInventory, IInventoryDetail, IVariant } from "@/interfaces";
+import { IInventory, IInventoryDetail, IVariant } from "types";
 import { useEffect, useState } from "react";
 import React from "react";
 import { useModalForm } from "@refinedev/react-hook-form";

@@ -10,7 +10,7 @@ import { MdOutlineLocationOn } from "react-icons/md";
 import NavbarUserInfo from "./NavbarUserInfo";
 import { Suspense } from "react";
 import { CategoryDropDown, CategoryDropDownButton } from "./CategoryDropdown";
-import { Category } from "@/interfaces";
+import { Category } from "types";
 
 const getCategories = async () => {
     const response = await fetch("http://localhost:3000/api/categories");
@@ -126,12 +126,15 @@ const Header = async () => {
 
                         {/* ==================== Cart Start ==================== */}
                         <Link href="/cart">
-                            <div className="flex flex-col justify-center items-center gap-2 h-12 px-5 rounded-full bg-transparent hover:bg-hoverBg duration-300 relative">
-                                <BsCart2 className="text-2xl" />
-                                <p className="text-[10px] -mt-2">$0.00</p>
-                                <span className="absolute w-4 h-4 bg-yellow text-black top-0 right-4 rounded-full flex items-center justify-center font-bodyFont text-xs">
-                                    0
-                                </span>
+                            <div className="flex flex-col justify-center items-center gap-2 h-12 px-5 rounded-full bg-transparent hover:bg-hoverBg duration-300">
+                                <div className="relative">
+                                    <BsCart2 className="text-2xl" />
+                                    <span className="absolute w-4 h-4 bg-yellow text-black -top-1 -right-1 rounded-full flex items-center justify-center font-bodyFont text-xs">
+                                        0
+                                    </span>
+                                </div>
+
+                                {/* <p className="text-[10px] -mt-2">$0.00</p> */}
                             </div>
                         </Link>
 

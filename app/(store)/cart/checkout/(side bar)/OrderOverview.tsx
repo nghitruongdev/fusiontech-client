@@ -3,7 +3,7 @@ import { Input } from "@components/ui/shadcn/input";
 import CartList from "./CartList";
 import { Button } from "@components/ui/shadcn/button";
 import { Separator } from "@components/ui/shadcn/separator";
-import { ICartItem } from "@/interfaces";
+import { ICartItem } from "types";
 import { Badge } from "@components/ui/shadcn/badge";
 import { SaveButton } from "@refinedev/chakra-ui";
 import { Spinner } from "@chakra-ui/react";

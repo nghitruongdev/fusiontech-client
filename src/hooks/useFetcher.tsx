@@ -1,4 +1,4 @@
-import { APP_API } from "@/constants";
+import { APP_API } from "types/constants";
 import axios, {
     AxiosInterceptorManager,
     AxiosRequestConfig,

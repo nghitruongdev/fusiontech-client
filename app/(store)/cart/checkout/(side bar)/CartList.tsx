@@ -7,7 +7,7 @@ import {
 } from "@components/ui/shadcn/accordion";
 import { TbReload } from "react-icons/tb";
 import Image from "next/image";
-import { ICartItem } from "@/interfaces";
+import { ICartItem } from "types";
 
 const CartList = ({ items }: { items: ICartItem[] }) => {
     const tags = Array.from({ length: 10 }).map(

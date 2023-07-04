@@ -1,6 +1,6 @@
 import { IoMdHeartEmpty } from "react-icons/io";
 import { BsStarFill, BsInfoCircle } from "react-icons/bs";
-import { IProduct } from "@/interfaces";
+import { IProduct } from "types";
 import { Badge } from "@components/ui/shadcn/badge";
 import ProductSpecification from "./ProductSpecification";
 import Review from "./(review)/Review";

@@ -1,4 +1,4 @@
-import { ShippingAddress, User } from "@/interfaces";
+import { ShippingAddress, User } from "types";
 import {
     Modal,
     ModalBody,

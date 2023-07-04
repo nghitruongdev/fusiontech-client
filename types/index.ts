@@ -8,6 +8,7 @@ export interface IProduct {
     brand: string;
     category: string;
     image: string;
+    title?: string;
 }
 
 export interface IVariant {
@@ -61,9 +62,13 @@ export interface ICheckout {
 }
 
 export interface ICartItem {
+    id: string;
     variantId: string | number;
     quantity: number;
-    price: number;
+    /**
+     * @deprecated This field is deprecated. This should be no longer contained.
+     */
+    price?: number;
 }
 
 export interface IOrder {

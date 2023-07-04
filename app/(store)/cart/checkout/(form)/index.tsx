@@ -7,7 +7,7 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import AddressSection from "./(address)";
-import { ICheckout } from "@/interfaces";
+import { ICheckout } from "types";
 import ChakraFormInput from "@components/ui/ChakraFormInput";
 import { UseFormRegister, UseFormSetValue } from "react-hook-form";
 

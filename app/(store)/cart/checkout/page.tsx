@@ -1,12 +1,12 @@
 "use client";
 import CheckoutForm from "./(form)/index";
 import { useForm } from "@refinedev/react-hook-form";
-import { ICartItem, ICheckout } from "@/interfaces";
+import { ICartItem, ICheckout } from "types";
 import { HttpError, useCustom, useCustomMutation } from "@refinedev/core";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import OrderOverview from "./(side bar)/OrderOverview";
-import { API_URL, RESOURCE_API, fakeUserId } from "@/constants";
+import { API_URL, RESOURCE_API, fakeUserId } from "types/constants";
 import { Spinner } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 

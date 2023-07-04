@@ -19,7 +19,7 @@ import {
     Thead,
     Tr,
 } from "@chakra-ui/react";
-import { IOrderItem, IVariant } from "@/interfaces";
+import { IOrderItem, IVariant } from "types";
 import Image from "next/image";
 import { loginImg } from "@public/assets/images";
 

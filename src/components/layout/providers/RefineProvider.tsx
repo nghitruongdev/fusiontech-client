@@ -1,5 +1,4 @@
 "use client";
-import { authProvider } from "@/providers/authProvider";
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import { Refine } from "@refinedev/core";
 import routerProvider from "@refinedev/nextjs-router/app";
@@ -9,7 +8,7 @@ import {
     notificationProvider,
     refineTheme,
 } from "@refinedev/chakra-ui";
-import { dataProvider } from "@/rest-data-provider";
+import { dataProvider } from "@/providers/rest-data-provider";
 
 const RefineProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: session, status, update } = useSession();
@@ -21,7 +20,7 @@ const RefineProvider = ({ children }: { children: React.ReactNode }) => {
             />
             <Refine
                 dataProvider={dataProvider}
-                authProvider={authProvider({ session, status })}
+                // authProvider={authProvider({ session, status })}
                 routerProvider={routerProvider}
                 notificationProvider={notificationProvider}
                 // i18nProvider={i18nProvider}

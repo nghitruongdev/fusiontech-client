@@ -1,5 +1,5 @@
 "use client";
-import { IOrderStatus, IProblemResponse } from "@/interfaces";
+import { IOrderStatus, IProblemResponse } from "types";
 import {
     Badge,
     useEditableControls,

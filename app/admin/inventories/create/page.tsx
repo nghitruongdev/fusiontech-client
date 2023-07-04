@@ -28,7 +28,7 @@ import {
     Collapse,
 } from "@chakra-ui/react";
 import { useForm } from "@refinedev/react-hook-form";
-import { IInventory, IInventoryDetail, IVariant } from "@/interfaces";
+import { IInventory, IInventoryDetail, IVariant } from "types";
 import React, { useState } from "react";
 import { Inbox, PlusCircle } from "lucide-react";
 import { FieldValue } from "react-hook-form";

@@ -58,7 +58,11 @@
         "next-env.d.ts",
         "**/*.ts",
         "**/*.tsx",
-        ".next/types/**/*.ts"
+        ".next/types/**/*.ts",
+        "src/providers/.local.authProvider.ts",
+        "src/providers/.local.authProvider.ts",
+        "src/lib/.local.firestore.ts",
+        "src/lib/.local.adminFirebase.ts"
     ],
     "exclude": [
         "node_modules"

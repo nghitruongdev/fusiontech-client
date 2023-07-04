@@ -1,5 +1,5 @@
-import { RESOURCE_API, API_URL } from "@/constants";
-import { ShippingAddress, User } from "@/interfaces";
+import { RESOURCE_API, API_URL } from "types/constants";
+import { ShippingAddress, User } from "types";
 import {
     useCustomMutation,
     useNotification,

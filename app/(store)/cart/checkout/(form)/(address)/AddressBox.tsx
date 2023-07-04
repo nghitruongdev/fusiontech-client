@@ -1,4 +1,4 @@
-import { ShippingAddress } from "@/interfaces";
+import { ShippingAddress } from "types";
 import { Flex, useBoolean, Radio, Spinner } from "@chakra-ui/react";
 import MenuOptions, { MenuItem } from "@components/ui/MenuOptions";
 import { BaseKey } from "@refinedev/core";

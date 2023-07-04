@@ -1,6 +1,6 @@
-import { API_URL } from "@/constants";
+import { API_URL } from "types/constants";
 import StatusTabs from "./StatusTabs";
-import { IOrderStatusGroup } from "@/interfaces";
+import { IOrderStatusGroup } from "types";
 
 const getStatusGroups = async () => {
     const response = await fetch(`${API_URL}/orders/statuses/groups`);

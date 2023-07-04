@@ -15,7 +15,7 @@ import {
     Td,
     HStack,
 } from "@chakra-ui/react";
-import { IInventory } from "@/interfaces";
+import { IInventory } from "types";
 import { Pagination } from "@components/pagination";
 
 export default function ListPage() {

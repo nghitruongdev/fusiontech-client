@@ -1,4 +1,4 @@
-import { ShippingAddress } from "@/interfaces";
+import { ShippingAddress } from "types";
 import {
     Modal,
     ModalOverlay,

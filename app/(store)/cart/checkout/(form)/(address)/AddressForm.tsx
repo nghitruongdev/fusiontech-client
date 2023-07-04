@@ -1,4 +1,4 @@
-import { ShippingAddress } from "@/interfaces";
+import { ShippingAddress } from "types";
 import { Checkbox, Input, Spinner } from "@chakra-ui/react";
 import ChakraFormInput from "@components/ui/ChakraFormInput";
 import LoadingOverlay from "@components/ui/LoadingOverlay";

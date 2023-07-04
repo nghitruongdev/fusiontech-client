@@ -20,7 +20,7 @@ import {
     UseModalFormReturnType,
     useModalForm,
 } from "@refinedev/react-hook-form";
-import { IInventoryDetail, IVariant } from "@/interfaces";
+import { IInventoryDetail, IVariant } from "types";
 
 export const EditDetailModalForm: React.FC<
     UseModalFormReturnType<IInventoryDetail> & {

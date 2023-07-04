@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { IconFilter, IconX, IconCheck } from "@tabler/icons";
 
-import { ColumnButtonProps } from "../../interfaces";
+import { ColumnButtonProps } from "../../../types";
 
 export const ColumnFilter: React.FC<ColumnButtonProps> = ({ column }) => {
     // eslint-disable-next-line

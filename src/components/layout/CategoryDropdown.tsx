@@ -14,7 +14,7 @@ import {
     useDisclosure,
 } from "@chakra-ui/react";
 import { Laptop } from "lucide-react";
-import { Category } from "@/interfaces";
+import { Category } from "types";
 
 export function CategoryDropDown({ categories }: { categories: Category[] }) {
     return (

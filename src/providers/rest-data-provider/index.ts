@@ -2,8 +2,8 @@ import { DataProvider, MetaQuery } from "@refinedev/core";
 import { axiosInstance, generateSort, generateFilter } from "./utils";
 import { AxiosInstance } from "axios";
 import { stringify } from "query-string";
-import { API_URL } from "@/constants";
-import page from "../../app/test/page";
+import { API_URL } from "types/constants";
+import page from "../../../app/(.local.)/test/page";
 
 type MethodTypes = "get" | "delete" | "head" | "options";
 type MethodTypesWithBody = "post" | "put" | "patch";
