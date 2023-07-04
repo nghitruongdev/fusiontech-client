@@ -1,6 +1,6 @@
 import "./globals.css";
 import { Inter, Open_Sans } from "next/font/google";
-import NextAuthProvider from "@/providers/NextAuthProvider";
+import NextAuthProvider from "@components/layout/providers/NextAuthProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 const open_sans = Open_Sans({

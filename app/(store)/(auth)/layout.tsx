@@ -1,6 +1,5 @@
 import { ReactNode } from "react";
 import { cookies } from "next/headers";
-import { authProvider } from "@/providers/authProvider";
 import { redirect } from "next/navigation";
 type Props = {
     children: ReactNode;

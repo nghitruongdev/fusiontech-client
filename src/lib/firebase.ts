@@ -2,12 +2,12 @@ import { initializeApp } from "firebase/app";
 import { getAuth, inMemoryPersistence } from "firebase/auth";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDMEylQD5zSyLBdBPEl0iIyuRxjuIK_RcE",
-    authDomain: "fusiontech-vnco4.firebaseapp.com",
-    projectId: "fusiontech-vnco4",
-    storageBucket: "fusiontech-vnco4.appspot.com",
-    messagingSenderId: "175572558295",
-    appId: "1:175572558295:web:0d3af8e9c4433dee5bab92",
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_APP_ID,
 };
 
 export const app = initializeApp(firebaseConfig, "CLIENT");

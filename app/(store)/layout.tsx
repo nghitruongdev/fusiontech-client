@@ -1,6 +1,6 @@
-import RefineProvider from "@/providers/RefineProvider";
 import Footer from "@components/layout/Footer";
 import Header from "@components/layout/Header";
+import RefineProvider from "@components/layout/providers/RefineProvider";
 
 export const metadata = {
     title: "FusionTech Online Store",
