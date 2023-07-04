@@ -1,3 +1,4 @@
+"use client";
 import {
     phoneImg,
     ship1Img,
@@ -13,6 +14,7 @@ import FormatPrice from "@/components/client/FormatPrice";
 import { ReactNode, useEffect, useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import Link from "next/link";
+import useCart from "@components/client/CartHander";
 type Props = {
     children: ReactNode;
 };
@@ -25,6 +27,13 @@ const Cart = () => {
     //     let savings = 0;
     //     let amt = 0;
     // }, []);
+    const {
+        cartItems,
+        totalQuantity,
+        handleRemoveFromCart,
+        clearCart,
+        totalPrice,
+    } = useCart(); // Sử dụng hook useCart để lấy danh sách sản phẩm trong giỏ hàng
 
     return (
         <div className="w-full py-10 bg-white text-black">
@@ -33,7 +42,7 @@ const Cart = () => {
                     <h1 className="text-2xl font-bold text-black">
                         Cart{" "}
                         <span className="text-lightText font-normal">
-                            (48 items)
+                            ({totalQuantity} items)
                         </span>
                     </h1>
                     {/* Pickup details */}
@@ -84,78 +93,87 @@ const Cart = () => {
                                 </span>
                             </p>
                             {/* Cart Items */}
-                            <div>
-                                <div className="flex items-center justify-between gap-4 border-b-[1px] border-b-zinc-200 pb-4">
-                                    <div className="w-3/4 flex items-center gap-4">
-                                        <Image
-                                            className="w-32"
-                                            width={500}
-                                            height={500}
-                                            alt="productImg"
-                                            src={
-                                                "https://i.ibb.co/1r28gMk/1.webp"
-                                            }
-                                        />
-                                        <div className="mx-4">
-                                            <h2 className="text-base text-zinc-900">
-                                                Canon ABC 2023{" "}
-                                            </h2>
-                                            <p className="text-sm text-zinc-500 text-clip">
-                                                Lorem ipsum dolor, sit amet
-                                                consectetur adipisicing elit.
-                                                Doloremque natus autem excepturi
-                                                quibusdam dicta recusandae, vero
-                                                earum eius, quo quam magni
-                                                dolorem tenetur hic nisi laborum
-                                                pariatur placeat vitae! Tempore.
-                                            </p>
-                                            <p className="text-sm text-zinc-500">
-                                                Price: $240.00
-                                            </p>
-                                            <p className="text-sm text-zinc-500 flex items-center gap-1">
-                                                <span className="bg-primaryBlue rounded-full text-white text-xs w-4 h-4 flex items-center justify-center">
-                                                    <TbReload className="rotate-180" />
-                                                </span>
-                                                Free 30-day returns
-                                            </p>
-                                            <div className="mt-2 flex items-center gap-6">
-                                                <button className="text-sm underline underline-offset-2 decoration-[1px] text-zinc-600 hover:no-underline hover:text-primaryBlue duration-300">
-                                                    Remove
-                                                </button>
-                                                <div className="w-28 h-9 border border-zinc-400 rounded-full text-base font-semibold text-black flex items-center justify-between px-3">
-                                                    <button className="text-base w-5 h-5 text-zinc-600 hover:-bg[#74767c] hover:text-white rounded-full flex items-center justify-center cursor-pointer duration-200">
-                                                        <HiMinusSm />
+                            {cartItems.map((product) => (
+                                <div>
+                                    <div
+                                        key={product._id}
+                                        className="flex items-center justify-between gap-4 border-b-[1px] border-b-zinc-200 pb-4"
+                                    >
+                                        <div className="w-3/4 flex items-center gap-4">
+                                            <Image
+                                                className="w-32"
+                                                width={500}
+                                                height={500}
+                                                alt={product.title}
+                                                src={product.image}
+                                            />
+                                            <div className="mx-4">
+                                                <h2 className="text-base text-zinc-900">
+                                                    {product.title}
+                                                </h2>
+                                                <p className="text-sm text-zinc-500 text-clip">
+                                                    {product.description}
+                                                </p>
+                                                <p className="text-sm text-zinc-500">
+                                                    Price: {product.price}
+                                                </p>
+                                                <p className="text-sm text-zinc-500 flex items-center gap-1">
+                                                    <span className="bg-primaryBlue rounded-full text-white text-xs w-4 h-4 flex items-center justify-center">
+                                                        <TbReload className="rotate-180" />
+                                                    </span>
+                                                    Free 30-day returns
+                                                </p>
+                                                <div className="mt-2 flex items-center gap-6">
+                                                    <button
+                                                        className="text-sm underline underline-offset-2 decoration-[1px] text-zinc-600 hover:no-underline hover:text-primaryBlue duration-300"
+                                                        onClick={() =>
+                                                            handleRemoveFromCart(
+                                                                product,
+                                                            )
+                                                        }
+                                                    >
+                                                        Remove
                                                     </button>
-                                                    <span className="">5</span>
-                                                    <button className="text-base w-5 h-5 text-zinc-600 hover:-bg[#74767c] hover:text-white rounded-full flex items-center justify-center cursor-pointer duration-200">
-                                                        <MdOutlineAdd />
-                                                    </button>
+                                                    <div className="w-28 h-9 border border-zinc-400 rounded-full text-base font-semibold text-black flex items-center justify-between px-3">
+                                                        <button className="text-base w-5 h-5 text-zinc-600 hover:-bg[#74767c] hover:text-white rounded-full flex items-center justify-center cursor-pointer duration-200">
+                                                            <HiMinusSm />
+                                                        </button>
+                                                        <span className="">
+                                                            5
+                                                        </span>
+                                                        <button className="text-base w-5 h-5 text-zinc-600 hover:-bg[#74767c] hover:text-white rounded-full flex items-center justify-center cursor-pointer duration-200">
+                                                            <MdOutlineAdd />
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
+                                            {/* Button */}
                                         </div>
-                                        {/* Button */}
-                                    </div>
-                                    <div className="w-1/4 text-right flex flex-col items-end gap-1">
-                                        <p className="font-semibold text-xl text-green-500">
-                                            <FormatPrice amount={3 * 5} />
-                                        </p>
-                                        <p className="text-sm line-through text-zinc-500">
-                                            <FormatPrice amount={3 * 5} />
-                                        </p>
-                                        <div className="flex items-center text-xs gap-2">
-                                            <p className="bg-green-200 text-[8px] uppercase px-2 py-[1px]">
-                                                You save
+                                        <div className="w-1/4 text-right flex flex-col items-end gap-1">
+                                            <p className="font-semibold text-xl text-green-500">
+                                                <FormatPrice amount={3 * 5} />
                                             </p>
-                                            <p className="text-[#2a8703] font-semibold">
-                                                <FormatPrice amount={0} />
+                                            <p className="text-sm line-through text-zinc-500">
+                                                <FormatPrice amount={3 * 5} />
                                             </p>
+                                            <div className="flex items-center text-xs gap-2">
+                                                <p className="bg-green-200 text-[8px] uppercase px-2 py-[1px]">
+                                                    You save
+                                                </p>
+                                                <p className="text-[#2a8703] font-semibold">
+                                                    <FormatPrice amount={0} />
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <button className="w-44 bg-red-500 text-white h-10 rounded-full text-base font-semibold hover:bg-red-800 duration-300 mt-4">
-                                    Reset Cart
-                                </button>
-                            </div>
+                            ))}
+                            <button
+                                className="w-44 bg-red-500 text-white h-10 rounded-full text-base font-semibold hover:bg-red-800 duration-300 mt-4"
+                                onClick={() => clearCart()}
+                            >
+                                Reset Cart
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -195,14 +213,15 @@ const Cart = () => {
                         </p>
                     </div>
                     {/* checkout price */}
+
                     <div className="w-full flex flex-col gap-4 border-b-[1px] border-b-zinc-200 pb-4">
                         <div className="flex flex-col gap-1">
                             <div className="text-sm flex justify-between">
                                 <p className="font-semibold">
-                                    Subtotal <span>(5 items)</span>
+                                    Subtotal <span>{totalQuantity}</span>
                                 </p>
                                 <p className="line-through text-zinc-500 text-base">
-                                    <FormatPrice amount={400} />
+                                    <FormatPrice amount={totalPrice} />
                                 </p>
                             </div>
                             <div className="text-sm flex justify-between">
@@ -214,7 +233,7 @@ const Cart = () => {
                             <div className="text-sm flex justify-between">
                                 <p className="font-semibold">Total amount</p>
                                 <p className="text-zinc-800 font-normal text-base">
-                                    <FormatPrice amount={500} />
+                                    <FormatPrice amount={totalPrice} />
                                 </p>
                             </div>
                         </div>
@@ -236,7 +255,7 @@ const Cart = () => {
                     <div className="flex items-center justify-between">
                         <p>Estimated total</p>
                         <p className="text-zinc-800 font-bold text-lg">
-                            <FormatPrice amount={1000} />
+                            <FormatPrice amount={totalPrice} />
                         </p>
                     </div>
                 </div>

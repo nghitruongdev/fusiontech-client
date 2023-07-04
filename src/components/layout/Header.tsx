@@ -18,10 +18,12 @@ import {
     PopoverTrigger,
 } from "@chakra-ui/react";
 import CategoryNavigation, { CategoryMenuButton } from "./CategoryNavigation";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { CategoryDropDown } from "./CategoryDropdown";
+import useCart from "@components/client/CartHander";
 
 const Header = () => {
+    const { totalPrice, totalQuantity } = useCart();
     return (
         <>
             <BannerNavbar />
@@ -127,12 +129,15 @@ const Header = () => {
                         {/* ==================== Account End ==================== */}
 
                         {/* ==================== Cart Start ==================== */}
+
                         <Link href="/cart">
                             <div className="flex flex-col justify-center items-center gap-2 h-12 px-5 rounded-full bg-transparent hover:bg-hoverBg duration-300 relative">
                                 <BsCart2 className="text-2xl" />
-                                <p className="text-[10px] -mt-2">$0.00</p>
+                                <p className="text-[10px] -mt-2">
+                                    ${totalPrice.toFixed(2)}
+                                </p>
                                 <span className="absolute w-4 h-4 bg-yellow text-black top-0 right-4 rounded-full flex items-center justify-center font-bodyFont text-xs">
-                                    0
+                                    {totalQuantity}
                                 </span>
                             </div>
                         </Link>
