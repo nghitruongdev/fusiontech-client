@@ -11,3 +11,4 @@ pages_exclude
 
 .local.*
 *.local.*
+*.ignored.*

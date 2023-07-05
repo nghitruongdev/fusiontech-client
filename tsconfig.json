@@ -61,8 +61,11 @@
         ".next/types/**/*.ts",
         "src/providers/.local.authProvider.ts",
         "src/providers/.local.authProvider.ts",
-        "src/lib/.local.firestore.ts",
-        "src/lib/.local.adminFirebase.ts"
+        "src/lib/.ignored.admin.firestore.ts",
+        "src/lib/.ignored.adminFirebase.ts",
+        "src/providers/firestore-data-provider/.ignored.firebaseAuth.ts",
+        "src/providers/firestore-data-provider/.ignored.firebaseDatabase.ts",
+        "src/components/store/cart/.local.Cart.tsx"
     ],
     "exclude": [
         "node_modules"

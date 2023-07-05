@@ -3,12 +3,11 @@ import { axiosInstance, generateSort, generateFilter } from "./utils";
 import { AxiosInstance } from "axios";
 import { stringify } from "query-string";
 import { API_URL } from "types/constants";
-import page from "../../../app/(.local.)/test/page";
 
 type MethodTypes = "get" | "delete" | "head" | "options";
 type MethodTypesWithBody = "post" | "put" | "patch";
 
-export const springDataProvider = (
+const dataProvider = (
     apiUrl: string,
     httpClient: AxiosInstance = axiosInstance,
 ): Omit<
@@ -220,4 +219,4 @@ export const springDataProvider = (
     },
 });
 
-export const dataProvider = springDataProvider(API_URL);
+export const springDataProvider = dataProvider(API_URL);

@@ -15,6 +15,7 @@ import { signIn, signOut } from "next-auth/react";
 import { AppUser } from "types/next-auth";
 import { useSsr } from "usehooks-ts";
 import { getServerSession } from "next-auth";
+import { setCookie } from "nookies";
 
 export interface ILogin {
     providerName: typeof GoogleAuthProvider.PROVIDER_ID | "credentials";
@@ -47,12 +48,13 @@ auth.onAuthStateChanged(async (user) => {
                 refreshToken: user.refreshToken,
             },
         };
+        setCookie(null, "authenticated", "true");
         const result = await signIn("firebase", {
             redirect: false,
             user: JSON.stringify({ ...nextUser }),
         });
         console.log("sign in result", result);
-        fbSignOut(auth);
+        // fbSignOut(auth);
     }
 });
 

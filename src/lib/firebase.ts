@@ -1,5 +1,9 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, inMemoryPersistence } from "firebase/auth";
+import {
+    browserSessionPersistence,
+    getAuth,
+    inMemoryPersistence,
+} from "firebase/auth";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -10,8 +14,8 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_APP_ID,
 };
 
-export const app = initializeApp(firebaseConfig, "CLIENT");
+export const firebaseApp = initializeApp(firebaseConfig, "CLIENT");
 
-export const firebaseAuth = getAuth(app);
-firebaseAuth.setPersistence(inMemoryPersistence);
+export const firebaseAuth = getAuth(firebaseApp);
+firebaseAuth.setPersistence(browserSessionPersistence);
 firebaseAuth.useDeviceLanguage();

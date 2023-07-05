@@ -8,8 +8,12 @@ import {
     notificationProvider,
     refineTheme,
 } from "@refinedev/chakra-ui";
-import { dataProvider } from "@/providers/rest-data-provider";
+import { springDataProvider } from "@/providers/rest-data-provider";
 import dynamic from "next/dynamic";
+import { QueryClient } from "@tanstack/react-query";
+import { FirestoreDatabase } from "@/providers/firestore-data-provider/FirestoreDatabase";
+
+const firestoreProvider = new FirestoreDatabase().getDataProvider();
 
 const RefineProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: session, status, update } = useSession();
@@ -19,13 +23,24 @@ const RefineProvider = ({ children }: { children: React.ReactNode }) => {
             ssr: false,
         },
     );
+    const queryClient = new QueryClient({
+        defaultOptions: {
+            queries: {
+                suspense: true,
+                // placeholderData: <>Loading data....</>,
+            },
+        },
+    });
     return (
         <ChakraProvider theme={RefineThemes.Blue}>
             <DynamicColorScript
                 initialColorMode={refineTheme.config.initialColorMode}
             />
             <Refine
-                dataProvider={dataProvider}
+                dataProvider={{
+                    default: springDataProvider,
+                    firestore: firestoreProvider,
+                }}
                 // authProvider={authProvider({ session, status })}
                 routerProvider={routerProvider}
                 notificationProvider={notificationProvider}
@@ -33,6 +48,9 @@ const RefineProvider = ({ children }: { children: React.ReactNode }) => {
                 options={{
                     syncWithLocation: true,
                     warnWhenUnsavedChanges: true,
+                    // reactQuery: {
+                    //     clientConfig: queryClient,
+                    // },
                 }}
             >
                 {children}

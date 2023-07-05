@@ -26,12 +26,14 @@ type Props = {
         _id: number;
     };
 };
+
 const ProductDetails = async ({ params: { _id } }: Props) => {
     const products = await getData(_id);
     const product = products.find(
         (product: IProduct) => product._id == _id,
     ) as IProduct;
     const isDiscount = false;
+
     return (
         <section className="bg-white">
             <div className="w-[90%] mx-auto p-4">
