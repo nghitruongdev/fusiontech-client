@@ -142,22 +142,33 @@ import { firestore } from "@/firebase";
 import { GoPlus } from "react-icons/go";
 import { Product } from "@/interfaces";
 
-const useCart = (userId: string | null) => {
+const useCart = (uid: string | null) => {
     // Thêm tham số userId vào hàm useCart để xác định người dùng hiện tại.
     const [cartItems, setCartItems] = useState<Product[]>([]); // Danh sách sản phẩm trong giỏ hàng
     const [totalPrice, setTotalPrice] = useState<number>(0); // Tổng tiền trong giỏ hàng
     const [totalQuantity, setTotalQuantity] = useState<number>(0); // Tổng số lượng sản phẩm trong giỏ hàng
 
     useEffect(() => {
-        // Load danh sách sản phẩm trong giỏ hàng và tính tổng tiền
         loadCartItems();
-    }, []);
+    }, [uid]);
 
-    const loadCartItems = () => {
-        // Lắng nghe sự thay đổi trong collection "cart" và cập nhật danh sách sản phẩm trong giỏ hàng
-        const unsubscribe = onSnapshot(
-            collection(firestore, "cart"),
-            (snapshot) => {
+    const loadCartItems = async () => {
+        try {
+            if (!uid) {
+                const storedCartItems = localStorage.getItem("cartItems");
+                if (storedCartItems) {
+                    const parsedItems = JSON.parse(storedCartItems);
+                    setCartItems(parsedItems);
+                    updateCartTotal(parsedItems);
+                } else {
+                    setCartItems([]);
+                    updateCartTotal([]);
+                }
+                return;
+            }
+
+            const cartRef = collection(firestore, "users", uid, "cart");
+            const unsubscribe = onSnapshot(cartRef, (snapshot) => {
                 const items: Product[] = [];
                 let quantity = 0;
                 let price = 0;
@@ -172,25 +183,11 @@ const useCart = (userId: string | null) => {
                 setCartItems(items);
                 setTotalQuantity(quantity);
                 setTotalPrice(price);
-            },
-        );
-
-        return () => unsubscribe();
-    };
-
-    const saveCartItemsToFirestore = async (items: Product[]) => {
-        try {
-            const cartRef = collection(firestore, `users/${userId}/cart`);
-            const batch = writeBatch(firestore);
-
-            items.forEach((item) => {
-                const itemDocRef = doc(cartRef);
-                batch.set(itemDocRef, item);
             });
 
-            await batch.commit();
+            return () => unsubscribe();
         } catch (error) {
-            console.error("Lỗi khi lưu giỏ hàng vào Firestore:", error);
+            console.error("Lỗi khi tải sản phẩm trong giỏ hàng:", error);
         }
     };
 
@@ -200,7 +197,7 @@ const useCart = (userId: string | null) => {
 
     const addToCart = async (product: Product) => {
         try {
-            if (!userId) {
+            if (!uid) {
                 const storedCartItems = localStorage.getItem("cartItems");
                 if (storedCartItems) {
                     const parsedItems = JSON.parse(storedCartItems);
@@ -217,9 +214,14 @@ const useCart = (userId: string | null) => {
                 return;
             }
 
-            const cartRef = collection(firestore, "users", userId, "cart");
-            const docRef = await addDoc(cartRef, product);
-            console.log("Sản phẩm đã được thêm vào giỏ hàng", docRef.id);
+            const cartRef = collection(firestore, "users", uid, "cart");
+            const batch = writeBatch(firestore);
+            const itemDocRef = doc(cartRef);
+
+            batch.set(itemDocRef, product);
+
+            await batch.commit();
+            console.log("Sản phẩm đã được thêm vào giỏ hàng");
 
             setCartItems([...cartItems, product]);
             setTotalQuantity(totalQuantity + 1);
@@ -231,7 +233,7 @@ const useCart = (userId: string | null) => {
 
     const removeFromCart = async (product: Product) => {
         try {
-            if (!userId) {
+            if (!uid) {
                 const storedCartItems = localStorage.getItem("cartItems");
                 if (storedCartItems) {
                     const parsedItems = JSON.parse(storedCartItems);
@@ -245,7 +247,7 @@ const useCart = (userId: string | null) => {
                 return;
             }
 
-            const cartRef = collection(firestore, "users", userId, "cart");
+            const cartRef = collection(firestore, "users", uid, "cart");
             const cartQuery = query(cartRef, where("_id", "==", product._id));
             const cartSnapshot = await getDocs(cartQuery);
 
@@ -268,7 +270,7 @@ const useCart = (userId: string | null) => {
 
     const clearCart = async () => {
         try {
-            if (!userId) {
+            if (!uid) {
                 setCartItems([]);
                 setTotalQuantity(0);
                 setTotalPrice(0);
@@ -276,7 +278,7 @@ const useCart = (userId: string | null) => {
                 return;
             }
 
-            const cartRef = collection(firestore, "users", userId, "cart");
+            const cartRef = collection(firestore, "users", uid, "cart");
             const cartSnapshot = await getDocs(cartRef);
 
             const batch = writeBatch(firestore);

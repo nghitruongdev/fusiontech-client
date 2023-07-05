@@ -33,7 +33,7 @@ const Cart = () => {
         handleRemoveFromCart,
         clearCart,
         totalPrice,
-    } = useCart(); // Sử dụng hook useCart để lấy danh sách sản phẩm trong giỏ hàng
+    } = useCart("thaian1"); // Sử dụng hook useCart để lấy danh sách sản phẩm trong giỏ hàng
 
     return (
         <div className="w-full py-10 bg-white text-black">

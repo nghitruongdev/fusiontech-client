@@ -23,7 +23,7 @@ import { CategoryDropDown } from "./CategoryDropdown";
 import useCart from "@components/client/CartHander";
 
 const Header = () => {
-    const { totalPrice, totalQuantity } = useCart();
+    const { totalPrice, totalQuantity } = useCart("thaian1");
     return (
         <>
             <BannerNavbar />
@@ -134,7 +134,7 @@ const Header = () => {
                             <div className="flex flex-col justify-center items-center gap-2 h-12 px-5 rounded-full bg-transparent hover:bg-hoverBg duration-300 relative">
                                 <BsCart2 className="text-2xl" />
                                 <p className="text-[10px] -mt-2">
-                                    ${totalPrice.toFixed(2)}
+                                    ${totalPrice}
                                 </p>
                                 <span className="absolute w-4 h-4 bg-yellow text-black top-0 right-4 rounded-full flex items-center justify-center font-bodyFont text-xs">
                                     {totalQuantity}

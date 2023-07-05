@@ -12,7 +12,7 @@ const ProductList = ({ products }: { products: Product[] }) => {
     return (
         <div className="py-6 px-4 grid grid-cols-4 gap-4">
             {products.map((product: Product) => {
-                const { handleAddToCart } = useCart();
+                const { handleAddToCart } = useCart("thaian1");
 
                 return (
                     <div
