@@ -8,18 +8,17 @@ import { Badge } from "@components/ui/shadcn/badge";
 import { SaveButton } from "@refinedev/chakra-ui";
 import { Spinner } from "@chakra-ui/react";
 import ButtonPrimary from "@components/ButtonPrimary";
+import { useSelectedCartItemStore } from "@components/store/cart/useSelectedItemStore";
 
-const OrderOverview = ({
-    cartItems,
-    isSubmitting,
-    checkoutHandler,
-}: {
-    cartItems: ICartItem[];
-    isSubmitting: boolean;
-    checkoutHandler: () => Promise<void> | void;
+const OrderOverview = ({}: // isSubmitting,
+// checkoutHandler,
+{
+    // isSubmitting: boolean;
+    // checkoutHandler: () => Promise<void> | void;
 }) => {
+    const cartItems = useSelectedCartItemStore((state) => state.items);
     const subTotal = cartItems
-        .map((item) => item.price * item.quantity)
+        .map((item) => 100 * item.quantity)
         .reduce((prev, curr) => prev + curr, 0);
     const discount = 0;
     const shippingFee = 0;
@@ -88,11 +87,11 @@ const OrderOverview = ({
                 </div>
                 <button
                     className="flex items-center justify-center gap-4 w-full rounded-md bg-blue-600 hover:bg-blue-700 px-4 py-2 text-white text-sm leading-loose font-[500] shadow-blue-500 shadow-md"
-                    onClick={checkoutHandler}
-                    disabled={isSubmitting}
+                    // onClick={checkoutHandler}
+                    // disabled={isSubmitting}
                 >
-                    {isSubmitting ? "Loading...." : "Xác nhận đặt hàng"}
-                    {isSubmitting && <Spinner size={"sm"} speed="0.3s" />}
+                    {/* {isSubmitting ? "Loading...." : "Xác nhận đặt hàng"} */}
+                    {/* {isSubmitting && <Spinner size={"sm"} speed="0.3s" />} */}
                 </button>
             </div>
 

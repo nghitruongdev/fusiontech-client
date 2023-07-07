@@ -60,10 +60,13 @@ export interface ICheckout {
     email?: string;
     note?: string;
 }
-
-export interface ICartItem {
+export interface ICart {
     id: string;
-    variantId: string | number;
+    uid: string | null;
+    items: ICartItem[];
+}
+export interface ICartItem {
+    variantId: number;
     quantity: number;
     /**
      * @deprecated This field is deprecated. This should be no longer contained.

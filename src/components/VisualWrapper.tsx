@@ -1,37 +1,50 @@
-import { useSsr } from "usehooks-ts";
-const DEBUG = true;
+import useRenderCount from "@/hooks/useRenderCount";
+import { useIsMounted, useSsr } from "usehooks-ts";
+import RenderCount from "./RenderCount";
+const DEBUG = false;
 
 function VisualWrapper({
     children,
     name,
     debug = DEBUG,
+    isRenderCount,
 }: {
     children: React.ReactNode;
     name?: string;
     debug?: boolean;
+    isRenderCount?: boolean;
 }) {
+    const { isServer: ssr } = useSsr();
     if (!debug) {
-        return <>{children}</>;
+        return <div>{children}</div>;
     }
-    const { isServer: rsc } = useSsr();
-
     return (
         <div
-            className={`mt-2 border-2 ${
-                rsc ? "border-blue-800" : "border-red-800"
-            } rounded-lg`}
+            // className={`border-4 ${
+            //      ssr ? "border-blue-800" : "border-red-800"
+            // } rounded-lg relative`}
+            className={`relative w-full group hover:outline-dashed ${
+                ssr ? "outline-blue-600" : "outline-red-600"
+            }`}
         >
-            <div
-                className={`flex text-2xl rounded-t-sm ${
-                    rsc ? "bg-blue-100" : "bg-red-100"
-                } font-bold`}
-            >
-                {rsc && (
-                    <div className="bg-blue-800 text-white px-4 py-2">RSC</div>
-                )}
-                <div className="ml-2 py-2 text-black">{name}</div>
-            </div>
-            <div className="p-1">{children}</div>
+            {/* {isRenderCount && <RenderCount />} */}
+
+            {!!name && (
+                <div
+                    className={`absolute bottom-0 w-full hidden group-hover:flex opacity-75 text-2xl rounded-t-sm ${
+                        ssr ? "bg-blue-100" : "bg-red-100"
+                    } font-bold`}
+                >
+                    <div
+                        className={`ml-2 py-2 ${
+                            ssr ? "text-blue-700" : "text-red-700"
+                        }`}
+                    >
+                        {name}
+                    </div>
+                </div>
+            )}
+            <>{children}</>
         </div>
     );
 }

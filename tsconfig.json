@@ -65,7 +65,9 @@
         "src/lib/.ignored.adminFirebase.ts",
         "src/providers/firestore-data-provider/.ignored.firebaseAuth.ts",
         "src/providers/firestore-data-provider/.ignored.firebaseDatabase.ts",
-        "src/components/store/cart/.local.Cart.tsx"
+        "src/components/store/cart/Cart-new.tsx",
+        "src/components/store/cart/.local.CartHander.ts",
+        "src/components/store/cart/.ignored.Cart.tsx"
     ],
     "exclude": [
         "node_modules"

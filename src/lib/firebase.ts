@@ -1,9 +1,7 @@
+import { FirestoreDatabase } from "@/providers/firestore-data-provider/FirestoreDatabase";
 import { initializeApp } from "firebase/app";
-import {
-    browserSessionPersistence,
-    getAuth,
-    inMemoryPersistence,
-} from "firebase/auth";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -17,5 +15,7 @@ const firebaseConfig = {
 export const firebaseApp = initializeApp(firebaseConfig, "CLIENT");
 
 export const firebaseAuth = getAuth(firebaseApp);
-firebaseAuth.setPersistence(browserSessionPersistence);
-firebaseAuth.useDeviceLanguage();
+// export const storage = getStorage(app);
+export const firestore = getFirestore(firebaseApp);
+export const firestoreDB = new FirestoreDatabase(undefined, firestore);
+export const firestoreProvider = firestoreDB.getDataProvider();

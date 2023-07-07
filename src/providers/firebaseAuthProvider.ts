@@ -5,6 +5,8 @@ import {
     signInWithEmailAndPassword,
     signOut as fbSignOut,
     GoogleAuthProvider,
+    signInAnonymously,
+    browserLocalPersistence,
 } from "firebase/auth";
 import {
     AuthActionResponse,
@@ -13,9 +15,10 @@ import {
 import { firebaseAuth } from "@/lib/firebase";
 import { signIn, signOut } from "next-auth/react";
 import { AppUser } from "types/next-auth";
-import { useSsr } from "usehooks-ts";
+import { useLocalStorage, useSsr } from "usehooks-ts";
 import { getServerSession } from "next-auth";
 import { setCookie } from "nookies";
+import { setUser } from "@/hooks/useAuthUser";
 
 export interface ILogin {
     providerName: typeof GoogleAuthProvider.PROVIDER_ID | "credentials";
@@ -29,34 +32,8 @@ export interface ILogin {
 
 const auth = firebaseAuth;
 const googleProvider = new GoogleAuthProvider();
-
-auth.onAuthStateChanged(async (user) => {
-    if (user) {
-        const accessToken = await user.getIdTokenResult();
-
-        const nextUser: AppUser = {
-            id: user.uid,
-            name: user.displayName,
-            email: user.email,
-            image: user.photoURL,
-            phone: user.phoneNumber,
-            isAnonymous: user.isAnonymous,
-            metadata: user.metadata,
-            providerId: user.providerId,
-            tokens: {
-                accessToken: accessToken,
-                refreshToken: user.refreshToken,
-            },
-        };
-        setCookie(null, "authenticated", "true");
-        const result = await signIn("firebase", {
-            redirect: false,
-            user: JSON.stringify({ ...nextUser }),
-        });
-        console.log("sign in result", result);
-        // fbSignOut(auth);
-    }
-});
+firebaseAuth.setPersistence(browserLocalPersistence);
+firebaseAuth.useDeviceLanguage();
 
 export const firebaseAuthProvider = (): AuthBindings => {
     return {
@@ -73,7 +50,6 @@ export const firebaseAuthProvider = (): AuthBindings => {
                 success: true,
             };
         },
-
         check: async (params: any) => {
             const ssr = useSsr();
             console.log("ssr", ssr);
@@ -85,10 +61,11 @@ export const firebaseAuthProvider = (): AuthBindings => {
         },
 
         logout: async (params: any) => {
-            const result = await signOut({
-                redirect: false,
-                // callbackUrl: ""
-            });
+            // const result = await signOut({
+            //     redirect: false,
+            //     // callbackUrl: ""
+            // });
+            const result = await fbSignOut(firebaseAuth);
             console.log("signOut result", result);
             return {
                 success: true,
@@ -144,6 +121,10 @@ const handleCredentialLogin = async (credentials: ILogin["credentials"]) => {
     } catch (err) {
         return err;
     }
+};
+export const loginAnonymously = async () => {
+    // await signInAnonymously(firebaseAuth);
+    throw Error("Login anonymously is not supported");
 };
 
 const handleGoogleLogin = async () => {

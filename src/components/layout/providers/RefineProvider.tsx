@@ -11,9 +11,7 @@ import {
 import { springDataProvider } from "@/providers/rest-data-provider";
 import dynamic from "next/dynamic";
 import { QueryClient } from "@tanstack/react-query";
-import { FirestoreDatabase } from "@/providers/firestore-data-provider/FirestoreDatabase";
-
-const firestoreProvider = new FirestoreDatabase().getDataProvider();
+import { firestoreProvider } from "@/lib/firebase";
 
 const RefineProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: session, status, update } = useSession();

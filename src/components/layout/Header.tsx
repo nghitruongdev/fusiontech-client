@@ -11,6 +11,8 @@ import NavbarUserInfo from "./NavbarUserInfo";
 import { Suspense } from "react";
 import { CategoryDropDown, CategoryDropDownButton } from "./CategoryDropdown";
 import { Category } from "types";
+import HeaderCartButton from "./CartButton";
+import dynamic from "next/dynamic";
 
 const getCategories = async () => {
     const response = await fetch("http://localhost:3000/api/categories");
@@ -19,6 +21,7 @@ const getCategories = async () => {
 
     return response.json();
 };
+const DynamicCartButton = dynamic(() => import("./CartButton"));
 const Header = async () => {
     const categories = ((await getCategories()) ?? []) as Category[];
     return (
@@ -125,18 +128,8 @@ const Header = async () => {
                         {/* ==================== Account End ==================== */}
 
                         {/* ==================== Cart Start ==================== */}
-                        <Link href="/cart">
-                            <div className="flex flex-col justify-center items-center gap-2 h-12 px-5 rounded-full bg-transparent hover:bg-hoverBg duration-300">
-                                <div className="relative">
-                                    <BsCart2 className="text-2xl" />
-                                    <span className="absolute w-4 h-4 bg-yellow text-black -top-1 -right-1 rounded-full flex items-center justify-center font-bodyFont text-xs">
-                                        0
-                                    </span>
-                                </div>
-
-                                {/* <p className="text-[10px] -mt-2">$0.00</p> */}
-                            </div>
-                        </Link>
+                        {/* <HeaderCartButton /> */}
+                        <DynamicCartButton />
 
                         {/* ==================== Cart End ==================== */}
 

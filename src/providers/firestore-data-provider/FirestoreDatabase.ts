@@ -209,7 +209,7 @@ export class FirestoreDatabase extends BaseDatabase {
 
             return { data: args.variables };
         } catch (error) {
-            Promise.reject(error);
+            return Promise.reject(error);
         }
     }
     async updateManyData<TVariables = {}>(
