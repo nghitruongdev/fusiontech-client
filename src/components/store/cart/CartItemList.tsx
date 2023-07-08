@@ -5,17 +5,15 @@ import { useFetch, useUpdateEffect } from "usehooks-ts";
 import VisualWrapper from "@components/VisualWrapper";
 import { phoneImg } from "@public/assets/images";
 import { Suspense, createContext, use, useContext, useRef } from "react";
-import { useCartItems, useCartStatus } from "./useCartStore";
 import CartItem from "./CartItem";
 import { useSelectedCartItemStore } from "./useSelectedItemStore";
 import { Award, BadgeCheck } from "lucide-react";
-
-const handleRemoveFromCart = (item: any) => {};
+import { useCartItems } from "./useCart";
 
 const CartItemList = () => {
     const data = useFetch<IVariant[]>("/api/products", {});
     return (
-        <VisualWrapper name="Cart Item List">
+        <div about="Cart Item List">
             <div className="flex flex-col gap-5">
                 <CartItemList.Provider>
                     <CartItemList.Header />
@@ -24,7 +22,7 @@ const CartItemList = () => {
                     </Suspense>
                 </CartItemList.Provider>
             </div>
-        </VisualWrapper>
+        </div>
     );
 };
 
@@ -39,7 +37,8 @@ const useCartContext = () => {
 
 CartItemList.Context = createContext<ContextProps | undefined>(undefined);
 CartItemList.Provider = ({ children }: React.PropsWithChildren<{}>) => {
-    const status = useCartStatus();
+    // const status = useCartStatus();
+    const status = "success";
     return (
         <CartItemList.Context.Provider value={{ status }}>
             {children}
@@ -54,7 +53,7 @@ CartItemList.Header = () => {
             <h1 className="text-2xl font-bold text-black">
                 <span>Giỏ hàng </span>
                 <span className="text-lightText font-normal">
-                    ({items?.length ?? 0} sản phẩm)
+                    ({Object.keys(items).length ?? 0} sản phẩm)
                 </span>
             </h1>
             {/* <div className="text-xl font-bold flex items-center gap-2 mb-2">
@@ -66,16 +65,17 @@ CartItemList.Header = () => {
 };
 
 CartItemList.Body = () => {
-    const items = useCartItems();
+    const items = Object.values(useCartItems()).reverse();
     const ctx = useCartContext();
+    console.count("CartItemList Body rendered");
 
-    use(
-        new Promise((res) => {
-            if (ctx.status === "success") {
-                res(undefined);
-            }
-        }),
-    );
+    // use(
+    //     new Promise((res) => {
+    //         if (ctx.status === "success") {
+    //             res(undefined);
+    //         }
+    //     }),
+    // );
     // if i use like this, will cause hydration failed
     // if (status === "loading") return <>Loading items in your cart...</>;
     return (
@@ -100,7 +100,7 @@ CartItemList.Body = () => {
                         {items.map((item) => (
                             <CartItem
                                 item={item}
-                                key={item.variantId + Math.random()}
+                                key={item.id ?? Math.random()}
                             />
                         ))}
                     </div>

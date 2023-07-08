@@ -15,21 +15,21 @@ import { TbReload } from "react-icons/tb";
 import { ICartItem } from "types";
 import Image from "next/image";
 import { useSelectedCartItemStore } from "./useSelectedItemStore";
-import useCart from "./useCartStore";
 import { Tooltip } from "@chakra-ui/react";
-import { SearchIcon } from "lucide-react";
 import { useDebounce } from "usehooks-ts";
+import useCart from "./useCart";
 
 const CartItem = ({ item }: { item: ICartItem }) => {
+    console.count(`CartItem ${item.variantId} rendered`);
     return (
-        <VisualWrapper>
+        <>
             <div className="w-full flex p-2 gap-2 border-t-[1px] border-zinc-200">
                 <CartItem.Provider item={item}>
                     <CartItem.SelectedCheckbox />
                     <CartItem.ProductInfo />
                 </CartItem.Provider>
             </div>
-        </VisualWrapper>
+        </>
     );
 };
 const ItemContext = createContext<ICartItem | null>(null);
@@ -125,40 +125,50 @@ CartItem.ProductInfoPrice = () => {
     );
 };
 CartItem.ProductInfoButton = () => {
-    const { removeItem, addItem } = useCart();
+    const { removeItem, updateItem } = useCart();
     const item = useContext(ItemContext);
     if (!!!item)
         throw new Error("Use Context is called outside Item Context Provider");
     // const quantity = item.quantity;
     const [quantity, setQuantity] = useState<number>(item.quantity);
-    // const debounceValue = useDebounce(quantity, 3000);
+    const debounceValue = useDebounce(quantity, 300);
 
     const isAddOk = quantity < 10;
     const isMinusOk = quantity > 1;
 
     const removeItemHandler = () => {
-        removeItem(item);
+        if (!!!item?.id) {
+            console.error("ID item not found");
+            return;
+        }
+        const result = confirm("Do you really want to delete items?");
+        if (result) {
+            removeItem(item.id);
+        }
     };
 
     const updateQuantityHandler = (isPlus: boolean) => {
         if (isPlus) {
-            addItem({ ...item, quantity: item.quantity + 1 });
-            // setQuantity((prev) => prev + 1);
+            setQuantity((prev) => prev + 1);
         } else {
-            if (item.quantity === 1) {
+            if (quantity <= 1) {
                 removeItemHandler();
                 return;
             }
-            addItem({ ...item, quantity: item.quantity - 1 });
+            setQuantity((prev) => prev - 1);
         }
     };
-    console.count("Info Button ran");
-    // useEffect(() => {
-    //     // console.count(`debounce effect ran ${debounceValue}`);
-    //     // if (debounceValue !== item.quantity)
-    //     // addItem({ ...item, quantity: quantity });
-    // }, [quantity]);
 
+    useEffect(() => {
+        console.count(`debounce effect ran ${debounceValue}`);
+        if (debounceValue !== item.quantity) {
+            updateItem({ ...item, quantity: debounceValue });
+        }
+    }, [debounceValue]);
+
+    useEffect(() => {
+        setQuantity(item.quantity);
+    }, [item.quantity]);
     return (
         <>
             <button
@@ -176,7 +186,7 @@ CartItem.ProductInfoButton = () => {
                     <HiMinusSm />
                 </button>
 
-                <span className="select-none">{item.quantity}</span>
+                <span className="select-none">{quantity}</span>
 
                 <ConditionTooltip
                     condition={!isAddOk}

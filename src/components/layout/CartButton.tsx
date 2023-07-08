@@ -1,6 +1,6 @@
 "use client";
 
-import useCart, { useCartItems } from "@components/store/cart/useCartStore";
+import useCart, { useCartItems } from "@components/store/cart/useCart";
 import Link from "next/link";
 import { BsCart2 } from "react-icons/bs";
 
@@ -14,7 +14,7 @@ const HeaderCartButton = () => {
                     <div className="relative">
                         <BsCart2 className="text-2xl" />
                         <span className="absolute w-4 h-4 bg-yellow text-black -top-1 -right-1 rounded-full flex items-center justify-center font-bodyFont text-xs">
-                            {items.length}
+                            {Object.keys(items).length}
                         </span>
                     </div>
 

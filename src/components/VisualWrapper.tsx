@@ -15,6 +15,7 @@ function VisualWrapper({
     isRenderCount?: boolean;
 }) {
     const { isServer: ssr } = useSsr();
+    return <>{children}</>;
     if (!debug) {
         return <div>{children}</div>;
     }
@@ -27,7 +28,7 @@ function VisualWrapper({
                 ssr ? "outline-blue-600" : "outline-red-600"
             }`}
         >
-            {/* {isRenderCount && <RenderCount />} */}
+            {isRenderCount && <RenderCount />}
 
             {!!name && (
                 <div

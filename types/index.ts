@@ -1,3 +1,5 @@
+import { FieldValue, Timestamp } from "@firebase/firestore";
+
 export interface IProduct {
     _id: number;
     name: string;
@@ -63,11 +65,14 @@ export interface ICheckout {
 export interface ICart {
     id: string;
     uid: string | null;
-    items: ICartItem[];
+    items?: ICartItem[];
+    updatedAt?: Timestamp;
 }
 export interface ICartItem {
+    id?: string;
     variantId: number;
     quantity: number;
+    updatedAt?: Timestamp;
     /**
      * @deprecated This field is deprecated. This should be no longer contained.
      */

@@ -1,166 +1,80 @@
 "use client";
 
-import useAuthUser from "@/hooks/useAuthUser";
-import {
-    firebaseAuth,
-    firestore,
-    firestoreDB,
-    firestoreProvider,
-} from "@/lib/firebase";
-import useCart from "@components/store/cart/useCartStore";
-import dynamic, { noSSR } from "next/dynamic";
-import { useEffect, useRef } from "react";
-import useAuhUser from "@/hooks/useAuthUser";
-import { useIsMounted } from "usehooks-ts";
-import { ILogin, firebaseAuthProvider } from "@/providers/firebaseAuthProvider";
+import useCart, {
+    useCartIdStore,
+    useCartStore,
+} from "@components/store/cart/useCart";
 import { Button } from "@components/ui/shadcn/button";
-import { Input } from "@components/ui/shadcn/input";
-import { useCreate, useUpdate } from "@refinedev/core";
-import { collection, onSnapshot, query } from "firebase/firestore";
-import { FirestoreDatabase } from "@/providers/firestore-data-provider/FirestoreDatabase";
+import { useRef, useState } from "react";
 
 const page = () => {
-    // const { addToCart } = useCart(null);
-    // const { data, status } = useList({
-    //     resource: "cart",
-    //     dataProviderName: "firestore",
-    // });
-    // const { mutateAsync } = useCreate({});
-    // const { mutate: update } = useUpdate();
-    // const addItemToCart = () => {
-    //     console.log("Adding new item to cart");
-    // mutateAsync({
-    //     values: {
-    //         items: [
-    //             {
-    //                 id: "1",
-    //                 variantId: "10",
-    //                 quantity: 1,
-    //             },
-    //             {
-    //                 id: "1",
-    //                 variantId: "10",
-    //                 quantity: 1,
-    //             },
-    //         ],
-    //         uid: fakeUserId,
-    //     },
-    //     resource: "carts",
-    //     dataProviderName: "firestore",
-    // });
-    // update({
-    //     id: "QAGzfD7M20AP7RTD97MM",
-    //     values: {
-    //         items: arrayRemove({
-    //             id: "",
-    //             variantId: "",
-    //             quantity: "",
-    //         }),
-    //     },
-    //     resource: "carts",
-    //     dataProviderName: "firestore",
-    // });
-    // };
-    const { cart, status, addItem } = useCart();
-
-    const user = useAuhUser((state) => state.user);
-    const isMounted = useIsMounted();
-    const variantRef = useRef<HTMLInputElement>(null);
-    const quantityRef = useRef<HTMLInputElement>(null);
-    const { mutate } = useUpdate();
-    const add = () => {
-        const value = {
-            variantId: variantRef.current?.valueAsNumber || 0,
-            quantity: quantityRef.current?.valueAsNumber || 0,
-        };
-        // addItem({
-        //     variantId: variantRef.current?.valueAsNumber || 0,
-        //     quantity: quantityRef.current?.valueAsNumber || 0,
-        // });
-        // firestoreProvider.create({
-        //     resource: "carts/spirnjb3FTIFiAcypd8C/items",
-        //     variables: {
-
-        //     }
-        // });
-        mutate({
-            resource: "carts/spirnjb3FTIFiAcypd8C/items",
-            id: "8X8rmZXxDNgs3po028x5",
-            dataProviderName: "firestore",
-            values: { ...value },
-        });
+    const setCartId = useCartIdStore((state) => state.setId);
+    const items = useCartStore((state) => state.items);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const set = () => {
+        setCartId(inputRef.current?.value ?? "");
     };
-
-    useEffect(() => {
-        const q = query(
-            collection(firestore, "carts", "spirnjb3FTIFiAcypd8", "items"),
-        );
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            const cities = [] as any;
-            querySnapshot.forEach((doc) => {
-                cities.push(doc.data());
-            });
-            querySnapshot.docChanges().forEach((change) => {
-                console.log("doc.data()", change.doc.data());
-                console.log("change.type", change.type);
-            });
-
-            console.log("Current cities in CA: ", cities.join(", "));
-        });
-        // const unsub = onSnapshot(
-        //     new FirestoreDatabase().getDocRef("carts", "spirnjb3FTIFiAcypd8C"),
-        //     (snapshot) => {
-        //         console.log("snapshot", snapshot);
-        //     },
-        // );
-        return unsubscribe;
-    }, []);
+    const [state, setState] = useState<boolean>(false);
+    const [cart] = useCartStore((state) => [state.cart]);
+    const { createCart, removeCart, addItem, removeItem, updateItem } =
+        useCart();
+    console.debug("cart", items);
     return (
         <div>
-            Test page: uid: {isMounted() ? user?.uid : ""}, data:{" "}
-            {JSON.stringify(cart)}
-            <div>
-                <Input
-                    type="number"
-                    ref={variantRef}
-                    placeholder="Variant id"
-                />
-                <Input type="number" ref={quantityRef} placeholder="Quantity" />
-            </div>
-            <Button className="" onClick={add}>
-                Add
+            <p>Test page</p>
+            <p>{JSON.stringify(cart)}</p>
+            {Object.values(items)
+                .reverse()
+                .map(({ id, variantId, quantity, updatedAt }) => (
+                    <div key={id}>
+                        <p>Id:{id}</p>
+                        <p>Variant: {variantId}</p>
+                        <p>Quantity: {quantity}</p>
+                        <p>
+                            updatedAt:{" "}
+                            {JSON.stringify(
+                                updatedAt?.toDate().toLocaleTimeString(),
+                            )}
+                        </p>
+                    </div>
+                ))}
+            <input type="text" ref={inputRef} className="border" />
+
+            <Button variant="secondary" onClick={set}>
+                Submit
             </Button>
+
+            <Button variant="default" onClick={createCart}>
+                Create cart
+            </Button>
+
             <Button
+                variant="default"
+                // onClick={removeCart.bind(null, inputRef.current?.value ?? "")}
+                onClick={() =>
+                    console.log(
+                        "inputRef.current?.value",
+                        inputRef.current?.value,
+                    )
+                }
+            >
+                Delete cart
+            </Button>
+
+            <Button
+                variant="destructive"
                 onClick={() => {
-                    const props: ILogin = {
-                        providerName: "credentials",
-                        credentials: {
-                            email: "nghitvps19009@fpt.edu.vn",
-                            password: "123456",
-                        },
-                    };
-                    firebaseAuthProvider().login(props);
+                    addItem({
+                        variantId: +Math.random().toFixed(1),
+                        quantity: +Math.random().toFixed(1),
+                    });
                 }}
             >
-                Log user id
+                Add item
             </Button>
-            <Button
-                onClick={() => {
-                    firebaseAuthProvider().logout({});
-                }}
-            >
-                Log out
-            </Button>
-            <Button
-                onClick={() => {
-                    const userString = window.localStorage.getItem(
-                        `firebase:authUser:${firebaseAuth.config.apiKey}:${firebaseAuth.name}`,
-                    );
-                    const user = JSON.parse(userString || "");
-                    console.debug("user", user.stsTokenManager.accessToken);
-                }}
-            >
-                Cart ID
+
+            <Button onClick={() => setState((prev) => !prev)}>
+                Force refresh
             </Button>
         </div>
     );

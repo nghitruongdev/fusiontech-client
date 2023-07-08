@@ -5,7 +5,6 @@ const useRenderCount = () => {
 
     useEffect(() => {
         renderCountRef.current += 1;
-        console.count("Component rendered");
     });
 
     return renderCountRef.current;

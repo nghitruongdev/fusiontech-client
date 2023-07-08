@@ -6,30 +6,21 @@
     // $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders.
     // Placeholders with the same ids are connected.
     // Example:
-    // "Print to console": {
-    // 	"scope": "javascript,typescript",
-    // 	"prefix": "log",
-    // 	"body": [
-    // 		"console.log('$1');",
-    // 		"$2"
-    // 	],
-    // 	"description": "Log output to console"
-    // }
-    "Insert comment separated component": {
-        "scope": "javascript,typescript",
-        "prefix": "cmt",
-        "body": [
-            "{/*====================$1====================*/}",
-            "$2"
-        ],
-    },
     "Print to console": {
         "scope": "javascript,typescript",
-        "prefix": "log1",
+        "prefix": "log",
         "body": [
             "console.log('$1');",
             "$2"
         ],
         "description": "Log output to console"
-    }
+    },
+    "Insert comment separated component": {
+        "scope": "javascript,typescript",
+        "prefix": "logcmt",
+        "body": [
+            "{/*====================$1====================*/}",
+            "$2"
+        ],
+    },
 }
