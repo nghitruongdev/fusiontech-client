@@ -1,6 +1,6 @@
-import useAuthStore from "@/hooks/useAuthUser";
+import useAuthStore from "@/hooks/useAuth/useAuthUser";
 import { withStorageDOMEvents } from "@/hooks/withStorageEvent";
-import { firestore, firestoreDB } from "@/lib/firebase";
+import { firestoreInstance, firestoreDatabase } from "@/lib/firebase";
 import { useCreate, useDelete, useList, useUpdate } from "@refinedev/core";
 import {
     DocumentChangeType,
@@ -86,7 +86,7 @@ const useCart = (): ReturnProps => {
         }
 
         const unsub = onSnapshot(
-            doc(firestore, "carts", cartId),
+            doc(firestoreInstance, "carts", cartId),
             (snapshot) => {
                 const cart = snapshot.data() as ICart;
                 if (snapshot.exists()) {
@@ -115,7 +115,7 @@ const useCart = (): ReturnProps => {
         }
 
         const q = query(
-            collection(firestore, "carts", cartId, "items"),
+            collection(firestoreInstance, "carts", cartId, "items"),
             orderBy("updatedAt", "asc"),
         );
         const unsub = onSnapshot(q, (querySnapshot) => {

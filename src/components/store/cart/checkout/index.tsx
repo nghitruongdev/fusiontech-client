@@ -8,7 +8,7 @@ import { CheckoutForm } from "./(form)";
 import { useSelectedCartItemStore } from "../useSelectedItemStore";
 import { use, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { suspensePromise } from "@/hooks/usePromise";
+import { suspensePromise } from "@/lib/promise";
 
 const Checkout = () => {
     const { isSubmitting, isLoading } = useCheckoutContext(

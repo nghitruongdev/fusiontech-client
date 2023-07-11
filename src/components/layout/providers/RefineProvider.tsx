@@ -12,23 +12,26 @@ import { springDataProvider } from "@/providers/rest-data-provider";
 import dynamic from "next/dynamic";
 import { QueryClient } from "@tanstack/react-query";
 import { firestoreProvider } from "@/lib/firebase";
+import { firebaseAuthProvider } from "@/providers/firebaseAuthProvider";
+import { useRouter } from "next/navigation";
 
+const DynamicColorScript = dynamic(
+    () => import("@chakra-ui/react").then((mod) => mod.ColorModeScript),
+    {
+        ssr: false,
+    },
+);
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            suspense: true,
+        },
+    },
+});
 const RefineProvider = ({ children }: { children: React.ReactNode }) => {
     const { data: session, status, update } = useSession();
-    const DynamicColorScript = dynamic(
-        () => import("@chakra-ui/react").then((mod) => mod.ColorModeScript),
-        {
-            ssr: false,
-        },
-    );
-    const queryClient = new QueryClient({
-        defaultOptions: {
-            queries: {
-                suspense: true,
-                // placeholderData: <>Loading data....</>,
-            },
-        },
-    });
+    const router = useRouter();
+    console.count("Refine Provider rendered");
     return (
         <ChakraProvider theme={RefineThemes.Blue}>
             <DynamicColorScript
@@ -39,6 +42,7 @@ const RefineProvider = ({ children }: { children: React.ReactNode }) => {
                     default: springDataProvider,
                     firestore: firestoreProvider,
                 }}
+                authProvider={firebaseAuthProvider(router)}
                 // authProvider={authProvider({ session, status })}
                 routerProvider={routerProvider}
                 notificationProvider={notificationProvider}

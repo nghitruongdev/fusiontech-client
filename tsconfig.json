@@ -8,6 +8,8 @@
         ],
         "allowJs": true,
         "skipLibCheck": true,
+        "noUnusedLocals": true,
+        "noUncheckedIndexedAccess": true,
         "strict": true,
         "forceConsistentCasingInFileNames": true,
         "noEmit": true,

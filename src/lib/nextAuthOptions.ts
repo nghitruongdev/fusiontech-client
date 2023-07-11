@@ -14,6 +14,7 @@ export const authOptions: NextAuthOptions = {
             credentials: {},
             async authorize(credentials, req) {
                 const authUser = req.body?.user;
+                console.log("authorize rquest");
                 if (!!!authUser)
                     throw Error("Không tìm thấy người dùng firebase");
                 const user = JSON.parse(authUser) as AppUser;

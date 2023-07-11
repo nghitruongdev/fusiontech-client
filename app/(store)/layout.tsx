@@ -12,6 +12,7 @@ export default function StoreLayout({
 }: {
     children: React.ReactNode;
 }) {
+    console.debug("Store Layout rendered");
     return (
         <>
             <RefineProvider>

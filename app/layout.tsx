@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Inter, Open_Sans } from "next/font/google";
 import NextAuthProvider from "@components/layout/providers/NextAuthProvider";
+import dynamic from "next/dynamic";
 
 const inter = Inter({ subsets: ["latin"] });
 const open_sans = Open_Sans({
@@ -12,6 +13,10 @@ export const metadata = {
     description: "Cửa hàng thương mại thiết bị điện tử",
 };
 
+const DynamicAuthProvider = dynamic(
+    () => import("@components/layout/providers/NextAuthProvider"),
+    { ssr: false },
+);
 export default function RootLayout({
     children,
 }: {
@@ -20,7 +25,8 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={`${inter.className} font-sans`}>
-                <NextAuthProvider>{children}</NextAuthProvider>
+                <DynamicAuthProvider>{children}</DynamicAuthProvider>
+                {/* <NextAuthProvider>{children}</NextAuthProvider> */}
             </body>
         </html>
     );

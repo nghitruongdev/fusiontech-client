@@ -1,8 +1,7 @@
 "use client";
-import { setUser } from "@/hooks/useAuthUser";
+import { setUser } from "@/hooks/useAuth/useAuthUser";
 import { firebaseAuth } from "@/lib/firebase";
-import { SessionProvider } from "next-auth/react";
-import { useEffect } from "react";
+import { SessionProvider, signIn, signOut } from "next-auth/react";
 import { useEffectOnce } from "usehooks-ts";
 
 const NextAuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -10,9 +9,19 @@ const NextAuthProvider = ({ children }: { children: React.ReactNode }) => {
         const unsub = firebaseAuth.onAuthStateChanged(async (user) => {
             console.debug("onAuthStateChanged");
             setUser(user);
+            console.log("user", user);
+            if (user) {
+                // signIn("firebase", {
+                //     user: JSON.stringify(user),
+                //     redirect: false,
+                // });
+            } else {
+                // signOut();
+            }
         });
-        return () => unsub();
+        return unsub;
     });
+    console.log("nextauth rendered");
     return <SessionProvider>{children}</SessionProvider>;
 };
 export default NextAuthProvider;

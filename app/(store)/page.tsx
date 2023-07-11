@@ -9,6 +9,7 @@ const metadata: Metadata = {
     icons: "/favicon.ico",
 };
 const HomePage = async () => {
+    console.debug("Home page rendered");
     return (
         <>
             <main className="">
