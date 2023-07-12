@@ -1,4 +1,4 @@
-import { firebaseAuth } from "@/lib/firebase";
+import { firebaseAuth } from "@/providers/firebaseAuthProvider";
 import { User } from "firebase/auth";
 import { create } from "zustand";
 
@@ -14,7 +14,7 @@ type Action = {
 
 const getCurrentUser = () => {
     console.log("getCurrentUser called");
-    return firebaseAuth.currentUser;
+    return firebaseAuth.auth.currentUser;
 };
 
 export const useAuthStore = create<State>(() => ({

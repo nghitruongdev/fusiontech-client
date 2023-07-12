@@ -2,17 +2,17 @@
 import { ReactNode } from "react";
 import { Box, Flex, Heading, Icon, Text } from "@chakra-ui/react";
 
-import Error from "next/error";
 import { ShieldCloseIcon } from "lucide-react";
+import { AppError } from "types/error";
 type Props = {
     children: ReactNode;
 };
 
-export default function ErrorBondary({
+export default function AuthErrorCatch({
     error,
 }: {
-    error: Error;
-    reset: () => void;
+    error: Error | AppError;
+    reset?: () => void;
 }) {
     return (
         <Box textAlign="center" py={10} px={6}>
@@ -32,17 +32,12 @@ export default function ErrorBondary({
                         boxSize={"20px"}
                         color={"white"}
                     />
-                    {/* <ShieldCloseIcon  /> */}
                 </Flex>
             </Box>
             <Heading as="h2" size="xl" mt={6} mb={2}>
-                This is the headline
+                {error.name}
             </Heading>
-            <Text color={"gray.500"}>
-                Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed
-                diam nonumy eirmod tempor invidunt ut labore et dolore magna
-                aliquyam erat, sed diam voluptua.
-            </Text>
+            <Text color={"gray.500"}>{error.message}</Text>
         </Box>
     );
 }

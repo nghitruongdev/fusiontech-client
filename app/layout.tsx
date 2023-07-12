@@ -1,6 +1,6 @@
 import "./globals.css";
 import { Inter, Open_Sans } from "next/font/google";
-import NextAuthProvider from "@components/layout/providers/NextAuthProvider";
+import AuthProvider from "@components/layout/providers/AuthProvider";
 import dynamic from "next/dynamic";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -14,7 +14,7 @@ export const metadata = {
 };
 
 const DynamicAuthProvider = dynamic(
-    () => import("@components/layout/providers/NextAuthProvider"),
+    () => import("@components/layout/providers/AuthProvider"),
     { ssr: false },
 );
 export default function RootLayout({

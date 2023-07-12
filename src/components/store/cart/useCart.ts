@@ -1,6 +1,6 @@
 import useAuthStore from "@/hooks/useAuth/useAuthUser";
 import { withStorageDOMEvents } from "@/hooks/withStorageEvent";
-import { firestoreInstance, firestoreDatabase } from "@/lib/firebase";
+import { firestoreInstance } from "@/lib/firebase";
 import { useCreate, useDelete, useList, useUpdate } from "@refinedev/core";
 import {
     DocumentChangeType,
@@ -38,12 +38,12 @@ const useCart = (): ReturnProps => {
     const cartId = useCartIdStore((state) => state.cartId);
     const setCartId = useCartIdStore((state) => state.setId);
     const user = useAuthStore((state) => state.user);
-    const id = "";
-    const { mutateAsync: create, status: createStatus } = useCreate({});
 
-    const { mutateAsync: update, status: updateStatus } = useUpdate({});
+    const { mutateAsync: create } = useCreate({});
 
-    const { mutateAsync: deleteOne, status: deleteStatus } = useDelete({});
+    const { mutateAsync: update } = useUpdate({});
+
+    const { mutateAsync: deleteOne } = useDelete({});
 
     const { items, onItemsChange, clearItems, cart, setCart } = useCartStore(
         ({ items, cart, setCart, onItemsChange, clearItems }) => ({
@@ -246,17 +246,26 @@ const useCart = (): ReturnProps => {
                     quantity: getAllowQuantity(quantity),
                     updatedAt: serverTimestamp(),
                 },
-                // successNotification: false,
+                successNotification: false,
             });
 
-        if (!!items[variantId].id && items[variantId].id !== id) {
-            const { id: itemId, quantity: itemQuantity } = items[variantId];
-            Promise.all([
-                deleteCartItem(id),
-                updateItem(itemId ?? "", variantId, itemQuantity + quantity),
-            ]);
-            return;
+        const currentCartItemBasedOnVariantId = items[variantId];
+        if (currentCartItemBasedOnVariantId) {
+            const { id: currentId, quantity: currentQuantity } =
+                currentCartItemBasedOnVariantId;
+            if (currentId && currentId !== id) {
+                Promise.all([
+                    deleteCartItem(id),
+                    updateItem(
+                        currentId,
+                        variantId,
+                        currentQuantity + quantity,
+                    ),
+                ]);
+                return;
+            }
         }
+
         updateItem(id, variantId, quantity);
     };
 
@@ -371,10 +380,10 @@ const useCartStore = create(
             },
             updateItem: (item) => {
                 console.count("updating store item");
-                const { id, variantId, quantity } = item;
+                const { variantId, quantity } = item;
                 set(({ items }) => {
                     if (items[variantId]) {
-                        items[variantId].quantity = quantity;
+                        items[variantId]!.quantity = quantity;
                     } else {
                         items[variantId] = item;
                     }

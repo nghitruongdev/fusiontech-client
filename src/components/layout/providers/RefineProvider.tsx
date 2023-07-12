@@ -2,7 +2,6 @@
 import { ChakraProvider } from "@chakra-ui/react";
 import { Refine } from "@refinedev/core";
 import routerProvider from "@refinedev/nextjs-router/app";
-import { useSession } from "next-auth/react";
 import {
     RefineThemes,
     notificationProvider,
@@ -12,7 +11,7 @@ import { springDataProvider } from "@/providers/rest-data-provider";
 import dynamic from "next/dynamic";
 import { QueryClient } from "@tanstack/react-query";
 import { firestoreProvider } from "@/lib/firebase";
-import { firebaseAuthProvider } from "@/providers/firebaseAuthProvider";
+import { firebaseAuth } from "@/providers/firebaseAuthProvider";
 import { useRouter } from "next/navigation";
 
 const DynamicColorScript = dynamic(
@@ -29,7 +28,7 @@ const queryClient = new QueryClient({
     },
 });
 const RefineProvider = ({ children }: { children: React.ReactNode }) => {
-    const { data: session, status, update } = useSession();
+    // const { data: session, status, update } = useSession();
     const router = useRouter();
     console.count("Refine Provider rendered");
     return (
@@ -42,7 +41,7 @@ const RefineProvider = ({ children }: { children: React.ReactNode }) => {
                     default: springDataProvider,
                     firestore: firestoreProvider,
                 }}
-                authProvider={firebaseAuthProvider(router)}
+                authProvider={firebaseAuth.authProvider(router)}
                 // authProvider={authProvider({ session, status })}
                 routerProvider={routerProvider}
                 notificationProvider={notificationProvider}

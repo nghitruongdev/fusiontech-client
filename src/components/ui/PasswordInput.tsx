@@ -4,10 +4,11 @@ import {
     InputGroup,
     InputProps,
     InputRightElement,
+    forwardRef,
 } from "@chakra-ui/react";
 import React from "react";
 
-export function PasswordInput(props: InputProps) {
+const PasswordInput = forwardRef<InputProps, "input">((props, ref) => {
     const [show, setShow] = React.useState(false);
     const handleClick = () => setShow(!show);
 
@@ -18,6 +19,7 @@ export function PasswordInput(props: InputProps) {
                 placeholder="Enter password"
                 {...props}
                 type={show ? "text" : "password"}
+                ref={ref}
             />
             <InputRightElement width="4.5rem">
                 <Button h="1.75rem" size="sm" onClick={handleClick}>
@@ -26,4 +28,5 @@ export function PasswordInput(props: InputProps) {
             </InputRightElement>
         </InputGroup>
     );
-}
+});
+export default PasswordInput;

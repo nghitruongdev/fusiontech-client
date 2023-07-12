@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useSession, signIn, signOut } from "next-auth/react";
+// import { useSession, signIn, signOut } from "next-auth/react";
 import { AiOutlineUser } from "react-icons/ai";
 import {
     Button,
@@ -14,8 +14,8 @@ import {
 import Link from "next/link";
 
 const NavbarUserInfo = () => {
-    const { data: session, status } = useSession();
-    const userInfo = session?.user;
+    // const { data: session, status } = useSession();
+    // const userInfo = session?.user;
 
     if (status === "authenticated") {
         return (
@@ -26,11 +26,11 @@ const NavbarUserInfo = () => {
                             width={500}
                             height={500}
                             className="w-10 rounded-full object-cover"
-                            src={userInfo?.image ?? ``}
+                            src={"" ?? ``}
                             alt="userImage"
                         />
                         <h2 className="text-base font-semibold -mt-1">
-                            {userInfo?.name}
+                            {/* {userInfo?.name} */}
                         </h2>
                     </div>
                 </MenuButton>
@@ -44,7 +44,7 @@ const NavbarUserInfo = () => {
                     </MenuItem>
 
                     <MenuDivider />
-                    <MenuItem onClick={() => signOut()}>Log out</MenuItem>
+                    {/* <MenuItem onClick={() => signOut()}>Log out</MenuItem> */}
                 </MenuList>
             </Menu>
             // <div className="navBarHover">
@@ -52,7 +52,7 @@ const NavbarUserInfo = () => {
         );
     }
     return (
-        <div className="navBarHover" onClick={() => signIn()}>
+        <div className="navBarHover">
             <AiOutlineUser className="text-lg" />
             <div className="">
                 <p className="text-xs">Sign In</p>

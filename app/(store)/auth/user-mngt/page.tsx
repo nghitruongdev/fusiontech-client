@@ -9,13 +9,13 @@ import {
 } from "@chakra-ui/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { useTranslate, useUpdatePassword } from "@refinedev/core";
-import { firebaseAuth } from "../../../../src/lib/firebase";
-import { AuthError, verifyPasswordResetCode } from "firebase/auth";
-import { useEffect } from "react";
-import { firebaseAuthProvider } from "@/providers/firebaseAuthProvider";
-import { signOut } from "next-auth/react";
-import Link from "next/link";
+import { HttpError, useTranslate } from "@refinedev/core";
+import { verifyPasswordResetCode } from "firebase/auth";
+import { useEffect, useState } from "react";
+import { firebaseAuth } from "@/providers/firebaseAuthProvider";
+import AuthPage from "../AuthPage";
+import AuthErrorCatch from "../error";
+import { AppError } from "types/error";
 
 type PasswordForm = {
     password: string;
@@ -33,32 +33,42 @@ const UpdatePasswordPage = () => {
     const translate = useTranslate();
 
     const mode = params.get("mode");
-    const actionCode = params.get("oobCode");
+    const actionCode = params.get("oobCode") ?? "";
     const continueUrl = params.get("continueUrl");
     const lang = params.get("lang") || "en";
     const router = useRouter();
-    const auth = firebaseAuth;
-    const [showError, { on: showErrorOn }] = useBoolean();
+    const [showForm, { on: showFormOn }] = useBoolean();
     const [showSuccess, { on: showSuccessOn }] = useBoolean();
-
+    const [error, setError] = useState<AppError>();
     // Handle the user management action.
 
-    // function handleResetPassword(auth, actionCode, continueUrl, lang) {}
-    //todo: if not auth or no action code, redirect to the home page
-    if (!!!actionCode || !!!mode) {
-        router.replace("/");
-        return;
-    }
-
     useEffect(() => {
+        //todo: if not auth or no action code, redirect to the home page
+
+        if (!!!actionCode || !!!mode) {
+            router.replace("/");
+            return;
+        }
+
         const verifyAction = async () => {
             try {
-                const result = await verifyPasswordResetCode(auth, actionCode);
+                const result = await verifyPasswordResetCode(
+                    firebaseAuth.auth,
+                    actionCode,
+                );
                 //show the login form
+                showFormOn();
             } catch (error) {
                 console.log("error", error);
-                showErrorOn();
-                // throw error;
+
+                // const updateError = new Error(
+                // );
+                // updateError.name = "Đường dẫn không hợp lệ.";
+                setError({
+                    name: "Đường dẫn không hợp lệ.",
+                    message:
+                        "Đường dẫn không hợp lệ hoặc đã hết hạn. Vui lòng tạo một yêu cầu mới.",
+                });
             }
         };
         verifyAction();
@@ -66,7 +76,7 @@ const UpdatePasswordPage = () => {
 
     const submitHandler = async (data: PasswordForm) => {
         console.log("data", data);
-        const result = await firebaseAuthProvider().updatePassword?.({
+        const result = await firebaseAuth.updatePassword?.({
             type: "reset",
             actionCode: actionCode,
             password: data.password,
@@ -79,79 +89,84 @@ const UpdatePasswordPage = () => {
         console.log("update result", result);
     };
 
-    if (showError)
-        return (
-            <>
-                Yêu cầu không hợp lệ hoặc đã hết hạn. Vui lòng tạo lại yêu cầu
-                mới.
-            </>
-        );
-    if (showSuccess) {
-        return (
-            <>
-                Đã cập nhật mật khẩu mới thành công. Bây giờ bạn có thể sử dụng
-                mật khẩu mới để đăng nhập.
-                <Link href="/auth/login">Quay trở lại đăng nhập</Link>
-            </>
-        );
-    }
-    return (
-        <>
-            <form onSubmit={handleSubmit(submitHandler)}>
-                <FormControl mb="3" isInvalid={!!errors?.password}>
-                    <FormLabel htmlFor="password">
-                        {translate(
-                            "pages.updatePassword.fields.password",
-                            "New Password",
-                        )}
-                    </FormLabel>
-                    <Input
-                        id="password"
-                        type="password"
-                        placeholder="Password"
-                        {...register("password", {
-                            required: true,
-                        })}
-                    />
-                    <FormErrorMessage>
-                        {`${errors.password?.message}`}
-                    </FormErrorMessage>
-                </FormControl>
+    if (error) return <AuthErrorCatch error={error} />;
 
-                <FormControl mb="3" isInvalid={!!errors?.confirmPassword}>
-                    <FormLabel htmlFor="confirmPassword">
-                        {translate(
-                            "pages.updatePassword.fields.confirmPassword",
-                            "Confirm New Password",
-                        )}
-                    </FormLabel>
-                    <Input
-                        id="confirmPassword"
-                        type="password"
-                        placeholder="Confirm Password"
-                        {...register("confirmPassword", {
-                            required: true,
-                            validate: (val: any) => {
-                                if (watch("password") != val) {
-                                    return translate(
-                                        "pages.updatePassword.errors.confirmPasswordNotMatch",
-                                        "Passwords do not match",
-                                    );
-                                }
-                                return;
-                            },
-                        })}
-                    />
-                    <FormErrorMessage>
-                        {`${errors.confirmPassword?.message}`}
-                    </FormErrorMessage>
-                </FormControl>
+    //todo: chưa có showSuccess
+    // if (showSuccess) {
+    //     return (
+    //         <>
+    //             Đã cập nhật mật khẩu mới thành công. Bây giờ bạn có thể sử dụng
+    //             mật khẩu mới để đăng nhập.
+    //             <Link href="/auth/login">Quay trở lại đăng nhập</Link>
+    //         </>
+    //     );
+    // }
+    if (showForm)
+        return (
+            <AuthPage title={"Đặt lại mật khẩu"}>
+                <form onSubmit={handleSubmit(submitHandler)}>
+                    <FormControl mb="3" isInvalid={!!errors?.password}>
+                        <FormLabel htmlFor="password">
+                            {translate(
+                                "pages.updatePassword.fields.password",
+                                "New Password",
+                            )}
+                        </FormLabel>
+                        <Input
+                            id="password"
+                            type="password"
+                            placeholder="Password"
+                            {...register("password", {
+                                required: true,
+                            })}
+                        />
+                        <FormErrorMessage>
+                            {`${errors.password?.message}`}
+                        </FormErrorMessage>
+                    </FormControl>
 
-                <Button mt="6" type="submit" width="full" colorScheme="brand">
-                    {translate("pages.updatePassword.buttons.submit", "Update")}
-                </Button>
-            </form>
-        </>
-    );
+                    <FormControl mb="3" isInvalid={!!errors?.confirmPassword}>
+                        <FormLabel htmlFor="confirmPassword">
+                            {translate(
+                                "pages.updatePassword.fields.confirmPassword",
+                                "Confirm New Password",
+                            )}
+                        </FormLabel>
+                        <Input
+                            id="confirmPassword"
+                            type="password"
+                            placeholder="Confirm Password"
+                            {...register("confirmPassword", {
+                                required: true,
+                                validate: (val: any) => {
+                                    if (watch("password") != val) {
+                                        return translate(
+                                            "pages.updatePassword.errors.confirmPasswordNotMatch",
+                                            "Passwords do not match",
+                                        );
+                                    }
+                                    return;
+                                },
+                            })}
+                        />
+                        <FormErrorMessage>
+                            {`${errors.confirmPassword?.message}`}
+                        </FormErrorMessage>
+                    </FormControl>
+
+                    <Button
+                        mt="6"
+                        type="submit"
+                        width="full"
+                        colorScheme="brand"
+                    >
+                        {translate(
+                            "pages.updatePassword.buttons.submit",
+                            "Update",
+                        )}
+                    </Button>
+                </form>
+            </AuthPage>
+        );
 };
 export default UpdatePasswordPage;

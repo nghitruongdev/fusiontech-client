@@ -5,9 +5,7 @@ import { warningImg } from "@public/assets/images";
 import { IoMdClose } from "react-icons/io";
 import VisualWrapper from "@components/VisualWrapper";
 import { CartOverview } from "./CheckoutOverview";
-import useServerAuthenticatedCookie from "@/hooks/useAuth/useAuthServerCookie";
 import { useSelectedCartItemStore } from "../useSelectedItemStore";
-import useAuthClientCookie from "@/hooks/useAuth/useAuthClientCookie";
 
 const Panel = () => {
     return (
@@ -22,7 +20,8 @@ const Panel = () => {
 };
 
 Panel.Login = () => {
-    const isAuthenticated = useAuthClientCookie().isAuthenticated;
+    // const isAuthenticated = useAuthClientCookie().isAuthenticated;
+    const isAuthenticated = false;
     const isSelected = useSelectedCartItemStore((state) => state.items).length;
     return (
         <div className="mt-2">
