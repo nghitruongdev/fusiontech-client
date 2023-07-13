@@ -8,6 +8,7 @@ import {
     FaRegEnvelope,
     FaSearchLocation,
 } from "react-icons/fa";
+import { Link } from 'react-router-dom';
 
 const AccountLayout = ({ children }: { children: React.ReactNode }) => {
     return (
@@ -50,11 +51,13 @@ const AccountMenu = () => {
                     </li>
                     <li className="flex items-center hover:bg-gray-200 hover:text-blue-700 hover:font-semibold">
                         <FaRegListAlt className="text-gray-400" />
-                        <button className="ml-2">Quản lý đơn hàng</button>
+                        <button className="ml-2" >
+                            Quản lý đơn hàng
+                        </button>
                     </li>
                     <li className="flex items-center hover:bg-gray-200 hover:text-blue-700 hover:font-semibold">
                         <FaSearchLocation className="text-gray-400" />
-                        <button className="ml-2">Sổ địa chỉ</button>
+                        <button className="ml-2">Sản phẩm yêu thích</button>
                     </li>
                     <li className="flex items-center hover:bg-gray-200 hover:text-blue-700 hover:font-semibold">
                         <FaRegBell className="text-gray-400" />

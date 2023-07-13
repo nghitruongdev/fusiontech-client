@@ -3,7 +3,7 @@ import { BsStarFill, BsInfoCircle } from "react-icons/bs";
 import { Product } from "@/interfaces";
 import { Badge } from "@components/ui/shadcn/badge";
 import ProductSpecification from "./ProductSpecification";
-import Review from "./(review)/Review";
+import ReviewComponent from "./(review)/Review";
 import Description from "./Description";
 
 async function getData(_id: number): Promise<Product[]> {
@@ -104,7 +104,7 @@ const ProductDetails = async ({ params: { _id } }: Props) => {
                                     <BsStarFill />
                                     <p className="">(5.0)</p>
                                     <p className="underline leading-none text-sm">
-                                        11 reviews
+                                         reviews
                                     </p>
                                 </div>
                                 {/* </div> */}
@@ -194,10 +194,10 @@ const ProductDetails = async ({ params: { _id } }: Props) => {
                             <Description />
                         </div>
                         <div className="">
-                            <p className="font-bold text-2xl mb-2">
+                            <p className="font-bold text-2xl mt-12 mb-2">
                                 Đánh giá sản phẩm
                             </p>
-                            <Review />
+                            <ReviewComponent />
                         </div>
                     </div>
                     <div className="w-1/3">

@@ -1,265 +1,265 @@
 "use client";
-import {
-    Container,
-    Heading,
-    Box,
-    Flex,
-    Text,
-    Stack,
-    HStack,
-    Avatar,
-    useColorModeValue,
-} from "@chakra-ui/react";
-import ButtonPrimary from "@components/ButtonPrimary";
-import { Button } from "@components/ui/shadcn/button";
-import { Separator } from "@components/ui/shadcn/separator";
+import React, { useEffect, useState, useRef } from "react";
+import reviewApi from "src/api/reviewAPI";
+import { format } from "date-fns";
+import { FcBusinessman } from "react-icons/fc";
+import { AiFillStar } from "react-icons/ai";
+import Image from "next/image";
+import { loginImg } from "@public/assets/images";
+import { IoIosArrowBack } from "react-icons/io";
+import useMyToast from "@/hooks/useToast";
 
-const reviewData = [
-    {
-        avatarSrc:
-            "https://s.gravatar.com/avatar/4f9135f54df98fe894a9f9979d600a87?s=80",
-        review: `What a wonderful little cottage! More spacious and adorable than the What a wonderful little cottage! More spacious and adorable than the
-            pictures show. We never met our hosts and...`,
-        stars: 3,
-        userName: "Ahmad",
-        dateTime: "2 months ago",
-    },
-    {
-        avatarSrc: "",
-        review: `What a wonderful little cottage! More spacious and adorable than the
-            pictures show. We never met our hosts, but we felt welcomed and...`,
-        stars: 4,
-        userName: "Ali",
-        dateTime: "1 months ago",
-    },
-    {
-        avatarSrc: "",
-        review: `What a wonderful little cottage! More spacious and adorable than the
-            pictures show. We never met our hosts, but we felt welcomed and...`,
-        stars: 2,
-        userName: "Zac",
-        dateTime: "4 months ago",
-    },
-];
+const ReviewComponent = () => {
+    const [reviewList, setReviewList] = useState<any[]>([]);
+    const [averageRating, setAverageRating] = useState<number>(0);
+    const [showReviewForm, setShowReviewForm] = useState<boolean>(false);
+    const [rating, setRating] = useState<number>(0);
+    const [comment, setComment] = useState<string>("");
 
-const ratingSummary = [
-    { id: 1, rating: 5, percentage: "80%" },
-    { id: 2, rating: 4, percentage: "65%" },
-    { id: 3, rating: 3, percentage: "35%" },
-    { id: 4, rating: 2, percentage: "75%" },
-    { id: 5, rating: 1, percentage: "55%" },
-];
+    {
+        /* Call api lấy các review từ product id */
+    }
+    useEffect(() => {
+        const fetchReviewList = async () => {
+            try {
+                const response = await reviewApi.get(5);
+                console.log(response.data);
+                setReviewList(response.data);
 
-const Review = () => {
+                calculateAverageRating(response.data);
+            } catch (error) {
+                console.log("fail to fetch review list", error);
+            }
+        };
+        fetchReviewList();
+    }, []);
+
+    {
+        /* Hiển thị số sao dựa theo rating của user */
+    }
+    const renderRatingStars = (rating: number) => {
+        const stars = [];
+        for (let i = 0; i < rating; i++) {
+            stars.push(<AiFillStar key={i} className="w-5 h-5 text-yellow" />);
+        }
+        return stars;
+    };
+
+    {
+        /* Hàm tính đánh giá trung bình dựa trên rating */
+    }
+    const calculateAverageRating = (reviews: any[]) => {
+        if (reviews.length > 0) {
+            const totalRating = reviews.reduce(
+                (sum, review) => sum + review.rating,
+                0,
+            );
+            const averageRating = totalRating / reviews.length;
+            setAverageRating(averageRating);
+        } else {
+            setAverageRating(0);
+        }
+    };
+
+    {
+        /* Button bật / tắt form đánh giá */
+    }
+    const ReviewFormButtonClick = () => {
+        setShowReviewForm(!showReviewForm);
+    };
+
+    const handleRatingSelect = (selectedRating: number) => {
+        setRating(selectedRating);
+    };
+
+    const handleCommentChange = (
+        event: React.ChangeEvent<HTMLTextAreaElement>,
+    ) => {
+        setComment(event.target.value);
+    };
+
+    // Tạo một instance của useToast()
+    const toast = useMyToast();
+    // call Post api review
+    const createReview = async (reviewData: any) => {
+        try {
+            const response = await reviewApi.create(reviewData);
+            const newReview = response.data; // Đánh giá mới được trả về từ API
+            setReviewList((prevReviews) => [...prevReviews, newReview]); // Thêm đánh giá mới vào danh sách hiện tại
+            console.log(response.data);
+            toast
+                .ok({
+                    title: "Thành công",
+                    message: "Đánh giá thành công",
+                })
+                .fire();
+        } catch (error) {
+            console.log("Lỗi khi tạo đánh giá:", error);
+            toast
+                .fail({
+                    title: "Thành công",
+                    message: "Đánh giá thất bại",
+                })
+                .fire();
+        }
+    };
+    // gửi review khi user click button
+    const handleReviewSubmit = (event: any) => {
+        event.preventDefault();
+        const now = format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+
+        const reviewData = {
+            product: { id: 5 },
+            user: { id: "18aedd00-928b-4ab2-8fec-04a1cf11f570" },
+            rating: rating,
+            comment: comment,
+            create_at: now,
+        };
+        createReview(reviewData);
+        ReviewFormButtonClick();
+
+        setRating(0);
+        setComment("");
+    };
+
     return (
-        <>
-            <div className="grid grid-cols-3 gap-4 border shadow-md rounded-lg p-4">
-                <div className="mx-auto">
-                    <p>
-                        <span className="text-[72px] font-bold">4.5</span>{" "}
-                        <span className="text-4xl font-extrabold leading-loose">
-                            trên{" "}
-                        </span>
-                        <span className="text-[72px] font-bold">5</span>
-                    </p>
-                    <Box as="div" className="flex items-center justify-between">
-                        <div className="">
-                            <HStack>
-                                <Flex alignItems="center" justify="start">
-                                    {Array.from(Array(4).keys()).map((id) => {
-                                        return (
-                                            <Star
-                                                key={id}
-                                                fillColor="#EACA4E"
-                                            />
-                                        );
-                                    })}
-                                    {Array.from(Array(5 - 4).keys()).map(
-                                        (id) => {
-                                            return (
-                                                <Star
-                                                    key={id}
-                                                    fillColor="#e2e8f0"
-                                                />
-                                            );
-                                        },
-                                    )}
-                                </Flex>
-                            </HStack>
-                            <Text
-                                fontWeight="medium"
-                                fontSize="sm"
-                                className=" underline"
-                            >
-                                (1355 ratings)
-                            </Text>
+        <div>
+            {/* Hiển thị bảng thống kê review */}
+            <div className="mb-4">
+                <div className="flex mt-2">
+                    {/* Hiển thị đánh giá trung bình */}
+                    <div className="flex flex-col justify-center items-center w-1/2 border border-gray-200 p-4 space-y-2 rounded-md">
+                        <div className=" flex">
+                            <p className="text-2xl font-bold">
+                                {averageRating.toFixed(1)}
+                            </p>
+                            <p className="text-2xl font-bold">/5</p>
                         </div>
-                        <div className="">
-                            <Button
-                                variant="secondary"
-                                className="my-2 shadow-md font-medium text-sm bg-blue-600 text-white hover:bg-blue-700"
-                            >
-                                Đánh giá ngay
-                            </Button>
+                        <div className="flex">
+                            {[1, 2, 3, 4, 5].map((index) => (
+                                <AiFillStar
+                                    key={index}
+                                    className={`w-5 h-5 ${
+                                        index <= Math.floor(averageRating)
+                                            ? "text-yellow"
+                                            : "text-black"
+                                    }`}
+                                />
+                            ))}
                         </div>
-                    </Box>
-                </div>
-                <Container
-                    className="col-span-2 h-full"
-                    // maxW="5xl"
-                    // p={{ base: 5, md: 10 }}
-                    // className="col-span-2"
-                >
-                    <Box mb={8} mx="auto h-full">
-                        {/* <Heading
-                        as="h3"
-                        size="lg"
-                        fontWeight="bold"
-                        textAlign="left"
-                        mb={3}
-                    >
-                        Audience rating summary
-                    </Heading> */}
-                        {/* <Stack spacing={3}> */}
-                        <Flex
-                            direction="column"
-                            justify="space-between"
-                            h="full"
+                        <p>{reviewList.length} đánh giá và nhận xét</p>
+                    </div>
+
+                    {/* Button đánh giá ngay */}
+                    <div className="w-1/2 flex flex-col justify-center items-center">
+                        <p>Bạn đánh giá sao sản phẩm này</p>
+                        <button
+                            className="bg-blue-500 text-white px-2 rounded-md h-10 hover:bg-blue-600"
+                            onClick={ReviewFormButtonClick}
                         >
-                            {ratingSummary.map((data) => {
-                                return (
-                                    <HStack
-                                        key={data.id}
-                                        spacing={5}
-                                        mr={0}
-                                        pr={0}
-                                    >
-                                        <Text fontWeight="bold" fontSize="md">
-                                            {data.rating}
-                                        </Text>
-                                        <Box w={{ base: "100%", md: "70%" }}>
-                                            <Box
-                                                w="100%"
-                                                bg={useColorModeValue(
-                                                    "gray.300",
-                                                    "gray.600",
-                                                )}
-                                                rounded="md"
-                                            >
-                                                <Box
-                                                    w={data.percentage}
-                                                    h={3}
-                                                    bg="yellow.400"
-                                                    rounded="md"
-                                                ></Box>
-                                            </Box>
-                                        </Box>
-                                        <Text fontWeight="bold" fontSize="md">
-                                            {data.percentage}
-                                        </Text>
-                                    </HStack>
-                                );
-                            })}
-                        </Flex>
-                        {/* </Stack> */}
-                    </Box>
-                </Container>
+                            Đánh giá ngay
+                        </button>
+                    </div>
+                </div>
             </div>
-            <Separator />
-            <div className="p-4">
-                <Box>
-                    {/* <Heading
-                        as="h3"
-                        size="lg"
-                        fontWeight="bold"
-                        textAlign="left"
-                        mb={4}
-                    >
-
-                    </Heading> */}
-                    <Stack direction="column" spacing={5}>
-                        {reviewData.map((review, index) => {
-                            return (
-                                <Box key={index}>
-                                    <HStack spacing={3} mb={2}>
-                                        <Avatar
-                                            size="md"
-                                            name={review.userName}
-                                            src={review.avatarSrc}
+            {!showReviewForm ? (
+                <p></p>
+            ) : (
+                <div className="fixed inset-0 flex items-center justify-center  bg-black bg-opacity-50 z-50">
+                    <form className="flex flex-col w-1/3 p-4 bg-white rounded-lg ">
+                        <IoIosArrowBack
+                            className="flex justify-end items-end hover:bg-gray-200"
+                            onClick={ReviewFormButtonClick}
+                        />
+                        <div className="flex justify-center">
+                            <Image
+                                src={loginImg}
+                                alt="Login img"
+                                className="w-56 h-auto"
+                            />
+                        </div>
+                        <h3 className="text-2xl text-center font-semibold mb-4">
+                            Đánh giá sản phẩm
+                        </h3>
+                        <div className="mb-2">
+                            <textarea
+                                id="comment"
+                                className="w-full h-24 border border-gray-300 rounded p-2 placeholder:p-2"
+                                placeholder="Xin mời chia sẻ một số cảm nhận về sản phẩm"
+                                value={comment}
+                                onChange={handleCommentChange}
+                            />
+                        </div>
+                        <div className="flex flex-col border border-gray-300 rounded p-4 mb-4">
+                            <p className="font-semibold mb-2">
+                                Bạn thấy sản phẩm này như thế nào?
+                            </p>
+                            <div className="flex justify-center items-center space-x-8">
+                                {[1, 2, 3, 4, 5].map((index) => (
+                                    <div
+                                        className="flex flex-col justify-center items-center"
+                                        onClick={() =>
+                                            handleRatingSelect(index)
+                                        }
+                                        key={index}
+                                    >
+                                        <AiFillStar
+                                            className={`w-5 h-5 ${
+                                                index <= rating
+                                                    ? "text-yellow"
+                                                    : "text-black"
+                                            }`}
                                         />
-                                        <Stack direction="column" spacing={2}>
-                                            <Text
-                                                fontWeight="bold"
-                                                fontSize="md"
-                                            >
-                                                {review.userName}
-                                            </Text>
-                                            <Flex
-                                                alignItems="center"
-                                                justify="start"
-                                            >
-                                                {Array.from(
-                                                    Array(review.stars).keys(),
-                                                ).map((id) => {
-                                                    return (
-                                                        <Star
-                                                            key={id}
-                                                            fillColor="#EACA4E"
-                                                        />
-                                                    );
-                                                })}
-                                                {Array.from(
-                                                    Array(
-                                                        5 - review.stars,
-                                                    ).keys(),
-                                                ).map((id) => {
-                                                    return (
-                                                        <Star
-                                                            key={id}
-                                                            fillColor="#e2e8f0"
-                                                        />
-                                                    );
-                                                })}
-                                            </Flex>
-                                        </Stack>
-                                    </HStack>
-                                    <Text
-                                        color={useColorModeValue(
-                                            "gray.700",
-                                            "gray.400",
-                                        )}
-                                        fontSize="0.87rem"
-                                        textAlign="left"
-                                        lineHeight="1.375"
-                                        fontWeight="300"
-                                    >
-                                        {review.review}
-                                    </Text>
-                                </Box>
-                            );
-                        })}
-                    </Stack>
-                </Box>
-            </div>
-        </>
+                                        <p>
+                                            {index === 1 && "Rất tệ"}
+                                            {index === 2 && "Tệ"}
+                                            {index === 3 && "Bình thường"}
+                                            {index === 4 && "Tốt"}
+                                            {index === 5 && "Rất tốt"}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <button
+                            className=" font-semibold w-full bg-blue-500 text-white px-4 py-2 rounded-md"
+                            type="submit"
+                            onClick={handleReviewSubmit}
+                        >
+                            Gửi đánh giá
+                        </button>
+                    </form>
+                </div>
+            )}
+
+            {/* Hiển thị reviews */}
+            {reviewList && reviewList.length > 0 ? (
+                reviewList.map((review) => (
+                    <div className="mb-4" key={review.id}>
+                        <div className="flex justify-between mb-2">
+                            <p className="flex font-medium">
+                                <FcBusinessman className="w-6 h-6 border border-2 mr-1 bg-gray-300" />
+                                {review.user.id}
+                            </p>
+                            <p>{review.createdAt}</p>
+                        </div>
+                        <div className="flex flex-col border bg-gray-100 rounded-2xl p-4">
+                            <div className="flex">
+                                <p className="font-medium mr-1">Đánh giá:</p>
+                                {renderRatingStars(review.rating)}
+                            </div>
+                            <div className="flex">
+                                <p className="font-medium mr-1">Nhận xét:</p>
+                                {review.comment}
+                            </div>
+                        </div>
+                    </div>
+                ))
+            ) : (
+                <p>No reviews found.</p>
+            )}
+        </div>
     );
 };
 
-const Star = ({ fillColor }: { fillColor: string }) => {
-    return (
-        <svg
-            style={{
-                width: "1rem",
-                height: "1rem",
-                fill: fillColor,
-                marginRight: "0.25rem",
-            }}
-            viewBox="0 0 1000 1000"
-            xmlns="http://www.w3.org/2000/svg"
-        >
-            <path d="M972 380c9 28 2 50-20 67L725 619l87 280c11 39-18 75-54 75-12 0-23-4-33-12L499 790 273 962a58 58 0 0 1-78-12 50 50 0 0 1-8-51l86-278L46 447c-21-17-28-39-19-67 8-24 29-40 52-40h280l87-279c7-23 28-39 52-39 25 0 47 17 54 41l87 277h280c24 0 45 16 53 40z" />
-        </svg>
-    );
-};
-
-export default Review;
+export default ReviewComponent;
