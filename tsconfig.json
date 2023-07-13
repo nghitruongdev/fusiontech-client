@@ -8,6 +8,8 @@
         ],
         "allowJs": true,
         "skipLibCheck": true,
+        // "noUnusedLocals": true,
+        "noUncheckedIndexedAccess": true,
         "strict": true,
         "forceConsistentCasingInFileNames": true,
         "noEmit": true,
@@ -58,7 +60,7 @@
         "next-env.d.ts",
         "**/*.ts",
         "**/*.tsx",
-        ".next/types/**/*.ts"
+        ".next/types/**/*.ts",
     ],
     "exclude": [
         "node_modules"

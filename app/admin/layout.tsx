@@ -1,7 +1,7 @@
 "use client";
 
 import { authProvider } from "@/providers/authProvider";
-import { dataProvider } from "@/rest-data-provider";
+import { dataProvider } from "@/providers/rest-data-provider";
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import {
     RefineThemes,
@@ -12,7 +12,7 @@ import {
 import { Refine } from "@refinedev/core";
 import { useSession } from "next-auth/react";
 import routerProvider from "@refinedev/nextjs-router/app";
-import { resources } from "@/constants";
+import { resources } from "types/constants";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const { data: session, status } = useSession();
@@ -58,6 +58,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         // create: "/admin/or/create",
                         // edit: "/admin/products/edit/:id",
                         show: "/admin/orders/show/:id",
+                        meta: {
+                            canDelete: false,
+                        },
+                    },
+                    {
+                        name: "inventories",
+                        list: "/admin/inventories",
+                        create: "/admin/inventories/create",
+                        // edit: "/admin/inventories/edit/:id",
+                        show: "/admin/inventories/show/:id",
+                        meta: {
+                            canDelete: false,
+                        },
+                    },
+                    {
+                        name: "inventory-details",
+                        // list: "/admin/inventories",
+                        // create: "/admin/inventories/create",
+                        edit: "/admin/inventories/edit/:id",
+                        // show: "/admin/inventories/show/:id",
                         meta: {
                             canDelete: false,
                         },

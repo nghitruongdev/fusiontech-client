@@ -2,6 +2,6 @@
 
 import { ChakraUIShowInferencer } from "@refinedev/inferencer/chakra-ui";
 
-export default function CategoryShow() {
+export default function ShowPage() {
     return <ChakraUIShowInferencer />;
 }

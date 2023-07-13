@@ -8,3 +8,7 @@ node_modules
 !.env.example
 # template pages
 pages_exclude
+
+.local.*
+*.local.*
+*.ignored.*

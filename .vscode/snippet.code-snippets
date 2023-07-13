@@ -22,5 +22,14 @@
             "{/*====================$1====================*/}",
             "$2"
         ],
+    },
+    "Print to console": {
+        "scope": "javascript,typescript",
+        "prefix": "log1",
+        "body": [
+            "console.log('$1');",
+            "$2"
+        ],
+        "description": "Log output to console"
     }
 }

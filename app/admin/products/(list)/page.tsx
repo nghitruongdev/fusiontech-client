@@ -23,6 +23,9 @@ import {
 } from "@chakra-ui/react";
 import { Pagination } from "@components/pagination";
 
+export default function ListPage() {
+    return <ProductList />;
+}
 const ProductList: React.FC<IResourceComponentsProps> = () => {
     const columns = React.useMemo<ColumnDef<any>[]>(
         () => [
@@ -158,5 +161,3 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
         </List>
     );
 };
-
-export default ProductList;

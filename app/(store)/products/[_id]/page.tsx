@@ -1,12 +1,12 @@
 import { IoMdHeartEmpty } from "react-icons/io";
 import { BsStarFill, BsInfoCircle } from "react-icons/bs";
-import { Product } from "@/interfaces";
+import { IProduct } from "types";
 import { Badge } from "@components/ui/shadcn/badge";
 import ProductSpecification from "./ProductSpecification";
 import ReviewComponent from "./(review)/Review";
 import Description from "./Description";
 
-async function getData(_id: number): Promise<Product[]> {
+async function getData(_id: number): Promise<IProduct[]> {
     // const res = await fetch(`http://localhost:3000/api/products/${_id}`);
     // The return value is *not* serialized
     // You can return Date, Map, Set, etc.
@@ -23,15 +23,17 @@ async function getData(_id: number): Promise<Product[]> {
 
 type Props = {
     params: {
-        _id: number;
+        id: string;
     };
 };
-const ProductDetails = async ({ params: { _id } }: Props) => {
-    const products = await getData(_id);
+
+const ProductDetails = async ({ params: { id } }: Props) => {
+    const products = await getData(+id);
     const product = products.find(
-        (product: Product) => product._id == _id,
-    ) as Product;
+        (product: IProduct) => product.id == id,
+    ) as IProduct;
     const isDiscount = false;
+
     return (
         <section className="bg-white">
             <div className="w-[90%] mx-auto p-4">
@@ -47,7 +49,7 @@ const ProductDetails = async ({ params: { _id } }: Props) => {
                                             className="p-2 w-1/2 hover:border "
                                         >
                                             <img
-                                                src={product?.image}
+                                                src={product?.thumbnail}
                                                 alt="product image"
                                                 className="cursor-move duration-500"
                                             />
@@ -57,7 +59,7 @@ const ProductDetails = async ({ params: { _id } }: Props) => {
                             </div>
                             <div className="w-4/5">
                                 <img
-                                    src={product?.image}
+                                    src={product?.thumbnail}
                                     alt="product image"
                                     className="w-[80%] transform-origin-top-left cursor-move duration-500"
                                 />
@@ -87,10 +89,10 @@ const ProductDetails = async ({ params: { _id } }: Props) => {
                             {/* Product Info */}
                             <div className="flex flex-col gap-1">
                                 <p className="text-sm underline underline-offset-4 ">
-                                    {product.brand}
+                                    {/* {product.brand} */}
                                 </p>
                                 <p className="text-2xl font-bold">
-                                    {product.title}
+                                    {product.name}
                                 </p>
                                 {/* <p className="text-base text-zinc-500">
                                 {product.description}
@@ -104,7 +106,7 @@ const ProductDetails = async ({ params: { _id } }: Props) => {
                                     <BsStarFill />
                                     <p className="">(5.0)</p>
                                     <p className="underline leading-none text-sm">
-                                         reviews
+                                        reviews
                                     </p>
                                 </div>
                                 {/* </div> */}
@@ -115,7 +117,7 @@ const ProductDetails = async ({ params: { _id } }: Props) => {
                                             Now ${product.price}
                                         </p>
                                         <p className="text-gray-500 text-md font-normal line-through decoration-[1px] flex gap-1 items-center">
-                                            ${product.oldPrice}{" "}
+                                            ${product.price}{" "}
                                             <span>
                                                 <BsInfoCircle />
                                             </span>

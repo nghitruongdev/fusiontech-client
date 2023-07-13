@@ -5,6 +5,7 @@ import {
     IResourceComponentsProps,
     useOne,
     useCustom,
+    useMany,
 } from "@refinedev/core";
 import { Show, NumberField, TextField, DateField } from "@refinedev/chakra-ui";
 import {
@@ -14,13 +15,15 @@ import {
     TableContainer,
     Tbody,
     Td,
-    Tfoot,
     Th,
     Thead,
     Tr,
 } from "@chakra-ui/react";
+import { IOrderItem, IVariant } from "types";
+import Image from "next/image";
+import { loginImg } from "@public/assets/images";
 
-export default function OrderShowPage() {
+export default function ShowPage() {
     return <OrderShow />;
 }
 const OrderShow: React.FC<IResourceComponentsProps> = () => {
@@ -30,7 +33,7 @@ const OrderShow: React.FC<IResourceComponentsProps> = () => {
     return (
         <Show isLoading={isLoading}>
             <OrderDetailSummary className="" />
-            <OrderItemList className="" />
+            <OrderItemList className="mt-4 shadow-md rounded-md" />
         </Show>
     );
 };
@@ -88,39 +91,85 @@ const OrderDetailSummary = ({ className }: { className?: string }) => {
 const OrderItemList = ({ className }: { className?: string }) => {
     const {
         items: { data, isLoading },
+        variants: { data: variantData, isLoading: isVariantLoading },
     } = useData();
     const items = data?.data;
+    const variants = variantData?.data;
+
     if (isLoading) return <div className={className}>Loading table...</div>;
-    return (
-        <div className={className}>
-            <TableContainer>
-                <Table variant="simple">
-                    <TableCaption>Chi tiết đơn hàng</TableCaption>
-                    <Thead>
-                        <Tr>
-                            <Th>To convert</Th>
-                            <Th>into</Th>
-                            <Th isNumeric>multiply by</Th>
-                        </Tr>
-                    </Thead>
-                    <Tbody>
-                        <Tr>
-                            <Td>inches</Td>
-                            <Td>millimetres (mm)</Td>
-                            <Td isNumeric>25.4</Td>
-                        </Tr>
-                    </Tbody>
-                    {/* <Tfoot>
+    if (!!items?.length)
+        return (
+            <div className={className}>
+                <TableContainer
+                    rounded="md"
+                    border="1px"
+                    borderColor="gray.100"
+                >
+                    <Table variant="simple">
+                        <TableCaption>
+                            Chi tiết đơn hàng {`(${items.length} sản phẩm)`}
+                        </TableCaption>
+                        <Thead>
+                            <Tr>
+                                <Th>ID</Th>
+                                <Th>Hình ảnh</Th>
+                                <Th>Mã sản phẩm</Th>
+                                <Th>Tên sản phẩm</Th>
+                                <Th isNumeric>Giá</Th>
+                                <Th isNumeric>Số lượng</Th>
+                                <Th isNumeric>Thành tiền</Th>
+                            </Tr>
+                        </Thead>
+                        <Tbody>
+                            {items
+                                .map((item) => ({
+                                    ...item,
+                                    variant: variants?.find(
+                                        (v) => v.id === item.variant.id,
+                                    ),
+                                }))
+                                .map(({ id, price, quantity, variant }) => (
+                                    <Tr key={id}>
+                                        <Td isNumeric>{id}</Td>
+                                        <Td>
+                                            <div className="flex justify-center">
+                                                <Image
+                                                    src={
+                                                        variant?.image ??
+                                                        loginImg
+                                                    }
+                                                    alt={`${variant?.image}`}
+                                                    loading="lazy"
+                                                    width="50"
+                                                    height="50"
+                                                />
+                                            </div>
+                                        </Td>
+                                        <Td>ABCXYZ-0005</Td>
+                                        <Td>
+                                            {variant?.product?.name ??
+                                                "Loading..."}
+                                        </Td>
+                                        <Td isNumeric>{price}</Td>
+                                        <Td isNumeric>{quantity}</Td>
+                                        <Td isNumeric>
+                                            {price * quantity} VNĐ
+                                        </Td>
+                                    </Tr>
+                                ))}
+                        </Tbody>
+                        {/* <Tfoot>
                         <Tr>
                             <Th>To convert</Th>
                             <Th>into</Th>
                             <Th isNumeric>multiply by</Th>
                         </Tr>
                     </Tfoot> */}
-                </Table>
-            </TableContainer>
-        </div>
-    );
+                    </Table>
+                </TableContainer>
+            </div>
+        );
+    return <>No data</>;
 };
 
 const useData = () => {
@@ -144,18 +193,35 @@ const useData = () => {
         },
     });
 
-    const items = useCustom({
+    const items = useCustom<IOrderItem[]>({
         url: record?._links?.items.href || "",
         method: "get",
         meta: {
             _embeddedResource: "orderItems",
         },
+        queryOptions: {
+            enabled: !!record,
+        },
     });
 
+    const variantsId = items.data?.data.map(({ variant }) => variant.id) || [];
+    const variants = useMany<IVariant>({
+        resource: "variants",
+        ids: variantsId,
+        queryOptions: {
+            enabled: variantsId.length > 0,
+        },
+        meta: {
+            query: {
+                projection: "product",
+            },
+        },
+    });
     return {
         order: queryResult,
         user,
         payment,
         items,
+        variants,
     };
 };

@@ -3,8 +3,8 @@ import useAxios, { AxiosOptions } from "./useAxios";
 import { getFetcher } from "./useFetcher";
 import useMyToast from "./useToast";
 import useSWR from "swr";
-import { ShippingAddress } from "@/interfaces";
-import { APP_API } from "@/constants";
+import { ShippingAddress } from "types";
+import { APP_API } from "types/constants";
 import { useForm } from "react-hook-form";
 import { useDisclosure } from "@chakra-ui/react";
 

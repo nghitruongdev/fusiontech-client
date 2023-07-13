@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
 import reviewApi from "src/api/reviewAPI";
-import { format } from "date-fns";
 import { FcBusinessman } from "react-icons/fc";
 import { AiFillStar } from "react-icons/ai";
 import Image from "next/image";
@@ -106,14 +105,12 @@ const ReviewComponent = () => {
     // gửi review khi user click button
     const handleReviewSubmit = (event: any) => {
         event.preventDefault();
-        const now = format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
 
         const reviewData = {
             product: { id: 5 },
             user: { id: "18aedd00-928b-4ab2-8fec-04a1cf11f570" },
             rating: rating,
             comment: comment,
-            create_at: now,
         };
         createReview(reviewData);
         ReviewFormButtonClick();
@@ -238,7 +235,7 @@ const ReviewComponent = () => {
                     <div className="mb-4" key={review.id}>
                         <div className="flex justify-between mb-2">
                             <p className="flex font-medium">
-                                <FcBusinessman className="w-6 h-6 border border-2 mr-1 bg-gray-300" />
+                                <FcBusinessman className="w-6 h-6 border-2 mr-1 bg-gray-300" />
                                 {review.user.id}
                             </p>
                             <p>{review.createdAt}</p>

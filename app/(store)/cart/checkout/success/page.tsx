@@ -1,4 +1,4 @@
-import { API_URL } from "@/constants";
+import { API_URL } from "types/constants";
 import { CheckCircle2, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";

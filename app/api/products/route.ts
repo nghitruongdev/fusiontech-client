@@ -1,257 +1,759 @@
 import { NextRequest, NextResponse } from "next/server";
 
-type Data = {
-    _id: number;
-    title: string;
-    description: string;
-    oldPrice: number;
-    price: number;
-    brand: string;
-    image: string;
-    isNew: boolean;
-    category: string;
-}[];
-const productData = [
-    {
-        _id: 101,
-        title: "Canon EOS Rebel T100",
-        description:
-            "Canon EOS Rebel T100 Digital SLR Camera with 18-55mm Lens Kit, 18 Megapixel Sensor, Wi-Fi, DIGIC4+, SanDisk 32GB Memory Card and Live View Shooting",
-        oldPrice: 700.0,
-        price: 559.99,
-        brand: "Canon",
-        image: "https://i.ibb.co/1r28gMk/1.webp",
-        isNew: true,
-        category: "Electronics",
+export const products = {
+    _embedded: {
+        products: [
+            {
+                name: "Intelligent Aluminum Car",
+                id: 1,
+                variants: [
+                    {
+                        id: 1,
+                        price: 189,
+                    },
+                    {
+                        id: 2,
+                        price: 667,
+                    },
+                    {
+                        id: 3,
+                        price: 818,
+                    },
+                    {
+                        id: 4,
+                        price: 899,
+                    },
+                    {
+                        id: 5,
+                        price: 657,
+                    },
+                    {
+                        id: 6,
+                        price: 758,
+                    },
+                    {
+                        id: 7,
+                        price: 624,
+                    },
+                    {
+                        id: 8,
+                        price: 895,
+                    },
+                    {
+                        id: 9,
+                        price: 863,
+                    },
+                    {
+                        id: 10,
+                        price: 831,
+                    },
+                ],
+                slug: null,
+                brand: null,
+                shortDescription: "Games",
+                thumbnail: "https://i.ibb.co/BVzsqvz/10.webp",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 8,
+                },
+                description: "Heavy Duty Steel Keyboard",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/1",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/1{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/1/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/1/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/1/category",
+                    },
+                },
+            },
+            {
+                name: "Practical Silk Chair",
+                id: 2,
+                variants: [],
+                slug: null,
+                brand: null,
+                shortDescription: "Home",
+                thumbnail: "https://i.ibb.co/yPJjB3r/top6.webp",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 7,
+                },
+                description: "Small Aluminum Wallet",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/2",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/2{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/2/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/2/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/2/category",
+                    },
+                },
+            },
+            {
+                name: "Small Wool Bag",
+                id: 3,
+                variants: [],
+                slug: null,
+                brand: null,
+                shortDescription: "Computers",
+                thumbnail: "https://i.ibb.co/5F3nWv6/7.webp",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 10,
+                },
+                description: "Fantastic Marble Gloves",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/3",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/3{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/3/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/3/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/3/category",
+                    },
+                },
+            },
+            {
+                name: "Rustic Bronze Wallet",
+                id: 4,
+                variants: [],
+                slug: null,
+                brand: null,
+                shortDescription: "Sports",
+                thumbnail: "https://i.ibb.co/Ycz8hkV/6.webp",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 15,
+                },
+                description: "Mediocre Wooden Coat",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/4",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/4{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/4/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/4/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/4/category",
+                    },
+                },
+            },
+            {
+                name: "Heavy Duty Paper Bottle",
+                id: 5,
+                variants: [],
+                slug: null,
+                brand: null,
+                shortDescription: "Kids & Sports",
+                thumbnail: "https://i.ibb.co/qdfB3s6/2.webp",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 17,
+                },
+                description: "Mediocre Wooden Shirt",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/5",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/5{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/5/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/5/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/5/category",
+                    },
+                },
+            },
+            {
+                name: "Ergonomic Leather Plate",
+                id: 6,
+                variants: [],
+                slug: null,
+                brand: null,
+                shortDescription: "Movies & Sports",
+                thumbnail: "https://i.ibb.co/xgZWmdq/8.jpg",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 12,
+                },
+                description: "Mediocre Iron Plate",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/6",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/6{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/6/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/6/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/6/category",
+                    },
+                },
+            },
+            {
+                name: "Mediocre Paper Bag",
+                id: 7,
+                variants: [],
+                slug: null,
+                brand: null,
+                shortDescription: "Computers",
+                thumbnail: "https://i.ibb.co/TTS9wY4/9.webp",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 10,
+                },
+                description: "Small Copper Table",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/7",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/7{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/7/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/7/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/7/category",
+                    },
+                },
+            },
+            {
+                name: "Ergonomic Cotton Pants",
+                id: 8,
+                variants: [],
+                slug: null,
+                brand: null,
+                shortDescription: "Shoes",
+                thumbnail: "https://i.ibb.co/TTS9wY4/9.webp",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 18,
+                },
+                description: "Gorgeous Cotton Coat",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/8",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/8{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/8/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/8/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/8/category",
+                    },
+                },
+            },
+            {
+                name: "Aerodynamic Concrete Plate",
+                id: 9,
+                variants: [],
+                slug: null,
+                brand: null,
+                shortDescription: "Grocery",
+                thumbnail: "https://i.ibb.co/qdfB3s6/2.webp",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 17,
+                },
+                description: "Durable Leather Watch",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/9",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/9{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/9/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/9/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/9/category",
+                    },
+                },
+            },
+            {
+                name: "Sleek Cotton Keyboard",
+                id: 10,
+                variants: [],
+                slug: null,
+                brand: null,
+                shortDescription: "Automotive, Grocery & Industrial",
+                thumbnail: "https://i.ibb.co/TTS9wY4/9.webp",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 3,
+                },
+                description: "Synergistic Bronze Table",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/10",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/10{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/10/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/10/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/10/category",
+                    },
+                },
+            },
+            {
+                name: "Heavy Duty Steel Pants",
+                id: 11,
+                variants: [],
+                slug: null,
+                brand: null,
+                shortDescription: "Sports",
+                thumbnail: "https://i.ibb.co/1r28gMk/1.webp",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 7,
+                },
+                description: "Awesome Marble Bag",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/11",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/11{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/11/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/11/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/11/category",
+                    },
+                },
+            },
+            {
+                name: "Fantastic Plastic Table",
+                id: 12,
+                variants: [],
+                slug: null,
+                brand: null,
+                shortDescription: "Grocery & Outdoors",
+                thumbnail: "https://i.ibb.co/5F3nWv6/7.webp",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 16,
+                },
+                description: "Synergistic Aluminum Computer",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/12",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/12{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/12/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/12/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/12/category",
+                    },
+                },
+            },
+            {
+                name: "Sleek Wool Gloves",
+                id: 13,
+                variants: [],
+                slug: null,
+                brand: null,
+                shortDescription: "Clothing",
+                thumbnail: "https://i.ibb.co/zmw8xFY/top7.webp",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 14,
+                },
+                description: "Durable Cotton Car",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/13",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/13{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/13/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/13/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/13/category",
+                    },
+                },
+            },
+            {
+                name: "Awesome Linen Plate",
+                id: 14,
+                variants: [],
+                slug: null,
+                brand: null,
+                shortDescription: "Books & Kids",
+                thumbnail: "https://i.ibb.co/yPJjB3r/top6.webp",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 15,
+                },
+                description: "Small Marble Watch",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/14",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/14{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/14/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/14/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/14/category",
+                    },
+                },
+            },
+            {
+                name: "Heavy Duty Wool Car",
+                id: 15,
+                variants: [],
+                slug: null,
+                brand: null,
+                shortDescription: "Beauty & Movies",
+                thumbnail: "https://i.ibb.co/5F3nWv6/7.webp",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 4,
+                },
+                description: "Synergistic Concrete Keyboard",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/15",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/15{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/15/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/15/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/15/category",
+                    },
+                },
+            },
+            {
+                name: "Lightweight Rubber Watch",
+                id: 16,
+                variants: [],
+                slug: null,
+                brand: null,
+                shortDescription: "Music",
+                thumbnail: "https://i.ibb.co/qdfB3s6/2.webp",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 8,
+                },
+                description: "Durable Aluminum Lamp",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/16",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/16{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/16/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/16/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/16/category",
+                    },
+                },
+            },
+            {
+                name: "Durable Iron Bench",
+                id: 17,
+                variants: [],
+                slug: null,
+                brand: null,
+                shortDescription: "Automotive",
+                thumbnail: "https://i.ibb.co/zPDcCQY/top4.webp",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 18,
+                },
+                description: "Small Aluminum Wallet",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/17",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/17{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/17/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/17/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/17/category",
+                    },
+                },
+            },
+            {
+                name: "Incredible Wooden Bag",
+                id: 18,
+                variants: [],
+                slug: null,
+                brand: null,
+                shortDescription: "Toys",
+                thumbnail: "https://i.ibb.co/VL1Dnv1/4.webp",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 7,
+                },
+                description: "Awesome Linen Coat",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/18",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/18{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/18/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/18/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/18/category",
+                    },
+                },
+            },
+            {
+                name: "Intelligent Wool Clock",
+                id: 19,
+                variants: [],
+                slug: null,
+                brand: null,
+                shortDescription: "Beauty, Electronics & Tools",
+                thumbnail: "https://i.ibb.co/zPDcCQY/top4.webp",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 15,
+                },
+                description: "Aerodynamic Paper Table",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/19",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/19{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/19/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/19/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/19/category",
+                    },
+                },
+            },
+            {
+                name: "Ergonomic Plastic Shoes",
+                id: 20,
+                variants: [],
+                slug: null,
+                brand: null,
+                shortDescription: "Outdoors",
+                thumbnail: "https://i.ibb.co/sJwg0YF/top1.webp",
+                reviewCount: 0,
+                reviewScore: null,
+                category: {
+                    id: 14,
+                },
+                description: "Rustic Marble Car",
+                _links: {
+                    self: {
+                        href: "http://localhost:8080/api/products/20",
+                    },
+                    product: {
+                        href: "http://localhost:8080/api/products/20{?projection}",
+                        templated: true,
+                    },
+                    brand: {
+                        href: "http://localhost:8080/api/products/20/brand",
+                    },
+                    variants: {
+                        href: "http://localhost:8080/api/products/20/variants{?projection}",
+                        templated: true,
+                    },
+                    category: {
+                        href: "http://localhost:8080/api/products/20/category",
+                    },
+                },
+            },
+        ],
     },
+    _links: {
+        first: {
+            href: "http://localhost:8080/api/products?projection=full&page=0&size=20",
+        },
+        self: {
+            href: "http://localhost:8080/api/products?projection=full",
+        },
+        next: {
+            href: "http://localhost:8080/api/products?projection=full&page=1&size=20",
+        },
+        last: {
+            href: "http://localhost:8080/api/products?projection=full&page=4&size=20",
+        },
+        profile: {
+            href: "http://localhost:8080/api/profile/products",
+        },
+        search: {
+            href: "http://localhost:8080/api/products/search",
+        },
+    },
+    page: {
+        size: 20,
+        totalElements: 100,
+        totalPages: 5,
+        number: 0,
+    },
+};
 
-    {
-        _id: 102,
-        title: "DJI Air",
-        description:
-            "DJI Mini 2 Fly More Combo - Ultralight Foldable Drone, 3-Axis Gimbal with 4K Camera, 12MP Photos, 31 Min Flight Time",
-        oldPrice: 1050.0,
-        price: 999.0,
-        brand: "DJI",
-        image: "https://i.ibb.co/qdfB3s6/2.webp",
-        isNew: true,
-        category: "Electronics",
-    },
-    {
-        _id: 103,
-        title: "Apple 10.2-inch iPad",
-        description:
-            "2021 Apple 10.2-inch iPad Wi-Fi 64GB - Space Gray (9th Generation)",
-        oldPrice: 329.0,
-        price: 269.0,
-        brand: "Apple",
-        image: "https://i.ibb.co/VL1Dnv1/4.webp",
-        isNew: true,
-        category: "Electronics",
-    },
-    {
-        _id: 104,
-        title: "iPhone 14",
-        description: "AT&T iPhone 14 128GB Midnight",
-        oldPrice: 1745.99,
-        price: 1200.0,
-        brand: "Apple",
-        image: "https://i.ibb.co/5F3nWv6/7.webp",
-        isNew: true,
-        category: "Electronics",
-    },
-    {
-        _id: 105,
-        title: "Apple Watch SE",
-        description:
-            "Apple Watch SE (2nd Gen) GPS 40mm Midnight Aluminum Case with Midnight Sport Band - S/M",
-        oldPrice: 350.0,
-        price: 249.0,
-        brand: "Apple",
-        image: "https://i.ibb.co/xgZWmdq/8.jpg",
-        isNew: true,
-        category: "Electronics",
-    },
-    {
-        _id: 106,
-        title: "Beats Solo3",
-        description:
-            "Beats Solo3 Wireless On-Ear Headphones with Apple W1 Headphone Chip, Black, MX432LL/A",
-        oldPrice: 120.99,
-        price: 130.09,
-        brand: "Beats by Dr. Dre",
-        image: "https://i.ibb.co/rQKjVC2/5.webp",
-        isNew: true,
-        category: "Electronics",
-    },
-    {
-        _id: 107,
-        title: "uhomepro TV Stand Cabinet",
-        description:
-            "uhomepro TV Stand Cabinet for Living Room up to 55 Television, Entertainment Center with RGB LED Lights and Storage Shelves Furniture, Black High Gloss TV Cabinet Console Table, Q15709",
-        oldPrice: 219.99,
-        price: 125.99,
-        brand: "uhomepro",
-        image: "https://i.ibb.co/Ycz8hkV/6.webp",
-        isNew: true,
-        category: "Home Decoration",
-    },
-    {
-        _id: 108,
-        title: "T-Shirt Men",
-        description:
-            "St Patricks Day T-Shirt Men -Image by Shutterstock, Male XX-Large",
-        oldPrice: 15.0,
-        price: 18.99,
-        brand: "Smartprints",
-        image: "https://i.ibb.co/BLCDw7v/3.webp",
-        isNew: true,
-        category: "Fashion",
-    },
-    {
-        _id: 109,
-        title: "Picnic Table Bench Set",
-        description:
-            "Costway Picnic Table Bench Set Outdoor Backyard Patio Garden Party Dining All Weather Black",
-        oldPrice: 169.99,
-        price: 298.0,
-        brand: "Costway",
-        image: "https://i.ibb.co/qCXcPhq/8.webp",
-        isNew: true,
-        category: "Home Decoration",
-    },
-    {
-        _id: 110,
-        title: "Grill Heavy Duty",
-        description: "Expert Grill Heavy Duty 24-Inch Charcoal Grill, Black",
-        oldPrice: 120.99,
-        price: 107.0,
-        brand: "Expert Grill",
-        image: "https://i.ibb.co/TTS9wY4/9.webp",
-        isNew: true,
-        category: "Equipments",
-    },
-    {
-        _id: 111,
-        title: "Girls Cropped",
-        description:
-            "Free Assembly Girls Cropped Mixed Cable Knit Fair Isle Sweater, Sizes 4-18",
-        oldPrice: 20.0,
-        price: 15.31,
-        brand: "Free Assembly",
-        image: "https://i.ibb.co/BVzsqvz/10.webp",
-        isNew: true,
-        category: "Fashion",
-    },
-    {
-        _id: 112,
-        title: "Night of Olay Firming Night Cream Face Moisturizer, 1.9 oz",
-        description:
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since",
-        oldPrice: 12.99,
-        price: 7.98,
-        brand: "Olay",
-        image: "https://i.ibb.co/zPDcCQY/top4.webp",
-        isNew: true,
-        category: "Beauty Product",
-    },
-    {
-        _id: 113,
-        title: "Face LiquidSweet Lightweight Beauty Products for Women",
-        description:
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since",
-        oldPrice: 9.59,
-        price: 7.62,
-        brand: "unknown",
-        image: "https://i.ibb.co/QC4L3RF/top8.jpg",
-        isNew: true,
-        category: "Beauty Product",
-    },
-    {
-        _id: 114,
-        title: "L'Oreal Paris Revitalift Triple Power Anti-Aging Cream Face Moisturizer 1.7 oz",
-        description:
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since",
-        oldPrice: 35.0,
-        price: 21.91,
-        brand: "L'Oreal Paris",
-        image: "https://i.ibb.co/dKmw2sC/top2.webp",
-        isNew: true,
-        category: "Beauty Product",
-    },
-    {
-        _id: 115,
-        title: "L'Oreal Paris 55+ Moisturizer Anti-Aging Face Moisturizer, Wrinkle Expert, 1.7 oz",
-        description:
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since",
-        oldPrice: 23.65,
-        price: 10.63,
-        brand: "L'Oreal Paris",
-        image: "https://i.ibb.co/sJwg0YF/top1.webp",
-        isNew: true,
-        category: "Beauty Product",
-    },
-    {
-        _id: 116,
-        title: "Vaseline Intensive Care™ Advanced Repair Unscented Body Lotion, 20.3 oz",
-        description:
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since",
-        oldPrice: 9.99,
-        price: 6.98,
-        brand: "Vaseline",
-        image: "https://i.ibb.co/v1sPXLq/top5.webp",
-        isNew: true,
-        category: "Beauty Product",
-    },
-    {
-        _id: 117,
-        title: "CeraVe Healing Ointment, Protects and Soothes Cracked Skin, 12 oz",
-        description:
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since",
-        oldPrice: 25.35,
-        price: 20.87,
-        brand: "CeraVe",
-        image: "https://i.ibb.co/yPJjB3r/top6.webp",
-        isNew: false,
-        category: "Beauty Product",
-    },
-    {
-        _id: 118,
-        title: "Neutrogena Hydro Boost Hyaluronic Acid Water Gel Face Moisturizer, 1.7 oz",
-        description:
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since",
-        oldPrice: 29.0,
-        price: 19.97,
-        brand: "Neutrogena",
-        image: "https://i.ibb.co/zmw8xFY/top7.webp",
-        isNew: true,
-        category: "Beauty Product",
-    },
-    {
-        _id: 119,
-        title: "L'Oreal Paris Collagen Moisture Filler Facial Treatment Day Night Cream, Anti-Aging, 1.7 oz",
-        description:
-            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since",
-        oldPrice: 14.0,
-        price: 8.98,
-        brand: "L'Oreal Paris",
-        image: "https://i.ibb.co/vHJkwzt/top3.webp",
-        isNew: false,
-        category: "Beauty Product",
-    },
-    {
-        _id: 120,
-        title: "Girls Sleeveless Cutout",
-        description:
-            "Free Assembly Girls Sleeveless Cutout Jumpsuit, Sizes 4-18",
-        oldPrice: 52.0,
-        price: 22.0,
-        brand: "Free Assembly",
-        image: "https://i.ibb.co/BNXTLkq/12.webp",
-        isNew: false,
-        category: "Fashion",
-    },
-];
 export async function GET(req: NextRequest) {
-    return NextResponse.json(productData);
+    return NextResponse.json(products);
 }

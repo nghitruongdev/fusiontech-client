@@ -1,4 +1,4 @@
-import { ICartItem } from "@/interfaces";
+import { ICartItem } from "types";
 import { NextRequest, NextResponse } from "next/server";
 
 const cartItems: ICartItem[] = Array.from({

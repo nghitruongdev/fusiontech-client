@@ -1,6 +1,6 @@
-import { API_URL, fakeUserId } from "@/constants";
-import { IFullOrderStatus, IOrder } from "@/interfaces";
-import { springDataProvider } from "@/rest-data-provider";
+import { API_URL, fakeUserId } from "types/constants";
+import { IFullOrderStatus, IOrder } from "types";
+import { springDataProvider } from "@/providers/rest-data-provider";
 
 const getOrderByGroup = async (group: string) => {
     const statusListResp = await fetch(

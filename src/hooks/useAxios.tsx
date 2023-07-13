@@ -1,4 +1,4 @@
-import { APP_API } from "@/constants";
+import { APP_API } from "types/constants";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { useEffect, useState } from "react";
 type State = {
