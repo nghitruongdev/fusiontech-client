@@ -1,29 +1,13 @@
 import { firebaseAuth } from "@/providers/firebaseAuthProvider";
-import { User } from "firebase/auth";
-import { create } from "zustand";
+import { useEffect, useState } from "react";
 
-type State = {
-    user: User | null;
+export const useAuthUser = () => {
+    const { currentUser } = firebaseAuth.auth;
+    const [user, setUser] = useState(currentUser);
+
+    useEffect(() => {
+        setUser(currentUser);
+    }, [currentUser]);
+
+    return { user };
 };
-
-type Action = {
-    setUser: (user: State["user"]) => void;
-    updateUser: () => void;
-    isAnonymous: () => boolean | undefined;
-};
-
-const getCurrentUser = () => {
-    console.log("getCurrentUser called");
-    return firebaseAuth.auth.currentUser;
-};
-
-export const useAuthStore = create<State>(() => ({
-    user: getCurrentUser(),
-}));
-
-export const setUser = (user: State["user"]) => {
-    useAuthStore.setState({ user: user });
-    console.log("setUser called", useAuthStore.getState().user?.uid);
-};
-
-export default useAuthStore;

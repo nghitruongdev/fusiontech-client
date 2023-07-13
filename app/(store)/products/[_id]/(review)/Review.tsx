@@ -10,7 +10,7 @@ import {
     Avatar,
     useColorModeValue,
 } from "@chakra-ui/react";
-import ButtonPrimary from "@components/ButtonPrimary";
+import ButtonPrimary from "@components/ui/ButtonPrimary";
 import { Button } from "@components/ui/shadcn/button";
 import { Separator } from "@components/ui/shadcn/separator";
 

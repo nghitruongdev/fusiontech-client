@@ -1,6 +1,6 @@
 "use client";
-import FormatPrice from "@components/client/FormatPrice";
 import { useSelectedCartItemStore } from "../useSelectedItemStore";
+import { formatPrice } from "@/lib/utils";
 const useSelectedItems = () => useSelectedCartItemStore((state) => state.items);
 
 const Overview = () => {
@@ -28,20 +28,20 @@ Overview.Price = () => {
                     </p>
 
                     <p className="line-through text-zinc-500 text-base">
-                        <FormatPrice amount={400} />
+                        {formatPrice(400)}
                     </p>
                 </div>
 
                 <div className="text-sm flex justify-between mb-1">
                     <p className="font-semibold">Bạn tiết kiệm được</p>
                     <p className="text-[#2a8703] font-bold bg-green-100 px-[2px] rounded-lg inline-flex">
-                        -<FormatPrice amount={200} />
+                        -{formatPrice(200)}
                     </p>
                 </div>
                 {/* <div className="text-sm flex justify-between">
                         <p className="font-semibold">Thành tiền tạm tính</p>
                         <p className="text-zinc-800 font-normal text-base">
-                            <FormatPrice amount={500} />
+                           
                         </p>
                     </div> */}
             </div>
@@ -74,7 +74,7 @@ Overview.Total = () => {
         <div className="flex items-center justify-between border-b-[1px] border-b-zinc-200">
             <p className="text-xl font-semibold">Thành tiền</p>
             <p className="text-zinc-800 font-bold text-lg">
-                <FormatPrice amount={1000} />
+                {formatPrice(1000)}
             </p>
         </div>
     );

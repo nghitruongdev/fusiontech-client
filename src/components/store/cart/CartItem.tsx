@@ -1,6 +1,5 @@
 "use client";
-import VisualWrapper from "@components/VisualWrapper";
-import FormatPrice from "@components/client/FormatPrice";
+
 import {
     PropsWithChildren,
     ReactNode,
@@ -18,6 +17,7 @@ import { useSelectedCartItemStore } from "./useSelectedItemStore";
 import { Tooltip } from "@chakra-ui/react";
 import { useDebounce } from "usehooks-ts";
 import useCart from "./useCart";
+import { formatPrice } from "../../../lib/utils";
 
 const CartItem = ({ item }: { item: ICartItem }) => {
     console.count(`CartItem ${item.variantId} rendered`);
@@ -108,17 +108,17 @@ CartItem.ProductInfoPrice = () => {
     return (
         <>
             <p className="font-semibold text-xl text-green-500">
-                <FormatPrice amount={3 * 5} />
+                {formatPrice(3 * 5)}
             </p>
             <p className="text-sm line-through text-zinc-500">
-                <FormatPrice amount={3 * 5} />
+                {formatPrice(3 * 5)}
             </p>
             <div className="flex items-center text-xs gap-2">
                 <p className="bg-green-200 text-[8px] uppercase px-2 py-[1px]">
                     You save
                 </p>
                 <p className="text-[#2a8703] font-semibold">
-                    <FormatPrice amount={0} />
+                    {formatPrice(3 * 5)}
                 </p>
             </div>
         </>

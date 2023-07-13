@@ -1,5 +1,5 @@
 "use client";
-import VisualWrapper from "@components/VisualWrapper";
+import VisualWrapper from "@components/ui/VisualWrapper";
 import { useCustomMutation } from "@refinedev/core";
 import { UseFormReturnType, useForm } from "@refinedev/react-hook-form";
 import { useRouter } from "next/navigation";
