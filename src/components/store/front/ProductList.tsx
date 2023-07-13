@@ -50,11 +50,17 @@ const Product = ({
 
 Product.Image = ({ thumbnail }: { thumbnail: IProduct["thumbnail"] }) => {
     return (
-        <div className="relative w-full min-h-[200px] ease-in-out duration-300 scale-90 hover:scale-95">
+        <div
+            className="
+        w-full h-auto overflow-y-hidden
+        ease-in-out duration-300 scale-90 hover:scale-95"
+        >
             <Image
                 src={thumbnail}
                 alt="Product image"
-                fill
+                // fill
+                width={200}
+                height={200}
                 loading="lazy"
                 placeholder="blur"
                 blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMz4irBwAEGQGuUtJ+VQAAAABJRU5ErkJggg=="

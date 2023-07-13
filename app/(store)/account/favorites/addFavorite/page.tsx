@@ -6,40 +6,54 @@ import favoriteApi from "src/api/favoriteAPI";
 import { GoPlus } from "react-icons/go";
 import { BsStarFill } from "react-icons/bs";
 import useMyToast from "@/hooks/useToast";
-
+import { IoMdHeartEmpty } from "react-icons/io";
 const FavoriteProducts = () => {
-    const [productList, setProductList] = useState<any[]>([]);
+    const [products, setProducts] = useState<product[]>([]);
+
+    interface product {
+        id: number;
+        name: string;
+        description: string;
+        image: null;
+        // ...các thuộc tính khác
+    }
+
     // dữ liệu mẫu
+    const pid = [1, 2, 3, 4];
     const uid = "2534684b-8fc6-485b-994a-07ed72ce83e6";
     const imageUrl =
         "https://lh3.googleusercontent.com/1S6Ltn5pJWSMWh0U6V4w80Di1Lq8AVQhuDOzVHbQPmxwcztwofrF_3gyuy7Pk8AJ73MVFCYDgm4r1orx6eh88iwVj9nDyXk=w230-rw";
 
     useEffect(() => {
-        const fetchProductList = async () => {
+        
+
+        const fetchProducts = async () => {
             try {
-                const response = await favoriteApi.get(uid);
-                console.log(response.data);
-                setProductList(response.data._embedded.products);
+                const productPromises = pid.map((id) =>
+                    favoriteApi.getProductId(id),
+                );
+                const responses = await Promise.all(productPromises);
+                const fetchedProducts = responses.map(
+                    (response) => response.data,
+                );
+                setProducts(fetchedProducts);
+                
             } catch (error) {
-                console.log("Fail to fetch favorite list", error);
+                console.log("Failed to fetch products", error);
             }
         };
-        fetchProductList();
+        fetchProducts();
     }, []);
-    const handleToggleFavorite = async (productId: any) => {
+    const addFavoriteProduct = async (productId: any, index: number) => {
         try {
-            // Gọi API để xóa sản phẩm yêu thích
-            await favoriteApi.delete(productId, uid);
+            // Gọi API để thêm sản phẩm yêu thích
+            await favoriteApi.create(productId, uid);
 
-            // Cập nhật danh sách sản phẩm yêu thích
-            const updatedProductList = productList.filter(
-                (product) => product.id !== productId,
-            );
-            setProductList(updatedProductList);
+            // thể hiện thông báo nhỏ khi thực thi
             toast
                 .ok({
                     title: "Thành công",
-                    message: "Hủy yêu thích thành công",
+                    message: "Yêu thích sản phẩm thành công",
                 })
                 .fire();
         } catch (error) {
@@ -47,7 +61,7 @@ const FavoriteProducts = () => {
             toast
                 .fail({
                     title: "Thất bại",
-                    message: "Hủy yêu thích thất bại",
+                    message: "Yêu thích sản phẩm thất bại",
                 })
                 .fire();
         }
@@ -59,24 +73,29 @@ const FavoriteProducts = () => {
     return (
         <div className="mx-auto bg-white rounded">
             <h1 className="text-xl font-semibold pt-2 pl-4">
-                Sản phẩm bạn yêu thích
+                Sản phẩm đã xem gần đây
             </h1>
             <div className="mx-auto">
                 <div className="py-6 px-4 grid grid-cols-4 gap-4">
-                    {productList.map((product: any) => (
+                    {products.map((product, index) => (
                         <div
                             key={product.id}
                             className="border-[1px] border-gray-200 mb-6 group rounded-xl shadow-lg"
                         >
                             <div className="flex justify-end p-2">
-                                <button
-                                    className="hover:opacity-50 transition-opacity hover:scale-125  duration-3000"
-                                    onClick={() =>
-                                        handleToggleFavorite(product.id)
-                                    }
-                                >
-                                    <FaHeart className="text-red-500" />
-                                </button>
+
+                                    <button
+                                        className="hover:scale-125 duration-3000"
+                                        onClick={() =>
+                                            addFavoriteProduct(
+                                                product.id,
+                                                index,
+                                            )
+                                        }
+                                    >
+                                        <IoMdHeartEmpty className="text-gray-600 text-xl" />
+                                    </button>
+                  
                             </div>
                             <div className="w-full h-[150px] overflow-hidden p-1">
                                 <img src={imageUrl} alt="itemImage" />

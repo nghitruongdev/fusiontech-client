@@ -22,7 +22,7 @@ const Header = async () => {
     return (
         <>
             {/* <BannerNavbar /> */}
-            <div className="w-full bg-blue-600 text-white sticky top-0 z-50">
+            <div className="w-full bg-blue-600 text-white sticky top-0 z-40">
                 <div className="w-full h-full border-b-[1px] border-b-white">
                     <Header.Navbar />
                 </div>
