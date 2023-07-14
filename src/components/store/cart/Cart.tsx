@@ -1,6 +1,6 @@
 "use client";
 import { ReactNode } from "react";
-import VisualWrapper from "@components/VisualWrapper";
+import VisualWrapper from "@components/ui/VisualWrapper";
 import CartItemList from "./CartItemList";
 import { CartPanel } from "./panel";
 import useCart, {

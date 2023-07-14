@@ -1,16 +1,22 @@
 import { FieldValue, Timestamp } from "@firebase/firestore";
 
 export interface IProduct {
-    _id: number;
+    id: number | string;
     name: string;
-    isNew: boolean;
-    oldPrice: string;
+    slug: string;
     price: number;
+    compareAtPrice: number;
+    shortDescription: string;
     description: string;
-    brand: string;
-    category: string;
-    image: string;
-    title?: string;
+    thumbnail: string;
+    reviewCount?: number;
+    reviewScore?: number;
+    brand?: IBrand;
+    category?: ICategory;
+    brandId: number;
+    categoryId: number;
+    variants?: IVariant[];
+    variantIds?: number[];
 }
 
 export interface IVariant {
@@ -23,7 +29,13 @@ export interface IVariant {
     _links: _links;
 }
 
-export interface Category {
+export interface IBrand {
+    id: number;
+    name: string;
+    logo: string;
+}
+
+export interface ICategory {
     id: string | undefined;
     name: string;
 }
@@ -168,3 +180,10 @@ export interface IProblemResponse {
         detail: string;
     };
 }
+
+export type Page = {
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    number: number;
+};

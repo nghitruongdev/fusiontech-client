@@ -1,7 +1,7 @@
 import { bannerImg } from "public/assets/images";
 import Image from "next/image";
-import ButtonPrimary from "../ButtonPrimary";
-import CaptionCarousel from "@components/Carousel";
+import ButtonPrimary from "../ui/ButtonPrimary";
+import CaptionCarousel from "@components/ui/Carousel";
 
 const Banner = () => {
     return (

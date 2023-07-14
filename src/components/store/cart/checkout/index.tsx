@@ -2,7 +2,7 @@
 
 import { Spinner } from "@chakra-ui/react";
 import OrderOverview from "@components/store/cart/checkout/OrderOverview";
-import VisualWrapper from "@components/VisualWrapper";
+import VisualWrapper from "@components/ui/VisualWrapper";
 import { useCheckoutContext } from "./CheckoutProvider";
 import { CheckoutForm } from "./(form)";
 import { useSelectedCartItemStore } from "../useSelectedItemStore";

@@ -3,7 +3,7 @@ import { BsStarFill, BsInfoCircle } from "react-icons/bs";
 import { IProduct } from "types";
 import { Badge } from "@components/ui/shadcn/badge";
 import ProductSpecification from "./ProductSpecification";
-import Review from "./(review)/Review";
+import ReviewComponent from "./(review)/Review";
 import Description from "./Description";
 
 async function getData(_id: number): Promise<IProduct[]> {
@@ -23,14 +23,14 @@ async function getData(_id: number): Promise<IProduct[]> {
 
 type Props = {
     params: {
-        _id: number;
+        id: string;
     };
 };
 
-const ProductDetails = async ({ params: { _id } }: Props) => {
-    const products = await getData(_id);
+const ProductDetails = async ({ params: { id } }: Props) => {
+    const products = await getData(+id);
     const product = products.find(
-        (product: IProduct) => product._id == _id,
+        (product: IProduct) => product.id == id,
     ) as IProduct;
     const isDiscount = false;
 
@@ -49,7 +49,7 @@ const ProductDetails = async ({ params: { _id } }: Props) => {
                                             className="p-2 w-1/2 hover:border "
                                         >
                                             <img
-                                                src={product?.image}
+                                                src={product?.thumbnail}
                                                 alt="product image"
                                                 className="cursor-move duration-500"
                                             />
@@ -59,7 +59,7 @@ const ProductDetails = async ({ params: { _id } }: Props) => {
                             </div>
                             <div className="w-4/5">
                                 <img
-                                    src={product?.image}
+                                    src={product?.thumbnail}
                                     alt="product image"
                                     className="w-[80%] transform-origin-top-left cursor-move duration-500"
                                 />
@@ -89,7 +89,7 @@ const ProductDetails = async ({ params: { _id } }: Props) => {
                             {/* Product Info */}
                             <div className="flex flex-col gap-1">
                                 <p className="text-sm underline underline-offset-4 ">
-                                    {product.brand}
+                                    {/* {product.brand} */}
                                 </p>
                                 <p className="text-2xl font-bold">
                                     {product.name}
@@ -106,7 +106,7 @@ const ProductDetails = async ({ params: { _id } }: Props) => {
                                     <BsStarFill />
                                     <p className="">(5.0)</p>
                                     <p className="underline leading-none text-sm">
-                                        11 reviews
+                                        reviews
                                     </p>
                                 </div>
                                 {/* </div> */}
@@ -117,7 +117,7 @@ const ProductDetails = async ({ params: { _id } }: Props) => {
                                             Now ${product.price}
                                         </p>
                                         <p className="text-gray-500 text-md font-normal line-through decoration-[1px] flex gap-1 items-center">
-                                            ${product.oldPrice}{" "}
+                                            ${product.price}{" "}
                                             <span>
                                                 <BsInfoCircle />
                                             </span>
@@ -195,11 +195,11 @@ const ProductDetails = async ({ params: { _id } }: Props) => {
                             </p>
                             <Description />
                         </div>
-                        <div className="mt-12">
-                            <p className="font-bold text-2xl mb-2">
+                        <div className="">
+                            <p className="font-bold text-2xl mt-12 mb-2">
                                 Đánh giá sản phẩm
                             </p>
-                            <Review />
+                            <ReviewComponent />
                         </div>
                     </div>
                     <div className="w-1/3">

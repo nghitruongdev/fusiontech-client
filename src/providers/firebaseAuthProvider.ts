@@ -85,7 +85,16 @@ const check = async (): Promise<CheckResponse> => {
             authenticated: true,
         };
     }
-    return {} as CheckResponse;
+
+    const user = auth.currentUser;
+    if (user) {
+        return {
+            authenticated: true,
+        };
+    }
+    return {
+        authenticated: false,
+    };
 };
 
 const logout =

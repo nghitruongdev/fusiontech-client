@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { warningImg } from "@public/assets/images";
 import { IoMdClose } from "react-icons/io";
-import VisualWrapper from "@components/VisualWrapper";
+import VisualWrapper from "@components/ui/VisualWrapper";
 import { CartOverview } from "./CheckoutOverview";
 import { useSelectedCartItemStore } from "../useSelectedItemStore";
 

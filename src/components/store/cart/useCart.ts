@@ -1,4 +1,4 @@
-import useAuthStore from "@/hooks/useAuth/useAuthUser";
+import { useAuthUser } from "@/hooks/useAuth/useAuthUser";
 import { withStorageDOMEvents } from "@/hooks/withStorageEvent";
 import { firestoreInstance } from "@/lib/firebase";
 import { useCreate, useDelete, useList, useUpdate } from "@refinedev/core";
@@ -37,7 +37,7 @@ const getAllowQuantity = (quantity: number) =>
 const useCart = (): ReturnProps => {
     const cartId = useCartIdStore((state) => state.cartId);
     const setCartId = useCartIdStore((state) => state.setId);
-    const user = useAuthStore((state) => state.user);
+    const { user } = useAuthUser();
 
     const { mutateAsync: create } = useCreate({});
 

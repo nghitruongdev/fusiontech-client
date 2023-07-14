@@ -7,7 +7,7 @@ import { ICartItem } from "types";
 import { Badge } from "@components/ui/shadcn/badge";
 import { SaveButton } from "@refinedev/chakra-ui";
 import { Spinner } from "@chakra-ui/react";
-import ButtonPrimary from "@components/ButtonPrimary";
+import ButtonPrimary from "@components/ui/ButtonPrimary";
 import { useSelectedCartItemStore } from "@components/store/cart/useSelectedItemStore";
 
 const OrderOverview = ({}: // isSubmitting,

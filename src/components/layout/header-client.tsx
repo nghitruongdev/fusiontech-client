@@ -1,8 +1,10 @@
 "use client";
 
+import useCart, { useCartItems } from "@components/store/cart/useCart";
+import { ShoppingBag, UserCircle } from "lucide-react";
+
+import Link from "next/link";
 import Image from "next/image";
-// import { useSession, signIn, signOut } from "next-auth/react";
-import { AiOutlineUser } from "react-icons/ai";
 import {
     Button,
     Menu,
@@ -11,9 +13,32 @@ import {
     MenuItem,
     MenuList,
 } from "@chakra-ui/react";
-import Link from "next/link";
+import { IoSearchOutline } from "react-icons/io5";
+export const HeaderClient = () => {};
 
-const NavbarUserInfo = () => {
+export const CartButton = () => {
+    const {} = useCart();
+    const items = useCartItems();
+    return (
+        <>
+            <Link href="/cart">
+                <div className="flex flex-col justify-center items-center gap-2 h-12 px-5 rounded-full bg-transparent hover:bg-hoverBg duration-300">
+                    <div className="relative">
+                        <ShoppingBag className="text-2xl" />
+                        {/* <BsCart2 className="text-2xl" /> */}
+                        <span className="absolute w-4 h-4 bg-yellow text-black -top-1 -right-1 rounded-full flex items-center justify-center font-bodyFont text-xs">
+                            {Object.keys(items).length}
+                        </span>
+                    </div>
+
+                    {/* <p className="text-[10px] -mt-2">$0.00</p> */}
+                </div>
+            </Link>
+        </>
+    );
+};
+
+export const UserInfo = () => {
     // const { data: session, status } = useSession();
     // const userInfo = session?.user;
 
@@ -53,7 +78,7 @@ const NavbarUserInfo = () => {
     }
     return (
         <div className="navBarHover">
-            <AiOutlineUser className="text-lg" />
+            <UserCircle className="text-lg" />
             <div className="">
                 <p className="text-xs">Sign In</p>
                 <h2 className="text-base font-semibold -mt-1">Account</h2>
@@ -61,4 +86,18 @@ const NavbarUserInfo = () => {
         </div>
     );
 };
-export default NavbarUserInfo;
+
+export const SearchInput = () => {
+    return (
+        <div className="h-10 flex flex-1 relative">
+            <input
+                type="text"
+                placeholder="Search everything at FusionTech store"
+                className="h-full w-full rounded-full px-4 text-black text-base outline-none border-[1px] border-transparent focus-visible:border-black duration-200"
+            />
+            <span className="absolute w-8 h-8 rounded-full flex items-center justify-center top-1 right-1 bg-yellow text-black text-xl">
+                <IoSearchOutline />
+            </span>
+        </div>
+    );
+};

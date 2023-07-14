@@ -2,7 +2,7 @@
 import { ICartItem, IVariant } from "types";
 import Image from "next/image";
 import { useFetch, useUpdateEffect } from "usehooks-ts";
-import VisualWrapper from "@components/VisualWrapper";
+import VisualWrapper from "@components/ui/VisualWrapper";
 import { phoneImg } from "@public/assets/images";
 import { Suspense, createContext, use, useContext, useRef } from "react";
 import CartItem from "./CartItem";

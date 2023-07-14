@@ -5,18 +5,14 @@ import {
     MenuItem,
     MenuList,
     Popover,
-    PopoverArrow,
     PopoverBody,
-    PopoverCloseButton,
     PopoverContent,
-    PopoverHeader,
     PopoverTrigger,
-    useDisclosure,
 } from "@chakra-ui/react";
 import { Laptop } from "lucide-react";
-import { Category } from "types";
+import { ICategory } from "types";
 
-export function CategoryDropDown({ categories }: { categories: Category[] }) {
+export function CategoryDropDown({ categories }: { categories: ICategory[] }) {
     return (
         <>
             <Popover isLazy>
