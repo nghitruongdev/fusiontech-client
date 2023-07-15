@@ -4,9 +4,8 @@ import useCart, { useCartItems } from "@components/store/cart/useCart";
 import { ShoppingBag, UserCircle } from "lucide-react";
 
 import Link from "next/link";
-import Image from "next/image";
 import {
-    Button,
+    Avatar,
     Menu,
     MenuButton,
     MenuDivider,
@@ -14,6 +13,13 @@ import {
     MenuList,
 } from "@chakra-ui/react";
 import { IoSearchOutline } from "react-icons/io5";
+import { useAuthUser } from "@/hooks/useAuth/useAuthUser";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@components/ui/Skeleton";
+import { User } from "@firebase/auth";
+// import useModals, { ModalProvider } from "@components/ui/AlertModals";
+import { useLogout } from "@refinedev/core";
+import useCallbackUrl from "@/hooks/useCallbackUrl";
 export const HeaderClient = () => {};
 
 export const CartButton = () => {
@@ -38,25 +44,37 @@ export const CartButton = () => {
     );
 };
 
-export const UserInfo = () => {
-    // const { data: session, status } = useSession();
-    // const userInfo = session?.user;
-
-    if (status === "authenticated") {
-        return (
+export const UserInfoMenu = ({ user }: { user: User }) => {
+    const { displayName, email, phoneNumber, photoURL } = user;
+    const display = displayName ?? email ?? phoneNumber;
+    // const { confirm } = useModals();
+    const { mutate: logout } = useLogout();
+    return (
+        <>
             <Menu>
-                <MenuButton as={Button} variant="unstyled">
-                    <div className="flex gap-2 items-center navBarHover">
-                        <Image
-                            width={500}
-                            height={500}
-                            className="w-10 rounded-full object-cover"
-                            src={"" ?? ``}
-                            alt="userImage"
+                <MenuButton
+                    as={"div"}
+                    className="cursor-pointer navBarHover max-w-[200px]"
+                >
+                    <div className="flex gap-2 items-center ">
+                        <Avatar
+                            src={photoURL ?? ""}
+                            name={display ?? ""}
+                            backdropBlur={"lg"}
+                            bg={"blue.700"}
+                            size="md"
+                            scale={"80"}
+                            boxSize={10}
                         />
-                        <h2 className="text-base font-semibold -mt-1">
-                            {/* {userInfo?.name} */}
-                        </h2>
+                        <div className="text-start text-sm font-normal text-ellipsis overflow-hidden">
+                            <p className="text-xs">Xin chào,</p>
+                            <p className="font-semibold text-md ">
+                                {displayName ??
+                                    email ??
+                                    phoneNumber ??
+                                    "Tài khoản của tôi"}
+                            </p>
+                        </div>
                     </div>
                 </MenuButton>
                 <MenuList
@@ -69,21 +87,81 @@ export const UserInfo = () => {
                     </MenuItem>
 
                     <MenuDivider />
-                    {/* <MenuItem onClick={() => signOut()}>Log out</MenuItem> */}
+                    <MenuItem
+                        onClick={async () => {
+                            const result = await confirm(
+                                "Bạn có muốn đăng xuất khỏi hệ thống?",
+                            );
+                            if (!result) {
+                                console.log("No longer want to logged out");
+                                return;
+                            }
+                            logout(undefined, {
+                                onSuccess() {
+                                    console.log("log out successfully");
+                                },
+                            });
+                        }}
+                    >
+                        Đăng xuất
+                    </MenuItem>
                 </MenuList>
             </Menu>
-            // <div className="navBarHover">
-            // </div>
+        </>
+    );
+};
+
+const DynamicUserMenu = dynamic(
+    () =>
+        new Promise((res) => {
+            setTimeout(() => {
+                res(undefined);
+            }, 300);
+        })
+            .then(() => import("./header-client"))
+            .then((mod) => mod.UserInfoMenu),
+    {
+        loading: () => (
+            <>
+                <div className="flex items-center space-x-4">
+                    <Skeleton className="h-12 w-12 rounded-full" />
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-[100px]" />
+                        <Skeleton className="h-4 w-[100px]" />
+                    </div>
+                </div>
+            </>
+        ),
+    },
+);
+export const UserInfo = () => {
+    const { user } = useAuthUser();
+    const { callbackUrl } = useCallbackUrl();
+
+    if (user)
+        return (
+            // <ModalProvider>
+            <DynamicUserMenu user={user} />
+            // </ModalProvider>
         );
-    }
     return (
-        <div className="navBarHover">
+        <Link
+            href={{
+                pathname: "/auth/login",
+                query: {
+                    ...(callbackUrl && { callbackUrl }),
+                },
+            }}
+            className="navBarHover"
+        >
+            {/* <div className="navBarHover"> */}
             <UserCircle className="text-lg" />
             <div className="">
-                <p className="text-xs">Sign In</p>
-                <h2 className="text-base font-semibold -mt-1">Account</h2>
+                <p className="text-xs">Đăng nhập</p>
+                <h2 className="text-base font-semibold -mt-1">Tài khoản</h2>
             </div>
-        </div>
+            {/* </div> */}
+        </Link>
     );
 };
 

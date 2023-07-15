@@ -10,9 +10,11 @@ import {
     FormErrorIcon,
     FormErrorMessage,
     Input,
+    Spinner,
     Stack,
+    useBoolean,
 } from "@chakra-ui/react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader } from "lucide-react";
 import { ckMerge } from "@/lib/chakra-merge";
 import { AuthActionResponse } from "@refinedev/core/dist/interfaces";
 import { PrefetchKind } from "next/dist/client/components/router-reducer/router-reducer-types";
@@ -20,20 +22,23 @@ import { ICredentials } from "types/auth";
 import AuthPage from "../AuthPage";
 import PasswordInput from "@components/ui/PasswordInput";
 import { firebaseAuth } from "@/providers/firebaseAuthProvider";
-
+import { waitPromise } from "@/lib/promise";
+import { cn } from "components/lib/utils";
 const LoginForm = () => {
     const [errorState, setErrorState] = useState("");
-    const [isRedirecting, setIsRedirecting] = useState<boolean>(false);
+    const [isRedirecting, { on: onRedirecting }] = useBoolean();
     const formMethods = useForm<ICredentials["credentials"]>({});
     const {
         handleSubmit,
-        formState: { isSubmitting, touchedFields },
+        formState: { isSubmitting: formSubmitting, touchedFields },
         reset,
+        setFocus,
     } = formMethods;
     const router = useRouter();
     const params = useSearchParams();
-    const callbackUrl = params.get("callbackUrl") ?? "/";
-    const isLoading = isSubmitting;
+    const callbackParam = params.get("callbackUrl");
+    const callbackUrl = callbackParam ? decodeURIComponent(callbackParam) : "/";
+    const isLoading = formSubmitting;
     useEffect(() => {
         if (callbackUrl)
             router.prefetch(callbackUrl, {
@@ -42,6 +47,7 @@ const LoginForm = () => {
     }, []);
 
     useEffect(() => {
+        console.log("touch field effect ran");
         if (touchedFields.email || touchedFields.password) {
             setErrorState("");
         }
@@ -59,21 +65,22 @@ const LoginForm = () => {
         });
         handlePostLogin(result);
     };
-
     const onCredentialsLogin = async (
         credentials: ICredentials["credentials"],
     ) => {
-        reset(undefined, {
-            keepDirtyValues: true,
-            keepValues: true,
-            keepIsValid: true,
-            keepErrors: false,
-            keepTouched: false,
-        });
+        console.log(
+            "isSubmitting, isLoading, isRedirecting",
+            formSubmitting,
+            isLoading,
+            isRedirecting,
+        );
+
+        await waitPromise(0.3 * 1000);
         const result = await firebaseAuth.login({
             providerName: "credentials",
             credentials: credentials,
         });
+
         handlePostLogin(result);
     };
 
@@ -81,12 +88,17 @@ const LoginForm = () => {
         console.log("data", data);
         const { success, error } = data as AuthActionResponse;
         if (success) {
-            setIsRedirecting(true);
+            onRedirecting();
             router.push(callbackUrl);
             return;
         }
         if (error) {
             setErrorState(`${error?.message}`);
+            reset(undefined, {
+                keepValues: true,
+                keepTouched: false,
+            });
+            setFocus("email");
         }
     };
     //todo: have not validate email field
@@ -103,8 +115,8 @@ const LoginForm = () => {
                         </form>
 
                         <div className={`grid gap-2`}>
-                            {!isLoading && errorState && (
-                                <p className="flex sm:items-start items-center text-center text-sm font-normal text-red-600">
+                            {errorState && (
+                                <p className="flex h-6 sm:items-start items-center text-center text-sm font-normal text-red-600">
                                     <AlertCircle
                                         fill="#f02424"
                                         fillOpacity="90%"
@@ -114,20 +126,32 @@ const LoginForm = () => {
                                 </p>
                             )}
                             <Link
-                                href={"/auth/forgot-password"}
+                                href={{
+                                    pathname: "/auth/forgot-password",
+                                    query: {
+                                        ...(callbackUrl && { callbackUrl }),
+                                    },
+                                }}
                                 className="text-zinc-700 text-sm hover:underline underline-offset-2 text-end"
                             >
                                 Quên mật khẩu?
                             </Link>
                         </div>
                         <button
-                            disabled={isLoading}
+                            disabled={isLoading || !!errorState}
                             onClick={handleSubmit(onCredentialsLogin)}
-                            className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg w-full h-12 shadow-sm checked:bg-blue-700"
+                            className={cn(
+                                "bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg w-full h-12 shadow-sm",
+                                "disabled:cursor-not-allowed",
+                            )}
                         >
-                            {isLoading || isRedirecting
-                                ? "Đang đăng nhập"
-                                : "Đăng nhập"}
+                            {isLoading || isRedirecting ? (
+                                <p className="flex gap-2 justify-center">
+                                    Đang đăng nhập <Spinner speed="0.5s" />
+                                </p>
+                            ) : (
+                                "Đăng nhập"
+                            )}
                         </button>
                         <div className="flex gap-4 items-center">
                             <hr className="flex-grow" />
@@ -144,7 +168,12 @@ const LoginForm = () => {
                         <div className="flex justify-center ">
                             <p>Bạn chưa có tài khoản? </p>
                             <Link
-                                href="/register"
+                                href={{
+                                    pathname: "/auth/register",
+                                    query: {
+                                        ...(callbackUrl && { callbackUrl }),
+                                    },
+                                }}
                                 className="text-red-500 font-semibold ml-2 underline underline-offset-2"
                             >
                                 Đăng ký ngay

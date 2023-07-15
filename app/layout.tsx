@@ -1,6 +1,7 @@
 import "./globals.css";
+import "@smastrom/react-rating/style.css";
+
 import { Inter, Open_Sans } from "next/font/google";
-import AuthProvider from "@components/layout/providers/AuthProvider";
 import dynamic from "next/dynamic";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -24,9 +25,8 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en">
-            <body className={`${inter.className} font-sans`}>
+            <body className={`${inter.className} font-sans relative`}>
                 <DynamicAuthProvider>{children}</DynamicAuthProvider>
-                {/* <NextAuthProvider>{children}</NextAuthProvider> */}
             </body>
         </html>
     );

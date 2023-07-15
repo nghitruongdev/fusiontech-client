@@ -64,7 +64,7 @@ const dataProvider = (
             data?._embedded?.[meta?._embeddedResource ?? resource] ?? data;
         const page = data?.page;
 
-        const total = page?.totalElements ?? +headers["x-total-count"];
+        const total = page?.totalElements ?? headers["x-total-count"];
         return {
             data: fetchData,
             total: total || fetchData.length,
@@ -160,11 +160,7 @@ const dataProvider = (
         headers,
         meta,
     }) => {
-        let requestUrl = `${url}?`;
-
-        // if (!sorters || !!filters || !!query) {
-        //     requestUrl = `${url}?`;
-        // }
+        let requestUrl = !!sorters || !!filters || !!query ? `${url}?` : url;
 
         if (!!sorters) {
             const generatedSort = generateSort(sorters);
@@ -193,6 +189,7 @@ const dataProvider = (
                 ...headers,
             };
         }
+        console.log("requestUrl", requestUrl);
 
         let axiosResponse;
         switch (method) {
@@ -211,10 +208,24 @@ const dataProvider = (
                 break;
         }
 
-        const { data } = axiosResponse;
+        const { data: response } = axiosResponse;
+        let data =
+            response?._embedded?.[meta?._embeddedResource] ??
+            response?._embedded?.[meta?.resource] ??
+            response;
 
+        if (meta?.projection) {
+            if (Array.isArray(data)) {
+                data = data.map((item) => ({
+                    ...item,
+                    projection: meta.projection,
+                }));
+            } else {
+                data = { ...data, projection: meta.projection };
+            }
+        }
         return Promise.resolve({
-            data: data?._embedded?.[meta?._embeddedResource] ?? data,
+            data,
         });
     },
 });

@@ -18,8 +18,11 @@ import {
 import Link from "next/link";
 import AuthPage from "../AuthPage";
 import { firebaseAuth } from "@/providers/firebaseAuthProvider";
+import { Loader } from "lucide-react";
 const ForgotPasswordForm = () => {
-    const [showResult, { on }] = useBoolean();
+    const [showResult, { on: onShowResult }] = useBoolean();
+    const [isSubmitting, { on: onSubmitting, off: offSubmitting }] =
+        useBoolean();
     const {
         register,
         handleSubmit,
@@ -27,8 +30,12 @@ const ForgotPasswordForm = () => {
         formState: { errors },
     } = useForm<{ email: string }>({});
     const onResetMail = async ({ email }: any) => {
+        onSubmitting();
+        setTimeout(() => {
+            onShowResult();
+            offSubmitting();
+        }, 500);
         const result = await firebaseAuth.forgotPassword(email);
-        on();
     };
     return (
         <AuthPage
@@ -97,8 +104,13 @@ const ForgotPasswordForm = () => {
                                 flex={"1 0 auto"}
                                 _hover={{ bg: "blue.500" }}
                                 _focus={{ bg: "blue.500" }}
+                                px="4"
                             >
-                                Tiếp tục
+                                {isSubmitting ? (
+                                    <Loader className="animate-spin 3000" />
+                                ) : (
+                                    "Tiếp tục"
+                                )}
                             </Button>
                         </FormControl>
                     </Stack>

@@ -8,15 +8,8 @@ import { FaPlaceOfWorship } from "react-icons/fa";
 import { MdOutlineLocationOn } from "react-icons/md";
 import { Suspense } from "react";
 import { CategoryDropDown, CategoryDropDownButton } from "./CategoryDropdown";
-import dynamic from "next/dynamic";
 import { getCategoriesList } from "@/lib/data/categories";
-import { FavoriteButton } from "../store/front/client";
-import {
-    CartButton,
-    HeaderClient,
-    SearchInput,
-    UserInfo,
-} from "./header-client";
+import { CartButton, SearchInput, UserInfo } from "./header-client";
 
 const Header = async () => {
     return (

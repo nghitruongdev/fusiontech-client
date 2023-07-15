@@ -1,20 +1,18 @@
 "use client";
 import { ICartItem, IVariant } from "types";
-import Image from "next/image";
 import { useFetch, useUpdateEffect } from "usehooks-ts";
-import VisualWrapper from "@components/ui/VisualWrapper";
-import { phoneImg } from "@public/assets/images";
-import { Suspense, createContext, use, useContext, useRef } from "react";
+import { Suspense, createContext, useContext, useRef } from "react";
 import CartItem from "./CartItem";
 import { useSelectedCartItemStore } from "./useSelectedItemStore";
-import { Award, BadgeCheck } from "lucide-react";
-import { useCartItems } from "./useCart";
+import useCart, { useCartItems } from "./useCart";
+import { Button } from "@chakra-ui/react";
+import { useDialog } from "@components/ui/DialogProvider";
 
 const CartItemList = () => {
     const data = useFetch<IVariant[]>("/api/products", {});
     return (
         <div about="Cart Item List">
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-2">
                 <CartItemList.Provider>
                     <CartItemList.Header />
                     <Suspense fallback="Loading items in cart....">
@@ -48,8 +46,9 @@ CartItemList.Provider = ({ children }: React.PropsWithChildren<{}>) => {
 
 CartItemList.Header = () => {
     const items = useCartItems();
+
     return (
-        <>
+        <div className="flex justify-between items-end gap-4 px-2">
             <h1 className="text-2xl font-bold text-black">
                 <span>Giỏ hàng </span>
                 <span className="text-lightText font-normal">
@@ -60,15 +59,43 @@ CartItemList.Header = () => {
                 <Image className="w-10" src={phoneImg} alt="phoneImage" />
                 <p>Pickup and delivery options</p>
             </div> */}
+
+            <CartItemList.ClearAllButton />
+        </div>
+    );
+};
+
+CartItemList.ClearAllButton = () => {
+    const { confirm } = useDialog();
+    const { clearCart } = useCart();
+    const onClearCartHandler = () => {
+        confirm({
+            header: <p className="flex gap-2">Xoá tất cả sản phẩm</p>,
+            message:
+                "Bạn có chắc chắn muốn xoá tất cả sản phẩm trong giỏ hàng?",
+        }).then((res) => {
+            if (res) {
+                clearCart();
+            }
+        });
+    };
+
+    return (
+        <>
+            <Button
+                onClick={onClearCartHandler}
+                variant={"link"}
+                fontSize={"sm"}
+            >
+                Xoá tất cả
+            </Button>
+            {/* {dialog} */}
         </>
     );
 };
 
 CartItemList.Body = () => {
     const items = Object.values(useCartItems()).reverse();
-    const ctx = useCartContext();
-    console.count("CartItemList Body rendered");
-
     // use(
     //     new Promise((res) => {
     //         if (ctx.status === "success") {
@@ -89,7 +116,7 @@ CartItemList.Body = () => {
                             <span className="mx-1 font-medium text-xs text-zinc-500">
                                 Hãng chính hãng được bán và phân phối bởi
                             </span>
-                            <span className="text-sky-600 font-semibold text-md">
+                            <span className="text-blue-800 font-bold uppercase text-base">
                                 FusionTech
                             </span>
                         </p>
@@ -104,9 +131,6 @@ CartItemList.Body = () => {
                             />
                         ))}
                     </div>
-                    <button className="w-44 bg-red-500 text-white h-10 rounded-full text-base font-semibold hover:bg-red-800 duration-300 mt-4">
-                        Reset Cart
-                    </button>
                 </div>
             </div>
         </>

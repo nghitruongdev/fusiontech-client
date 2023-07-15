@@ -20,6 +20,10 @@ const DynamicColorScript = dynamic(
         ssr: false,
     },
 );
+const DynamicDialogProvider = dynamic(
+    () => import("@components/ui/DialogProvider"),
+    { ssr: false },
+);
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
@@ -56,6 +60,7 @@ const RefineProvider = ({ children }: { children: React.ReactNode }) => {
             >
                 {children}
             </Refine>
+            <DynamicDialogProvider />
         </ChakraProvider>
     );
 };

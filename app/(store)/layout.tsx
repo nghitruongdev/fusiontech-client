@@ -1,4 +1,4 @@
-import { firebaseAuth } from "@/providers/firebaseAuthProvider";
+import { Portal } from "@chakra-ui/react";
 import Footer from "@components/layout/Footer";
 import Header from "@components/layout/Header";
 import RefineProvider from "@components/layout/providers/RefineProvider";
@@ -14,8 +14,6 @@ export default function StoreLayout({
 }: {
     children: React.ReactNode;
 }) {
-    console.debug("Store Layout rendered");
-
     return (
         <>
             <RefineProvider>

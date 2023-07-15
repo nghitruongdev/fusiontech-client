@@ -20,7 +20,6 @@ import useCart from "./useCart";
 import { formatPrice } from "../../../lib/utils";
 
 const CartItem = ({ item }: { item: ICartItem }) => {
-    console.count(`CartItem ${item.variantId} rendered`);
     return (
         <>
             <div className="w-full flex p-2 gap-2 border-t-[1px] border-zinc-200">

@@ -1,14 +1,29 @@
 import { waitPromise } from "@/lib/promise";
 import { toRecord } from "@/lib/utils";
 import { IProduct } from "types";
-import { serverDataProvider } from "./provider";
+import { serverDataProvider as provider } from "./provider";
 
+const resource = "products";
+const key = "id";
+const projection = {
+    full: "full",
+};
 export const getProductsWithDetails = async () => {
-    return serverDataProvider.getList<IProduct, "id">({
-        resource: "products",
-        key: "id",
+    return provider.getList<IProduct, "id">({
+        resource,
+        key,
         query: {
-            projection: "full",
+            projection: projection.full,
+        },
+    });
+};
+
+export const getOneProduct = async (id: string | number) => {
+    return provider.getOne<IProduct>({
+        resource,
+        id: id,
+        query: {
+            projection: projection.full,
         },
     });
 };

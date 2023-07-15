@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Heart, Plus } from "lucide-react";
 import { formatPrice } from "../../../lib/utils";
 import { FavoriteButton } from "@components/store/front/client";
+import NextLinkContainer from "@components/ui/NextLinkContainer";
 
 const ProductList = async () => {
     const products = await getProductsWithDetails();
@@ -34,15 +35,18 @@ const Product = ({
             aria-label={`Product Item:${name}`}
             className="p-1 group cursor-pointer lg:min-w-[16.666667%] md:min-w-[25%] sm:min-w-[33.333333%] min-w-[50%]"
         >
-            <Product.Image thumbnail={thumbnail} />
-            <div className="px-2 flex flex-col justify-center">
-                <div className="flex justify-between">
-                    {/* <Product.DetailButton id={id} slug={slug} /> */}
+            <NextLinkContainer href={`/products/${id}`}>
+                <Product.Image thumbnail={thumbnail} />
+                <div className="px-2 flex flex-col justify-center">
+                    <div className="flex justify-between">
+                        {/* <Product.DetailButton id={id} slug={slug} /> */}
+                    </div>
+                    <Product.Brand />
+                    <Product.Price />
+                    <Product.Name name={name} />
                 </div>
-                <Product.Brand />
-                <Product.Price />
-                <Product.Name name={name} />
-            </div>
+            </NextLinkContainer>
+
             {/* <Product.Review /> */}
         </div>
     );

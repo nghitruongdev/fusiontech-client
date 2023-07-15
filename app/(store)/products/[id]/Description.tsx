@@ -1,6 +1,7 @@
 const Description = () => {
     return (
-        <>
+        <div className="h-[600px]">
+            <p className="font-bold text-xl mb-2">Mô tả sản phẩm</p>
             <div className="container mx-auto space-y-4 mb-4 overflow-y-scroll h-[600px] pl-2">
                 <div className="appearance">
                     <h4 className=" font-semibold text-lg text-zinc-700">
@@ -71,7 +72,7 @@ const Description = () => {
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 

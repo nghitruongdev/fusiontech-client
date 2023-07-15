@@ -1,4 +1,4 @@
-import { APP_API } from "types/constants";
+import { API_URL } from "types/constants";
 import axios, {
     AxiosInterceptorManager,
     AxiosRequestConfig,
@@ -14,7 +14,7 @@ type OptionProps = {
 };
 
 const axiosInstance = axios.create({
-    baseURL: APP_API.url,
+    baseURL: API_URL,
 });
 
 export const getFetcher = ({
@@ -26,7 +26,7 @@ export const getFetcher = ({
 } = {}) => {
     return async (url: string) => {
         // const timeout = await new Promise((res) => setTimeout(res, 500))
-        console.debug("axios fetch", url, APP_API.url);
+        console.debug("axios fetch", url, API_URL);
         const res = await axiosInstance.get(url);
 
         return transform ? transform(res.data) : res.data;

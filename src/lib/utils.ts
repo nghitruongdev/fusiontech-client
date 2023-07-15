@@ -1,3 +1,6 @@
+import { usePathname, useSearchParams } from "next/navigation";
+import { stringify, stringifyUrl } from "query-string";
+
 export const formatPrice = (amount: number) => {
     const formatted = new Number(amount).toLocaleString("vi-VN", {
         style: "currency",
@@ -33,4 +36,17 @@ export const blurColorDataUrl = () => {
             triplet(0, r, g) + triplet(b, 255, 255)
         }/yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==`;
     return rgbDataURL;
+};
+
+export const useCurrentUrl = () => {
+    const searchParams = useSearchParams();
+    const pathName = usePathname();
+    const query = {} as any;
+    searchParams.forEach((value, key) => (query[key] = value));
+
+    return stringifyUrl({ url: pathName, query });
+};
+
+export const cleanUrl = (dirtyUrl: string) => {
+    return dirtyUrl.replace(/{.*}/, "");
 };

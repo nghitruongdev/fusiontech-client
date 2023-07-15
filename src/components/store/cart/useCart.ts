@@ -1,4 +1,5 @@
 import { useAuthUser } from "@/hooks/useAuth/useAuthUser";
+import useNotification from "@/hooks/useNotification";
 import { withStorageDOMEvents } from "@/hooks/withStorageEvent";
 import { firestoreInstance } from "@/lib/firebase";
 import { useCreate, useDelete, useList, useUpdate } from "@refinedev/core";
@@ -22,7 +23,8 @@ type ReturnProps = {
     updateItem: (item: ICartItem) => void;
     removeItem: (id: string) => void;
     createCart: () => void;
-    removeCart: (id: string) => void;
+    // removeCart: (id: string) => void;
+    clearCart: () => void;
 };
 
 const CART_RESOURCE = "carts";
@@ -31,8 +33,11 @@ const getResource = (resource: string) => ({
     dataProviderName: "firestore",
     resource,
 });
+export const ALLOW_QUANTITY = 10;
 const getAllowQuantity = (quantity: number) =>
-    Math.round(quantity) > 10 ? 10 : Math.round(quantity);
+    Math.round(quantity) > ALLOW_QUANTITY
+        ? ALLOW_QUANTITY
+        : Math.round(quantity);
 
 const useCart = (): ReturnProps => {
     const cartId = useCartIdStore((state) => state.cartId);
@@ -80,7 +85,6 @@ const useCart = (): ReturnProps => {
 
     //update cart
     useEffect(() => {
-        console.log("use effect use cart ran", cartId);
         if (!!!cartId) {
             return;
         }
@@ -106,9 +110,8 @@ const useCart = (): ReturnProps => {
 
     //update items
     useEffect(() => {
-        console.log("use effect cart items ran", cartId);
-        if (!!!cartId) {
-            if (!!items.length) {
+        if (!cartId) {
+            if (!!Object.keys(items).length) {
                 clearItems();
             }
             return;
@@ -189,6 +192,10 @@ const useCart = (): ReturnProps => {
             },
         );
     };
+
+    const clearCurrentCart = () => {
+        if (cartId) deleteCart(cartId);
+    };
     const addCartItem = async (addItem: ICartItem) => {
         if (!!!cartId) {
             createCart();
@@ -208,6 +215,7 @@ const useCart = (): ReturnProps => {
             });
             return;
         }
+
         create({
             ...getResource(ITEMS_RESOURCE(cartId ?? "")),
             values: {
@@ -220,11 +228,11 @@ const useCart = (): ReturnProps => {
     };
 
     const updateCartItem = async ({ id, variantId, quantity }: ICartItem) => {
-        if (!!!cartId) {
+        if (!cartId) {
             console.error("Cart id or item id not found");
             return;
         }
-        if (!!!id || !!!variantId || !!!items[variantId]) {
+        if (!id || !variantId || !items[variantId]) {
             console.error("Update error: Check your input.");
             return;
         }
@@ -237,7 +245,9 @@ const useCart = (): ReturnProps => {
             id: string,
             variantId: number,
             quantity: number,
-        ) =>
+        ) => {
+            const allowQty = getAllowQuantity(quantity);
+
             update({
                 ...getResource(ITEMS_RESOURCE(cartId ?? "")),
                 id: id,
@@ -248,6 +258,7 @@ const useCart = (): ReturnProps => {
                 },
                 successNotification: false,
             });
+        };
 
         const currentCartItemBasedOnVariantId = items[variantId];
         if (currentCartItemBasedOnVariantId) {
@@ -341,14 +352,14 @@ const useCart = (): ReturnProps => {
         updateItem: updateCartItem,
         removeItem: deleteCartItem,
         createCart,
-        removeCart: deleteCart,
+        clearCart: clearCurrentCart,
     };
 };
 
 type State = {
     cart: ICart | undefined;
     // items: ICartItem[];
-    items: Record<string, ICartItem>;
+    items: Record<number, ICartItem>;
     setCart: (cart: State["cart"]) => void;
     addItem: (item: State["items"][number]) => void;
     removeItem: (item: State["items"][number]) => void;

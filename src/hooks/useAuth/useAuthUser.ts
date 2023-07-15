@@ -1,13 +1,20 @@
-import { firebaseAuth } from "@/providers/firebaseAuthProvider";
-import { useEffect, useState } from "react";
+import { User } from "@firebase/auth";
+import { create } from "zustand";
+
+type State = {
+    user: User | null;
+};
+
+const store = create<State>()(() => ({
+    user: null,
+}));
 
 export const useAuthUser = () => {
-    const { currentUser } = firebaseAuth.auth;
-    const [user, setUser] = useState(currentUser);
-
-    useEffect(() => {
-        setUser(currentUser);
-    }, [currentUser]);
-
-    return { user };
+    const user = store((state) => state.user);
+    return {
+        user,
+    };
+};
+export const setAuthUser = (user: State["user"]) => {
+    store.setState(() => ({ user }));
 };

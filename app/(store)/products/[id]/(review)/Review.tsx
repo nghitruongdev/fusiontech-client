@@ -121,6 +121,7 @@ const ReviewComponent = () => {
 
     return (
         <div>
+            <p className="font-bold text-2xl mt-12 mb-2">Đánh giá sản phẩm</p>
             {/* Hiển thị bảng thống kê review */}
             <div className="mb-4">
                 <div className="flex mt-2">

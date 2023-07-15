@@ -10,24 +10,62 @@ export interface IProduct {
     description: string;
     thumbnail: string;
     reviewCount?: number;
-    reviewScore?: number;
+    avgRating?: number;
     brand?: IBrand;
     category?: ICategory;
     brandId: number;
     categoryId: number;
     variants?: IVariant[];
     variantIds?: number[];
+    _links?: {
+        self: {
+            href: string;
+        };
+        product: {
+            href: string;
+            templated: true;
+        };
+        category: {
+            href: string;
+        };
+        variants: {
+            href: string;
+            templated: true;
+        };
+        brand: {
+            href: string;
+        };
+    };
 }
 
-export interface IVariant {
+export type IVariant = {
     id: number;
     image: string;
     price: number;
     active: boolean;
     availableQuantity?: number;
     product?: IProduct;
+    attributes?: IAttribute[];
     _links: _links;
-}
+};
+
+export type IAttribute = {
+    id: number;
+    name: string;
+    value: string;
+    _links: {
+        self: {
+            href: string;
+        };
+        variantAttribute: {
+            href: string;
+        };
+        variant: {
+            href: string;
+            templated: true;
+        };
+    };
+};
 
 export interface IBrand {
     id: number;
