@@ -1,13 +1,8 @@
+import { IProduct, IAttribute, _links } from "types";
+
 export const API_URL = "http://localhost:8080/api";
 export const fakeUserId = process.env.NEXT_PUBLIC_FAKE_USER_ID;
-export const resources = {
-    categories: {
-        name: "Danh mục sản phẩm",
-    },
-    products: {
-        name: "Sản phẩm",
-    },
-};
+
 export const RESOURCE_API = {
     url: API_URL,
     users: {
@@ -96,16 +91,3 @@ export const RESOURCE_API = {
 //         image: {
 //             url: (name?: string) => {
 //                 if (!name) return "";
-
-//                 return `https://firebasestorage.googleapis.com/v0/b/${firebaseBucket}
-// /o/${name.replace("/", "%2F")}?alt=media&metadata=true
-// `;
-//             },
-//         },
-//         carts: {
-//             url: "",
-//         },
-//     },
-// };
-
-// export default config;

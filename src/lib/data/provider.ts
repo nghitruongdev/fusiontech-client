@@ -30,6 +30,7 @@ type GetOneProps = {
 
 type CustomProps<T> = {
     resource?: string;
+    projecion?: string;
     pathName?: string;
     url?: string;
     baseUrl?: string;
@@ -83,13 +84,13 @@ export type ResourceData<T, K extends keyof T | undefined> = K extends keyof T
       }
     : never;
 
-type RecordData<T, K extends keyof T> = {
+export type RecordData<T, K extends keyof T> = {
     data: Record<K, T>;
     page?: Page;
     _links?: _listLinks | _searchLinks;
 };
 
-type ListData<T> = {
+export type ListData<T> = {
     data: T[];
     page?: Page;
     _links?: _listLinks | _searchLinks;
@@ -213,19 +214,24 @@ export const serverDataProvider = {
         };
     },
     custom: async <T>({
-        resource,
         url,
         pathName,
         baseUrl = BASE_URL,
         cache,
         query,
+        resource,
+        projecion,
     }: CustomProps<T>): Promise<T | ListData<T>> => {
         if (!url && !pathName) {
             throw new Error("Url or Pathname is required");
         }
+
         const href = stringifyUrl({
             url: url ?? `${baseUrl}/${pathName}`,
-            query,
+            query: {
+                ...query,
+                projection: projecion ?? query?.projection,
+            },
         });
         const res = await fetch(href, {
             cache,
@@ -248,3 +254,9 @@ export const serverDataProvider = {
         return result as T;
     },
 };
+
+// function hasResource<T, R extends ResourceName | undefined>(
+//     props: CustomProps<T, R>,
+// ): props is CustomProps<T, R> & Resource<R> {
+//     return "resource" in props;
+// }

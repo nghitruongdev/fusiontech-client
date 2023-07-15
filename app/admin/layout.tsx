@@ -10,7 +10,7 @@ import {
 } from "@refinedev/chakra-ui";
 import { Refine } from "@refinedev/core";
 import routerProvider from "@refinedev/nextjs-router/app";
-import { resources } from "types/constants";
+import { old_resources } from "types/constants";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (

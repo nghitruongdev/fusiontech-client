@@ -1,11 +1,44 @@
 import { FieldValue, Timestamp } from "@firebase/firestore";
 
+export type ResourceName = "categories" | "variants" | "orders";
+
+// export type Projection = {
+//     categories: undefined;
+//     variants: "with-attributes";
+//     orders: undefined;
+// };
+export const resources = (name: ResourceName) => name;
+export const searchAPI = {
+    orders: {},
+    categories: undefined,
+    variants: undefined,
+    products: {
+        countProductSold: (productId: number) =>
+            `products/search/countProductSold?productId=${productId}`,
+    },
+};
+
+export const projectionAPI = {
+    categories: {},
+    variants: {
+        withAttributes: "with-attributes",
+    },
+    orders: {},
+};
+
+// export type Resource<T extends ResourceName | undefined> =
+//     T extends ResourceName
+//         ? {
+//               resource: T;
+//               projection?: Projection[T];
+//               search?: searchAPI[T];
+//           }
+//         : never;
+
 export interface IProduct {
     id: number | string;
     name: string;
     slug: string;
-    price: number;
-    compareAtPrice: number;
     shortDescription: string;
     description: string;
     thumbnail: string;

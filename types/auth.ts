@@ -18,6 +18,17 @@ export type ICredentials = {
     };
 };
 
+export type IRegister = {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    phone: string;
+    agree?: boolean;
+    subscription?: boolean;
+};
+
 export type IUpdatePassword = {} & IResetPassword;
 
 export type IResetPassword = {

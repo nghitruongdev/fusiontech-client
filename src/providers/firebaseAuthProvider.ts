@@ -10,6 +10,9 @@ import {
     getAuth,
     UserCredential,
     AuthError,
+    createUserWithEmailAndPassword,
+    updateCurrentUser,
+    updateProfile,
 } from "firebase/auth";
 import {
     AuthActionResponse,
@@ -19,7 +22,7 @@ import {
 } from "@refinedev/core/dist/interfaces";
 import { useSsr } from "usehooks-ts";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context";
-import { ILogin, IUpdatePassword } from "types/auth";
+import { ILogin, IRegister, IUpdatePassword } from "types/auth";
 import { getServerSession } from "@/lib/server";
 import { firebaseApp } from "@/lib/firebase";
 
@@ -124,13 +127,13 @@ const onError = async (error: HttpError): Promise<OnErrorResponse> => {
     // return { error };
 };
 
-// register: async ({ email, password }: any) => {
-//     const userCredentials = await createUserWithEmailAndPassword(
-//         auth,
-//         email,
-//         password,
-//     );
-// },
+const register = async (formValues: IRegister) => {
+    //todo: gửi info lên back-end api
+    //todo: đợi backend trả về response là token
+    //todo: gọi firebase và settoken nếu success
+    //todo: throw error nếu có lỗi
+};
+
 const forgotPassword = async (email: string): Promise<AuthActionResponse> => {
     try {
         const response = await sendPasswordResetEmail(auth, email);

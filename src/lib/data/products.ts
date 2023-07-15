@@ -1,8 +1,5 @@
-import { waitPromise } from "@/lib/promise";
-import { toRecord } from "@/lib/utils";
 import { IProduct } from "types";
 import { serverDataProvider as provider } from "./provider";
-
 const resource = "products";
 const key = "id";
 const projection = {

@@ -1,12 +1,17 @@
 "use client";
 
 import { Rating } from "@smastrom/react-rating";
-import { CarrotIcon, Heart } from "lucide-react";
+import { CarrotIcon, Heart, Info } from "lucide-react";
 import { PropsWithChildren, createContext, useContext } from "react";
-import { IProduct, IVariant } from "types";
-import { projection as variantProjections } from "@/lib/data/variants";
+import {
+    IProduct,
+    IVariant,
+    ResourceName,
+    projectionAPI,
+    searchAPI,
+} from "types";
 import { useCustom } from "@refinedev/core";
-import { cleanUrl } from "@/lib/utils";
+import { cleanUrl, formatPrice } from "@/lib/utils";
 import { useOptionStore } from "./ProductOptions";
 import useCart, {
     ALLOW_QUANTITY,
@@ -14,10 +19,12 @@ import useCart, {
 } from "@components/store/cart/useCart";
 import { cn } from "components/lib/utils";
 import useNotification from "@/hooks/useNotification";
+import { Skeleton } from "@components/ui/Skeleton";
+
 type ContextState = {
     product: IProduct;
     variants: {
-        data: IVariant[] | undefined;
+        data: IVariant[];
         status: "loading" | "success" | "error";
     };
 };
@@ -31,17 +38,19 @@ const useProductContext = () => {
 const ProductContextProvider = ({
     product,
     children,
-}: PropsWithChildren<{ product: IProduct }>) => {
+}: PropsWithChildren<Partial<ContextState>>) => {
+    if (!product) {
+        throw new Error("Product is missing in the context");
+    }
     const { _links } = product;
-    const projection = variantProjections.withAttributes;
+    const resource: ResourceName = "variants";
     const { data, status } = useCustom<IVariant[]>({
         url: `${cleanUrl(_links?.variants.href ?? "")}`,
         meta: {
-            resource: "variants",
-            projection,
+            resource,
         },
         config: {
-            query: { projection },
+            query: { projection: projectionAPI[resource].withAttributes },
         },
 
         method: "get",
@@ -52,7 +61,7 @@ const ProductContextProvider = ({
 
     return (
         <ProductContext.Provider
-            value={{ product, variants: { data: data?.data, status } }}
+            value={{ product, variants: { data: data?.data ?? [], status } }}
         >
             {children}
         </ProductContext.Provider>
@@ -87,7 +96,47 @@ export const ProductImages = () => {
     );
 };
 
-export const ProductRating = async () => {
+export const ProductPrice = () => {
+    const {
+        variants: { data: variants, status },
+    } = useProductContext();
+    const isDiscount = false;
+
+    if (status === "loading") {
+        return <Skeleton className="w-full h-6" />;
+    }
+    if (!variants.length) {
+        return <>Không tìm thấy dữ liệu</>;
+    }
+    const min = variants.sort((a, b) => a.price - b.price)[0];
+
+    return (
+        <>
+            {isDiscount && (
+                <div className="flex items-end gap-2 my-2">
+                    <p className="text-3xl text-green-700 font-bold leading-none">
+                        Now ${formatPrice(min?.price)}
+                    </p>
+                    <p className="text-gray-500 text-md font-normal line-through decoration-[1px] flex gap-1 items-center">
+                        ${formatPrice(min?.price)}{" "}
+                        <span>
+                            <Info />
+                        </span>
+                    </p>
+                </div>
+            )}
+            {!isDiscount && (
+                <div className="my-2">
+                    <p className="text-3xl text-zinc-950 font-bold leading-none">
+                        ${formatPrice(min?.price)}
+                    </p>
+                </div>
+            )}
+        </>
+    );
+};
+
+export const ProductRating = () => {
     const {
         product: { avgRating, reviewCount },
     } = useProductContext();
@@ -96,7 +145,7 @@ export const ProductRating = async () => {
             <div className="rating gap-1">
                 <Rating
                     style={{ maxWidth: 180 }}
-                    value={3.45}
+                    value={avgRating ?? 0}
                     readOnly
                     className="h-5"
                 />
@@ -108,6 +157,7 @@ export const ProductRating = async () => {
         </div>
     );
 };
+
 export const ProductCartButton = () => {
     const {
         variants: { data: variants, status },
@@ -218,11 +268,24 @@ export const ProductViewRecently = () => {
 };
 
 export const ProductFavoriteDetails = () => {
+    const {
+        product: { id },
+    } = useProductContext();
+    const { data, status } = useCustom({
+        url: searchAPI["products"].countProductSold(+id),
+        method: "get",
+        queryOptions: {
+            enabled: !!id,
+        },
+    });
+    const displayText = data?.data
+        ? `${data.data}+ khách hàng đã mua sản phẩm`
+        : "Trở thành khách hàng đầu tiên sở hữu ngay sản phẩm";
     return (
         <>
             <div className="flex gap-2 relative border-b mt-2">
                 <p className="p-2 text-blue-700 text-sm font-semibold">
-                    500+ khách hàng đã mua sản phẩm
+                    {displayText}
                 </p>
                 <Heart className="text-gray-600 text-2xl absolute top-2 right-2" />
             </div>

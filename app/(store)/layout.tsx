@@ -1,8 +1,4 @@
-import { Portal } from "@chakra-ui/react";
-import Footer from "@components/layout/Footer";
-import Header from "@components/layout/Header";
 import RefineProvider from "@components/layout/providers/RefineProvider";
-import Link from "next/link";
 
 export const metadata = {
     title: "FusionTech Online Store",
@@ -17,10 +13,10 @@ export default function StoreLayout({
     return (
         <>
             <RefineProvider>
-                <Header />
-                <Link href="/test">Go to test</Link>
+                {/* <Header /> */}
+                {/* <Link href="/test">Go to test</Link> */}
                 <main>{children}</main>
-                <Footer />
+                {/* <Footer /> */}
             </RefineProvider>
         </>
     );

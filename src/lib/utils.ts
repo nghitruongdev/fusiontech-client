@@ -1,7 +1,8 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { stringify, stringifyUrl } from "query-string";
 
-export const formatPrice = (amount: number) => {
+export const formatPrice = (amount?: number) => {
+    if (!amount) return 0;
     const formatted = new Number(amount).toLocaleString("vi-VN", {
         style: "currency",
         currency: "VND",

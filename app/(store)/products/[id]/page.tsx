@@ -9,12 +9,14 @@ import {
     ProductFavoriteDetails,
     ProductFrequentBoughtTogether,
     ProductImages,
+    ProductPrice,
     ProductRating,
     ProductViewRecently,
 } from "./product-client";
 import { getOneBrand } from "@/lib/data/brands";
 import { Suspense } from "react";
 import { ProductOptions } from "./ProductOptions";
+import { getProductVariants } from "@/lib/data/variants";
 
 type Props = {
     params: {
@@ -24,6 +26,7 @@ type Props = {
 const DynamicContextProvider = dynamic(() => import("./product-client"), {
     ssr: false,
 });
+
 const Product = async ({ params: { id } }: Props) => {
     Product.Id = id;
     const product = await getOneProduct(id);
@@ -77,7 +80,7 @@ Product.Info = async () => {
                 <ProductRating />
                 {/* </div> */}
                 {/* Product Price */}
-                <Product.Price />
+                <ProductPrice />
                 <Product.StoreInfo />
 
                 <Suspense fallback={<>Đang tìm kiếm tuỳ chọn...</>}>
@@ -105,35 +108,6 @@ Product.Brand = async () => {
     );
 };
 
-Product.Price = async () => {
-    const { price } = await getOneProduct(Product.Id);
-    const isDiscount = false;
-
-    return (
-        <>
-            {isDiscount && (
-                <div className="flex items-end gap-2 my-2">
-                    <p className="text-3xl text-green-700 font-bold leading-none">
-                        Now ${price}
-                    </p>
-                    <p className="text-gray-500 text-md font-normal line-through decoration-[1px] flex gap-1 items-center">
-                        ${price}{" "}
-                        <span>
-                            <BsInfoCircle />
-                        </span>
-                    </p>
-                </div>
-            )}
-            {!isDiscount && (
-                <div className="my-2">
-                    <p className="text-3xl text-zinc-950 font-bold leading-none">
-                        ${price}
-                    </p>
-                </div>
-            )}
-        </>
-    );
-};
 Product.StoreInfo = () => {
     return (
         <p className="text-gray-500 text-sm font-medium flex gap-1 items-center ">
