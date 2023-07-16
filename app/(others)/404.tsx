@@ -1,6 +1,7 @@
-import { notFoundImg } from "public/assets/images";
+import { notFoundImg } from "../../public/assets/images";
 import Image from "next/image";
 import Link from "next/link";
+import React from "react";
 
 const Custom404 = () => {
     return (
