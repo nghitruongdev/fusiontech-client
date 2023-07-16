@@ -4,7 +4,7 @@ import { loadingImg } from "../public/assets/images";
 import React from "react";
 const Loading = () => {
     // return <div>Loading homepage....</div>;
-    let circleCommonClasses = " h-3 w-3   rounded";
+    let circleCommonClasses = " h-3 w-3 bg-current  rounded";
 
     return (
         <div className="flex flex-col items-center justify-center h-screen">
