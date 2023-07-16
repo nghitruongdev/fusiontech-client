@@ -11,6 +11,7 @@ import { CategoryDropDown, CategoryDropDownButton } from "./CategoryDropdown";
 import dynamic from "next/dynamic";
 import { getCategoriesList } from "@/lib/data/categories";
 import { FavoriteButton } from "../store/front/client";
+
 import {
     CartButton,
     HeaderClient,

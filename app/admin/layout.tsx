@@ -1,6 +1,6 @@
 "use client";
 
-import { authProvider } from "@/providers/authProvider";
+import { authProvider } from "@/providers/firebaseAuthProvider";
 import { dataProvider } from "@/providers/rest-data-provider";
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import {

@@ -1,5 +1,6 @@
 import Banner from "@components/client/Banner";
 import ProductList from "@components/store/front/ProductList";
+import ProductListWithCategory from "@components/store/front/ProductListWithCategory";
 import { Skeleton } from "@components/ui/Skeleton";
 import { Metadata } from "next";
 import { Suspense } from "react";
@@ -33,7 +34,10 @@ const HomePage = async () => {
                         <Banner />
                     </Suspense>
                     <Suspense fallback={<ProductLoading />}>
-                        <ProductList />
+                        <div className="bg-white w-full px-4 py-6">
+                            <ProductList />
+                            <ProductListWithCategory />
+                        </div>
                     </Suspense>
                 </div>
             </main>

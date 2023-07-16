@@ -1,17 +1,3 @@
-/*
-  This example requires some changes to your config:
-  
-  ```
-  // tailwind.config.js
-  module.exports = {
-    // ...
-    plugins: [
-      // ...
-      require('@tailwindcss/forms'),
-    ],
-  }
-  ```
-*/
 "use client";
 import { Fragment, useState } from "react";
 import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
@@ -23,7 +9,7 @@ import {
     PlusIcon,
     Squares2X2Icon,
 } from "@heroicons/react/20/solid";
-import ProductList from "@components/client/ProductList";
+// import ProductList from "@components/store/front/ProductList";
 
 const sortOptions = [
     { name: "Most Popular", href: "#", current: true },
@@ -81,7 +67,7 @@ function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(" ");
 }
 
-export default function Example() {
+export default function SearchPage() {
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
     return (
@@ -239,7 +225,7 @@ export default function Example() {
                 <main className="mx-100px max-w-8xl px-4 sm:px-6 lg:px-8">
                     <div className="flex items-baseline justify-between border-b border-gray-200 pb-6 pt-14">
                         <h1 className="text-4xl font-bold tracking-tight text-gray-900">
-                            New Arrivals
+                            Tên sản phẩm cần tìm
                         </h1>
 
                         <div className="flex items-center">
@@ -417,7 +403,7 @@ export default function Example() {
                             {/* Product grid */}
                             <div className="lg:col-span-3">
                                 {/* Your content */}
-                                <ProductList />
+                                {/* <ProductList /> */}
                             </div>
                         </div>
                     </section>
