@@ -1,9 +1,10 @@
 import Image from "next/image";
-import { loginImg } from "@public/assets/images";
-import { loadingImg } from "@public/assets/images";
+import { loginImg } from "../public/assets/images";
+import { loadingImg } from "../public/assets/images";
+import React from "react";
 const Loading = () => {
     // return <div>Loading homepage....</div>;
-    let circleCommonClasses = " h-4 w-4 bg-current   rounded-full";
+    let circleCommonClasses = " h-3 w-3   rounded";
 
     return (
         <div className="flex flex-col items-center justify-center h-screen">
@@ -13,7 +14,7 @@ const Loading = () => {
                     alt="Login icon"
                     className="w-40 h-40 animate-pulse"
                 />
-                <div className=" ">
+                <div>
                     <svg
                         aria-hidden="true"
                         className="w-40 h-44 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600 absolute inset-0 flex items-center justify-center"
@@ -32,57 +33,19 @@ const Loading = () => {
                     </svg>
                 </div>
             </div>
-            <div className="flex space-x-2">
-                {/* <style>
-                    {`
-        @keyframes wave-animation {
-          0% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-8px);
-          }
-          100% {
-            transform: translateY(0);
-          }
-        }
-  
-        .wave-text__letter {
-          animation: wave-animation 0.6s ease-in-out infinite;
-          display: inline-block;
-        }
-      `}
-                </style> */}
-                <div
-                    className={`${circleCommonClasses} bg-blue mr-2 animate-bounce`}
-                ></div>
-                <div
-                    className={`${circleCommonClasses} bg-green mr-2 animate-bounce200`}
-                ></div>
-                <div
-                    className={`${circleCommonClasses} bg-red animate-bounce400`}
-                ></div>
+            <div className="flex space-x-2 justify-between items-center">
+                <span className="text-2xl animate-bounce">Đang </span>
+                <span className="text-2xl animate-bounce200">tải</span>
 
-                {/* <div className="wave-text font-size: 8rem">
-                    <span className="wave-text__letter">Đ</span>
-                    <span className="wave-text__letter">a</span>
-                    <span className="wave-text__letter">n</span>
-                    <span className="wave-text__letter">g</span>
-                    <span className=""> </span>
-                    <span className="wave-text__letter">t</span>
-                    <span className="wave-text__letter">ả</span>
-                    <span className="wave-text__letter">i</span>
-                    <span className=""> </span>
-                    <span className="wave-text__letter">t</span>
-                    <span className="wave-text__letter">r</span>
-                    <span className="wave-text__letter">a</span>
-                    <span className="wave-text__letter">n</span>
-                    <span className="wave-text__letter">g</span>
-                    <span className=""> </span>
-                    <span className="wave-text__letter">c</span>
-                    <span className="wave-text__letter">h</span>
-                    <span className="wave-text__letter">ủ</span>
-                </div> */}
+                <div
+                    className={`${circleCommonClasses} bg-blue-600  animate-bounce`}
+                ></div>
+                <div
+                    className={`${circleCommonClasses} bg-green-600 mr-2 animate-bounce200`}
+                ></div>
+                <div
+                    className={`${circleCommonClasses} bg-red-600 animate-bounce400`}
+                ></div>
             </div>
         </div>
     );
