@@ -1,6 +1,4 @@
 "use client";
-import { FaHeart, FaStar } from "react-icons/fa";
-import ProductList from "@components/client/ProductList";
 import React, { useEffect, useState } from "react";
 import favoriteApi from "src/api/favoriteAPI";
 import { GoPlus } from "react-icons/go";
@@ -25,8 +23,6 @@ const FavoriteProducts = () => {
         "https://lh3.googleusercontent.com/1S6Ltn5pJWSMWh0U6V4w80Di1Lq8AVQhuDOzVHbQPmxwcztwofrF_3gyuy7Pk8AJ73MVFCYDgm4r1orx6eh88iwVj9nDyXk=w230-rw";
 
     useEffect(() => {
-        
-
         const fetchProducts = async () => {
             try {
                 const productPromises = pid.map((id) =>
@@ -37,7 +33,6 @@ const FavoriteProducts = () => {
                     (response) => response.data,
                 );
                 setProducts(fetchedProducts);
-                
             } catch (error) {
                 console.log("Failed to fetch products", error);
             }
@@ -83,19 +78,14 @@ const FavoriteProducts = () => {
                             className="border-[1px] border-gray-200 mb-6 group rounded-xl shadow-lg"
                         >
                             <div className="flex justify-end p-2">
-
-                                    <button
-                                        className="hover:scale-125 duration-3000"
-                                        onClick={() =>
-                                            addFavoriteProduct(
-                                                product.id,
-                                                index,
-                                            )
-                                        }
-                                    >
-                                        <IoMdHeartEmpty className="text-gray-600 text-xl" />
-                                    </button>
-                  
+                                <button
+                                    className="hover:scale-125 duration-3000"
+                                    onClick={() =>
+                                        addFavoriteProduct(product.id, index)
+                                    }
+                                >
+                                    <IoMdHeartEmpty className="text-gray-600 text-xl" />
+                                </button>
                             </div>
                             <div className="w-full h-[150px] overflow-hidden p-1">
                                 <img src={imageUrl} alt="itemImage" />

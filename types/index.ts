@@ -1,55 +1,93 @@
-import { FieldValue, Timestamp } from "@firebase/firestore";
+import { ListOption } from "@/hooks/useListOption";
+import { Timestamp } from "@firebase/firestore";
 
-export type ResourceName = "categories" | "variants" | "orders";
-
-// export type Projection = {
-//     categories: undefined;
-//     variants: "with-attributes";
-//     orders: undefined;
-// };
-export const resources = (name: ResourceName) => name;
-export const searchAPI = {
-    orders: {},
-    categories: undefined,
-    variants: undefined,
-    products: {
-        countProductSold: (productId: number) =>
-            `products/search/countProductSold?productId=${productId}`,
+export type ResourceName =
+    | "categories"
+    | "brands"
+    | "products"
+    | "variants"
+    | "orders"
+    | "users"
+    | "shippingAddresses";
+//todo: const {} =  API['users']()
+export const API = {
+    orders: () => {
+        return {
+            cart: {
+                checkout: `cart/checkout`,
+            },
+        };
+    },
+    categories: () => {
+        const name: ResourceName = "categories";
+        return {
+            resource: name,
+        };
+    },
+    brands: () => {
+        const name: ResourceName = "brands";
+        return {
+            resource: name,
+        };
+    },
+    variants: () => {
+        const name: ResourceName = "variants";
+        return {
+            resource: name,
+            projection: {
+                withAttributes: "with-attributes",
+            },
+        };
+    },
+    products: () => {
+        const name: ResourceName = "products";
+        return {
+            resource: name,
+            projection: {
+                full: "full",
+            },
+            countProductSold: (productId: string) =>
+                `${name}/search/countProductSold?productId=${productId}`,
+        };
+    },
+    users: () => {
+        const name: ResourceName = "users";
+        return {
+            resource: name,
+            defaultAddress: {
+                update: (uid: string, aid: number) =>
+                    `${name}/${uid}/defaultAddress/${aid}`,
+            },
+            findByFirebaseId: (id: string) =>
+                `${name}/search/findByFirebaseId?fid=${id}`,
+        };
+    },
+    shippingAddresses: () => {
+        const name: ResourceName = "shippingAddresses";
+        return {
+            resource: name,
+            findAllByUserId: `${name}/search/findAllByUserId`,
+            defaultAddressByUserId: `${name}/search/findDefaultShippingAddressByUserId`,
+        };
     },
 };
-
-export const projectionAPI = {
-    categories: {},
-    variants: {
-        withAttributes: "with-attributes",
-    },
-    orders: {},
-};
-
-// export type Resource<T extends ResourceName | undefined> =
-//     T extends ResourceName
-//         ? {
-//               resource: T;
-//               projection?: Projection[T];
-//               search?: searchAPI[T];
-//           }
-//         : never;
 
 export interface IProduct {
-    id: number | string;
+    id: string | undefined;
     name: string;
     slug: string;
-    shortDescription: string;
+    summary: string;
     description: string;
     thumbnail: string;
-    reviewCount?: number;
-    avgRating?: number;
+    features?: string[];
+    specifications?: {
+        [key: string]: string;
+    };
     brand?: IBrand;
     category?: ICategory;
-    brandId: number;
-    categoryId: number;
-    variants?: IVariant[];
-    variantIds?: number[];
+    reviewCount?: number;
+    avgRating?: number;
+    variants?: IVariant[] | { id: string; price: number }[];
     _links?: {
         self: {
             href: string;
@@ -71,8 +109,74 @@ export interface IProduct {
     };
 }
 
+export type IProductField = {
+    id: string | undefined;
+    name: string;
+    slug: string;
+    summary: string;
+    description: string;
+    thumbnail: string;
+    features?: { value: string }[];
+    specifications?: {
+        key: string;
+        value: string;
+    }[];
+} & {
+    brand?: ListOption<string, ICategory>;
+    category?: ListOption<string, ICategory>;
+};
+
+// export interface IBaseProduct {
+//     name: string;
+//     slug: string;
+//     summary: string;
+//     description: string;
+//     thumbnail: string;
+//     features?: string[];
+//     specifications?: {
+//         [key: string]: string;
+//     };
+//     brand?: IBrand | ListOption<string, IBrand>;
+//     category?: ICategory | ListOption<string, ICategory>;
+// }
+// export interface IProduct extends IBaseProduct {
+//     id: string;
+//     brand?: IBrand;
+//     category?: ICategory;
+//     reviewCount?: number;
+//     avgRating?: number;
+//     variants?: IVariant[] | { id: string; price: number }[];
+//     _links?: {
+//         self: {
+//             href: string;
+//         };
+//         product: {
+//             href: string;
+//             templated: true;
+//         };
+//         category: {
+//             href: string;
+//         };
+//         variants: {
+//             href: string;
+//             templated: true;
+//         };
+//         brand: {
+//             href: string;
+//         };
+//     };
+// }
+
+// export type IProductField =
+//     | IProduct
+//     | {
+//           brand?: ListOption<string, IBrand>;
+//           category?: ListOption<string, ICategory>;
+//       };
+
 export type IVariant = {
     id: number;
+    sku: string;
     image: string;
     price: number;
     active: boolean;
@@ -100,11 +204,11 @@ export type IAttribute = {
     };
 };
 
-export interface IBrand {
+export type IBrand = {
     id: number;
     name: string;
     logo: string;
-}
+};
 
 export interface ICategory {
     id: string | undefined;
@@ -116,7 +220,7 @@ export interface User {
     _links: _links;
 }
 export interface ShippingAddress {
-    id: string | number | undefined;
+    id: string | undefined;
     name: string;
     phone: string;
     address: string;

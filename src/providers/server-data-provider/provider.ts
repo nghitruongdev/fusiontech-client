@@ -1,7 +1,6 @@
 import "server-only";
-import { IProduct, Page } from "types";
-import { toRecord } from "../utils";
-import { stringify } from "querystring";
+import { Page } from "types";
+import { toRecord } from "../../lib/utils";
 import { stringifyUrl } from "query-string";
 import { _listLinks, _searchLinks } from "types/_link";
 import { CustomResponse } from "types/response";
@@ -107,10 +106,9 @@ export const serverDataProvider = {
         cache,
         pathName = resource,
         query,
+        baseUrl = BASE_URL,
         ...props
     }: GetListProps<T, K>): Promise<RecordData<T, K>> => {
-        const { baseUrl = BASE_URL } = props;
-
         const url = stringifyUrl({
             url: `${baseUrl}/${pathName}`,
             query,
@@ -140,10 +138,9 @@ export const serverDataProvider = {
         cache,
         pathName = resource,
         query,
+        baseUrl = BASE_URL,
         ...props
     }: GetOneProps): Promise<T> => {
-        const { baseUrl = BASE_URL } = props;
-
         const url = stringifyUrl({
             url: `${baseUrl}/${pathName}/${id}`,
             query,
@@ -167,10 +164,9 @@ export const serverDataProvider = {
         cache,
         query,
         searchPathname,
+        baseUrl = BASE_URL,
         ...props
     }: SearchProps<T, K>): Promise<unknown> => {
-        const { baseUrl = BASE_URL } = props;
-
         const url = stringifyUrl({
             url: `${baseUrl}/${resource}/search/${searchPathname}`,
             query,
@@ -254,9 +250,3 @@ export const serverDataProvider = {
         return result as T;
     },
 };
-
-// function hasResource<T, R extends ResourceName | undefined>(
-//     props: CustomProps<T, R>,
-// ): props is CustomProps<T, R> & Resource<R> {
-//     return "resource" in props;
-// }

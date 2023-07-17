@@ -1,5 +1,5 @@
 import { IBrand } from "types";
-import { serverDataProvider as provider } from "./provider";
+import { serverDataProvider as provider } from "../provider";
 
 const resource = "brands";
 const key = "id";

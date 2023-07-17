@@ -19,15 +19,17 @@ import {
     Th,
     Tbody,
     Td,
+    Image,
     HStack,
 } from "@chakra-ui/react";
-import { Pagination } from "@components/pagination";
+import { IProduct } from "types";
+import { useDefaultTableRender } from "@/hooks/useRenderTable";
 
 export default function ListPage() {
     return <ProductList />;
 }
 const ProductList: React.FC<IResourceComponentsProps> = () => {
-    const columns = React.useMemo<ColumnDef<any>[]>(
+    const columns = React.useMemo<ColumnDef<IProduct>[]>(
         () => [
             {
                 id: "id",
@@ -40,29 +42,37 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
                 header: "Name",
             },
             {
+                id: "summary",
+                accessorKey: "summary",
+                header: "Summary",
+            },
+            {
                 id: "description",
                 accessorKey: "description",
                 header: "Description",
+            },
+            {
+                id: "thumbnail",
+                accessorKey: "thumbnail",
+                header: "Thumbnail",
                 cell: function render({ getValue }) {
                     return (
-                        <MarkdownField
-                            value={getValue<string>()?.slice(0, 80) + "..."}
+                        <Image
+                            sx={{ maxWidth: "100px" }}
+                            src={getValue<any>()}
                         />
                     );
                 },
             },
             {
-                id: "image",
-                accessorKey: "image",
-                header: "Image",
+                id: "reviewCount",
+                accessorKey: "reviewCount",
+                header: "Review Count",
             },
             {
-                id: "publishDate",
-                accessorKey: "publishDate",
-                header: "Publish Date",
-                cell: function render({ getValue }) {
-                    return <DateField value={getValue<any>()} />;
-                },
+                id: "avgRating",
+                accessorKey: "avgRating",
+                header: "Avg Rating",
             },
             {
                 id: "actions",
@@ -79,6 +89,10 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
                                 hideText
                                 recordItemId={getValue() as string}
                             />
+                            {/* <DeleteButton
+                                hideText
+                                recordItemId={getValue() as string}
+                            /> */}
                         </HStack>
                     );
                 },
@@ -101,7 +115,6 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
         },
     } = useTable({
         columns,
-
         refineCoreProps: {
             sorters: {
                 initial: [],
@@ -115,49 +128,21 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
             ...prev.meta,
         },
     }));
+    const { headers, body, pagination } = useDefaultTableRender({
+        headerGroups: getHeaderGroups(),
+        rowModel: getRowModel(),
+        pagination: { current, pageCount, pageSize, setCurrent, setPageSize },
+    });
     console.log("tableData", tableData);
     return (
         <List>
             <TableContainer whiteSpace="pre-line">
                 <Table variant="simple">
-                    <Thead>
-                        {getHeaderGroups().map((headerGroup) => (
-                            <Tr key={headerGroup.id}>
-                                {headerGroup.headers.map((header) => (
-                                    <Th key={header.id}>
-                                        {!header.isPlaceholder &&
-                                            flexRender(
-                                                header.column.columnDef.header,
-                                                header.getContext(),
-                                            )}
-                                    </Th>
-                                ))}
-                            </Tr>
-                        ))}
-                    </Thead>
-                    <Tbody>
-                        {getRowModel().rows.map((row) => (
-                            <Tr key={row.id}>
-                                {row.getVisibleCells().map((cell) => (
-                                    <Td key={cell.id}>
-                                        {flexRender(
-                                            cell.column.columnDef.cell,
-                                            cell.getContext(),
-                                        )}
-                                    </Td>
-                                ))}
-                            </Tr>
-                        ))}
-                    </Tbody>
+                    {headers}
+                    {body}
                 </Table>
             </TableContainer>
-            <Pagination
-                current={current}
-                pageCount={pageCount}
-                setCurrent={setCurrent}
-                pageSize={pageSize}
-                setPageSize={setPageSize}
-            />
+            {pagination}
         </List>
     );
 };

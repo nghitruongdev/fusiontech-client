@@ -4,8 +4,8 @@ import { useCustomMutation } from "@refinedev/core";
 import { UseFormReturnType, useForm } from "@refinedev/react-hook-form";
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useRef } from "react";
-import { ICartItem, ICheckout } from "types";
-import { API_URL, RESOURCE_API } from "types/constants";
+import { API, ICartItem, ICheckout } from "types";
+import { API_URL } from "types/constants";
 import { createStore, useStore } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import Checkout from ".";
@@ -50,7 +50,8 @@ export const CheckoutProvider = ({ children }: ProviderProps) => {
     });
     const checkoutHandler = () => {
         console.log("checkout button clicked");
-        const url = `${API_URL}/${RESOURCE_API.orders().checkout}`;
+        const { cart } = API["orders"]();
+        const url = `${API_URL}/${cart.checkout}`;
         console.log("url", url);
         handleSubmit(async (data) => {
             console.log("data", data);

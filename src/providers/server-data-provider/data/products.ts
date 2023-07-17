@@ -1,5 +1,5 @@
 import { IProduct } from "types";
-import { serverDataProvider as provider } from "./provider";
+import { serverDataProvider as provider } from "../provider";
 const resource = "products";
 const key = "id";
 const projection = {

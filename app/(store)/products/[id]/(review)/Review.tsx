@@ -7,6 +7,15 @@ import Image from "next/image";
 import { loginImg } from "@public/assets/images";
 import { IoIosArrowBack } from "react-icons/io";
 import useMyToast from "@/hooks/useToast";
+import { format } from "date-fns";
+import {
+    Container,
+    Box,
+    Flex,
+    Text,
+    HStack,
+    useColorModeValue,
+} from "@chakra-ui/react";
 
 const ReviewComponent = () => {
     const [reviewList, setReviewList] = useState<any[]>([]);
@@ -21,7 +30,7 @@ const ReviewComponent = () => {
     useEffect(() => {
         const fetchReviewList = async () => {
             try {
-                const response = await reviewApi.get(5);
+                const response = await reviewApi.get(10);
                 console.log(response.data);
                 setReviewList(response.data);
 
@@ -106,11 +115,14 @@ const ReviewComponent = () => {
     const handleReviewSubmit = (event: any) => {
         event.preventDefault();
 
+        const now = format(new Date(), "yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+
         const reviewData = {
-            product: { id: 5 },
-            user: { id: "18aedd00-928b-4ab2-8fec-04a1cf11f570" },
+            product: { id: 10 },
+            user: { id: "f1a65a69-aed8-447a-9138-2f1c62ae1cbd" },
             rating: rating,
             comment: comment,
+            create_at: now,
         };
         createReview(reviewData);
         ReviewFormButtonClick();
@@ -119,19 +131,42 @@ const ReviewComponent = () => {
         setComment("");
     };
 
+    const calculatePercentage = (reviews: any[], rating: number) => {
+        const totalReviews = reviews.length;
+        if (totalReviews === 0) {
+            return "0%";
+        }
+
+        const ratingCount = reviews.filter(
+            (review) => review.rating === rating,
+        ).length;
+        const percentage = Math.round((ratingCount / totalReviews) * 100);
+        return `${percentage}%`;
+    };
+
+    const ratingSummary = [
+        { id: 1, rating: 5, percentage: calculatePercentage(reviewList, 5) },
+        { id: 2, rating: 4, percentage: calculatePercentage(reviewList, 4) },
+        { id: 3, rating: 3, percentage: calculatePercentage(reviewList, 3) },
+        { id: 4, rating: 2, percentage: calculatePercentage(reviewList, 2) },
+        { id: 5, rating: 1, percentage: calculatePercentage(reviewList, 1) },
+    ];
+
     return (
         <div>
-            <p className="font-bold text-2xl mt-12 mb-2">Đánh giá sản phẩm</p>
             {/* Hiển thị bảng thống kê review */}
             <div className="mb-4">
+                <p className="font-bold text-2xl mt-12 mb-2">
+                    Đánh giá sản phẩm
+                </p>
                 <div className="flex mt-2">
                     {/* Hiển thị đánh giá trung bình */}
-                    <div className="flex flex-col justify-center items-center w-1/2 border border-gray-200 p-4 space-y-2 rounded-md">
+                    <div className="flex flex-col justify-center items-center w-1/3 border border-gray-200 p-4 space-y-2 rounded-tl-2xl rounded-bl-2xl">
                         <div className=" flex">
-                            <p className="text-2xl font-bold">
+                            <p className="text-4xl font-bold">
                                 {averageRating.toFixed(1)}
                             </p>
-                            <p className="text-2xl font-bold">/5</p>
+                            <p className="text-4xl font-bold">/5</p>
                         </div>
                         <div className="flex">
                             {[1, 2, 3, 4, 5].map((index) => (
@@ -147,17 +182,73 @@ const ReviewComponent = () => {
                         </div>
                         <p>{reviewList.length} đánh giá và nhận xét</p>
                     </div>
-
-                    {/* Button đánh giá ngay */}
-                    <div className="w-1/2 flex flex-col justify-center items-center">
-                        <p>Bạn đánh giá sao sản phẩm này</p>
-                        <button
-                            className="bg-blue-500 text-white px-2 rounded-md h-10 hover:bg-blue-600"
-                            onClick={ReviewFormButtonClick}
-                        >
-                            Đánh giá ngay
-                        </button>
+                    <div className="flex flex-col justify-center items-center w-2/3 border border-gray-200 p-4 space-y-2 rounded-tr-2xl rounded-br-2xl">
+                        <Container className="col-span-2 h-full mt-6">
+                            <Box mb={8} mx="auto h-full">
+                                <Flex
+                                    direction="column"
+                                    justify="space-between"
+                                    h="full"
+                                >
+                                    {ratingSummary.map((data) => {
+                                        return (
+                                            <HStack
+                                                key={data.id}
+                                                spacing={5}
+                                                mr={0}
+                                                pr={0}
+                                            >
+                                                <Text
+                                                    fontWeight="bold"
+                                                    fontSize="md"
+                                                >
+                                                    {data.rating}
+                                                </Text>
+                                                <Box
+                                                    w={{
+                                                        base: "100%",
+                                                        md: "70%",
+                                                    }}
+                                                >
+                                                    <Box
+                                                        w="100%"
+                                                        bg={useColorModeValue(
+                                                            "gray.300",
+                                                            "gray.600",
+                                                        )}
+                                                        rounded="md"
+                                                    >
+                                                        <Box
+                                                            w={data.percentage}
+                                                            h={3}
+                                                            bg="yellow.400"
+                                                            rounded="md"
+                                                        ></Box>
+                                                    </Box>
+                                                </Box>
+                                                <Text
+                                                    fontWeight="bold"
+                                                    fontSize="md"
+                                                >
+                                                    {data.percentage}
+                                                </Text>
+                                            </HStack>
+                                        );
+                                    })}
+                                </Flex>
+                            </Box>
+                        </Container>
                     </div>
+                </div>
+                {/* Button đánh giá ngay */}
+                <div className="w-full flex flex-col justify-center items-center mt-2">
+                    <p>Bạn đánh giá sao sản phẩm này</p>
+                    <button
+                        className="bg-blue-500 text-white px-2 w-48 rounded-md h-10 hover:bg-blue-600"
+                        onClick={ReviewFormButtonClick}
+                    >
+                        Đánh giá ngay
+                    </button>
                 </div>
             </div>
             {!showReviewForm ? (

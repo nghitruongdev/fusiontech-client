@@ -1,5 +1,5 @@
-import { RESOURCE_API, API_URL } from "types/constants";
-import { ShippingAddress, User } from "types";
+import { API_URL } from "types/constants";
+import { API, ShippingAddress, User } from "types";
 import {
     useCustomMutation,
     useNotification,
@@ -7,7 +7,6 @@ import {
     useCustom,
     UpdateResponse,
     CreateResponse,
-    useShow,
 } from "@refinedev/core";
 import { UseFormHandleSubmit, UseFormReset } from "react-hook-form";
 
@@ -15,7 +14,7 @@ type Props = {
     userId: string;
 };
 
-const defaultAddress = (): ShippingAddress => {
+const defaultAddressValue = (): ShippingAddress => {
     return {
         id: "",
         name: "",
@@ -43,9 +42,11 @@ export type EditAddressProps = CreateAddressProps;
 export default function useCheckout({ userId }: Props) {
     const { mutate } = useCustomMutation();
     const { open, close } = useNotification();
-    const addressAPI = RESOURCE_API.shippingAddress();
+    const { resource, findAllByUserId, defaultAddressByUserId } =
+        API["shippingAddresses"]();
+    const { resource: userResource, defaultAddress } = API["users"]();
     const { data: userData } = useOne({
-        resource: "users",
+        resource: userResource,
         id: userId,
         errorNotification(error, values, resource) {
             return {
@@ -62,7 +63,7 @@ export default function useCheckout({ userId }: Props) {
         isFetching,
         refetch: refetchAddressList,
     } = useCustom({
-        url: `${API_URL}/${addressAPI.findAllByUserId}`,
+        url: `${API_URL}/${findAllByUserId}`,
         method: "get",
         config: {
             query: {
@@ -74,7 +75,8 @@ export default function useCheckout({ userId }: Props) {
             // enabled: false,
         },
         meta: {
-            _embeddedResource: addressAPI.name,
+            // _embeddedResource: addressAPI.name,
+            resource,
         },
         errorNotification(error, values) {
             return {
@@ -86,7 +88,7 @@ export default function useCheckout({ userId }: Props) {
     });
 
     const { data: addressData, refetch: refetchDefaultAddress } = useCustom({
-        url: `${API_URL}/${addressAPI.defaultAddressByUserId}`,
+        url: `${API_URL}/${defaultAddressByUserId}`,
         method: "get",
         config: {
             query: {
@@ -121,10 +123,7 @@ export default function useCheckout({ userId }: Props) {
             return;
         }
 
-        const url = `${API_URL}/${RESOURCE_API.users.defaultAddress.update(
-            userId,
-            addressId,
-        )}`;
+        const url = `${API_URL}/${defaultAddress.update(userId, addressId)}`;
         mutate(
             {
                 url,
@@ -164,7 +163,7 @@ export default function useCheckout({ userId }: Props) {
             }
             const response = await onFinish(data);
             if (!!response) {
-                reset(defaultAddress);
+                reset(defaultAddressValue);
                 closeModal();
             }
         })();
@@ -188,7 +187,7 @@ export default function useCheckout({ userId }: Props) {
             const response = await onFinish(data);
             if (!!response) {
                 console.log("response", response);
-                reset(defaultAddress);
+                reset(defaultAddressValue);
                 closeModal();
             }
         })();

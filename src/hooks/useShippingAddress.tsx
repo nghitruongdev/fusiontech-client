@@ -3,8 +3,7 @@ import useAxios, { AxiosOptions } from "./useAxios";
 import { getFetcher } from "./useFetcher";
 import useMyToast from "./useToast";
 import useSWR from "swr";
-import { ShippingAddress } from "types";
-import { APP_API } from "types/constants";
+import { API, ShippingAddress } from "types";
 import { useForm } from "react-hook-form";
 import { useDisclosure } from "@chakra-ui/react";
 
@@ -81,12 +80,10 @@ const useShippingAddress = ({ mutate }: { mutate: () => void }) => {
 
     const updateDefaultAddress = (uid: string, addressId: number) => {
         console.log("update default address for address id ", addressId);
+        const { defaultAddress } = API["users"]();
         const updateHandler = async () => {
             const response = await patch({
-                requestUrl: `${APP_API.users.defaultAddress.update(
-                    uid,
-                    addressId,
-                )}`,
+                requestUrl: `${defaultAddress.update(uid, addressId)}`,
                 options: axiosOptions,
             });
             console.log("Response", response);
@@ -103,8 +100,9 @@ const useShippingAddress = ({ mutate }: { mutate: () => void }) => {
 
     const deleteAddress = (addressId: number) => {
         const removeHandler = async () => {
+            const { resource } = API["shippingAddresses"]();
             const response = await remove({
-                requestUrl: `${APP_API.shippingAddress.url}/${addressId}`,
+                requestUrl: `${resource}/${addressId}`,
                 options: axiosOptions,
             });
             if (response?.status) {

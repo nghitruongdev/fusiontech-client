@@ -8,7 +8,7 @@ import { FaPlaceOfWorship } from "react-icons/fa";
 import { MdOutlineLocationOn } from "react-icons/md";
 import { Suspense } from "react";
 import { CategoryDropDown, CategoryDropDownButton } from "./CategoryDropdown";
-import { getCategoriesList } from "@/lib/data/categories";
+import { getCategoriesList } from "@/providers/server-data-provider/data/categories";
 import { CartButton, SearchInput, UserInfo } from "./header-client";
 
 const Header = async () => {

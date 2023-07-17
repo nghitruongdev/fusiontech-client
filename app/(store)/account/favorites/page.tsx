@@ -1,6 +1,5 @@
 "use client";
 import { FaHeart, FaStar } from "react-icons/fa";
-import ProductList from "@components/client/ProductList";
 import React, { useEffect, useState } from "react";
 import favoriteApi from "src/api/favoriteAPI";
 import { GoPlus } from "react-icons/go";
@@ -10,7 +9,7 @@ import useMyToast from "@/hooks/useToast";
 const FavoriteProducts = () => {
     const [productList, setProductList] = useState<any[]>([]);
     // dữ liệu mẫu
-    const uid = "2534684b-8fc6-485b-994a-07ed72ce83e6";
+    const uid = "a849b6e9-0a0a-4dc6-b13b-bb1e834389f7";
     const imageUrl =
         "https://lh3.googleusercontent.com/1S6Ltn5pJWSMWh0U6V4w80Di1Lq8AVQhuDOzVHbQPmxwcztwofrF_3gyuy7Pk8AJ73MVFCYDgm4r1orx6eh88iwVj9nDyXk=w230-rw";
 

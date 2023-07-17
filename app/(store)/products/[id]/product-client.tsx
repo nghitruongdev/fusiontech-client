@@ -3,13 +3,7 @@
 import { Rating } from "@smastrom/react-rating";
 import { CarrotIcon, Heart, Info } from "lucide-react";
 import { PropsWithChildren, createContext, useContext } from "react";
-import {
-    IProduct,
-    IVariant,
-    ResourceName,
-    projectionAPI,
-    searchAPI,
-} from "types";
+import { API, IProduct, IVariant, ResourceName } from "types";
 import { useCustom } from "@refinedev/core";
 import { cleanUrl, formatPrice } from "@/lib/utils";
 import { useOptionStore } from "./ProductOptions";
@@ -28,6 +22,7 @@ type ContextState = {
         status: "loading" | "success" | "error";
     };
 };
+
 const ProductContext = createContext<ContextState | null>(null);
 const useProductContext = () => {
     const ctx = useContext(ProductContext);
@@ -43,14 +38,17 @@ const ProductContextProvider = ({
         throw new Error("Product is missing in the context");
     }
     const { _links } = product;
-    const resource: ResourceName = "variants";
+    const {
+        resource,
+        projection: { withAttributes: projection },
+    } = API["variants"]();
     const { data, status } = useCustom<IVariant[]>({
         url: `${cleanUrl(_links?.variants.href ?? "")}`,
         meta: {
             resource,
         },
         config: {
-            query: { projection: projectionAPI[resource].withAttributes },
+            query: { projection },
         },
 
         method: "get",
@@ -272,7 +270,7 @@ export const ProductFavoriteDetails = () => {
         product: { id },
     } = useProductContext();
     const { data, status } = useCustom({
-        url: searchAPI["products"].countProductSold(+id),
+        url: API["products"]().countProductSold(+id),
         method: "get",
         queryOptions: {
             enabled: !!id,

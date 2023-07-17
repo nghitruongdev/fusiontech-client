@@ -1,7 +1,7 @@
 import { DataProvider, MetaQuery } from "@refinedev/core";
 import { axiosInstance, generateSort, generateFilter } from "./utils";
 import { AxiosInstance } from "axios";
-import { stringify } from "query-string";
+import { stringify, stringifyUrl } from "query-string";
 import { API_URL } from "types/constants";
 
 type MethodTypes = "get" | "delete" | "head" | "options";
@@ -15,13 +15,15 @@ const dataProvider = (
     "createMany" | "updateMany" | "deleteMany"
 > => ({
     getList: async ({ resource, pagination, filters, sorters, meta }) => {
-        const url = `${apiUrl}/${resource}`;
-
         const {
             current = 0,
             pageSize = 10,
             mode = "server",
         } = pagination ?? {};
+
+        const url = `${apiUrl}/${resource}${
+            mode === "off" ? "/search/all" : ""
+        }`;
 
         const { headers: headersFromMeta, method } = meta ?? {};
         const requestMethod = (method as MethodTypes) ?? "get";
@@ -53,13 +55,13 @@ const dataProvider = (
             query._sort = _sort.join(",");
             query._order = _order.join(",");
         }
-
-        const { data, headers } = await httpClient[requestMethod](
-            `${url}?${stringify(query)}&${stringify(queryFilters)}`,
-            {
-                headers: headersFromMeta,
-            },
-        );
+        const requestUrl = `${url}?${stringify(query)}&${stringify(
+            queryFilters,
+        )}`;
+        console.log("requestUrl", requestUrl);
+        const { data, headers } = await httpClient[requestMethod](requestUrl, {
+            headers: headersFromMeta,
+        });
         const fetchData =
             data?._embedded?.[meta?._embeddedResource ?? resource] ?? data;
         const page = data?.page;
@@ -120,10 +122,17 @@ const dataProvider = (
     getOne: async ({ resource, id, meta }) => {
         const url = `${apiUrl}/${resource}/${id}`;
 
-        const { headers, method } = meta ?? {};
+        const { headers, method, query } = meta ?? {};
+
         const requestMethod = (method as MethodTypes) ?? "get";
 
-        const { data } = await httpClient[requestMethod](url, { headers });
+        const { data } = await httpClient[requestMethod](
+            stringifyUrl({
+                url: url,
+                query: query,
+            }),
+            { headers },
+        );
 
         return {
             data,
@@ -161,7 +170,9 @@ const dataProvider = (
         meta,
     }) => {
         let requestUrl = !!sorters || !!filters || !!query ? `${url}?` : url;
-
+        if (!url.startsWith("http")) {
+            requestUrl = `${API_URL}/${requestUrl}`;
+        }
         if (!!sorters) {
             const generatedSort = generateSort(sorters);
             if (generatedSort) {
@@ -230,4 +241,4 @@ const dataProvider = (
     },
 });
 
-export const springDataProvider = dataProvider(API_URL);
+export const springDataProvider = dataProvider(API_URL ?? "");

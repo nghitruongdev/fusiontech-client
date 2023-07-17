@@ -1,6 +1,6 @@
-import { APP_API } from "types/constants";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { useEffect, useState } from "react";
+import { API_URL } from "types/constants";
 type State = {
     isLoading?: boolean;
     errorText?: string;
@@ -66,7 +66,7 @@ const useAxios = (url?: string) => {
         try {
             if (timeout) await sleep(timeout);
             const response = await axios.request({
-                baseURL: APP_API.url,
+                baseURL: API_URL,
                 method: method,
                 data: data,
                 url: requestUrl ? requestUrl : url,

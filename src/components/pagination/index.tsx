@@ -2,7 +2,7 @@ import { Box, HStack, IconButton, Button, Select } from "@chakra-ui/react";
 import { usePagination } from "@refinedev/chakra-ui";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons";
 
-type PaginationProps = {
+export type PaginationProps = {
     current: number;
     pageCount: number;
     setCurrent: (page: number) => void;

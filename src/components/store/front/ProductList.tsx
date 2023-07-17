@@ -1,7 +1,7 @@
 import { IProduct } from "types";
 import Image from "next/image";
 import { BsStarFill } from "react-icons/bs";
-import { getProductsWithDetails } from "../../../lib/data/products";
+import { getProductsWithDetails } from "../../../providers/server-data-provider/data/products";
 import Link from "next/link";
 import { Heart, Plus } from "lucide-react";
 import { formatPrice } from "../../../lib/utils";

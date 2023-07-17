@@ -2,7 +2,7 @@ import { BsStarFill, BsInfoCircle } from "react-icons/bs";
 import ProductSpecification from "./ProductSpecification";
 import ReviewComponent from "./(review)/Review";
 import Description from "./Description";
-import { getOneProduct } from "@/lib/data/products";
+import { getOneProduct } from "@/providers/server-data-provider/data/products";
 import dynamic from "next/dynamic";
 import {
     ProductCartButton,
@@ -13,10 +13,10 @@ import {
     ProductRating,
     ProductViewRecently,
 } from "./product-client";
-import { getOneBrand } from "@/lib/data/brands";
+import { getOneBrand } from "@/providers/server-data-provider/data/brands";
 import { Suspense } from "react";
 import { ProductOptions } from "./ProductOptions";
-import { getProductVariants } from "@/lib/data/variants";
+import { getProductVariants } from "@/providers/server-data-provider/data/variants";
 
 type Props = {
     params: {
