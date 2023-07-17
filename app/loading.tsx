@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { loginImg } from "../public/assets/images";
-import { loadingImg } from "../public/assets/images";
+
 import React from "react";
 const Loading = () => {
     // return <div>Loading homepage....</div>;

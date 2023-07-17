@@ -13,7 +13,7 @@ import notFoundImg from "./404Img.png";
 import emptyCart from "./empty-cart.png";
 import warningImg from "./warning.png";
 import loginImg from "./loginIcon.png";
-import loadingImg from "./loading.png";
+import errorImg from "./404.png";
 
 export {
     logo,
@@ -31,5 +31,5 @@ export {
     emptyCart,
     warningImg,
     loginImg,
-    loadingImg,
+    errorImg,
 };
