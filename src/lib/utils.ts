@@ -1,4 +1,8 @@
-import { usePathname, useSearchParams } from "next/navigation";
+import {
+    ReadonlyURLSearchParams,
+    usePathname,
+    useSearchParams,
+} from "next/navigation";
 import { stringify, stringifyUrl } from "query-string";
 
 export const formatPrice = (amount?: number) => {
@@ -50,4 +54,21 @@ export const useCurrentUrl = () => {
 
 export const cleanUrl = (dirtyUrl: string) => {
     return dirtyUrl.replace(/{.*}/, "");
+};
+
+export const updateUrlParams = (
+    params: Record<string, string>,
+    current: ReadonlyURLSearchParams,
+) => {
+    const update = new URLSearchParams(Array.from(current.entries())); // -> has to use this form
+
+    Object.keys(params).forEach((key) => {
+        if (!params[key]) {
+            update.delete(key);
+        } else {
+            update.set(key, params[key] ?? "");
+        }
+    });
+
+    return update.toString();
 };

@@ -47,19 +47,13 @@ type Props = {
     remove?: () => void;
     showButtonControl?: boolean;
     value?: string;
+    isError?: boolean;
 };
 
 const InlineEditable = forwardRef((props: Props, ref) => {
-    const { editableProps, remove, showButtonControl, value } = props;
-    const previewRef = useRef(null);
-    const inputRef = useRef(null);
-    // const isHover = useHover(previewRef);
+    const { editableProps, remove, showButtonControl, value, isError } = props;
 
-    useEffect(() => {
-        console.log("inputRef.current", !!inputRef.current);
-    }, [inputRef.current]);
     const onBlurHandler = () => {
-        console.log("editable blurred");
         if (!value) remove?.();
     };
     return (
@@ -68,16 +62,16 @@ const InlineEditable = forwardRef((props: Props, ref) => {
             selectAllOnFocus={true}
             placeholder={"Enter your placeholder here ⚡️"}
             {...editableProps}
-            _placeholder={{
-                color: "red",
-            }}
             onBlur={onBlurHandler}
+            rounded="lg"
         >
             <Provider {...props}>
                 <div className="flex items-center">
                     <DeleteButton />
-                    <Preview />
-                    <InlineInput />
+                    <div className="w-full grid">
+                        <Preview />
+                        <InlineInput />
+                    </div>
                 </div>
                 {showButtonControl && <EditableControls />}
             </Provider>
@@ -115,40 +109,39 @@ const DeleteButton = () => {
 };
 
 const Preview = () => {
-    const { value } = useEditableContext();
+    const { value, isError } = useEditableContext();
 
     return (
         <Tooltip label={`Chỉnh sửa`} shouldWrapChildren={true}>
             <EditablePreview
                 py={2}
-                px={2}
+                px={4}
+                w="full"
                 _hover={{
                     background: useColorModeValue("gray.100", "gray.700"),
                 }}
-                color={value ? "gray.600" : "gray.500"}
+                color={value ? "gray.700" : "gray.500"}
+                {...(isError && {
+                    color: "red",
+                    border: "1px",
+                    borderColor: "red.500",
+                })}
             />
         </Tooltip>
     );
 };
 
 const InlineInput = () => {
-    const { inputProps, remove } = useEditableContext();
+    const { inputProps, remove, isError } = useEditableContext();
     const inputRef = useRef<HTMLInputElement>(null);
-    const onBlurHandler = () => {
-        console.log("inputRef.current?.value", inputRef.current?.value);
-        if (!inputRef.current?.value) {
-            remove?.();
-        }
-        console.log("inputBlur");
-    };
     return (
         <Input
-            py={2}
-            px={4}
+            // py={2}
+            // px={2}
             as={EditableInput}
             {...inputProps}
             ref={inputRef}
-            {...(remove && { onBlur: onBlurHandler })}
+            border={0}
         />
     );
 };

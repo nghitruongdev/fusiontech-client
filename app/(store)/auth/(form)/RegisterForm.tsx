@@ -12,13 +12,15 @@ import {
 import { ckMerge } from "@/lib/chakra-merge";
 import PasswordInput from "@components/ui/PasswordInput";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
-import { IRegister } from "types/auth";
+import { CredentialsRegister, IRegister } from "types/auth";
 import { firebaseAuth } from "@/providers/firebaseAuthProvider";
 import { AuthActionResponse } from "@refinedev/core/dist/interfaces";
 import { useRouter, useSearchParams } from "next/navigation";
+import { IAuthProvider } from "../../../../types/auth";
+import { useRegister } from "@refinedev/core";
 
 const RegisterForm = () => {
-    const formProps = useForm<IRegister>();
+    const formProps = useForm<CredentialsRegister>();
 
     //todo: sửa lại tất cả các field: register, placeholder, input name, input type,
     //todo: thêm validation rule
@@ -278,7 +280,7 @@ RegisterForm.LoginLink = () => (
 );
 
 const useRegisterFormContext = () => {
-    const formMethods = useFormContext<IRegister>();
+    const formMethods = useFormContext<CredentialsRegister>();
     const { formState, reset, setFocus } = formMethods;
     const [isRedirecting, { on: onRedirecting }] = useBoolean();
     const router = useRouter();
@@ -287,7 +289,38 @@ const useRegisterFormContext = () => {
     const callbackUrl = callbackParam ? decodeURIComponent(callbackParam) : "/";
     const [errorState, setErrorState] = useState("");
 
-    const handlePostLogin = (data: AuthActionResponse) => {
+    const { mutateAsync } = useRegister();
+
+    const onGoogleSignup = async () => {
+        reset(undefined, {
+            keepDirtyValues: true,
+            keepValues: true,
+            keepIsValid: true,
+            keepErrors: false,
+        });
+        const result = await firebaseAuth.login({
+            providerName: "google.com",
+        });
+        handlePostSuccess(result);
+    };
+
+    //todo: code đăng ký bằng form here
+    //todo: gọi firebaseAuthProvider.register()
+    const onFormSubmit = async (value: CredentialsRegister) => {
+        try {
+            const result = await mutateAsync({
+                providerName: IAuthProvider.credentials,
+            });
+            handlePostSuccess(result);
+        } catch (error) {
+            // Xử lý lỗi nếu có
+            console.error("Error during registration:", error);
+            setErrorState("Đã xảy ra lỗi trong quá trình đăng ký.");
+        }
+    };
+
+    //todo: redirect page to callbackUrl when sign up successfully like login page
+    const handlePostSuccess = (data: AuthActionResponse) => {
         console.log("data", data);
         const { success, error } = data as AuthActionResponse;
         if (success) {
@@ -304,39 +337,6 @@ const useRegisterFormContext = () => {
             setFocus("email");
         }
     };
-
-    //todo: code đăng ký google here
-    //todo: gọi firebaseAuthProvider.login()
-    //!đăng ký với đăng nhập bằng google nó giống nhau
-    const onGoogleSignup = async () => {
-        reset(undefined, {
-            keepDirtyValues: true,
-            keepValues: true,
-            keepIsValid: true,
-            keepErrors: false,
-        });
-        const result = await firebaseAuth.login({
-            providerName: "google.com",
-        });
-        handlePostLogin(result);
-    };
-
-    //todo: code đăng ký bằng form here
-    //todo: gọi firebaseAuthProvider.register()
-    const onFormSubmit = async (value: IRegister) => {
-        try {
-            // Gọi hàm register từ firebaseAuthProvider
-            // const result = await firebaseAuth.register(value);
-            // return result;
-        } catch (error) {
-            // Xử lý lỗi nếu có
-            console.error("Error during registration:", error);
-            setErrorState("Đã xảy ra lỗi trong quá trình đăng ký.");
-        }
-    };
-
-    //todo: redirect page to callbackUrl when sign up successfully like login page
-    const handlePostSuccess = () => {};
 
     return {
         ...formMethods,

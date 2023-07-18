@@ -35,7 +35,10 @@ export const API = {
         return {
             resource: name,
             projection: {
-                withAttributes: "with-attributes",
+                basic: "basic",
+                withAttributes: "attributes",
+                withProduct: "product",
+                withProductName: "product-name",
             },
         };
     },
@@ -59,7 +62,13 @@ export const API = {
                     `${name}/${uid}/defaultAddress/${aid}`,
             },
             findByFirebaseId: (id: string) =>
-                `${name}/search/findByFirebaseId?fid=${id}`,
+                `${name}/search/findByFirebaseId?firebaseId=${id}`,
+            existsByEmail: (email: string) => {
+                `${name}/search/existsByEmail?email=${email}`;
+            },
+            existsByPhoneNumber: (phone: string) => {
+                `${name}/search/existsByPhoneNumber?phone=${phone}`;
+            },
         };
     },
     shippingAddresses: () => {
@@ -126,60 +135,15 @@ export type IProductField = {
     category?: ListOption<string, ICategory>;
 };
 
-// export interface IBaseProduct {
-//     name: string;
-//     slug: string;
-//     summary: string;
-//     description: string;
-//     thumbnail: string;
-//     features?: string[];
-//     specifications?: {
-//         [key: string]: string;
-//     };
-//     brand?: IBrand | ListOption<string, IBrand>;
-//     category?: ICategory | ListOption<string, ICategory>;
-// }
-// export interface IProduct extends IBaseProduct {
-//     id: string;
-//     brand?: IBrand;
-//     category?: ICategory;
-//     reviewCount?: number;
-//     avgRating?: number;
-//     variants?: IVariant[] | { id: string; price: number }[];
-//     _links?: {
-//         self: {
-//             href: string;
-//         };
-//         product: {
-//             href: string;
-//             templated: true;
-//         };
-//         category: {
-//             href: string;
-//         };
-//         variants: {
-//             href: string;
-//             templated: true;
-//         };
-//         brand: {
-//             href: string;
-//         };
-//     };
-// }
-
-// export type IProductField =
-//     | IProduct
-//     | {
-//           brand?: ListOption<string, IBrand>;
-//           category?: ListOption<string, ICategory>;
-//       };
-
 export type IVariant = {
     id: number;
     sku: string;
-    image: string;
+    images?: string[];
     price: number;
-    active: boolean;
+    /**
+     * @deprecated
+     */
+    active?: boolean;
     availableQuantity?: number;
     product?: IProduct;
     attributes?: IAttribute[];
@@ -215,10 +179,29 @@ export interface ICategory {
     name: string;
 }
 
+/**
+ * @deprecated
+ */
 export interface User {
     id: string | undefined;
+}
+
+export interface IUser {
+    id?: number;
+    firebaseUid: string;
+    firstName?: string;
+    lastName?: string;
+    fullName?: string;
+    displayName?: string;
+    email?: string;
+    phoneNumber?: string;
+    photoUrl?: string;
+    dateOfBirth?: Date;
+    gender?: boolean;
+    defaultAddress?: ShippingAddress;
     _links: _links;
 }
+
 export interface ShippingAddress {
     id: string | undefined;
     name: string;

@@ -6,9 +6,8 @@ import React, {
     useContext,
     useEffect,
     useRef,
-    useState,
 } from "react";
-import { Edit, List } from "@refinedev/chakra-ui";
+import { Edit } from "@refinedev/chakra-ui";
 import {
     FormControl,
     FormLabel,
@@ -22,29 +21,17 @@ import {
     Heading,
     Icon,
     Stack,
-    StackDivider,
     Box,
-    Flex,
     TableContainer,
     Table,
-    TableCaption,
     Tbody,
     Td,
-    Tfoot,
     Th,
     Thead,
     Tr,
     Textarea,
-    Grid,
-    HStack,
     Avatar,
-    Editable,
-    EditableInput,
-    EditablePreview,
     IconButton,
-    useEditableControls,
-    ButtonGroup,
-    useEditableContext,
 } from "@chakra-ui/react";
 import { FiUploadCloud } from "react-icons/fi";
 import { API, IBrand, ICategory, IProduct, IProductField } from "types";
@@ -59,9 +46,7 @@ import {
     useFieldArray,
 } from "react-hook-form";
 import { HttpError, useCustom } from "@refinedev/core";
-import { MinusCircle, PlusCircle, Trash } from "lucide-react";
-import { products } from "app/api/products/route";
-import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
+import { MinusCircle } from "lucide-react";
 import InlineEditable from "@components/ui/InlineEditable";
 import { useHover } from "usehooks-ts";
 
@@ -107,11 +92,13 @@ const ProductFormProvider = ({ children }: PropsWithChildren) => {
         defaultValues: {
             features: [],
         },
+        shouldFocusError: true,
     });
     const {
         handleSubmit,
         control,
         refineCore: { queryResult },
+        reset,
     } = formMethods;
 
     const specificationArray = useFieldArray({
@@ -120,7 +107,42 @@ const ProductFormProvider = ({ children }: PropsWithChildren) => {
     });
 
     const product = queryResult?.data?.data;
+    useEffect(() => {
+        if (product) {
+            const {
+                features,
+                specifications,
+                name,
+                slug,
+                summary,
+                description,
+                thumbnail,
+                ...props
+            } = product;
 
+            let formFeature, formSpecification;
+            if (features) {
+                formFeature = features.map((item) => ({
+                    value: item,
+                }));
+            }
+            if (specifications) {
+                formSpecification = Object.keys(specifications).map((key) => ({
+                    key,
+                    value: specifications[key],
+                }));
+            }
+            reset({
+                name,
+                slug,
+                summary,
+                description,
+                thumbnail,
+                features: formFeature,
+                specifications: formSpecification,
+            });
+        }
+    }, [product]);
     return (
         <FormContext.Provider
             value={{ ...formMethods, product, specificationArray }}
@@ -133,7 +155,7 @@ const ProductFormProvider = ({ children }: PropsWithChildren) => {
 const EditForm = () => {
     const {
         handleSubmit,
-        formState: { touchedFields },
+        formState: { touchedFields, dirtyFields },
         refineCore: { formLoading, onFinish },
         getValues,
         saveButtonProps,
@@ -156,7 +178,7 @@ const EditForm = () => {
                 ...saveButtonProps,
                 onClick: (e) => {
                     console.log("touchedFields", touchedFields);
-                    console.log("getValues()", getValues());
+                    console.log("dirtyFields", dirtyFields);
                     handleSubmit(
                         async ({
                             brand,
@@ -170,29 +192,48 @@ const EditForm = () => {
                                 categoryId,
                                 updatedFeatures,
                                 updatedSpecification;
-                            if (brand && "value" in brand) {
+                            if (
+                                dirtyFields.brand &&
+                                brand &&
+                                "value" in brand
+                            ) {
                                 brandId = brand.value.id;
                             }
-                            if (category && "value" in category) {
+                            if (
+                                dirtyFields.category &&
+                                category &&
+                                "value" in category
+                            ) {
                                 categoryId = category.value.id;
                             }
-                            if (features && touchedFields.features) {
+                            if (features && !!dirtyFields.features) {
                                 updatedFeatures = features
                                     .filter((item) => !!item)
                                     .map(({ value }) => value);
                             }
                             if (
                                 specifications &&
-                                touchedFields.specifications
+                                !!dirtyFields.specifications
                             ) {
                                 updatedSpecification = specifications
-                                    .filter((item) => !!item)
+                                    .filter(
+                                        ({ key, value }) => !!key && !!value,
+                                    )
                                     .reduce((prev, { key, value }) => {
                                         prev[key] = value;
-                                    }, {} as any);
+                                        return prev;
+                                    }, {} as Record<string, string>);
                             }
-                            const updatedValue = {
-                                ...value,
+
+                            let updateValue: Record<string, Object> = {};
+                            Object.keys(dirtyFields).forEach((key) => {
+                                const asKey = key as keyof typeof value;
+                                if (dirtyFields[asKey]) {
+                                    updateValue[asKey] = value[asKey];
+                                }
+                            });
+                            updateValue = {
+                                ...updateValue,
                                 ...(brandId && {
                                     brand: { id: brandId },
                                 }),
@@ -207,9 +248,8 @@ const EditForm = () => {
                                 }),
                             };
 
-                            // const result = await onFinish(updatedValue);
-                            console.log("result", updatedValue);
-                            console.log("value", value);
+                            const result = await onFinish(updateValue as any);
+                            console.log("result", updateValue);
                         },
                     )();
                 },
@@ -246,7 +286,6 @@ EditForm.Id = () => {
                 disabled
                 type="number"
                 {...register("id", {
-                    required: "This field is required",
                     valueAsNumber: true,
                 })}
             />
@@ -484,26 +523,39 @@ EditForm.Specification = () => {
     return (
         <>
             <div className="min-h-[300px]">
-                Thông số kỹ thuật
-                <TableContainer>
-                    <Table variant="striped">
-                        <Thead>
-                            <Tr>
-                                <Th>Tên thông số</Th>
-                                <Th>Chi tiết</Th>
-                                <Th maxW="100px" w="80px"></Th>
-                            </Tr>
-                        </Thead>
-                        <Tbody>
-                            {fields.map((item, idx) => (
-                                <SpecificationRow key={item.id} index={idx} />
-                            ))}
-                        </Tbody>
-                    </Table>
-                </TableContainer>
-                <Button px="4" onClick={addRowHandler}>
-                    +
-                </Button>
+                <div className="flex gap-2">
+                    <p>Thông số kỹ thuật</p>
+                    <Button
+                        px="4"
+                        onClick={addRowHandler}
+                        variant="solid"
+                        colorScheme="blackAlpha"
+                    >
+                        +
+                    </Button>
+                </div>
+                {!fields.length && <p>Không có dữ liệu</p>}
+                {!!fields.length && (
+                    <TableContainer>
+                        <Table variant="striped">
+                            <Thead>
+                                <Tr>
+                                    <Th>Thông số</Th>
+                                    <Th>Chi tiết</Th>
+                                    <Th maxW="100px" w="80px"></Th>
+                                </Tr>
+                            </Thead>
+                            <Tbody>
+                                {fields.map((item, idx) => (
+                                    <SpecificationRow
+                                        key={item.id}
+                                        index={idx}
+                                    />
+                                ))}
+                            </Tbody>
+                        </Table>
+                    </TableContainer>
+                )}
             </div>
         </>
     );
@@ -520,22 +572,56 @@ const SpecificationRow = ({
     const {
         register,
         control,
+        formState: { errors },
         specificationArray: { fields, remove },
     } = useProductFormContext();
+
     return (
         <Tr ref={rowRef}>
             <Td>
                 <Controller
                     render={({ field }) => (
-                        <InlineEditable editableProps={field} />
+                        <InlineEditable
+                            editableProps={{
+                                ...field,
+                                placeholder: "Tên thông số",
+                            }}
+                        />
                     )}
                     name={`specifications.${index}.key`}
                     control={control}
                 />
             </Td>
             <Td>
-                <InlineEditable />
+                <Controller
+                    render={({ field }) => (
+                        <InlineEditable
+                            editableProps={{
+                                ...field,
+                                placeholder: "Chi tiết thông số",
+                                // ...(errors.specifications?.[index] && {
+                                //     className: `border border-red-500`,
+                                // }),
+                            }}
+                            isError={!!errors.specifications?.[index]}
+                        />
+                    )}
+                    name={`specifications.${index}.value`}
+                    control={control}
+                    rules={{
+                        validate(value, formValue) {
+                            if (
+                                !value &&
+                                formValue.specifications?.[index]?.key
+                            ) {
+                                return false;
+                            }
+                            return true;
+                        },
+                    }}
+                />
             </Td>
+
             <td
                 onClick={remove.bind(null, index)}
                 className={`${rowHover ? "!bg-red-500" : ""} h-full`}
@@ -568,16 +654,6 @@ EditForm.Features = () => {
         control,
         name: "features",
     });
-    useEffect(() => {
-        if (product?.features) {
-            const convert = product.features.map((item) => ({ value: item }));
-            console.log("convert", convert);
-            reset({
-                features: convert,
-            });
-            console.log("done setting form");
-        }
-    }, [product]);
 
     const addFeatureHandler = (e: FormEvent) => {
         e.preventDefault();
