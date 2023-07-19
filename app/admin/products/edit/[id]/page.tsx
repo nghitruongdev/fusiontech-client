@@ -291,7 +291,7 @@ EditForm.Id = () => {
                         Id
                     </Text>
                     <Input
-                        disabled
+                        // disabled
                         type="number"
                         {...register("id", {
                             required: "This field is required",
@@ -862,7 +862,7 @@ EditForm.Features = () => {
                         h="fit-content"
                         zIndex="2"
                     >
-                        Thêm tính năng nổi bậc
+                        Thêm tính năng nổi bật
                     </Text>
                     <div>
                         <form onSubmit={addFeatureHandler}>
