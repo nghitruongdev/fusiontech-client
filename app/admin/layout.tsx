@@ -10,6 +10,7 @@ import {
 } from "@refinedev/chakra-ui";
 import { Refine } from "@refinedev/core";
 import routerProvider from "@refinedev/nextjs-router/app";
+import { API } from "types";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
@@ -44,6 +45,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         create: "/admin/products/create",
                         edit: "/admin/products/edit/:id",
                         show: "/admin/products/show/:id",
+                        meta: {
+                            canDelete: false,
+                        },
+                    },
+                    {
+                        name: "variants",
+                        list: "/admin/variants",
+                        // create: "/admin/products/show/:id/variants/create",
+                        edit: "/admin/variants/edit/:id",
+                        show: "/admin/variants/show/:id",
                         meta: {
                             canDelete: false,
                         },

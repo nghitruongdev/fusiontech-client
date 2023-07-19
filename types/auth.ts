@@ -5,11 +5,16 @@ export type ILogin = {
 } & (IGoogle | ICredentials);
 
 export type IGoogle = {
-    providerName: typeof GoogleAuthProvider.PROVIDER_ID;
+    providerName: (typeof IAuthProvider)["google"];
+};
+
+export const IAuthProvider = {
+    google: GoogleAuthProvider.PROVIDER_ID,
+    credentials: "credentials",
 };
 
 export type ICredentials = {
-    providerName: "credentials";
+    providerName: (typeof IAuthProvider)["credentials"];
     credentials: {
         email: string;
         password: string;
@@ -18,7 +23,10 @@ export type ICredentials = {
     };
 };
 
-export type IRegister = {
+export type IRegister = CredentialsRegister | GoogleRegister;
+
+export type CredentialsRegister = {
+    providerName: (typeof IAuthProvider)["credentials"];
     firstName: string;
     lastName: string;
     email: string;
@@ -28,7 +36,10 @@ export type IRegister = {
     agree?: boolean;
     subscription?: boolean;
 };
-
+export type GoogleRegister = {
+    providerName: (typeof IAuthProvider)["google"];
+    firebaseId: string;
+};
 export type IUpdatePassword = {} & IResetPassword;
 
 export type IResetPassword = {

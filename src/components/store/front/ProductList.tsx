@@ -5,7 +5,10 @@ import { getProductsWithDetails } from "../../../providers/server-data-provider/
 import Link from "next/link";
 import { Heart, Plus } from "lucide-react";
 import { formatPrice } from "../../../lib/utils";
-import { FavoriteButton } from "@components/store/front/client";
+import {
+    FavoriteButton,
+    ProductCardProvider,
+} from "@components/store/front/client";
 import NextLinkContainer from "@components/ui/NextLinkContainer";
 
 const ProductList = async () => {
@@ -18,7 +21,9 @@ const ProductList = async () => {
             </div>
             <div aria-label="product-list" className="flex overflow-x-auto">
                 {Object.values(products.data).map((item: IProduct) => (
-                    <Product key={item.id} item={item} />
+                    <ProductCardProvider key={item.id} product={item}>
+                        <Product item={item} />
+                    </ProductCardProvider>
                 ))}
             </div>
         </>

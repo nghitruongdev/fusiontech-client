@@ -10,9 +10,8 @@ import {
     getAuth,
     UserCredential,
     AuthError,
-    createUserWithEmailAndPassword,
-    updateCurrentUser,
-    updateProfile,
+    signInWithCustomToken,
+    getAdditionalUserInfo,
 } from "firebase/auth";
 import {
     AuthActionResponse,
@@ -22,15 +21,22 @@ import {
 } from "@refinedev/core/dist/interfaces";
 import { useSsr } from "usehooks-ts";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context";
-import { ILogin, IRegister, IUpdatePassword } from "types/auth";
+import { IAuthProvider, ILogin, IRegister, IUpdatePassword } from "types/auth";
 import { getServerSession } from "@/lib/server";
 import { firebaseApp } from "@/lib/firebase";
+import { API_URL } from "types/constants";
+import { springDataProvider } from "./rest-data-provider";
 
 const auth = getAuth(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
 auth.setPersistence(browserLocalPersistence);
 auth.useDeviceLanguage();
 
+const authAPI = {
+    registerGoogle: (firebaseId: string) =>
+        `auth/register/google?firebaseId=${firebaseId}`,
+    registerWithEmail: `auth/register`,
+};
 const login = async (props: ILogin): Promise<AuthActionResponse> => {
     const { providerName, callbackUrl } = props;
     let result: UserCredential;
@@ -41,8 +47,7 @@ const login = async (props: ILogin): Promise<AuthActionResponse> => {
                     auth,
                     googleProvider.addScope("profile"),
                 );
-                //todo: track if user is new, send request to save user data to back-end server
-
+                await handleGooglePostLogin(result);
                 break;
             case "credentials": {
                 const { email, password } = props.credentials;
@@ -65,7 +70,6 @@ const login = async (props: ILogin): Promise<AuthActionResponse> => {
     } catch (err) {
         const error = err as AuthError;
         console.error(error.code);
-
         if (error.message.includes("auth/popup-closed-by-user"))
             return {
                 success: false,
@@ -74,6 +78,20 @@ const login = async (props: ILogin): Promise<AuthActionResponse> => {
             success: false,
             error: error,
         };
+    }
+};
+
+const handleGooglePostLogin = (userCred: UserCredential) => {
+    const infos = getAdditionalUserInfo(userCred);
+    const { user } = userCred;
+    if (infos?.isNewUser) {
+        console.debug("Register new google user with back-end server");
+        return firebaseAuth.register({
+            providerName: "google.com",
+            firebaseId: user.uid,
+        });
+        //         //todo: if success, set custom token to user
+        //         //todo: if fail, and user do not have account in database before -> delete user from firebase
     }
 };
 
@@ -127,7 +145,56 @@ const onError = async (error: HttpError): Promise<OnErrorResponse> => {
     // return { error };
 };
 
-const register = async (formValues: IRegister) => {
+const register = async ({ providerName, ...formValues }: IRegister) => {
+    if (providerName === IAuthProvider["google"]) {
+        if (!("firebaseId" in formValues)) {
+            throw new Error("firebase ID property is missing");
+        }
+        const { firebaseId } = formValues;
+        const response = await fetch(
+            `${API_URL}/${authAPI["registerGoogle"](firebaseId)}`,
+            { method: "post" },
+        );
+        console.log("response", response);
+        if (!response.ok) {
+            throw new Error(
+                "Không thể đăng ký người dùng Google trong hệ thống",
+            );
+        }
+        const { token } = await response.json();
+        signInWithCustomToken(auth, token);
+        return {
+            success: true,
+        };
+    }
+    if (
+        providerName === IAuthProvider["credentials"] &&
+        "email" in formValues
+    ) {
+        const { email, password, phone, firstName, lastName } = formValues;
+        const response = await springDataProvider.custom({
+            url: authAPI.registerWithEmail,
+            method: "post",
+            payload: {
+                firstName,
+                lastName,
+                phone,
+                email,
+                password,
+            },
+        });
+        if (response.data) {
+            const { token } = response.data;
+            signInWithCustomToken(auth, token);
+            return {
+                success: true,
+            };
+        }
+    }
+
+    return {
+        success: false,
+    };
     //todo: gửi info lên back-end api
     //todo: đợi backend trả về response là token
     //todo: gọi firebase và settoken nếu success
@@ -190,12 +257,14 @@ const firebaseAuth = {
     check,
     onError,
     forgotPassword,
+    register,
     updatePassword,
     authProvider: (router?: AppRouterInstance): AuthBindings => ({
         login,
         logout: logout(router),
         check,
         onError,
+        register,
         forgotPassword,
         updatePassword,
     }),

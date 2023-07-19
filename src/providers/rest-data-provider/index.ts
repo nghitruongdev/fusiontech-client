@@ -14,19 +14,24 @@ const dataProvider = (
     Required<DataProvider>,
     "createMany" | "updateMany" | "deleteMany"
 > => ({
-    getList: async ({ resource, pagination, filters, sorters, meta }) => {
+    getList: async ({ resource, pagination, filters, sorters, meta = {} }) => {
         const {
             current = 0,
             pageSize = 10,
             mode = "server",
         } = pagination ?? {};
 
-        const url = `${apiUrl}/${resource}${
-            mode === "off" ? "/search/all" : ""
-        }`;
-
-        const { headers: headersFromMeta, method } = meta ?? {};
+        const {
+            headers: headersFromMeta,
+            method,
+            url: customUrl,
+            query: metaQuery,
+        } = meta;
         const requestMethod = (method as MethodTypes) ?? "get";
+
+        const url = customUrl
+            ? customUrl
+            : `${apiUrl}/${resource}${mode === "off" ? "/search/all" : ""}`;
 
         if (!!filters) {
             console.warn("Filter is currently not supported.");
@@ -36,24 +41,27 @@ const dataProvider = (
         const query: {
             // _start?: number;
             // _end?: number;
-            _page?: number;
-            _size?: number;
-            _sort?: string;
-            _order?: string;
-        } = {};
+            projection?: string;
+            page?: number;
+            size?: number;
+            sort?: string;
+            order?: string;
+        } = {
+            projection: metaQuery?.projection,
+        };
 
         if (mode === "server") {
             // query._start = (current - 1) * pageSize;
             // query._end = current * pageSize;
-            query._page = current;
-            query._size = pageSize;
+            query.page = current;
+            query.size = pageSize;
         }
 
         const generatedSort = generateSort(sorters);
         if (generatedSort) {
             const { _sort, _order } = generatedSort;
-            query._sort = _sort.join(",");
-            query._order = _order.join(",");
+            query.sort = _sort.join(",");
+            query.order = _order.join(",");
         }
         const requestUrl = `${url}?${stringify(query)}&${stringify(
             queryFilters,
@@ -125,14 +133,14 @@ const dataProvider = (
         const { headers, method, query } = meta ?? {};
 
         const requestMethod = (method as MethodTypes) ?? "get";
-
-        const { data } = await httpClient[requestMethod](
-            stringifyUrl({
-                url: url,
-                query: query,
-            }),
-            { headers },
-        );
+        const requestUrl = stringifyUrl({
+            url: url,
+            query: query,
+        });
+        console.log("requestUrl", requestUrl);
+        const { data } = await httpClient[requestMethod](requestUrl, {
+            headers,
+        });
 
         return {
             data,
@@ -207,10 +215,10 @@ const dataProvider = (
             case "put":
             case "post":
             case "patch":
-                axiosResponse = await httpClient[method](url, payload);
+                axiosResponse = await httpClient[method](requestUrl, payload);
                 break;
             case "delete":
-                axiosResponse = await httpClient.delete(url, {
+                axiosResponse = await httpClient.delete(requestUrl, {
                     data: payload,
                 });
                 break;

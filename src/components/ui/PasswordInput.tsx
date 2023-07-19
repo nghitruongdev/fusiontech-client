@@ -29,9 +29,8 @@ const PasswordInput = forwardRef<InputProps, "input">((props, ref) => {
                     </Button>
                 </InputRightElement>
             </InputGroup>
-            <FormHelperText>
-                Mật khẩu phải nhiều hơn 8 ký tự, ít nhất 1 chữ thường 1 chữ in
-                hoa, 1 chữ số, 1 ký tự đặc biệt
+            <FormHelperText color="gray.500" fontSize={"sm"}>
+                Mật khẩu tối thiểu 8 ký tự
             </FormHelperText>
         </>
     );
