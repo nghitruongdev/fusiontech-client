@@ -6,8 +6,40 @@ import {
     useOne,
     useList,
 } from "@refinedev/core";
-import { CreateButton, Show } from "@refinedev/chakra-ui";
-import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
+import {
+    CreateButton,
+    NumberField,
+    Show,
+    TagField,
+    TextField,
+} from "@refinedev/chakra-ui";
+import {
+    Box,
+    Button,
+    Center,
+    Flex,
+    Grid,
+    GridItem,
+    HStack,
+    Heading,
+    Image,
+    Input,
+    Stack,
+    Tab,
+    TabList,
+    TabPanel,
+    TabPanels,
+    TableCaption,
+    Tabs,
+    Tbody,
+    Td,
+    Text,
+    Textarea,
+    Tfoot,
+    Th,
+    Thead,
+    Tr,
+} from "@chakra-ui/react";
 import React, {
     ReactNode,
     createContext,
@@ -22,9 +54,12 @@ import { TableContainer, Table } from "@chakra-ui/react";
 import { API, IProduct, IVariant } from "types";
 import { useDefaultTableRender } from "@/hooks/useRenderTable";
 import { cleanUrl, updateUrlParams } from "@/lib/utils";
-import { variantTableColumns } from "app/admin/variants/(list)/page";
 import { PropsWithChildren } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Rating } from "@smastrom/react-rating";
+import { BiChevronDownCircle } from "react-icons/bi";
+import { ChevronDown, ChevronUp } from "lucide-react";
+import { variantTableColumns } from "app/admin/variants/(list)/page";
 
 const ProductShowPage = () => {
     return (
@@ -48,7 +83,6 @@ export const ProductShow: React.FC<IResourceComponentsProps> = () => {
         <Show isLoading={isLoading} canEdit={tabIndex === 0}>
             <Tabs
                 variant={"solid-rounded"}
-                isLazy
                 index={tabIndex}
                 onChange={handleTabChange}
             >
@@ -57,16 +91,18 @@ export const ProductShow: React.FC<IResourceComponentsProps> = () => {
                         <Tab>Sản phẩm</Tab>
                         <Tab>Phiên bản sản phẩm</Tab>
                     </TabList>
-                    <CreateButton
-                        resource={resource}
-                        meta={{
-                            query: {
-                                product: 1,
-                            },
-                        }}
-                    >
-                        Thêm
-                    </CreateButton>
+                    {tabIndex === 1 && (
+                        <CreateButton
+                            resource={resource}
+                            meta={{
+                                query: {
+                                    product: 1,
+                                },
+                            }}
+                        >
+                            Thêm
+                        </CreateButton>
+                    )}
                 </div>
 
                 <TabPanels>
@@ -83,54 +119,296 @@ export const ProductShow: React.FC<IResourceComponentsProps> = () => {
 };
 
 const ProductInfo = () => {
+    const { record } = useContextProvider();
     return (
         <>
-            {/* <div className="grid grid-cols-2">
-                <div>
-                    <Heading as="h5" size="sm" mt={4}>
-                        Thumbnail
-                    </Heading>
-                    <Image sx={{ maxWidth: 200 }} src={record?.thumbnail} />
-                </div>
-                <div className="">
-                    <Heading as="h5" size="sm" mt={4}>
-                        Id
-                    </Heading>
-                    <NumberField value={record?.id ?? ""} />
-                    <Heading as="h5" size="sm" mt={4}>
-                        Name
-                    </Heading>
-                    <TextField value={record?.name} />
-                    <Heading as="h5" size="sm" mt={4}>
-                        Summary
-                    </Heading>
-                    <TextField value={record?.summary} />
+            <div className="bg-white">
+                <Grid
+                    templateRows="repeat(1, 1fr)"
+                    templateColumns="repeat(3, 1fr)"
+                    gap={4}
+                >
+                    <GridItem rowSpan={2} colSpan={1}>
+                        <Flex
+                            justify="center"
+                            alignItems="center"
+                            flexDirection="column"
+                            p={3}
+                        >
+                            <Box
+                                mb={8}
+                                className="overflow-x-auto shadow-bannerShadow sm:rounded-lg"
+                            >
+                                <Image
+                                    sx={{ maxWidth: 280 }}
+                                    src={record?.thumbnail}
+                                />
+                            </Box>
 
-                    <TextField value={record?.description} />
-                    <Heading as="h5" size="sm" mt={4}>
-                        Review Count
-                    </Heading>
-                    <NumberField value={record?.reviewCount ?? ""} />
-                    <Heading as="h5" size="sm" mt={4}>
-                        Avg Rating
-                    </Heading>
-                    <NumberField value={record?.avgRating ?? ""} />
-                    <Heading as="h5" size="sm" mt={4}>
-                        Features
-                    </Heading>
-                    <HStack spacing="12px">
-                        {record?.features?.map((item: any) => (
-                            <TagField value={item} key={item} />
-                        ))}
-                    </HStack>
-                    <Heading as="h5" size="sm" mt={4}>
-                        Description
-                    </Heading>
-                </div>
-            </div> */}
+                            <ProductInfo.AvgRating />
+                            <ProductInfo.ReviewCount />
+                        </Flex>
+                    </GridItem>
+                    <GridItem rowSpan={2} colSpan={2}>
+                        <Box p={4} mb={10}>
+                            <Flex>
+                                <ProductInfo.Id />
+                                <ProductInfo.Name />
+                            </Flex>
+                            <ProductInfo.Features />
+                            <ProductInfo.Summary />
+                        </Box>
+                    </GridItem>
+                    <GridItem rowSpan={2} colSpan={6}>
+                        <Box pr={16}>
+                            <Box mb={10}>
+                                <ProductInfo.Description />
+                            </Box>
+                        </Box>
+                    </GridItem>
+                </Grid>
+            </div>
         </>
     );
 };
+
+ProductInfo.Id = () => {
+    const { record } = useContextProvider();
+
+    return (
+        <Box mb="10" mr="10">
+            <Box pos="relative">
+                <div>
+                    <Text
+                        top="-15px"
+                        left="5px"
+                        p="0 12px"
+                        bg="#fff"
+                        transformOrigin="top left"
+                        transition="all .2s ease-out"
+                        color="#999"
+                        pointerEvents="none"
+                        pos="absolute"
+                        w="fit-content"
+                        h="fit-content"
+                        fontWeight="bold"
+                        zIndex="2"
+                    >
+                        Id
+                    </Text>
+                    <Input fontWeight="medium" value={record?.id ?? ""} />
+                </div>
+            </Box>
+        </Box>
+    );
+};
+
+ProductInfo.Name = () => {
+    const { record } = useContextProvider();
+
+    return (
+        <Box mb="5">
+            <Box pos="relative">
+                <div>
+                    <Text
+                        top="-15px"
+                        left="5px"
+                        p="0 12px"
+                        bg="#fff"
+                        transformOrigin="top left"
+                        transition="all .2s ease-out"
+                        color="#999"
+                        pointerEvents="none"
+                        pos="absolute"
+                        w="fit-content"
+                        h="fit-content"
+                        fontWeight="bold"
+                        zIndex="2"
+                    >
+                        Tên
+                    </Text>
+                    <Input
+                        className="font-bold "
+                        fontWeight="medium"
+                        value={record?.name ?? ""}
+                    />
+                </div>
+            </Box>
+        </Box>
+    );
+};
+
+ProductInfo.ReviewCount = () => {
+    const { record } = useContextProvider();
+
+    return (
+        <Box mb="10">
+            <Box pos="relative">
+                <div>
+                    <Text
+                        top="-15px"
+                        left="5px"
+                        p="0 12px"
+                        bg="#fff"
+                        transformOrigin="top left"
+                        transition="all .2s ease-out"
+                        color="#999"
+                        pointerEvents="none"
+                        pos="absolute"
+                        w="fit-content"
+                        h="fit-content"
+                        fontWeight="bold"
+                        zIndex="2"
+                    >
+                        Số lượng lượt đánh giá
+                    </Text>
+                    <Input
+                        textAlign="center"
+                        fontWeight="medium"
+                        value={record?.id ?? ""}
+                    />
+                </div>
+            </Box>
+        </Box>
+    );
+};
+
+ProductInfo.AvgRating = () => {
+    const { record } = useContextProvider();
+
+    return (
+        <Box mb="5">
+            <Box pos="relative">
+                <Flex alignItems="center">
+                    <Rating
+                        style={{ maxWidth: 180 }}
+                        value={
+                            typeof record?.avgRating === "number"
+                                ? parseInt(record?.avgRating.toString())
+                                : 0
+                        }
+                        readOnly
+                    />
+                    {/* <NumberField value={record?.reviewCount ?? ""} /> */}
+                </Flex>
+            </Box>
+        </Box>
+    );
+};
+
+ProductInfo.Summary = () => {
+    const { record } = useContextProvider();
+
+    return (
+        <Box mb="10">
+            <Box pos="relative">
+                <div>
+                    <Text
+                        top="-15px"
+                        left="5px"
+                        p="0 12px"
+                        bg="#fff"
+                        transformOrigin="top left"
+                        transition="all .2s ease-out"
+                        color="#999"
+                        pointerEvents="none"
+                        pos="absolute"
+                        w="fit-content"
+                        h="fit-content"
+                        fontWeight="bold"
+                        zIndex="2"
+                    >
+                        Mô tả sản phẩm
+                    </Text>
+                    <Textarea
+                        fontWeight="medium"
+                        h="269px"
+                        value={record?.summary ?? ""}
+                    />
+                </div>
+            </Box>
+        </Box>
+    );
+};
+ProductInfo.Features = () => {
+    const { record } = useContextProvider();
+
+    return (
+        <Box>
+            <Box pos="relative">
+                <Text
+                    top="-15px"
+                    left="5px"
+                    p="0 12px"
+                    bg="#fff"
+                    transformOrigin="top left"
+                    transition="all .2s ease-out"
+                    color="#999"
+                    pointerEvents="none"
+                    pos="absolute"
+                    w="fit-content"
+                    h="fit-content"
+                    fontWeight="bold"
+                    zIndex="2"
+                >
+                    Tính năng nổi bật
+                </Text>
+                <div className="overflow-x-auto overflow-y-auto shadow-bannerShadow sm:rounded-lg max-h-[310px]">
+                    <Table
+                        className="w-full normal-case text-base text-left dark:bg-gray-700"
+                        fontWeight="medium"
+                    >
+                        <Tbody>
+                            {record?.features?.map((feature, index) => (
+                                <Tr key={index}>
+                                    <Td>
+                                        <TextField value={feature} />
+                                    </Td>
+                                </Tr>
+                            ))}
+                        </Tbody>
+                    </Table>
+                </div>
+            </Box>
+        </Box>
+    );
+};
+
+ProductInfo.Description = () => {
+    const { record } = useContextProvider();
+
+    return (
+        <Box mb="10">
+            <Box pos="relative">
+                <div>
+                    <Text
+                        top="-15px"
+                        left="5px"
+                        p="0 12px"
+                        bg="#fff"
+                        transformOrigin="top left"
+                        transition="all .2s ease-out"
+                        color="#999"
+                        pointerEvents="none"
+                        pos="absolute"
+                        w="fit-content"
+                        h="fit-content"
+                        fontWeight="bold"
+                        zIndex="2"
+                    >
+                        Bài đăng
+                    </Text>
+                    <Textarea
+                        fontWeight="medium"
+                        h="313px"
+                        value={record?.description ?? ""}
+                    />
+                </div>
+            </Box>
+        </Box>
+    );
+};
+
 const VariantListByProduct: React.FC<IResourceComponentsProps> = () => {
     const {
         record: product,

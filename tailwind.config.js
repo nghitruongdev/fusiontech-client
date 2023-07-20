@@ -96,6 +96,8 @@ module.exports = {
                 "accordion-down": "accordion-down 0.2s ease-out",
                 "accordion-up": "accordion-up 0.2s ease-out",
                 "ping-once": "ping 1s cubic-bezier(0, 0, 0.2, 1)",
+                bounce200: "bounce 1s infinite 200ms",
+                bounce400: "bounce 1s infinite 400ms",
             },
             fontFamily: {
                 // sans: ["var(--font-open_sans)", ...fontFamily.sans],

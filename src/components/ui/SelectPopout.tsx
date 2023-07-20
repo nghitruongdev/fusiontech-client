@@ -89,6 +89,7 @@ const SelectPopout = <T extends FieldValues = FieldValues>({
                     rightIcon={<ChevronDown />}
                     onClick={() => (isOpen ? onClose() : onOpen())}
                     {...(isOpen && { bg: "blue.700", color: "white" })}
+                    minW="125px"
                 >
                     {!!!valueWatch?.label
                         ? defaultEmpty
@@ -142,7 +143,7 @@ const Menu = (props: JSX.IntrinsicElements["div"]) => {
                 boxShadow: `0 0 0 1px ${shadow}, 0 4px 11px ${shadow}`,
                 marginTop: 8,
                 position: "absolute",
-                zIndex: 2,
+                zIndex: 3,
             }}
             {...props}
         />

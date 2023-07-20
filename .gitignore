@@ -5,6 +5,7 @@ node_modules
 # environment variables
 .env
 .env.*
+
 !.env.example
 # template pages
 pages_exclude

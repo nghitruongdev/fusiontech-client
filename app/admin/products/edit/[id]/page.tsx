@@ -1,13 +1,15 @@
 "use client";
 import { useForm } from "@refinedev/react-hook-form";
 import React, {
+    ChangeEvent,
     FormEvent,
     createContext,
     useContext,
     useEffect,
     useRef,
+    useState,
 } from "react";
-import { Edit } from "@refinedev/chakra-ui";
+import { Edit, List } from "@refinedev/chakra-ui";
 import {
     FormControl,
     FormLabel,
@@ -32,11 +34,19 @@ import {
     Textarea,
     Avatar,
     IconButton,
+    useEditableControls,
+    ButtonGroup,
+    useEditableContext,
+    GridItem,
+    Grid,
+    Flex,
 } from "@chakra-ui/react";
 import { FiUploadCloud } from "react-icons/fi";
 import { API, IBrand, ICategory, IProduct, IProductField } from "types";
 import { PropsWithChildren } from "react";
 
+/* The above code is importing the `SelectPopout` component from the `@components/ui` directory. It is
+likely used in a TypeScript React project. */
 import SelectPopout from "@components/ui/SelectPopout";
 import useListOption, { ListOption } from "@/hooks/useListOption";
 import {
@@ -46,9 +56,12 @@ import {
     useFieldArray,
 } from "react-hook-form";
 import { HttpError, useCustom } from "@refinedev/core";
-import { MinusCircle } from "lucide-react";
+import { MinusCircle, PlusCircle, Trash } from "lucide-react";
+import { products } from "app/api/products/route";
+import { CheckIcon, CloseIcon } from "@chakra-ui/icons";
 import InlineEditable from "@components/ui/InlineEditable";
 import { useHover } from "usehooks-ts";
+import { Inbox } from "lucide-react";
 
 const EditProduct = () => {
     return (
@@ -255,20 +268,45 @@ const EditForm = () => {
                 },
             }}
         >
-            <div className="bg-gray-100">
-                <div className={`grid grid-cols-2`}>
-                    <ImageUpload />
-                    <Stack>
-                        <EditForm.Id />
-                        <EditForm.Name />
-                        <EditForm.Summary />
-                        <EditForm.Brand />
-                        <EditForm.Category />
-                    </Stack>
-                </div>
-                <EditForm.Features />
-                <EditForm.Specification />
-                <EditForm.Description />
+            <div className="bg-white">
+                <Grid
+                    templateRows="repeat(1, 1fr)"
+                    templateColumns="repeat(6, 1fr)"
+                    gap={4}
+                >
+                    <GridItem rowSpan={2} colSpan={2}>
+                        <Box p={4}>
+                            <Box mb={10}>
+                                <ImageUpload />
+                            </Box>
+                            <EditForm.Id />
+                            <EditForm.Name />
+                            <div className="flex">
+                                <EditForm.Brand />
+                                <EditForm.Category />
+                            </div>
+                            <EditForm.Summary />
+                        </Box>
+                    </GridItem>
+
+                    <GridItem colSpan={4}>
+                        <Box p={4}>
+                            <Stack spacing={4}>
+                                <EditForm.Features />
+
+                                <EditForm.Specification />
+                                {/* <EditForm.Description /> */}
+                            </Stack>
+                        </Box>
+                    </GridItem>
+                    <GridItem colSpan={6}>
+                        <Box p={4}>
+                            <Stack spacing={4}>
+                                <EditForm.Description />
+                            </Stack>
+                        </Box>
+                    </GridItem>
+                </Grid>
             </div>
         </Edit>
     );
@@ -280,12 +318,28 @@ EditForm.Id = () => {
         formState: { errors },
     } = useProductFormContext();
     return (
-        <FormControl mb="3" isInvalid={!!(errors as any)?.id}>
-            <FormLabel>Id</FormLabel>
+        <FormControl mb="5" isInvalid={!!(errors as any)?.id}>
+            <Text
+                top="-15px"
+                left="5px"
+                p="0 12px"
+                bg="#fff"
+                transformOrigin="top left"
+                transition="all .2s ease-out"
+                color="#999"
+                pointerEvents="none"
+                pos="absolute"
+                w="fit-content"
+                h="fit-content"
+                zIndex="2"
+            >
+                Id
+            </Text>
             <Input
-                disabled
+                // disabled
                 type="number"
                 {...register("id", {
+                    required: "This field is required",
                     valueAsNumber: true,
                 })}
             />
@@ -295,7 +349,6 @@ EditForm.Id = () => {
         </FormControl>
     );
 };
-
 EditForm.Name = () => {
     const {
         register,
@@ -303,18 +356,38 @@ EditForm.Name = () => {
     } = useProductFormContext();
 
     return (
-        <FormControl mb="3" isInvalid={!!(errors as any)?.name}>
-            <FormLabel>Name</FormLabel>
-            <Input
-                type="text"
-                {...register("name", {
-                    required: "This field is required",
-                })}
-            />
-            <FormErrorMessage>
-                {(errors as any)?.name?.message as string}
-            </FormErrorMessage>
-        </FormControl>
+        <Box mb="10">
+            <Box pos="relative">
+                <FormControl mb="3" isInvalid={!!(errors as any)?.name}>
+                    <Text
+                        top="-15px"
+                        left="5px"
+                        p="0 12px"
+                        bg="#fff"
+                        transformOrigin="top left"
+                        transition="all .2s ease-out"
+                        color="#999"
+                        pointerEvents="none"
+                        pos="absolute"
+                        w="fit-content"
+                        h="fit-content"
+                        zIndex="2"
+                    >
+                        Tên:
+                    </Text>
+                    <Input
+                        type="text"
+                        {...register("name", {
+                            required: "This field is required",
+                        })}
+                        w="100%" // Thêm thuộc tính w="100%" để làm cho phần input dài ra
+                    />
+                    <FormErrorMessage>
+                        {(errors as any)?.name?.message as string}
+                    </FormErrorMessage>
+                </FormControl>
+            </Box>
+        </Box>
     );
 };
 
@@ -325,18 +398,37 @@ EditForm.Summary = () => {
     } = useProductFormContext();
 
     return (
-        <FormControl mb="3" isInvalid={!!(errors as any)?.summary}>
-            <FormLabel>Mô tả sản phẩm</FormLabel>
-            <Input
-                type="text"
-                {...register("summary", {
-                    required: "This field is required",
-                })}
-            />
-            <FormErrorMessage>
-                {(errors as any)?.summary?.message as string}
-            </FormErrorMessage>
-        </FormControl>
+        <Box>
+            <Box pos="relative">
+                <FormControl mb="3" isInvalid={!!(errors as any)?.summary}>
+                    <Text
+                        top="-15px"
+                        left="5px"
+                        p="0 12px"
+                        bg="#fff"
+                        transformOrigin="top left"
+                        transition="all .2s ease-out"
+                        color="#999"
+                        pointerEvents="none"
+                        pos="absolute"
+                        w="fit-content"
+                        h="fit-content"
+                        zIndex="2"
+                    >
+                        Mô tả sản phẩm
+                    </Text>
+                    <Textarea
+                        {...register("summary", {
+                            required: "This field is required",
+                        })}
+                        h="269px"
+                    />
+                    <FormErrorMessage>
+                        {(errors as any)?.summary?.message as string}
+                    </FormErrorMessage>
+                </FormControl>
+            </Box>
+        </Box>
     );
 };
 
@@ -374,43 +466,63 @@ EditForm.Brand = () => {
     }, [product?.brand?.id, options]);
 
     const { control } = useProductFormContext();
-    return (
-        <SelectPopout
-            controller={{
-                name: "brand",
-                control,
-            }}
-            stateLabel={{
-                defaultEmpty: `Chọn thương hiệu`,
-            }}
-            props={{
-                options: options,
-                noOptionsMessage: "Không có nhãn hàng.",
-                formatOptionLabel: (data, meta) => {
-                    const {
-                        label,
-                        value: { logo },
-                    } = data as ListOption<string, IBrand>;
-                    return (
-                        <Box
-                            display="flex"
-                            justifyContent="space-between"
-                            alignItems="center"
-                        >
-                            <Text noOfLines={2}>{label}</Text>
 
-                            <Avatar
-                                ml="5"
-                                size="sm"
-                                variant="filled"
-                                name={label}
-                                src={logo}
-                            />
-                        </Box>
-                    );
-                },
-            }}
-        />
+    return (
+        <Box mb="10">
+            <Box pos="relative">
+                <Text
+                    top="-25px"
+                    left="-10px"
+                    p="0 12px"
+                    // bg="#fff"
+                    transformOrigin="top left"
+                    transition="all .2s ease-out"
+                    color="#999"
+                    pointerEvents="none"
+                    pos="absolute"
+                    w="fit-content"
+                    h="fit-content"
+                    zIndex="2"
+                >
+                    Thương hiệu:
+                </Text>
+                <SelectPopout
+                    controller={{
+                        name: "brand",
+                        control,
+                    }}
+                    stateLabel={{
+                        defaultEmpty: `Chọn thương hiệu`,
+                    }}
+                    props={{
+                        options: options,
+                        noOptionsMessage: "Không có nhãn hàng.",
+                        formatOptionLabel: (data, meta) => {
+                            const {
+                                label,
+                                value: { logo },
+                            } = data as ListOption<string, IBrand>;
+                            return (
+                                <Box
+                                    display="flex"
+                                    justifyContent="space-between"
+                                    alignItems="center"
+                                >
+                                    <Text noOfLines={2}>{label}</Text>
+                                    <Avatar
+                                        ml="5"
+                                        size="sm"
+                                        variant="filled"
+                                        name={label}
+                                        src={logo}
+                                    />
+                                </Box>
+                            );
+                        },
+                    }}
+                />
+            </Box>
+        </Box>
     );
 };
 
@@ -445,20 +557,40 @@ EditForm.Category = () => {
     }, [product?.category, options]);
     return (
         <>
-            <FormLabel>Danh mục</FormLabel>
-            <SelectPopout
-                controller={{
-                    name: "category",
-                    control,
-                }}
-                stateLabel={{
-                    defaultEmpty: `Chọn danh mục`,
-                }}
-                props={{
-                    options: options,
-                    noOptionsMessage: "Không có danh mục.",
-                }}
-            />
+            <Box mb="10" ml="10">
+                <Box pos="relative">
+                    <Text
+                        top="-25px"
+                        left="-10px"
+                        p="0 12px"
+                        // bg="#fff"
+                        transformOrigin="top left"
+                        transition="all .2s ease-out"
+                        color="#999"
+                        pointerEvents="none"
+                        pos="absolute"
+                        w="fit-content"
+                        h="fit-content"
+                        zIndex="2"
+                    >
+                        Danh mục:
+                    </Text>
+
+                    <SelectPopout
+                        controller={{
+                            name: "category",
+                            control,
+                        }}
+                        stateLabel={{
+                            defaultEmpty: `Chọn danh mục`,
+                        }}
+                        props={{
+                            options: options,
+                            noOptionsMessage: "Không có danh mục.",
+                        }}
+                    />
+                </Box>
+            </Box>
         </>
     );
 };
@@ -469,79 +601,159 @@ EditForm.Description = () => {
         formState: { errors },
     } = useProductFormContext();
     return (
-        <FormControl mb="3" isInvalid={!!(errors as any)?.description}>
-            <FormLabel>Bài đăng </FormLabel>
+        <Box>
+            <Box pos="relative">
+                <FormControl mb="3" isInvalid={!!(errors as any)?.description}>
+                    <Text
+                        top="-15px"
+                        left="5px"
+                        p="0 12px"
+                        bg="#fff"
+                        transformOrigin="top left"
+                        transition="all .2s ease-out"
+                        color="#999"
+                        pointerEvents="none"
+                        pos="absolute"
+                        w="fit-content"
+                        h="fit-content"
+                        zIndex="2"
+                    >
+                        Bài đăng
+                    </Text>
 
-            <Textarea
-                {...register("description", {
-                    required: "This field is required",
-                })}
-                value={
-                    "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Facere porro dicta ex! Nobis, voluptatum qui! Asperiores voluptate at, nesciunt necessitatibus facilis sequi ullam eum vero? Totam magni architecto nisi at."
-                }
-            />
-            <FormErrorMessage>
-                {(errors as any)?.description?.message as string}
-            </FormErrorMessage>
-        </FormControl>
+                    <Textarea
+                        {...register("description", {
+                            required: "This field is required",
+                        })}
+                        h="224px"
+                    />
+                    <FormErrorMessage>
+                        {(errors as any)?.description?.message as string}
+                    </FormErrorMessage>
+                </FormControl>
+            </Box>
+        </Box>
     );
 };
-
 const ImageUpload = () => {
+    const {
+        register,
+        formState: { errors },
+    } = useProductFormContext();
+
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+    const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files && event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            if (typeof reader.result === "string") {
+                setSelectedImage(reader.result);
+            }
+        };
+
+        if (file) {
+            reader.readAsDataURL(file);
+        }
+    };
+
     return (
         <>
-            <Card mb="10">
-                <CardHeader>
-                    <Heading size="md">Thêm hình ảnh sản phẩm</Heading>
-                </CardHeader>
-                <CardBody h={200} maxW={"300px"}>
-                    <Icon
-                        p={10}
-                        borderWidth="1px"
-                        borderColor={"blackAlpha.700"}
-                        color="blackAlpha.700"
-                        boxSize="full"
-                        as={FiUploadCloud}
+            <div className="flex items-center justify-center w-full">
+                <label
+                    htmlFor="dropzone-file"
+                    className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
+                >
+                    {selectedImage ? (
+                        <img
+                            src={selectedImage}
+                            alt="Uploaded Image"
+                            className="w-full h-full object-cover"
+                        />
+                    ) : (
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg
+                                className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
+                                aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 20 16"
+                            >
+                                <path
+                                    stroke="currentColor"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+                                />
+                            </svg>
+                            <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                                <span className="font-semibold">
+                                    Click to upload
+                                </span>{" "}
+                                or drag and drop
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                                SVG, PNG, JPG or GIF (MAX. 800x400px)
+                            </p>
+                        </div>
+                    )}
+                    <input
+                        id="dropzone-file"
+                        type="file"
+                        className="hidden"
+                        onChange={handleImageUpload}
                     />
-                </CardBody>
-            </Card>
+                </label>
+            </div>
         </>
     );
 };
-
 EditForm.Specification = () => {
     const {
         specificationArray: { append, fields },
     } = useProductFormContext();
+    const [showAddButton, setShowAddButton] = useState(fields.length === 0);
+
     const addRowHandler = () => {
         append({
             key: "",
             value: "",
         });
+        setShowAddButton(false);
     };
 
+    useEffect(() => {
+        setShowAddButton(fields.length === 0);
+    }, [fields]);
+
     return (
-        <>
-            <div className="min-h-[300px]">
-                <div className="flex gap-2">
-                    <p>Thông số kỹ thuật</p>
-                    <Button
-                        px="4"
-                        onClick={addRowHandler}
-                        variant="solid"
-                        colorScheme="blackAlpha"
+        <Box p="3">
+            <Box pos="relative" className="border rounded-lg">
+                <div className="min-h-[550px]">
+                    <Text
+                        top="-15px"
+                        left="5px"
+                        p="0 12px"
+                        bg="#fff"
+                        transformOrigin="top left"
+                        transition="all .2s ease-out"
+                        color="#999"
+                        pointerEvents="none"
+                        pos="absolute"
+                        w="fit-content"
+                        h="fit-content"
+                        zIndex="2"
                     >
-                        +
-                    </Button>
-                </div>
-                {!fields.length && <p>Không có dữ liệu</p>}
-                {!!fields.length && (
+                        Thông số kỹ thuật
+                    </Text>
                     <TableContainer>
-                        <Table variant="striped">
+                        <Table variant="striped" mt="4px">
                             <Thead>
                                 <Tr>
-                                    <Th>Thông số</Th>
-                                    <Th>Chi tiết</Th>
+                                    <Th textAlign="center">Tên thông số</Th>
+                                    <Th textAlign="center">Chi tiết</Th>
                                     <Th maxW="100px" w="80px"></Th>
                                 </Tr>
                             </Thead>
@@ -555,12 +767,40 @@ EditForm.Specification = () => {
                             </Tbody>
                         </Table>
                     </TableContainer>
-                )}
-            </div>
-        </>
+                    <Flex justify="center" h="100%" my="2">
+                        {showAddButton ? (
+                            <Button
+                                px="4"
+                                onClick={addRowHandler}
+                                size="lg"
+                                mt="220px"
+                                bg="white"
+                                _hover={{
+                                    pointerEvents: "none",
+                                    backgroundColor: "white",
+                                }}
+                            >
+                                <Inbox size="220px" />
+                            </Button>
+                        ) : (
+                            <Button
+                                bgColor="red.500"
+                                color="white"
+                                px="4"
+                                onClick={addRowHandler}
+                                _hover={{
+                                    backgroundColor: "red.600",
+                                }}
+                            >
+                                <PlusCircle />
+                            </Button>
+                        )}
+                    </Flex>
+                </div>
+            </Box>
+        </Box>
     );
 };
-
 const SpecificationRow = ({
     index,
 }: {
@@ -670,49 +910,66 @@ EditForm.Features = () => {
 
     return (
         <>
-            <div className="min-h-[300px] border flex flex-col gap-2">
-                Tính năng nổi bật
-                <form onSubmit={addFeatureHandler}>
-                    <Input
-                        type="text"
-                        ref={inputRef}
-                        placeholder="Thêm tính năng nổi bật cho sản phẩm"
-                        required
-                    />
-                </form>
-                {fields.map((feat, idx) => {
-                    // <div className="bg-blue-500 text-white">
-                    return (
-                        <Controller
-                            key={feat.id}
-                            render={({ field, fieldState, formState }) => (
-                                <>
-                                    <InlineEditable
-                                        editableProps={{
-                                            placeholder:
-                                                "Thêm tính năng nổi bật 🌟",
-                                            defaultValue: field.value,
-                                            ...field,
-                                        }}
-                                        remove={deleteFeatureHandler.bind(
-                                            this,
-                                            idx,
-                                        )}
-                                        value={field.value}
-                                    />
-                                </>
-                            )}
-                            name={`features.${idx}.value` as const}
-                            control={control}
-                        />
-                    );
-                })}
-                {/* <IconButton
+            <Box p="3">
+                <Box
+                    pos="relative"
+                    className=" rounded-lg min-h-[200px] border flex flex-col gap-2"
+                >
+                    <Text
+                        top="-15px"
+                        left="5px"
+                        p="0 12px"
+                        bg="#fff"
+                        transformOrigin="top left"
+                        transition="all .2s ease-out"
+                        color="#999"
+                        pointerEvents="none"
+                        pos="absolute"
+                        w="fit-content"
+                        h="fit-content"
+                        zIndex="2"
+                    >
+                        Thêm tính năng nổi bật
+                    </Text>
+                    <div>
+                        <form onSubmit={addFeatureHandler}>
+                            <Input type="text" ref={inputRef} required />
+                        </form>
+                    </div>
+                    {fields.map((feat, idx) => {
+                        // <div className="bg-blue-500 text-white">
+                        return (
+                            <Controller
+                                key={feat.id}
+                                render={({ field, fieldState, formState }) => (
+                                    <>
+                                        <InlineEditable
+                                            editableProps={{
+                                                placeholder:
+                                                    "Thêm tính năng nổi bật 🌟",
+                                                defaultValue: field.value,
+                                                ...field,
+                                            }}
+                                            remove={deleteFeatureHandler.bind(
+                                                this,
+                                                idx,
+                                            )}
+                                            value={field.value}
+                                        />
+                                    </>
+                                )}
+                                name={`features.${idx}.value` as const}
+                                control={control}
+                            />
+                        );
+                    })}
+                    {/* <IconButton
                     onClick={addFeatureHandler}
                     icon={<PlusCircle />}
                     aria-label="Add new feature button"
                 /> */}
-            </div>
+                </Box>
+            </Box>
         </>
     );
 };
