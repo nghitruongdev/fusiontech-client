@@ -39,6 +39,7 @@ import {
     useEditableContext,
     GridItem,
     Grid,
+    Flex,
 } from "@chakra-ui/react";
 import { FiUploadCloud } from "react-icons/fi";
 import { API, IBrand, ICategory, IProduct, IProductField } from "types";
@@ -317,10 +318,25 @@ EditForm.Id = () => {
         formState: { errors },
     } = useProductFormContext();
     return (
-        <FormControl mb="3" isInvalid={!!(errors as any)?.id}>
-            <FormLabel>Id</FormLabel>
+        <FormControl mb="5" isInvalid={!!(errors as any)?.id}>
+            <Text
+                top="-15px"
+                left="5px"
+                p="0 12px"
+                bg="#fff"
+                transformOrigin="top left"
+                transition="all .2s ease-out"
+                color="#999"
+                pointerEvents="none"
+                pos="absolute"
+                w="fit-content"
+                h="fit-content"
+                zIndex="2"
+            >
+                Id
+            </Text>
             <Input
-                disabled
+                // disabled
                 type="number"
                 {...register("id", {
                     required: "This field is required",
@@ -713,30 +729,76 @@ EditForm.Specification = () => {
     }, [fields]);
 
     return (
-        <>
-            <div className="min-h-[300px]">
-                Thông số kỹ thuật
-                <TableContainer>
-                    <Table variant="striped">
-                        <Thead>
-                            <Tr>
-                                <Th>Tên thông số</Th>
-                                <Th>Chi tiết</Th>
-                                <Th maxW="100px" w="80px"></Th>
-                            </Tr>
-                        </Thead>
-                        <Tbody>
-                            {fields.map((item, idx) => (
-                                <SpecificationRow key={item.id} index={idx} />
-                            ))}
-                        </Tbody>
-                    </Table>
-                </TableContainer>
-                <Button px="4" onClick={addRowHandler}>
-                    +
-                </Button>
-            </div>
-        </>
+        <Box p="3">
+            <Box pos="relative" className="border rounded-lg">
+                <div className="min-h-[550px]">
+                    <Text
+                        top="-15px"
+                        left="5px"
+                        p="0 12px"
+                        bg="#fff"
+                        transformOrigin="top left"
+                        transition="all .2s ease-out"
+                        color="#999"
+                        pointerEvents="none"
+                        pos="absolute"
+                        w="fit-content"
+                        h="fit-content"
+                        zIndex="2"
+                    >
+                        Thông số kỹ thuật
+                    </Text>
+                    <TableContainer>
+                        <Table variant="striped" mt="4px">
+                            <Thead>
+                                <Tr>
+                                    <Th textAlign="center">Tên thông số</Th>
+                                    <Th textAlign="center">Chi tiết</Th>
+                                    <Th maxW="100px" w="80px"></Th>
+                                </Tr>
+                            </Thead>
+                            <Tbody>
+                                {fields.map((item, idx) => (
+                                    <SpecificationRow
+                                        key={item.id}
+                                        index={idx}
+                                    />
+                                ))}
+                            </Tbody>
+                        </Table>
+                    </TableContainer>
+                    <Flex justify="center" h="100%" my="2">
+                        {showAddButton ? (
+                            <Button
+                                px="4"
+                                onClick={addRowHandler}
+                                size="lg"
+                                mt="220px"
+                                bg="white"
+                                _hover={{
+                                    pointerEvents: "none",
+                                    backgroundColor: "white",
+                                }}
+                            >
+                                <Inbox size="220px" />
+                            </Button>
+                        ) : (
+                            <Button
+                                bgColor="red.500"
+                                color="white"
+                                px="4"
+                                onClick={addRowHandler}
+                                _hover={{
+                                    backgroundColor: "red.600",
+                                }}
+                            >
+                                <PlusCircle />
+                            </Button>
+                        )}
+                    </Flex>
+                </div>
+            </Box>
+        </Box>
     );
 };
 const SpecificationRow = ({

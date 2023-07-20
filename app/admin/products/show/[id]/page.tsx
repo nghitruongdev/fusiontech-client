@@ -15,6 +15,7 @@ import {
 } from "@refinedev/chakra-ui";
 import {
     Box,
+    Button,
     Center,
     Flex,
     Grid,
@@ -28,9 +29,16 @@ import {
     TabList,
     TabPanel,
     TabPanels,
+    TableCaption,
     Tabs,
+    Tbody,
+    Td,
     Text,
     Textarea,
+    Tfoot,
+    Th,
+    Thead,
+    Tr,
 } from "@chakra-ui/react";
 import React, {
     ReactNode,
@@ -50,6 +58,8 @@ import { variantTableColumns } from "app/admin/products/variants/(list)/page";
 import { PropsWithChildren } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Rating } from "@smastrom/react-rating";
+import { BiChevronDownCircle } from "react-icons/bi";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const ProductShowPage = () => {
     return (
@@ -114,54 +124,45 @@ const ProductInfo = () => {
             <div className="bg-white">
                 <Grid
                     templateRows="repeat(1, 1fr)"
-                    templateColumns="repeat(4, 1fr)"
+                    templateColumns="repeat(3, 1fr)"
                     gap={4}
                 >
-                    <GridItem rowSpan={2} colSpan={2}>
+                    <GridItem rowSpan={2} colSpan={1}>
                         <Flex
                             justify="center"
                             alignItems="center"
                             flexDirection="column"
-                            p={4}
+                            p={3}
                         >
-                            <Box mb={10}>
+                            <Box
+                                mb={8}
+                                className="overflow-x-auto shadow-bannerShadow sm:rounded-lg"
+                            >
                                 <Image
-                                    sx={{ maxWidth: 200 }}
+                                    sx={{ maxWidth: 280 }}
                                     src={record?.thumbnail}
                                 />
                             </Box>
+
                             <ProductInfo.AvgRating />
+                            <ProductInfo.ReviewCount />
                         </Flex>
                     </GridItem>
                     <GridItem rowSpan={2} colSpan={2}>
-                        <Box p={4}>
-                            <Box mb={10}>
+                        <Box p={4} mb={10}>
+                            <Flex>
                                 <ProductInfo.Id />
                                 <ProductInfo.Name />
-                                <ProductInfo.ReviewCount />
-                                <ProductInfo.Summary />
-                            </Box>
+                            </Flex>
+                            <ProductInfo.Summary />
+                            <ProductInfo.Features />
                         </Box>
                     </GridItem>
-
-                    <GridItem colSpan={4}>
-                        <Box p={4}>
-                            <Stack spacing={4}></Stack>
-                        </Box>
-                    </GridItem>
-                    <GridItem colSpan={6}>
-                        <Box p={4}>
-                            <Stack spacing={4}>
-                                <Heading as="h5" size="sm" mt={4}>
-                                    Features
-                                </Heading>
-                                <TextField
-                                    bgColor="red.700"
-                                    value={record?.features}
-                                />
-
+                    <GridItem rowSpan={2} colSpan={6}>
+                        <Box pr={16}>
+                            <Box mb={10}>
                                 <ProductInfo.Description />
-                            </Stack>
+                            </Box>
                         </Box>
                     </GridItem>
                 </Grid>
@@ -174,7 +175,7 @@ ProductInfo.Id = () => {
     const { record } = useContextProvider();
 
     return (
-        <Box mb="10">
+        <Box mb="10" mr="10">
             <Box pos="relative">
                 <div>
                     <Text
@@ -189,11 +190,12 @@ ProductInfo.Id = () => {
                         pos="absolute"
                         w="fit-content"
                         h="fit-content"
+                        fontWeight="bold"
                         zIndex="2"
                     >
                         Id
                     </Text>
-                    <Input value={record?.id ?? ""} />
+                    <Input fontWeight="medium" value={record?.id ?? ""} />
                 </div>
             </Box>
         </Box>
@@ -204,7 +206,7 @@ ProductInfo.Name = () => {
     const { record } = useContextProvider();
 
     return (
-        <Box mb="10">
+        <Box mb="5">
             <Box pos="relative">
                 <div>
                     <Text
@@ -219,11 +221,16 @@ ProductInfo.Name = () => {
                         pos="absolute"
                         w="fit-content"
                         h="fit-content"
+                        fontWeight="bold"
                         zIndex="2"
                     >
                         Tên
                     </Text>
-                    <Input value={record?.name ?? ""} />
+                    <Input
+                        className="font-bold "
+                        fontWeight="medium"
+                        value={record?.name ?? ""}
+                    />
                 </div>
             </Box>
         </Box>
@@ -249,11 +256,16 @@ ProductInfo.ReviewCount = () => {
                         pos="absolute"
                         w="fit-content"
                         h="fit-content"
+                        fontWeight="bold"
                         zIndex="2"
                     >
                         Số lượng lượt đánh giá
                     </Text>
-                    <Input value={record?.id ?? ""} />
+                    <Input
+                        textAlign="center"
+                        fontWeight="medium"
+                        value={record?.id ?? ""}
+                    />
                 </div>
             </Box>
         </Box>
@@ -264,9 +276,9 @@ ProductInfo.AvgRating = () => {
     const { record } = useContextProvider();
 
     return (
-        <Box mb="10">
+        <Box mb="5">
             <Box pos="relative">
-                <div>
+                <Flex alignItems="center">
                     <Rating
                         style={{ maxWidth: 180 }}
                         value={
@@ -276,7 +288,8 @@ ProductInfo.AvgRating = () => {
                         }
                         readOnly
                     />
-                </div>
+                    {/* <NumberField value={record?.reviewCount ?? ""} /> */}
+                </Flex>
             </Box>
         </Box>
     );
@@ -301,11 +314,59 @@ ProductInfo.Summary = () => {
                         pos="absolute"
                         w="fit-content"
                         h="fit-content"
+                        fontWeight="bold"
                         zIndex="2"
                     >
                         Mô tả sản phẩm
                     </Text>
-                    <Textarea h="269px" value={record?.summary ?? ""} />
+                    <Textarea
+                        fontWeight="medium"
+                        h="269px"
+                        value={record?.summary ?? ""}
+                    />
+                </div>
+            </Box>
+        </Box>
+    );
+};
+ProductInfo.Features = () => {
+    const { record } = useContextProvider();
+
+    return (
+        <Box>
+            <Box pos="relative">
+                <Text
+                    top="-15px"
+                    left="5px"
+                    p="0 12px"
+                    bg="#fff"
+                    transformOrigin="top left"
+                    transition="all .2s ease-out"
+                    color="#999"
+                    pointerEvents="none"
+                    pos="absolute"
+                    w="fit-content"
+                    h="fit-content"
+                    fontWeight="bold"
+                    zIndex="2"
+                >
+                    Tính năng nổi bật
+                </Text>
+                <div className="overflow-x-auto overflow-y-auto shadow-bannerShadow sm:rounded-lg max-h-[310px]">
+                    <Table
+                        className="w-full normal-case text-base text-left dark:bg-gray-700"
+                        fontWeight="medium"
+                    >
+                        <Tbody>
+                            {record?.features?.map((feature, index) => (
+                                <Tr key={index}>
+                                    <Td>
+                                        <TextField value={feature} />
+                                    </Td>
+                                </Tr>
+                            ))}
+                        </Tbody>
+                    </Table>
                 </div>
             </Box>
         </Box>
@@ -331,11 +392,16 @@ ProductInfo.Description = () => {
                         pos="absolute"
                         w="fit-content"
                         h="fit-content"
+                        fontWeight="bold"
                         zIndex="2"
                     >
                         Bài đăng
                     </Text>
-                    <Textarea h="269px" value={record?.description ?? ""} />
+                    <Textarea
+                        fontWeight="medium"
+                        h="313px"
+                        value={record?.description ?? ""}
+                    />
                 </div>
             </Box>
         </Box>
