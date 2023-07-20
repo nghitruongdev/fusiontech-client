@@ -1,3 +1,5 @@
+import Footer from "@components/layout/Footer";
+import Header from "@components/layout/Header";
 import RefineProvider from "@components/layout/providers/RefineProvider";
 
 export const metadata = {
@@ -13,10 +15,10 @@ export default function StoreLayout({
     return (
         <>
             <RefineProvider>
-                {/* <Header /> */}
+                <Header />
                 {/* <Link href="/test">Go to test</Link> */}
                 <main>{children}</main>
-                {/* <Footer /> */}
+                <Footer />
             </RefineProvider>
         </>
     );

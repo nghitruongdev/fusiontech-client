@@ -61,7 +61,7 @@ const EditProduct = () => {
 const useProductFormContext = () => {
     const context = useContext(FormContext);
     if (!context) {
-        throw new Error("FormContext.Provider is missing");
+        throw new Error("EditProductFormContext.Provider is missing");
     }
     return {
         ...context,

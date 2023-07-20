@@ -52,7 +52,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     {
                         name: "variants",
                         list: "/admin/variants",
-                        // create: "/admin/products/show/:id/variants/create",
+                        create: "/admin/products/show/:id/variants/create",
                         edit: "/admin/variants/edit/:id",
                         show: "/admin/variants/show/:id",
                         meta: {

@@ -40,6 +40,9 @@ export const API = {
                 withProduct: "product",
                 withProductName: "product-name",
             },
+            existsBySku: (sku: string) =>
+                `${name}/search/existsBySku?sku=${sku}`,
+            findBySku: (sku: string) => `${name}/search/findBySku?sku=${sku}`,
         };
     },
     products: () => {
@@ -51,6 +54,9 @@ export const API = {
             },
             countProductSold: (productId: string) =>
                 `${name}/search/countProductSold?productId=${productId}`,
+            distinctAttributesByProduct: (
+                productId: string | number | undefined,
+            ) => `${name}/search/attributes?pid=${productId}`,
         };
     },
     users: () => {
@@ -148,6 +154,29 @@ export type IVariant = {
     product?: IProduct;
     attributes?: IAttribute[];
     _links: _links;
+};
+
+export type IVariantField = {
+    id: number;
+    sku: string;
+    images?: {
+        image: string;
+    }[];
+    price: number;
+    product: {
+        label: string;
+        value: {
+            id: string;
+            name: string;
+        };
+    };
+    attributes?: {
+        label: string;
+        value: {
+            name: string;
+            value: string;
+        };
+    }[];
 };
 
 export type IAttribute = {
@@ -344,4 +373,9 @@ export type Page = {
     totalElements: number;
     totalPages: number;
     number: number;
+};
+
+export type Option<T> = {
+    label: string;
+    value: T;
 };
