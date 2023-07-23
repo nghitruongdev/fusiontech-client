@@ -24,6 +24,7 @@ const DynamicDialogProvider = dynamic(
     () => import("@components/ui/DialogProvider"),
     { ssr: false },
 );
+
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {

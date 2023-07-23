@@ -53,7 +53,7 @@ const dataProvider = (
         if (mode === "server") {
             // query._start = (current - 1) * pageSize;
             // query._end = current * pageSize;
-            query.page = current;
+            query.page = current - 1;
             query.size = pageSize;
         }
 

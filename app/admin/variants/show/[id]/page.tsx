@@ -106,7 +106,7 @@ const ContextProvider = ({ children }: PropsWithChildren) => {
     const showProps = useShow<IVariant>({
         meta: {
             query: {
-                projection: variantResource.projection.withAttributes,
+                projection: variantResource.projection.withSpecs,
             },
         },
     });

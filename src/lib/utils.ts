@@ -3,8 +3,8 @@ import {
     usePathname,
     useSearchParams,
 } from "next/navigation";
-import { stringify, stringifyUrl } from "query-string";
-
+import { stringifyUrl } from "query-string";
+import { Option } from "types";
 export const formatPrice = (amount?: number) => {
     if (!amount) return 0;
     const formatted = new Number(amount).toLocaleString("vi-VN", {
@@ -72,3 +72,52 @@ export const updateUrlParams = (
 
     return update.toString();
 };
+
+/**
+ *
+ * @param array
+ * @param label
+ * @param value
+ * @returns
+ */
+export const toOption = <T>(array: T[], label: keyof T, value: keyof T | T) => {
+    return array.map((item) => ({
+        label: item[label],
+        value:
+            typeof value === "object" ? item : item[value as keyof typeof item],
+    }));
+};
+
+export const toArrayOptionString = (array: string[]): Option<string>[] => {
+    return array.map((item) => toOptionString(item));
+};
+
+export const toOptionString = (value: string) => {
+    return { label: value, value };
+};
+
+// export const toObjectOption = <T>(label: string, value: T) => {
+//     return { label, value };
+// };
+
+export function toObjectOption<T>(label: string, value: T): Option<T> {
+    return { label, value };
+}
+
+export function isValidNewOption(
+    input: string | undefined,
+    values: (string | undefined)[],
+) {
+    return (
+        !!input?.trim() &&
+        !values.some(
+            (item) =>
+                item?.toLocaleLowerCase() === input.trim().toLocaleLowerCase(),
+        )
+    );
+}
+
+// Define a type ToObjectOption<T> using conditional types
+// type ToObjectOption<T> = T extends infer U
+//     ? { label: string; value: U }
+//     : never;

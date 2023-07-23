@@ -12,6 +12,7 @@ module.exports = {
             "images.pexels.com",
             "lh3.googleusercontent.com",
             "i.pravatar.cc",
+            "firebasestorage.googleapis.com",
         ],
     },
 };

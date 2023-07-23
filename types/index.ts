@@ -1,4 +1,3 @@
-import { ListOption } from "@/hooks/useListOption";
 import { Timestamp } from "@firebase/firestore";
 
 export type ResourceName =
@@ -8,7 +7,8 @@ export type ResourceName =
     | "variants"
     | "orders"
     | "users"
-    | "shippingAddresses";
+    | "shippingAddresses"
+    | "specifications";
 //todo: const {} =  API['users']()
 export const API = {
     orders: () => {
@@ -36,7 +36,7 @@ export const API = {
             resource: name,
             projection: {
                 basic: "basic",
-                withAttributes: "attributes",
+                withSpecs: "specifications",
                 withProduct: "product",
                 withProductName: "product-name",
             },
@@ -51,12 +51,30 @@ export const API = {
             resource: name,
             projection: {
                 full: "full",
+                specifications: "specifications",
             },
             countProductSold: (productId: string) =>
                 `${name}/search/countProductSold?productId=${productId}`,
+            /**
+             * @deprecated
+             * @param productId
+             * @returns
+             */
             distinctAttributesByProduct: (
                 productId: string | number | undefined,
-            ) => `${name}/search/attributes?pid=${productId}`,
+            ) => {
+                throw new Error("Deprecated");
+                return `${name}/search/distinct-attributes-name-with-all-values?pid=${productId}`;
+            },
+        };
+    },
+    specifications: () => {
+        const name: ResourceName = "specifications";
+        return {
+            resource: name,
+            findDistinctNames: `${name}/search/distinct-names`,
+            findDistinctByName: (findName: string) =>
+                `${name}/search/findByName?name=${findName}`,
         };
     },
     users: () => {
@@ -87,22 +105,34 @@ export const API = {
     },
 };
 
+export type FirebaseImage = {
+    storagePath: string;
+    url: string;
+};
 export interface IProduct {
     id: string | undefined;
     name: string;
     slug: string;
     summary: string;
     description: string;
-    thumbnail: string;
+    thumbnail?: FirebaseImage;
     features?: string[];
     specifications?: {
-        [key: string]: string;
-    };
+        name: string;
+        values: ISpecification[];
+    }[];
     brand?: IBrand;
     category?: ICategory;
     reviewCount?: number;
     avgRating?: number;
     variants?: IVariant[] | { id: string; price: number }[];
+    /**
+     * @deprecated
+     */
+    attributes?: {
+        name: string;
+        values: string[];
+    }[];
     _links?: {
         self: {
             href: string;
@@ -130,17 +160,27 @@ export type IProductField = {
     slug: string;
     summary: string;
     description: string;
-    thumbnail: string;
+    thumbnail?: FirebaseImage;
+    thumbnailFile?: File | null;
     features?: { value: string }[];
-    specifications?: {
-        key: string;
-        value: string;
-    }[];
+    specifications?: (
+        | {
+              label: string;
+              options: Option<ISpecification>[];
+          }
+        | undefined
+    )[];
+    specificationGroup?: Option<string>[];
 } & {
-    brand?: ListOption<string, ICategory>;
-    category?: ListOption<string, ICategory>;
+    brand?: Option<IBrand>;
+    category?: Option<ICategory>;
 };
 
+export type ISpecification = {
+    id?: number;
+    name: string;
+    value: string;
+};
 export type IVariant = {
     id: number;
     sku: string;
@@ -152,6 +192,10 @@ export type IVariant = {
     active?: boolean;
     availableQuantity?: number;
     product?: IProduct;
+    specifications?: ISpecification[];
+    /**
+     * @deprecated
+     */
     attributes?: IAttribute[];
     _links: _links;
 };
@@ -170,6 +214,9 @@ export type IVariantField = {
             name: string;
         };
     };
+    /**
+     * @deprecated
+     */
     attributes?: {
         label: string;
         value: {
@@ -178,7 +225,9 @@ export type IVariantField = {
         };
     }[];
 };
-
+/**
+ * @deprecated
+ */
 export type IAttribute = {
     id: number;
     name: string;
@@ -206,6 +255,7 @@ export type IBrand = {
 export interface ICategory {
     id: string | undefined;
     name: string;
+    categorySpecs?: string[];
 }
 
 /**
@@ -378,4 +428,11 @@ export type Page = {
 export type Option<T> = {
     label: string;
     value: T;
+    __isNew__?: boolean;
+    __isFixed__?: boolean;
+};
+
+export type GroupOption<T> = {
+    label: string;
+    options: Option<T>[];
 };

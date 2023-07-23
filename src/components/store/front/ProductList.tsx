@@ -65,7 +65,7 @@ Product.Image = ({ thumbnail }: { thumbnail: IProduct["thumbnail"] }) => {
         ease-in-out duration-300 scale-90 hover:scale-95"
         >
             <Image
-                src={thumbnail}
+                src={thumbnail?.url ?? ""}
                 alt="Product image"
                 // fill
                 width={200}

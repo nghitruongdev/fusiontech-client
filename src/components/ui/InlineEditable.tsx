@@ -64,6 +64,7 @@ const InlineEditable = forwardRef((props: Props, ref) => {
             {...editableProps}
             onBlur={onBlurHandler}
             rounded="lg"
+            ref={ref}
         >
             <Provider {...props}>
                 <div className="flex items-center">
@@ -110,15 +111,14 @@ const DeleteButton = () => {
 
 const Preview = () => {
     const { value, isError } = useEditableContext();
-
     return (
-        <Tooltip label={`Chỉnh sửa`} shouldWrapChildren={true}>
+        <Tooltip label={`Chỉnh sửa ${value}`} shouldWrapChildren={true}>
             <EditablePreview
                 py={2}
                 px={4}
                 w="full"
                 _hover={{
-                    background: useColorModeValue("gray.100", "gray.700"),
+                    background: useColorModeValue("blackAlpha.100", "gray.700"),
                 }}
                 color={value ? "gray.700" : "gray.500"}
                 {...(isError && {
@@ -135,14 +135,17 @@ const InlineInput = () => {
     const { inputProps, remove, isError } = useEditableContext();
     const inputRef = useRef<HTMLInputElement>(null);
     return (
-        <Input
-            // py={2}
-            // px={2}
-            as={EditableInput}
-            {...inputProps}
-            ref={inputRef}
-            border={0}
-        />
+        <>
+            <Input
+                // py={2}
+                // px={2}
+                as={EditableInput}
+                ref={inputRef}
+                border={0}
+                // size="sm"
+                {...inputProps}
+            />
+        </>
     );
 };
 

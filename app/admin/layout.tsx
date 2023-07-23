@@ -1,5 +1,6 @@
 "use client";
 
+import { firestoreProvider } from "@/lib/firebase";
 import { springDataProvider } from "@/providers/rest-data-provider";
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
 import {
@@ -10,8 +11,12 @@ import {
 } from "@refinedev/chakra-ui";
 import { Refine } from "@refinedev/core";
 import routerProvider from "@refinedev/nextjs-router/app";
-import { API } from "types";
+import dynamic from "next/dynamic";
 
+const DynamicDialogProvider = dynamic(
+    () => import("@components/ui/DialogProvider"),
+    { ssr: false },
+);
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <ChakraProvider theme={RefineThemes.Blue}>
@@ -19,7 +24,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 initialColorMode={refineTheme.config.initialColorMode}
             />
             <Refine
-                dataProvider={springDataProvider}
+                dataProvider={{
+                    default: springDataProvider,
+                    firestore: firestoreProvider,
+                }}
                 // authProvider={authProvider({ session, status })}
                 routerProvider={routerProvider}
                 notificationProvider={notificationProvider}
@@ -92,6 +100,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 ]}
             >
                 <ThemedLayoutV2>{children}</ThemedLayoutV2>;
+                <DynamicDialogProvider />;
             </Refine>
         </ChakraProvider>
     );

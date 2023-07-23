@@ -40,7 +40,7 @@ const ProductContextProvider = ({
     const { _links } = product;
     const {
         resource,
-        projection: { withAttributes: projection },
+        projection: { withSpecs: projection },
     } = API["variants"]();
     const { data, status } = useCustom<IVariant[]>({
         url: `${cleanUrl(_links?.variants.href ?? "")}`,

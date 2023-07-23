@@ -10,6 +10,6 @@ export const getProductVariants = async (url?: string) => {
     return provider.custom<IVariant>({
         url: cleanUrl(url),
         resource,
-        projecion: projection.withAttributes,
+        projecion: projection.withSpecs,
     }) as Promise<ListData<IVariant>>;
 };

@@ -4,25 +4,9 @@ import React from "react";
 import { IResourceComponentsProps } from "@refinedev/core";
 import { useTable } from "@refinedev/react-table";
 import { ColumnDef, flexRender } from "@tanstack/react-table";
-import {
-    List,
-    EditButton,
-    ShowButton,
-    MarkdownField,
-    DateField,
-} from "@refinedev/chakra-ui";
-import {
-    TableContainer,
-    Table,
-    Thead,
-    Tr,
-    Th,
-    Tbody,
-    Td,
-    Image,
-    HStack,
-} from "@chakra-ui/react";
-import { IProduct } from "types";
+import { List, EditButton, ShowButton } from "@refinedev/chakra-ui";
+import { TableContainer, Table, Image, HStack } from "@chakra-ui/react";
+import { FirebaseImage, IProduct } from "types";
 import { useDefaultTableRender } from "@/hooks/useRenderTable";
 
 export default function ListPage() {
@@ -59,7 +43,7 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
                     return (
                         <Image
                             sx={{ maxWidth: "100px" }}
-                            src={getValue<any>()}
+                            src={getValue<FirebaseImage>()?.url}
                         />
                     );
                 },

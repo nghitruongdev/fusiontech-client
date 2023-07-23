@@ -40,7 +40,7 @@ import { CheckIcon, CloudCog, Inbox } from "lucide-react";
 import { API_URL } from "types/constants";
 import useListOption from "@/hooks/useListOption";
 import { useBoolean, useDebounce } from "usehooks-ts";
-import { suspensePromise } from "@/lib/promise";
+import { suspensePromise, waitPromise } from "@/lib/promise";
 import useCancellable from "@/hooks/useCancellable";
 
 const productResource = API.products();
@@ -190,6 +190,7 @@ VariantForm.SKU = () => {
     const validateSKUExists = async (sku: string) => {
         if (!sku) return false;
         setIsFieldValidating(true);
+        await waitPromise(300);
         let message: string = "";
         const response = await fetch(`${API_URL}/${findBySku(sku.trim())}`);
         if (response.status === 404) {
@@ -569,7 +570,7 @@ const ContextProvider = ({
             redirect: false,
             meta: {
                 query: {
-                    projection: variantResource.projection.withAttributes,
+                    projection: variantResource.projection.withSpecs,
                 },
             },
             onMutationSuccess(data, variables, context) {

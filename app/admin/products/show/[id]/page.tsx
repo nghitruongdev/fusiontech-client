@@ -141,7 +141,7 @@ const ProductInfo = () => {
                             >
                                 <Image
                                     sx={{ maxWidth: 280 }}
-                                    src={record?.thumbnail}
+                                    src={record?.thumbnail?.url ?? ""}
                                 />
                             </Box>
 
@@ -478,7 +478,7 @@ const ContextProvider = ({ children }: PropsWithChildren) => {
 
     const {
         resource,
-        projection: { withAttributes: projection },
+        projection: { withSpecs: projection },
     } = API["variants"]();
     const {
         getHeaderGroups,

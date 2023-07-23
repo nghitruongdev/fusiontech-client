@@ -11,14 +11,16 @@ type AlertProps = {
     cancelText?: string;
     okText?: string;
 };
-
+type ConfirmReturn = {
+    status: boolean | undefined;
+};
 interface AnyEvent {
     preventDefault(): void;
 }
 
 type StoreState = {
     dialog: ReactNode;
-    createDialog?: (props: AlertProps) => Promise<unknown>;
+    createDialog?: (props: AlertProps) => Promise<ConfirmReturn>;
     setDialog: (dialog: StoreState["dialog"]) => void;
     setCreateDialog: (fn: StoreState["createDialog"]) => void;
 };
@@ -58,17 +60,17 @@ export const useDialog = () => {
 const setDialog = (dialog: StoreState["dialog"]) =>
     dialogStore.setState(() => ({ dialog }));
 
-const createDialog = (props: AlertProps) => {
-    const onOk = (res: (value: unknown) => void, e?: AnyEvent) => {
+const createDialog = (props: AlertProps): Promise<ConfirmReturn> => {
+    const onOk = (res: (value: ConfirmReturn) => void, e?: AnyEvent) => {
         e?.preventDefault();
         setDialog(null);
-        res(true);
+        res({ status: true });
     };
 
-    const onCancel = (res: (value: unknown) => void, e?: AnyEvent) => {
+    const onCancel = (res: (value: ConfirmReturn) => void, e?: AnyEvent) => {
         e?.preventDefault();
         setDialog(null);
-        res(undefined);
+        res({ status: undefined });
     };
 
     return new Promise((res) => {

@@ -1,8 +1,8 @@
 "use client";
 
-import { ChakraUICreateInferencer } from "@refinedev/inferencer/chakra-ui";
+import { ProductForm } from "../(form)";
 
 const ProductCreate = () => {
-    return <ChakraUICreateInferencer />;
+    return <ProductForm action="create" />;
 };
 export default ProductCreate;
