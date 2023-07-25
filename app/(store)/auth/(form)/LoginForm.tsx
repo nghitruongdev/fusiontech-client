@@ -24,6 +24,9 @@ import PasswordInput from "@components/ui/PasswordInput";
 import { firebaseAuth } from "@/providers/firebaseAuthProvider";
 import { waitPromise } from "@/lib/promise";
 import { cn } from "components/lib/utils";
+import { useAuthUser } from "@/hooks/useAuth/useAuthUser";
+import userAPI from "src/api/userAPI";
+
 const LoginForm = () => {
     const [errorState, setErrorState] = useState("");
     const [isRedirecting, { on: onRedirecting }] = useBoolean();
@@ -103,7 +106,6 @@ const LoginForm = () => {
     };
     //todo: have not validate email field
     //todo: have not validate password field
-
     return (
         <AuthPage title="Đăng nhập vào FusionTech">
             <FormProvider {...formMethods}>
@@ -114,9 +116,13 @@ const LoginForm = () => {
                             <LoginForm.Password />
                         </form>
 
-                        <div className={`grid gap-2`}>
+                        <div
+                            className={`flex ${
+                                !errorState ? "justify-end" : ""
+                            }`}
+                        >
                             {errorState && (
-                                <p className="flex h-6 sm:items-start items-center text-center text-sm font-normal text-red-600">
+                                <p className="flex flex-grow h-6 sm:items-start items-center text-center text-sm font-normal text-red-600">
                                     <AlertCircle
                                         fill="#f02424"
                                         fillOpacity="90%"
@@ -132,7 +138,7 @@ const LoginForm = () => {
                                         ...(callbackUrl && { callbackUrl }),
                                     },
                                 }}
-                                className="text-zinc-700 text-sm hover:underline underline-offset-2 text-end"
+                                className=" text-zinc-700 text-sm hover:underline underline-offset-2 text-end"
                             >
                                 Quên mật khẩu?
                             </Link>
@@ -193,13 +199,36 @@ const useLoginFormContext = () => {
 LoginForm.Email = () => {
     const {
         register,
+        setError,
+        clearErrors,
         formState: { errors },
     } = useLoginFormContext();
+
+    const onEmailChange = async (email: String) => {
+
+        // Kiểm tra sự tồn tại của email
+        const exists = await userAPI.checkExistsByEmail(email);
+        console.log(exists);
+        if (exists.data == false) {
+            setError("email", {
+                type: "manual",
+                message: "Email không tồn tại.",
+            });
+            console.log('ko tồn tại')
+        } else {
+            clearErrors("email");
+        }
+        
+    };
     return (
         <FormControl className="" isRequired isInvalid={!!errors.email}>
             <Input
                 {...register("email", {
                     required: "Vui lòng nhập địa chỉ email.",
+                    validate:(value) => {
+                         onEmailChange(value);
+                        return true;
+                    },
                 })}
                 type="email"
                 placeholder="Nhập địa chỉ email"
@@ -221,6 +250,7 @@ LoginForm.Password = () => {
         register,
         formState: { errors },
     } = useLoginFormContext();
+
     return (
         <FormControl className="" isRequired isInvalid={!!errors.password}>
             <PasswordInput

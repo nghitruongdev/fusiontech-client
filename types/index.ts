@@ -48,6 +48,8 @@ export const API = {
             },
             countProductSold: (productId: string) =>
                 `${name}/search/countProductSold?productId=${productId}`,
+            getFavoriteProductsByUser: (id: number) =>
+                `${name}/search/favorites?uid=${id}`,
         };
     },
     users: () => {
@@ -59,7 +61,13 @@ export const API = {
                     `${name}/${uid}/defaultAddress/${aid}`,
             },
             findByFirebaseId: (id: string) =>
-                `${name}/search/findByFirebaseId?fid=${id}`,
+                `${name}/search/findByFirebaseId?firebaseId=${id}`,
+            existsByEmail: (email: string) => {
+                `${name}/search/existsByEmail?email=${email}`;
+            },
+            existsByPhoneNumber: (phone: string) => {
+                `${name}/search/existsByPhoneNumber?phone=${phone}`;
+            },
         };
     },
     shippingAddresses: () => {

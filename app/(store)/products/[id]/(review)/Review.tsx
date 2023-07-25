@@ -35,6 +35,7 @@ const ReviewComponent = () => {
                 setReviewList(response.data);
 
                 calculateAverageRating(response.data);
+                averageRating.toFixed(1); // chỉnh lại điểm review trung bình sau khi vừa thêm mới revie
             } catch (error) {
                 console.log("fail to fetch review list", error);
             }
@@ -119,7 +120,7 @@ const ReviewComponent = () => {
 
         const reviewData = {
             product: { id: 10 },
-            user: { id: "f1a65a69-aed8-447a-9138-2f1c62ae1cbd" },
+            user: { id: "1" },
             rating: rating,
             comment: comment,
             create_at: now,

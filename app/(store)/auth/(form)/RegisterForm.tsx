@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useRef, useState } from "react";
+import React, {
+    createContext,
+    useContext,
+    useRef,
+    useState,
+    useEffect,
+    useCallback,
+} from "react";
 import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
 import AuthPage from "../AuthPage";
@@ -12,13 +19,17 @@ import {
 import { ckMerge } from "@/lib/chakra-merge";
 import PasswordInput from "@components/ui/PasswordInput";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
-import { IRegister } from "types/auth";
+import { CredentialsRegister, IRegister } from "types/auth";
 import { firebaseAuth } from "@/providers/firebaseAuthProvider";
 import { AuthActionResponse } from "@refinedev/core/dist/interfaces";
 import { useRouter, useSearchParams } from "next/navigation";
+import { IAuthProvider } from "../../../../types/auth";
+import { useRegister } from "@refinedev/core";
+import userAPI from "src/api/userAPI";
+import { exists } from "fs";
 
 const RegisterForm = () => {
-    const formProps = useForm<IRegister>();
+    const formProps = useForm<CredentialsRegister>();
 
     //todo: sửa lại tất cả các field: register, placeholder, input name, input type,
     //todo: thêm validation rule
@@ -107,13 +118,45 @@ RegisterForm.LastName = () => {
 RegisterForm.Phone = () => {
     const {
         register,
+        setError,
+        clearErrors,
         formState: { errors },
     } = useRegisterFormContext();
+    const onPhoneChange = async(phone:string) => {
+         // Kiểm tra sự tồn tại của phone number
+         const exists = await userAPI.checkExistsByPhone(phone);
+         if (exists.data == true) {
+             setError("phone", {
+                 type: "manual",
+                 message: "Số điện thoại đã tồn tại.",
+             });
+         } else {
+             clearErrors("email");
+             return true;
+         }
+         
+    }
     return (
         <FormControl className="" isRequired isInvalid={!!errors.phone}>
             <Input
                 {...register("phone", {
                     required: "Vui lòng nhập số điện thoại.",
+                    pattern: {
+                        value: /^\d+$/,
+                        message: "Số điện thoại không hợp lệ.",
+                    },
+                    minLength: {
+                        value: 10,
+                        message: "Số điện thoại phải có ít nhất 10 số.",
+                    },
+                    maxLength: {
+                        value: 10,
+                        message: "Số điện thoại không được vượt quá 10 số.",
+                    },
+                    validate:(value) => {
+                        onPhoneChange(value);
+                       return true;
+                   },
                 })}
                 type="number"
                 placeholder="Nhập số điện thoại"
@@ -133,25 +176,52 @@ RegisterForm.Phone = () => {
 RegisterForm.Email = () => {
     const {
         register,
+        setError,
+        clearErrors,
         formState: { errors },
     } = useRegisterFormContext();
+
+    const onEmailChange = async (email: String) => {
+
+        // Kiểm tra sự tồn tại của email
+        const exists = await userAPI.checkExistsByEmail(email);
+        if (exists.data == true) {
+            setError("email", {
+                type: "manual",
+                message: "Email đã tồn tại.",
+            });
+        } else {
+            clearErrors("email");
+            return true;
+        }
+        
+    };
+
     return (
         <FormControl className="" isRequired isInvalid={!!errors.email}>
-            <Input
-                {...register("email", {
-                    required: "Vui lòng nhập địa chỉ email.",
-                })}
-                type="email"
-                placeholder="Nhập địa chỉ email"
-                _placeholder={{ fontSize: "sm" }}
-                className={ckMerge(`bg-gray-50 placeholder:text-sm`)}
-            />
-            {errors.email?.message && (
-                <FormErrorMessage>
-                    <FormErrorIcon />
-                    {errors.email?.message}
-                </FormErrorMessage>
-            )}
+                <Input
+                    {...register("email", {
+                        required: "Vui lòng nhập địa chỉ email.",
+                        pattern: {
+                            value: /^\S+@\S+$/i,
+                            message: "Email không hợp lệ.",
+                        },
+                        validate:(value) => {
+                            onEmailChange(value);
+                           return true;
+                       },
+                    })}
+                    type="email"
+                    placeholder="Nhập địa chỉ email"
+                    _placeholder={{ fontSize: "sm" }}
+                    className={ckMerge(`bg-gray-50 placeholder:text-sm`)}
+                />
+                {errors.email?.message && (
+                    <FormErrorMessage>
+                        <FormErrorIcon />
+                        {errors.email?.message}
+                    </FormErrorMessage>
+                )}
         </FormControl>
     );
 };
@@ -166,6 +236,10 @@ RegisterForm.Password = () => {
             <PasswordInput
                 {...register("password", {
                     required: "Mật khẩu không được để trống",
+                    minLength: {
+                        value: 8,
+                        message: "Mật khẩu phải có ít nhất 8 ký tự.",
+                    },
                 })}
                 placeholder="Nhập mật khẩu"
                 _placeholder={{ fontSize: "sm" }}
@@ -184,6 +258,7 @@ RegisterForm.Password = () => {
 RegisterForm.ConfirmPassword = () => {
     const {
         register,
+        getValues,
         formState: { errors },
     } = useRegisterFormContext();
     return (
@@ -195,6 +270,9 @@ RegisterForm.ConfirmPassword = () => {
             <PasswordInput
                 {...register("confirmPassword", {
                     required: "Xác nhận mật khẩu không được để trống",
+                    validate: (value) =>
+                        value === getValues("password") ||
+                        "Xác nhận mật khẩu không khớp.",
                 })}
                 placeholder="Xác nhận mật khẩu"
                 _placeholder={{ fontSize: "sm" }}
@@ -278,7 +356,7 @@ RegisterForm.LoginLink = () => (
 );
 
 const useRegisterFormContext = () => {
-    const formMethods = useFormContext<IRegister>();
+    const formMethods = useFormContext<CredentialsRegister>();
     const { formState, reset, setFocus } = formMethods;
     const [isRedirecting, { on: onRedirecting }] = useBoolean();
     const router = useRouter();
@@ -287,7 +365,38 @@ const useRegisterFormContext = () => {
     const callbackUrl = callbackParam ? decodeURIComponent(callbackParam) : "/";
     const [errorState, setErrorState] = useState("");
 
-    const handlePostLogin = (data: AuthActionResponse) => {
+    const { mutateAsync } = useRegister();
+
+    const onGoogleSignup = async () => {
+        reset(undefined, {
+            keepDirtyValues: true,
+            keepValues: true,
+            keepIsValid: true,
+            keepErrors: false,
+        });
+        const result = await firebaseAuth.login({
+            providerName: "google.com",
+        });
+        handlePostSuccess(result);
+    };
+
+    //todo: code đăng ký bằng form here
+    //todo: gọi firebaseAuthProvider.register()
+    const onFormSubmit = async (value: CredentialsRegister) => {
+        try {
+            const result = await mutateAsync({
+                providerName: IAuthProvider.credentials,
+            });
+            handlePostSuccess(result);
+        } catch (error) {
+            // Xử lý lỗi nếu có
+            console.error("Error during registration:", error);
+            setErrorState("Đã xảy ra lỗi trong quá trình đăng ký.");
+        }
+    };
+
+    //todo: redirect page to callbackUrl when sign up successfully like login page
+    const handlePostSuccess = (data: AuthActionResponse) => {
         console.log("data", data);
         const { success, error } = data as AuthActionResponse;
         if (success) {
@@ -304,39 +413,6 @@ const useRegisterFormContext = () => {
             setFocus("email");
         }
     };
-
-    //todo: code đăng ký google here
-    //todo: gọi firebaseAuthProvider.login()
-    //!đăng ký với đăng nhập bằng google nó giống nhau
-    const onGoogleSignup = async () => {
-        reset(undefined, {
-            keepDirtyValues: true,
-            keepValues: true,
-            keepIsValid: true,
-            keepErrors: false,
-        });
-        const result = await firebaseAuth.login({
-            providerName: "google.com",
-        });
-        handlePostLogin(result);
-    };
-
-    //todo: code đăng ký bằng form here
-    //todo: gọi firebaseAuthProvider.register()
-    const onFormSubmit = async (value: IRegister) => {
-        try {
-            // Gọi hàm register từ firebaseAuthProvider
-            // const result = await firebaseAuth.register(value);
-            // return result;
-        } catch (error) {
-            // Xử lý lỗi nếu có
-            console.error("Error during registration:", error);
-            setErrorState("Đã xảy ra lỗi trong quá trình đăng ký.");
-        }
-    };
-
-    //todo: redirect page to callbackUrl when sign up successfully like login page
-    const handlePostSuccess = () => {};
 
     return {
         ...formMethods,
