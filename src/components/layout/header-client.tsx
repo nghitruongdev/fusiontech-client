@@ -2,7 +2,7 @@
 
 import useCart, { useCartItems } from "@components/store/cart/useCart";
 import { ShoppingBag, UserCircle } from "lucide-react";
-
+import React, { useState, ChangeEvent } from "react";
 import Link from "next/link";
 import {
     Avatar,
@@ -166,16 +166,48 @@ export const UserInfo = () => {
 };
 
 export const SearchInput = () => {
+    const [searchTerm, setSearchTerm] = useState<string>("");
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        // Lấy giá trị nhập vào từ người dùng
+        const inputValue: string = e.target.value; // Kiểu dữ liệu của inputValue cũng là string
+        // Gán giá trị của inputValue vào searchTerm
+        setSearchTerm(inputValue);
+    };
+    //Filter chữ cái đầu của keyword thành viết hoa
+    const capitalizeFirstLetter = (str: string) => {
+        return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    };
+
+    // khi người dùng enter sẽ chuyển trang
+    const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
+            // Chuyển trang tới trang kết quả tìm kiếm khi nhấn phím "Enter"
+            window.location.href = `/search?keyword=${capitalizeFirstLetter(
+                searchTerm,
+            )}`;
+        }
+    };
     return (
         <div className="h-10 flex flex-1 relative">
             <input
+                value={searchTerm}
+                onChange={handleSearch}
+                onKeyDown={handleKeyPress} // Thêm sự kiện xử lý khi nhấn phím
                 type="text"
-                placeholder="Search everything at FusionTech store"
+                placeholder="Tìm kiếm thứ bạn cần ở FusionTech store"
                 className="h-full w-full rounded-full px-4 text-black text-base outline-none border-[1px] border-transparent focus-visible:border-black duration-200"
             />
-            <span className="absolute w-8 h-8 rounded-full flex items-center justify-center top-1 right-1 bg-yellow text-black text-xl">
-                <IoSearchOutline />
-            </span>
+            {/* <Link href={`/search?keyword=${searchTerm}`}>
+                <span className="absolute w-8 h-8 rounded-full flex items-center justify-center top-1 right-1 bg-yellow text-black text-xl">
+                    <IoSearchOutline />
+                </span>
+            </Link> */}
+            <Link href={`/search?keyword=${capitalizeFirstLetter(searchTerm)}`}>
+                {/* Truyền searchTerm thông qua encodeURIComponent để đảm bảo chuỗi an toàn cho URL */}
+                <span className="absolute w-8 h-8 rounded-full flex items-center justify-center top-1 right-1 bg-yellow text-black text-xl">
+                    <IoSearchOutline />
+                </span>
+            </Link>
         </div>
     );
 };

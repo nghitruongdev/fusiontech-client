@@ -32,6 +32,13 @@ const queryClient = new QueryClient({
         },
     },
 });
+
+const DynamicFavoriteProvider = dynamic(
+    () => import("@/hooks/useFavorite").then((mod) => mod.FavoriteProvider),
+    {
+        ssr: false,
+    },
+);
 const RefineProvider = ({ children }: { children: React.ReactNode }) => {
     // const { data: session, status, update } = useSession();
     const router = useRouter();
@@ -62,6 +69,7 @@ const RefineProvider = ({ children }: { children: React.ReactNode }) => {
                 {children}
             </Refine>
             <DynamicDialogProvider />
+            <DynamicFavoriteProvider />
         </ChakraProvider>
     );
 };

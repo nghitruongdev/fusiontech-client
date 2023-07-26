@@ -55,6 +55,8 @@ export const API = {
             },
             countProductSold: (productId: string) =>
                 `${name}/search/countProductSold?productId=${productId}`,
+            getFavoriteProductsByUser: (id: number) =>
+                `${name}/search/favorites?uid=${id}`,
             /**
              * @deprecated
              * @param productId

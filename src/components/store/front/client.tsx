@@ -1,9 +1,10 @@
 "use client";
-
+import { useEffect, useState } from "react";
 import { useBoolean } from "@chakra-ui/react";
 import { Heart } from "lucide-react";
 import { createContext, useContext, PropsWithChildren } from "react";
 import { IProduct } from "types";
+import useFavorite, { useFavoriteStore } from "@/hooks/useFavorite";
 
 type ContextState = {
     product: IProduct;
@@ -27,17 +28,40 @@ export const ProductCardProvider = ({
 };
 
 export const FavoriteButton = () => {
-    const [isFavorited, { toggle }] = useBoolean(Math.random() > 0.5);
+    const [isFavorited, setFavorited] = useState(false);
     const [isBouncing, { on: startBouncing, off: stopBouncing }] = useBoolean();
     const { product } = useProductCardContext();
+    const { addFavoriteProduct, deleteFavoriteProduct } = useFavorite();
+    const [favorites, checkFavorite] = useFavoriteStore(
+        ({ favoriteProducts, isFavorite }) => [favoriteProducts, isFavorite],
+    );
+
+    useEffect(() => {
+        if (!product || !product.id) {
+            setFavorited(false);
+            return;
+        }
+        console.log("isFavorited", isFavorited);
+        setFavorited(checkFavorite(+product.id));
+    }, [product, favorites]);
+
     const onClick = () => {
-        if (isFavorited) return;
+        if (!product.id) {
+            console.error("Product Id is not found");
+            return;
+        }
         startBouncing();
-        setTimeout(() => {
-            toggle();
+
+        setTimeout(async () => {
+            if (!product.id) return;
+            const promise = isFavorited
+                ? deleteFavoriteProduct(+product.id)
+                : addFavoriteProduct(product);
+            await promise;
             stopBouncing();
-        }, 5000);
+        }, 500);
     };
+
     return (
         <div
             onClick={onClick}

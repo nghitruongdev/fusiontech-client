@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useRef, useState } from "react";
+import React, {
+    createContext,
+    useContext,
+    useRef,
+    useState,
+    useEffect,
+    useCallback,
+} from "react";
 import { FcGoogle } from "react-icons/fc";
 import Link from "next/link";
 import AuthPage from "../AuthPage";
@@ -18,6 +25,8 @@ import { AuthActionResponse } from "@refinedev/core/dist/interfaces";
 import { useRouter, useSearchParams } from "next/navigation";
 import { IAuthProvider } from "../../../../types/auth";
 import { useRegister } from "@refinedev/core";
+import userAPI from "src/api/userAPI";
+import { exists } from "fs";
 
 const RegisterForm = () => {
     const formProps = useForm<CredentialsRegister>();
@@ -109,13 +118,45 @@ RegisterForm.LastName = () => {
 RegisterForm.Phone = () => {
     const {
         register,
+        setError,
+        clearErrors,
         formState: { errors },
     } = useRegisterFormContext();
+    const onPhoneChange = async(phone:string) => {
+         // Kiểm tra sự tồn tại của phone number
+         const exists = await userAPI.checkExistsByPhone(phone);
+         if (exists.data == true) {
+             setError("phone", {
+                 type: "manual",
+                 message: "Số điện thoại đã tồn tại.",
+             });
+         } else {
+             clearErrors("email");
+             return true;
+         }
+         
+    }
     return (
         <FormControl className="" isRequired isInvalid={!!errors.phone}>
             <Input
                 {...register("phone", {
                     required: "Vui lòng nhập số điện thoại.",
+                    pattern: {
+                        value: /^\d+$/,
+                        message: "Số điện thoại không hợp lệ.",
+                    },
+                    minLength: {
+                        value: 10,
+                        message: "Số điện thoại phải có ít nhất 10 số.",
+                    },
+                    maxLength: {
+                        value: 10,
+                        message: "Số điện thoại không được vượt quá 10 số.",
+                    },
+                    validate:(value) => {
+                        onPhoneChange(value);
+                       return true;
+                   },
                 })}
                 type="number"
                 placeholder="Nhập số điện thoại"
@@ -135,25 +176,52 @@ RegisterForm.Phone = () => {
 RegisterForm.Email = () => {
     const {
         register,
+        setError,
+        clearErrors,
         formState: { errors },
     } = useRegisterFormContext();
+
+    const onEmailChange = async (email: String) => {
+
+        // Kiểm tra sự tồn tại của email
+        const exists = await userAPI.checkExistsByEmail(email);
+        if (exists.data == true) {
+            setError("email", {
+                type: "manual",
+                message: "Email đã tồn tại.",
+            });
+        } else {
+            clearErrors("email");
+            return true;
+        }
+        
+    };
+
     return (
         <FormControl className="" isRequired isInvalid={!!errors.email}>
-            <Input
-                {...register("email", {
-                    required: "Vui lòng nhập địa chỉ email.",
-                })}
-                type="email"
-                placeholder="Nhập địa chỉ email"
-                _placeholder={{ fontSize: "sm" }}
-                className={ckMerge(`bg-gray-50 placeholder:text-sm`)}
-            />
-            {errors.email?.message && (
-                <FormErrorMessage>
-                    <FormErrorIcon />
-                    {errors.email?.message}
-                </FormErrorMessage>
-            )}
+                <Input
+                    {...register("email", {
+                        required: "Vui lòng nhập địa chỉ email.",
+                        pattern: {
+                            value: /^\S+@\S+$/i,
+                            message: "Email không hợp lệ.",
+                        },
+                        validate:(value) => {
+                            onEmailChange(value);
+                           return true;
+                       },
+                    })}
+                    type="email"
+                    placeholder="Nhập địa chỉ email"
+                    _placeholder={{ fontSize: "sm" }}
+                    className={ckMerge(`bg-gray-50 placeholder:text-sm`)}
+                />
+                {errors.email?.message && (
+                    <FormErrorMessage>
+                        <FormErrorIcon />
+                        {errors.email?.message}
+                    </FormErrorMessage>
+                )}
         </FormControl>
     );
 };
@@ -168,6 +236,10 @@ RegisterForm.Password = () => {
             <PasswordInput
                 {...register("password", {
                     required: "Mật khẩu không được để trống",
+                    minLength: {
+                        value: 8,
+                        message: "Mật khẩu phải có ít nhất 8 ký tự.",
+                    },
                 })}
                 placeholder="Nhập mật khẩu"
                 _placeholder={{ fontSize: "sm" }}
@@ -186,6 +258,7 @@ RegisterForm.Password = () => {
 RegisterForm.ConfirmPassword = () => {
     const {
         register,
+        getValues,
         formState: { errors },
     } = useRegisterFormContext();
     return (
@@ -197,6 +270,9 @@ RegisterForm.ConfirmPassword = () => {
             <PasswordInput
                 {...register("confirmPassword", {
                     required: "Xác nhận mật khẩu không được để trống",
+                    validate: (value) =>
+                        value === getValues("password") ||
+                        "Xác nhận mật khẩu không khớp.",
                 })}
                 placeholder="Xác nhận mật khẩu"
                 _placeholder={{ fontSize: "sm" }}

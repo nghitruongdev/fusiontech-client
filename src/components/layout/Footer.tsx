@@ -84,18 +84,13 @@ export default function Footer() {
                     spacing={8}
                 >
                     <Stack spacing={6}>
-                        <Box>
-                            <div className="navBarHover flex items-center justify-center border-2 w-40">
-                                {/* <Image
-                                    src={logo}
-                                    alt="Website logo"
-                                    className="w-44"
-                                /> */}
-                                <h1 className="font-extrabold text-xl">
+                        <div className="navBarHover flex items-center justify-center border-2 w-40  hover:bg-white hover:text-blue-600">
+                            <Link href="/">
+                                <button className="font-extrabold text-xl ">
                                     FusionTech
-                                </h1>
-                            </div>
-                        </Box>
+                                </button>
+                            </Link>
+                        </div>
                         <h1 className="text-sm font-semibold">
                             CÔNG TY CỔ PHẦN THƯƠNG MẠI ĐIỆN TỬ FUSIONTECH
                         </h1>
@@ -223,6 +218,15 @@ function FooterSignup() {
                     </Button>
                 </Box>
             </form>
+            <Box className="flex justify-center items-center">
+                <div className="navBarHover flex items-center justify-center border-2 w-32 hover:bg-white hover:text-blue-600">
+                    <Link href="/thank-you">
+                        <button className="font-extrabold text-sm">
+                            Thank you!
+                        </button>
+                    </Link>
+                </div>
+            </Box>
         </Stack>
     );
 }

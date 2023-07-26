@@ -25,6 +25,8 @@ import { firebaseAuth } from "@/providers/firebaseAuthProvider";
 import { waitPromise } from "@/lib/promise";
 import { cn } from "components/lib/utils";
 import { useAuthUser } from "@/hooks/useAuth/useAuthUser";
+import userAPI from "src/api/userAPI";
+
 const LoginForm = () => {
     const [errorState, setErrorState] = useState("");
     const [isRedirecting, { on: onRedirecting }] = useBoolean();
@@ -197,13 +199,36 @@ const useLoginFormContext = () => {
 LoginForm.Email = () => {
     const {
         register,
+        setError,
+        clearErrors,
         formState: { errors },
     } = useLoginFormContext();
+
+    const onEmailChange = async (email: String) => {
+
+        // Kiểm tra sự tồn tại của email
+        const exists = await userAPI.checkExistsByEmail(email);
+        console.log(exists);
+        if (exists.data == false) {
+            setError("email", {
+                type: "manual",
+                message: "Email không tồn tại.",
+            });
+            console.log('ko tồn tại')
+        } else {
+            clearErrors("email");
+        }
+        
+    };
     return (
         <FormControl className="" isRequired isInvalid={!!errors.email}>
             <Input
                 {...register("email", {
                     required: "Vui lòng nhập địa chỉ email.",
+                    validate:(value) => {
+                         onEmailChange(value);
+                        return true;
+                    },
                 })}
                 type="email"
                 placeholder="Nhập địa chỉ email"

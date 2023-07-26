@@ -5,55 +5,16 @@ import favoriteApi from "src/api/favoriteAPI";
 import { GoPlus } from "react-icons/go";
 import { BsStarFill } from "react-icons/bs";
 import useMyToast from "@/hooks/useToast";
+import useFavorite, { useFavoriteStore } from "@/hooks/useFavorite";
 
 const FavoriteProducts = () => {
-    const [productList, setProductList] = useState<any[]>([]);
+    // const [productList, setProductList] = useState<any[]>([]);
+    const { deleteFavoriteProduct } = useFavorite();
+    const [favorites] = useFavoriteStore((state) => [state.favoriteProducts]);
     // dữ liệu mẫu
-    const uid = "a849b6e9-0a0a-4dc6-b13b-bb1e834389f7";
+    const uid = 1;
     const imageUrl =
         "https://lh3.googleusercontent.com/1S6Ltn5pJWSMWh0U6V4w80Di1Lq8AVQhuDOzVHbQPmxwcztwofrF_3gyuy7Pk8AJ73MVFCYDgm4r1orx6eh88iwVj9nDyXk=w230-rw";
-
-    useEffect(() => {
-        const fetchProductList = async () => {
-            try {
-                const response = await favoriteApi.get(uid);
-                console.log(response.data);
-                setProductList(response.data._embedded.products);
-            } catch (error) {
-                console.log("Fail to fetch favorite list", error);
-            }
-        };
-        fetchProductList();
-    }, []);
-    const handleToggleFavorite = async (productId: any) => {
-        try {
-            // Gọi API để xóa sản phẩm yêu thích
-            await favoriteApi.delete(productId, uid);
-
-            // Cập nhật danh sách sản phẩm yêu thích
-            const updatedProductList = productList.filter(
-                (product) => product.id !== productId,
-            );
-            setProductList(updatedProductList);
-            toast
-                .ok({
-                    title: "Thành công",
-                    message: "Hủy yêu thích thành công",
-                })
-                .fire();
-        } catch (error) {
-            console.log("Failed to toggle favorite", error);
-            toast
-                .fail({
-                    title: "Thất bại",
-                    message: "Hủy yêu thích thất bại",
-                })
-                .fire();
-        }
-    };
-
-    // Tạo một instance của useToast()
-    const toast = useMyToast();
 
     return (
         <div className="mx-auto bg-white rounded">
@@ -62,7 +23,7 @@ const FavoriteProducts = () => {
             </h1>
             <div className="mx-auto">
                 <div className="py-6 px-4 grid grid-cols-4 gap-4">
-                    {productList.map((product: any) => (
+                    {Object.values(favorites).map((product: any) => (
                         <div
                             key={product.id}
                             className="border-[1px] border-gray-200 mb-6 group rounded-xl shadow-lg"
@@ -71,7 +32,7 @@ const FavoriteProducts = () => {
                                 <button
                                     className="hover:opacity-50 transition-opacity hover:scale-125  duration-3000"
                                     onClick={() =>
-                                        handleToggleFavorite(product.id)
+                                        deleteFavoriteProduct(product.id)
                                     }
                                 >
                                     <FaHeart className="text-red-500" />
@@ -89,15 +50,6 @@ const FavoriteProducts = () => {
                                         </span>{" "}
                                         Add
                                     </button>
-                                    {/* <Link
-                                href={{
-                                    pathname: `/products/${item._id}`,
-                                    query: {
-                                        product: JSON.stringify(item),
-                                    },
-                                }}
-                                as={`/products/${item._id}`}
-                            > */}
                                     <button className="w-24 h-9 bg-white border-[1px] border-black text-black rounded-full flex items-center justify-center gap-1 hover:bg-black hover:text-white duration-300">
                                         <span>
                                             <GoPlus />
