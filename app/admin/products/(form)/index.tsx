@@ -1,6 +1,5 @@
 import { useForm } from "@refinedev/react-hook-form";
 import React, {
-    ChangeEvent,
     FormEvent,
     createContext,
     useContext,
@@ -19,10 +18,10 @@ import {
     Box,
     Textarea,
     Avatar,
-    Tooltip,
 } from "@chakra-ui/react";
 import {
     API,
+    FirebaseImage,
     IBrand,
     ICategory,
     IProduct,
@@ -35,21 +34,20 @@ import SelectPopout from "@components/ui/SelectPopout";
 import useListOption from "@/hooks/useListOption";
 import { Controller, FieldArrayWithId, useFieldArray } from "react-hook-form";
 import { HttpError, useCustom } from "@refinedev/core";
-import { Inbox, MinusCircle, Plus, Trash } from "lucide-react";
-import useUploadImage from "@/hooks/useUploadImage";
-import { cn } from "components/lib/utils";
+import { Inbox, MinusCircle } from "lucide-react";
+import useUpload from "@/hooks/useUpload";
 import {
-    toOptionString,
     toObjectOption,
     toArrayOptionString,
     isValidNewOption,
 } from "@/lib/utils";
 import { useDialog } from "@components/ui/DialogProvider";
 import CreatableSelect from "react-select/creatable";
-import CreateableSelectWithFixedOptions from "@components/ui/CreateableSelectWithFixOptions";
 import { produce } from "immer";
 import InlineEditable from "@components/ui/InlineEditable";
 import { ActionMeta, MultiValue } from "react-select";
+import ImageUpload, { UploadProviderProps } from "@components/image-upload";
+import useUploadImage from "@/hooks/useUploadImage";
 
 type ContextProps = {
     action: "create" | "edit";
@@ -72,9 +70,8 @@ const ProductFormProvider = ({
     const {
         projection: { specifications: attributes },
     } = API["products"]();
-    const productImagePath = `images/products/`;
 
-    const { upload } = useUploadImage();
+    const { uploadImages, removeImages } = useUploadImage({ type: "products" });
     const formMethods = useForm<IProduct, HttpError, IProductField>({
         refineCoreProps: {
             meta: {
@@ -106,7 +103,6 @@ const ProductFormProvider = ({
                 slug,
                 summary,
                 description,
-                thumbnail,
             } = product;
 
             let formFeature;
@@ -120,7 +116,6 @@ const ProductFormProvider = ({
                 slug,
                 summary,
                 description,
-                thumbnail,
                 features: formFeature,
             });
         }
@@ -137,8 +132,8 @@ const ProductFormProvider = ({
                     specifications,
                     specificationGroup,
                     id,
-                    thumbnail,
-                    thumbnailFile,
+                    images,
+                    files,
                     ...value
                 }) => {
                     const handleFeatures = () =>
@@ -156,16 +151,24 @@ const ProductFormProvider = ({
                             return { name: item?.label, values };
                         });
 
-                    const handleThumbnail = async () => {
-                        if (!thumbnailFile) return;
-                        const fullPath = `${productImagePath}/${
-                            thumbnailFile.name
-                        }-${Date.now() * Math.random()}`;
-                        const url = await upload(fullPath, thumbnailFile);
-                        return {
-                            url: url ?? "",
-                            storagePath: fullPath,
-                        };
+                    const handleImages = async () => {
+                        const productImages = [...(product?.images ?? [])];
+
+                        const removed = () =>
+                            (images ?? [])
+                                .map((image, idx) =>
+                                    !image
+                                        ? productImages.splice(idx, 1)[0]
+                                        : null,
+                                )
+                                .filter((item) => !!item)
+                                .map((item) => item as FirebaseImage);
+                        const [uploadedUrls] = await Promise.all([
+                            uploadImages(files),
+                            dirtyFields.images && removeImages(removed()),
+                        ]);
+
+                        return [...productImages, ...uploadedUrls];
                     };
 
                     const handleFormSubmit = async () => {
@@ -180,8 +183,9 @@ const ProductFormProvider = ({
                         const formSpecs =
                             dirtyFields.specifications &&
                             handleSpecifications();
-                        const formThumbnail = await handleThumbnail();
-
+                        const formImages =
+                            dirtyFields.files && (await handleImages());
+                        console.log("formImages", formImages);
                         const formValues = Object.entries(value).reduce(
                             (acc, [key, val]) => {
                                 const asKey = key as keyof typeof value;
@@ -197,7 +201,7 @@ const ProductFormProvider = ({
                             ...(categoryId && { category: { id: categoryId } }),
                             ...(formFeatures && { features: formFeatures }),
                             ...(formSpecs && { specifications: formSpecs }),
-                            ...(formThumbnail && { thumbnail: formThumbnail }),
+                            ...(formImages && { images: formImages }),
                         };
 
                         try {
@@ -230,13 +234,13 @@ const { countProductSold } = API["products"]();
 export const ProductForm = ({ action }: { action: ContextProps["action"] }) => {
     return (
         <ProductFormProvider action={action}>
-            <div className="bg-white flex gap-10 min-h-[350px]">
+            <div className="bg-white flex gap-5 min-h-[350px]">
                 <div className="w-1/3 grid gap-4 ">
-                    <div className="w-full min-w-[300px] mb-10">
-                        <ImageUpload />
+                    <div className="w-full min-w-1/3 mb-10">
+                        <ProductForm.UploadImage />
                     </div>
                 </div>
-                <div className="w-2/3 flex flex-col">
+                <div className="flex-grow flex flex-col">
                     <ProductForm.Id />
                     <ProductForm.Name />
                     <ProductForm.Slug />
@@ -251,8 +255,6 @@ export const ProductForm = ({ action }: { action: ContextProps["action"] }) => {
                 <ProductForm.Features />
                 <ProductForm.Specification />
             </div>
-            <div className=""></div>
-            <div className=""></div>
         </ProductFormProvider>
     );
 };
@@ -465,20 +467,15 @@ ProductForm.Brand = () => {
     });
 
     useEffect(() => {
-        if (!product?.brand) {
+        const brandId = product?.brand?.id;
+        if (!brandId) {
             return;
         }
-        if ("id" in product?.brand) {
-            const id = product?.brand?.id;
-            if (id) {
-                const selected = options.find((item) => item.value.id == +id);
-                if (selected) setValue("brand", selected as any);
-            }
-        }
+        const selected = options.find((item) => item.value.id == +brandId);
+        if (selected) setValue("brand", selected);
     }, [product?.brand?.id, options]);
 
     const { control } = useProductFormContext();
-
     return (
         <Box mb="10">
             <Box pos="relative">
@@ -596,15 +593,13 @@ ProductForm.Category = () => {
     };
 
     useEffect(() => {
-        if (!product?.category || !("id" in product.category)) {
+        const id = product?.category?.id;
+        if (!id) {
             return;
         }
-        const id = product?.category?.id;
-        if (id) {
-            const selected = options.find((item) => item.value.id == id);
-            if (selected) setValue("category", selected);
-        }
-    }, [product?.category, options]);
+        const selected = options.find((item) => item.value.id == id);
+        if (selected) setValue("category", selected);
+    }, [product?.category?.id, options]);
     return (
         <>
             <Box mb="10" ml="10">
@@ -688,96 +683,32 @@ ProductForm.Description = () => {
         </Box>
     );
 };
-const ImageUpload = () => {
-    const { setValue, watch } = useProductFormContext();
-    const [imgUrl, setImgUrl] = useState<string | null>(null);
-    // const [thumbnailFile, setFile] = useState<File | null>(null);
-    const file = watch("thumbnailFile");
-    const productImg = watch("thumbnail.url");
 
-    const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
-        const uploadFile = event.target.files && event.target.files[0];
-        if (uploadFile) {
-            // setFile(uploadFile);
-            setValue("thumbnailFile", uploadFile);
-        }
+ProductForm.UploadImage = () => {
+    const { setValue, getValues, product } = useProductFormContext();
+    const onFilesChange: UploadProviderProps["onFilesChange"] = (files) => {
+        setValue(`files`, files, {
+            shouldDirty: true,
+        });
     };
 
+    const onUrlRemove: UploadProviderProps["onRemoveUrl"] = (index) => {
+        setValue(`images.${index}`, null, {
+            shouldDirty: true,
+        });
+        console.warn("have not implement delete image url");
+    };
+    const images = product?.images;
     useEffect(() => {
-        setImgUrl(productImg);
-    }, [productImg]);
-
-    useEffect(() => {
-        console.log("useEffect file ran");
-        if (file) {
-            setImgUrl(URL.createObjectURL(file));
-            return;
-        }
-
-        !!imgUrl && URL.revokeObjectURL(imgUrl);
-        return () => {
-            !!imgUrl && URL.revokeObjectURL(imgUrl);
-        };
-    }, [file]);
-
+        if (!images) return;
+        setValue(`images`, images);
+    }, [product?.images]);
     return (
-        <>
-            <div className="flex items-center justify-center w-full h-full">
-                <Tooltip label="Click để chọn hình">
-                    <label
-                        htmlFor="dropzone-file"
-                        className={cn(
-                            `flex flex-col items-center justify-center w-full h-full  border-dashed rounded-lg cursor-pointer`,
-                            `  dark:hover:bg-bray-800 dark:bg-gray-700 `,
-                            ` dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600 hover:scale-105 duration-300`,
-                            !imgUrl ??
-                                "bg-gray-50 border-gray-300 border-2 hover:bg-gray-100",
-                        )}
-                    >
-                        {imgUrl ? (
-                            <img
-                                src={imgUrl}
-                                alt="Uploaded Image"
-                                className="w-full h-full object-contain"
-                            />
-                        ) : (
-                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                <svg
-                                    className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400"
-                                    aria-hidden="true"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 20 16"
-                                >
-                                    <path
-                                        stroke="currentColor"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                                    />
-                                </svg>
-                                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                                    <span className="font-semibold">
-                                        Click to upload
-                                    </span>{" "}
-                                    or drag and drop
-                                </p>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    SVG, PNG, JPG or GIF (MAX. 800x400px)
-                                </p>
-                            </div>
-                        )}
-                        <input
-                            id="dropzone-file"
-                            type="file"
-                            className="hidden"
-                            onChange={handleImageUpload}
-                        />
-                    </label>
-                </Tooltip>
-            </div>
-        </>
+        <ImageUpload
+            initialUrls={images}
+            onFilesChange={onFilesChange}
+            onRemoveUrl={onUrlRemove}
+        />
     );
 };
 
@@ -971,12 +902,10 @@ const SpecificationRow = ({
         action,
         control,
         getValues,
+        setValue,
         formState: { errors },
+        watch,
     } = useProductFormContext();
-    const { fields, append, remove, replace } = useFieldArray({
-        control: control,
-        name: `specifications.${index}.options` as "specifications.0.options",
-    });
     const isDisabled = action === "edit";
 
     const [options, setOptions] = useState<Option<ISpecification>[]>([]);
@@ -992,45 +921,33 @@ const SpecificationRow = ({
     });
     useEffect(() => {
         if (!data) return;
-        setOptions(data.map((item) => toObjectOption(item.name, item)));
+        setOptions(
+            data.map(({ id, name, value }) =>
+                toObjectOption(name, { id, name, value }),
+            ),
+        );
     }, [data]);
 
     const getName = () => {
         return getValues(`specifications.${index}.label`);
     };
 
-    const handleOnChange = (
-        newValue: MultiValue<Option<ISpecification>>,
-        meta: ActionMeta<Option<ISpecification>>,
-    ) => {
-        const { action, option, removedValue } = meta;
-        switch (action) {
-            case "create-option":
-                if (!option) return;
-                append({
-                    label: option.label,
+    const append = (input: string) => {
+        const updated = produce(
+            getValues(`specifications.${index}.options`),
+            (draft) => {
+                draft.push({
+                    label: input,
                     value: {
                         name: getName(),
-                        value: option.value as unknown as string,
+                        value: input,
                     },
                 });
-                break;
-            case "select-option":
-                if (option) append(option);
-                break;
-            case "pop-value":
-            case "remove-value":
-            case "deselect-option":
-                const idx = fields.findIndex(
-                    (field) => field.label === removedValue?.label,
-                );
-                remove(idx);
-                break;
-            case "clear":
-                replace([]);
-                break;
-        }
+            },
+        );
+        setValue(`specifications.${index}.options`, updated);
     };
+
     return (
         <div className="flex border p-4 gap-2">
             <div className="flex-grow grid grid-cols-3 gap-2">
@@ -1042,9 +959,10 @@ const SpecificationRow = ({
                                 {...field}
                                 isMulti
                                 isDisabled={isDisabled}
-                                onChange={handleOnChange}
+                                // onChange={handleOnChange}
                                 options={options}
                                 menuPosition="fixed"
+                                onCreateOption={append}
                             />
                         )}
                         name={
@@ -1059,9 +977,7 @@ const SpecificationRow = ({
                         }}
                     />
                     <FormErrorMessage>
-                        {JSON.stringify(
-                            errors.specifications?.[index]?.options?.message,
-                        )}
+                        {errors.specifications?.[index]?.options?.message}
                     </FormErrorMessage>
                 </FormControl>
             </div>
@@ -1082,7 +998,7 @@ const SpecificationRow = ({
 ProductForm.Features = () => {
     const { product, control, reset } = useProductFormContext();
 
-    const { fields, remove, prepend } = useFieldArray({
+    const { fields, remove, prepend, append } = useFieldArray({
         control,
         name: "features",
     });
@@ -1092,7 +1008,7 @@ ProductForm.Features = () => {
         if (!inputRef.current) {
             throw new Error("Input is missing");
         }
-        prepend({ value: inputRef.current.value });
+        append({ value: inputRef.current.value });
         inputRef.current.value = "";
     };
     const deleteFeatureHandler = (idx: number) => {

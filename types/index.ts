@@ -109,32 +109,26 @@ export const API = {
 
 export type FirebaseImage = {
     storagePath: string;
+    name: string;
     url: string;
 };
-export interface IProduct {
+
+export type ImageUrl = {
+    name?: string;
+    url: string;
+};
+export type IProduct = {
     id: string | undefined;
     name: string;
     slug: string;
     summary: string;
     description: string;
-    thumbnail?: FirebaseImage;
     features?: string[];
-    specifications?: {
-        name: string;
-        values: ISpecification[];
-    }[];
     brand?: IBrand;
     category?: ICategory;
     reviewCount?: number;
     avgRating?: number;
     variants?: IVariant[] | { id: string; price: number }[];
-    /**
-     * @deprecated
-     */
-    attributes?: {
-        name: string;
-        values: string[];
-    }[];
     _links?: {
         self: {
             href: string;
@@ -154,7 +148,13 @@ export interface IProduct {
             href: string;
         };
     };
-}
+} & {
+    images?: FirebaseImage[];
+    specifications?: {
+        name: string;
+        values: ISpecification[];
+    }[];
+};
 
 export type IProductField = {
     id: string | undefined;
@@ -162,9 +162,11 @@ export type IProductField = {
     slug: string;
     summary: string;
     description: string;
-    thumbnail?: FirebaseImage;
-    thumbnailFile?: File | null;
     features?: { value: string }[];
+} & {
+    files: File[];
+    images?: (FirebaseImage | null)[];
+    specificationGroup?: Option<string>[];
     specifications?: (
         | {
               label: string;
@@ -172,8 +174,6 @@ export type IProductField = {
           }
         | undefined
     )[];
-    specificationGroup?: Option<string>[];
-} & {
     brand?: Option<IBrand>;
     category?: Option<ICategory>;
 };
@@ -186,7 +186,7 @@ export type ISpecification = {
 export type IVariant = {
     id: number;
     sku: string;
-    images?: string[];
+    images?: FirebaseImage[];
     price: number;
     /**
      * @deprecated
@@ -205,9 +205,7 @@ export type IVariant = {
 export type IVariantField = {
     id: number;
     sku: string;
-    images?: {
-        image: string;
-    }[];
+    images?: (FirebaseImage | null)[];
     price: number;
     product: {
         label: string;
@@ -216,16 +214,14 @@ export type IVariantField = {
             name: string;
         };
     };
-    /**
-     * @deprecated
-     */
-    attributes?: {
+    specificationGroup?: Option<string>[];
+    specifications?: {
         label: string;
-        value: {
-            name: string;
-            value: string;
-        };
+        options: Option<ISpecification | undefined>[];
     }[];
+} & {
+    files: File[];
+    images?: (FirebaseImage | null)[];
 };
 /**
  * @deprecated

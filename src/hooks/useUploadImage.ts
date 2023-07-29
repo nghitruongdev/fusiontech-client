@@ -1,25 +1,37 @@
-import { firebaseStorage } from "@/lib/firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import useUpload from "@/hooks/useUpload";
+import { FirebaseImage } from "types";
 
-const useUploadImage = () => {
-    const uploadFile = async (
-        path: string,
-        file: Blob | Uint8Array | ArrayBuffer,
-    ) => {
-        // Create a root reference
-        const storage = firebaseStorage;
+const path = {
+    products: `images/products/`,
+    variants: `images/variants/`,
+};
 
-        const storageRef = ref(storage, path);
-        // 'file' comes from the Blob or File API
-        try {
-            const uploadTask = await uploadBytes(storageRef, file);
-            return await getDownloadURL(uploadTask.ref);
-        } catch (err) {
-            console.error(err);
-        }
+const useUploadImage = ({ type }: { type: keyof typeof path }) => {
+    const { upload } = useUpload();
+
+    const uploadImage = async (file: File) => {
+        const fullPath = `${path[type]}/${file.name}-${
+            Date.now() * Math.random()
+        }`;
+        const url = await upload(fullPath, file);
+        return {
+            url: url ?? "",
+            storagePath: fullPath,
+            name: file.name,
+        };
+    };
+
+    const uploadImages = (files: File[]) => {
+        return Promise.all(files.filter((file) => !!file).map(uploadImage));
+    };
+
+    const removeImages = async (removedImages: FirebaseImage[]) => {
+        console.warn(`Have not implement delete image from firebase`);
     };
     return {
-        upload: uploadFile,
+        uploadImages,
+        removeImages,
     };
 };
+
 export default useUploadImage;

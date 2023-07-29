@@ -63,6 +63,7 @@
     "tailwind-merge": "^1.13.0",
     "tailwindcss-animate": "^1.0.5",
     "usehooks-ts": "^2.9.1",
+    "uuid": "^9.0.0",
     "zustand": "^4.3.9"
   },
   "devDependencies": {
@@ -70,6 +71,7 @@
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "@types/react-slick": "^0.23.10",
+    "@types/uuid": "^9.0.2",
     "@typescript-eslint/parser": "5.48.0",
     "autoprefixer": "^10.4.14",
     "cross-env": "^7.0.3",
