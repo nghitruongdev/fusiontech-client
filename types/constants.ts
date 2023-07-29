@@ -1,3 +1,4 @@
+import { Action } from '@refinedev/core'
 import { ResourceName } from 'types'
 
 const throwIfMissing = (name: string) => {
@@ -104,6 +105,24 @@ export const API = {
   },
 }
 
-// export const PATH: { [key in ResourceName]: string } = {
+type Lang = 'vi' | 'en'
+type ButtonType = Action | 'refresh' | 'delete' | 'save'
+export const ButtonText = (key: ButtonType, lang: Lang = 'vi') => {
+  switch (lang) {
+    case 'vi':
+      return ButtonTextVi[key]
+    case 'en':
+      return key as string
+  }
+}
 
-// };
+const ButtonTextVi: { [key in ButtonType]: string } = {
+  create: 'Thêm',
+  edit: 'Chỉnh sửa',
+  list: 'Danh sách',
+  show: 'Xem',
+  clone: 'Nhân bản',
+  refresh: 'Tải lại',
+  delete: 'Xoá',
+  save: 'Lưu',
+}

@@ -4,28 +4,29 @@ import {
   useCan,
   useNavigation,
   useTranslate,
+  useUserFriendlyName,
   useResource,
   useRouterContext,
   useRouterType,
   useLink,
+  pickNotDeprecated,
   AccessControlContext,
 } from '@refinedev/core'
-import { IconEye } from '@tabler/icons'
-import type { ShowButtonProps } from '@refinedev/chakra-ui'
+import { IconList } from '@tabler/icons'
+import type { ListButtonProps } from '@refinedev/chakra-ui'
 import { RefineButtonClassNames } from '@refinedev/ui-types'
 import { ButtonText } from 'types/constants'
 
 /**
- * `<ShowButton>` uses Chakra UI {@link https://chakra-ui.com/docs/components/button `<Button> `} component.
- * It uses the {@link https://refine.dev/docs/api-reference/core/hooks/navigation/useNavigation#show `show`} method from {@link https://refine.dev/docs/api-reference/core/hooks/navigation/useNavigation `useNavigation`} under the hood.
- * It can be useful when red sirecting the app to the show page with the record id route of resource.
+ * `<ListButton>` is using uses Chakra UI {@link https://chakra-ui.com/docs/components/button `<Button> `} component.
+ * It uses the  {@link https://refine.dev/docs/api-reference/core/hooks/navigation/useNavigation#list `list`} method from {@link https://refine.dev/docs/api-reference/core/hooks/navigation/useNavigation `useNavigation`} under the hood.
+ * It can be useful when redirecting the app to the list page route of resource}.
  *
- * @see {@link https://refine.dev/docs/api-reference/chakra-ui/components/buttons/show-button} for more details.
- */
-export const ShowButton: React.FC<ShowButtonProps> = ({
+ * @see {@link https://refine.dev/docs/api-reference/chakra-ui/components/buttons/list-button} for more details.
+ **/
+export const ListButton: React.FC<ListButtonProps> = ({
   resource: resourceNameFromProps,
   resourceNameOrRouteName,
-  recordItemId,
   hideText = false,
   accessControl,
   svgIconProps,
@@ -43,25 +44,28 @@ export const ShowButton: React.FC<ShowButtonProps> = ({
   const hideIfUnauthorized =
     accessControl?.hideIfUnauthorized ??
     accessControlContext.options.buttons.hideIfUnauthorized
-  const { showUrl: generateShowUrl } = useNavigation()
+  const { listUrl: generateListUrl } = useNavigation()
   const routerType = useRouterType()
   const Link = useLink()
   const { Link: LegacyLink } = useRouterContext()
+  const getUserFriendlyName = useUserFriendlyName()
 
   const ActiveLink = routerType === 'legacy' ? LegacyLink : Link
 
   const translate = useTranslate()
 
-  const { id, resource } = useResource(
+  const { resource, identifier } = useResource(
     resourceNameFromProps ?? resourceNameOrRouteName,
   )
 
   const { data } = useCan({
     resource: resource?.name,
-    action: 'show',
-    params: { id: recordItemId ?? id, resource },
+    action: 'list',
     queryOptions: {
       enabled: accessControlEnabled,
+    },
+    params: {
+      resource,
     },
   })
 
@@ -75,10 +79,7 @@ export const ShowButton: React.FC<ShowButtonProps> = ({
       )
   }
 
-  const showUrl =
-    resource && (recordItemId || id)
-      ? generateShowUrl(resource, recordItemId! ?? id!, meta)
-      : ''
+  const listUrl = resource ? generateListUrl(resource, meta) : ''
 
   if (accessControlEnabled && hideIfUnauthorized && !data?.can) {
     return null
@@ -86,7 +87,7 @@ export const ShowButton: React.FC<ShowButtonProps> = ({
 
   return (
     <ActiveLink
-      to={showUrl}
+      to={listUrl}
       replace={false}
       onClick={(e: React.PointerEvent<HTMLButtonElement>) => {
         if (onClick) {
@@ -98,24 +99,49 @@ export const ShowButton: React.FC<ShowButtonProps> = ({
       {hideText ? (
         <IconButton
           variant="outline"
-          aria-label={translate('buttons.show', 'Show')}
+          aria-label={translate(
+            `${identifier}.titles.list`,
+            getUserFriendlyName(
+              resource?.meta?.label ??
+                resource?.label ??
+                identifier ??
+                resourceNameOrRouteName,
+              'plural',
+            ),
+          )}
           isDisabled={data?.can === false}
           title={disabledTitle()}
-          className={RefineButtonClassNames.ShowButton}
+          className={RefineButtonClassNames.ListButton}
           {...rest}
         >
-          <IconEye size={20} {...svgIconProps} />
+          <IconList size={20} {...svgIconProps} />
         </IconButton>
       ) : (
         <Button
           variant="outline"
           isDisabled={data?.can === false}
-          leftIcon={<IconEye size={20} {...svgIconProps} />}
+          leftIcon={<IconList size={20} {...svgIconProps} />}
           title={disabledTitle()}
-          className={RefineButtonClassNames.ShowButton}
+          className={RefineButtonClassNames.ListButton}
           {...rest}
         >
-          {children ?? translate('buttons.show', ButtonText('show'))}
+          {children ??
+            translate(
+              `${
+                identifier ?? resourceNameFromProps ?? resourceNameOrRouteName
+              }.titles.list`,
+              getUserFriendlyName(
+                resource?.meta?.label ??
+                  resource?.label ??
+                  identifier ??
+                  pickNotDeprecated(
+                    resourceNameFromProps,
+                    resourceNameOrRouteName,
+                  ),
+                'plural',
+              ),
+            ) ??
+            ButtonText('list')}
         </Button>
       )}
     </ActiveLink>

@@ -1,19 +1,20 @@
 'use client'
+
+import React from 'react'
 import { IResourceComponentsProps } from '@refinedev/core'
 import { useTable } from '@refinedev/react-table'
 import { ColumnDef } from '@tanstack/react-table'
-import { TagField } from '@refinedev/chakra-ui'
+import {} from '@refinedev/chakra-ui'
 import { TableContainer, Table, HStack } from '@chakra-ui/react'
-import React from 'react'
 import { useDefaultTableRender } from '@/hooks/useRenderTable'
 import { List } from '@components/crud'
 import { DeleteButton, EditButton, ShowButton } from '@components/buttons'
 
 export default function ListPage() {
-  return <CategoriesList />
+  return <BrandList />
 }
 
-export const CategoriesList: React.FC<IResourceComponentsProps> = () => {
+export const BrandList: React.FC<IResourceComponentsProps> = () => {
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
       {
@@ -25,31 +26,6 @@ export const CategoriesList: React.FC<IResourceComponentsProps> = () => {
         id: 'name',
         accessorKey: 'name',
         header: 'Name',
-      },
-      {
-        id: 'slug',
-        accessorKey: 'slug',
-        header: 'Slug',
-      },
-      {
-        id: 'description',
-        accessorKey: 'description',
-        header: 'Description',
-      },
-      {
-        id: 'categorySpecs',
-        accessorKey: 'categorySpecs',
-        header: 'Category Specs',
-
-        cell: function render({ getValue }) {
-          return (
-            <HStack>
-              {getValue<any[]>()?.map((item, index) => (
-                <TagField value={item} key={index} />
-              ))}
-            </HStack>
-          )
-        },
       },
       {
         id: 'actions',
@@ -92,11 +68,11 @@ export const CategoriesList: React.FC<IResourceComponentsProps> = () => {
     },
   }))
   const paginationData = {
-    current,
-    setCurrent,
+    pageCount,
     pageSize,
     setPageSize,
-    pageCount,
+    current,
+    setCurrent,
   }
   const { headers, body, pagination } = useDefaultTableRender({
     rowModel: getRowModel(),

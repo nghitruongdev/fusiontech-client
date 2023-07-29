@@ -7,14 +7,7 @@ import {
   useCustom,
   useMany,
 } from '@refinedev/core'
-import {
-  Show,
-  TextField,
-  DateField,
-  NumberField,
-  EditButton,
-  DeleteButton,
-} from '@refinedev/chakra-ui'
+import { TextField, DateField, NumberField } from '@refinedev/chakra-ui'
 import {
   Heading,
   Portal,
@@ -33,6 +26,8 @@ import React from 'react'
 import { useModalForm } from '@refinedev/react-hook-form'
 import { EditDetailModalForm } from './EditModalForm'
 import { useQueryClient } from '@tanstack/react-query'
+import { Show } from '@components/crud'
+import { DeleteButton, EditButton } from '@components/buttons'
 export default function ShowPage() {
   // return <ChakraUIShowInferencer />;
   return <InventoryShow />

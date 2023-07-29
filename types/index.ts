@@ -144,15 +144,27 @@ export type IAttribute = {
 }
 
 export type IBrand = {
-  id: number
+  id?: number
   name: string
-  logo: string
+  image?: FirebaseImage | null
+}
+
+export type IBrandField = IBrand & {
+  file?: File | null
 }
 
 export interface ICategory {
-  id: string | undefined
+  id?: number
   name: string
-  categorySpecs?: string[]
+  slug: string
+  description?: string
+  image?: FirebaseImage | null
+  specifications?: string[]
+}
+
+export interface ICategoryField extends ICategory {
+  formSpecifications?: Option<string>[]
+  file?: File | null
 }
 
 export interface IUser {

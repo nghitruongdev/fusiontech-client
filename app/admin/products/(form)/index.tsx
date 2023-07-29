@@ -2,12 +2,12 @@ import { useForm } from '@refinedev/react-hook-form'
 import React, {
   FormEvent,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useRef,
   useState,
 } from 'react'
-import { Create, Edit } from '@refinedev/chakra-ui'
 import {
   FormControl,
   FormLabel,
@@ -28,7 +28,7 @@ import {
   ISpecification,
   Option,
 } from 'types'
-import { PropsWithChildren, FunctionComponent } from 'react'
+import { PropsWithChildren } from 'react'
 import SelectPopout from '@components/ui/SelectPopout'
 import useListOption from '@/hooks/useListOption'
 import { Controller, FieldArrayWithId, useFieldArray } from 'react-hook-form'
@@ -47,6 +47,7 @@ import { ActionMeta, MultiValue } from 'react-select'
 import ImageUpload, { UploadProviderProps } from '@components/image-upload'
 import useUploadImage from '@/hooks/useUploadImage'
 import { API } from 'types/constants'
+import { Create, Edit } from '@components/crud'
 
 type ContextProps = {
   action: 'create' | 'edit'
@@ -70,7 +71,9 @@ const ProductFormProvider = ({
     projection: { specifications: attributes },
   } = API['products']()
 
-  const { uploadImages, removeImages } = useUploadImage({ type: 'products' })
+  const { uploadImages, removeImages } = useUploadImage({
+    resource: 'products',
+  })
   const formMethods = useForm<IProduct, HttpError, IProductField>({
     refineCoreProps: {
       meta: {
@@ -92,8 +95,8 @@ const ProductFormProvider = ({
     formState: { dirtyFields },
   } = formMethods
 
-  const product = queryResult?.data?.data
   useEffect(() => {
+    const product = queryResult?.data?.data
     if (product) {
       const { features, specifications, name, slug, summary, description } =
         product
@@ -112,7 +115,9 @@ const ProductFormProvider = ({
         features: formFeature,
       })
     }
-  }, [product])
+  }, [queryResult?.data?.data, reset])
+
+  const product = queryResult?.data?.data
 
   const saveProps = {
     ...saveButtonProps,
@@ -220,7 +225,7 @@ export const ProductForm = ({ action }: { action: ContextProps['action'] }) => {
       <div className="bg-white flex gap-5 min-h-[350px]">
         <div className="w-1/3 grid gap-4 ">
           <div className="w-full min-w-1/3 mb-10">
-            <ProductForm.UploadImage />
+            <ProductForm.Images />
           </div>
         </div>
         <div className="flex-grow flex flex-col">
@@ -236,13 +241,13 @@ export const ProductForm = ({ action }: { action: ContextProps['action'] }) => {
       </div>
       <div className=" space-y-4">
         <ProductForm.Features />
-        <ProductForm.Specification />
+        <ProductForm.Specifications />
       </div>
     </ProductFormProvider>
   )
 }
 
-ProductForm.Container = ({ children }: PropsWithChildren) => {
+ProductForm.Container = function Container({ children }: PropsWithChildren) {
   const {
     action,
     product,
@@ -275,7 +280,7 @@ ProductForm.Container = ({ children }: PropsWithChildren) => {
   )
 }
 
-ProductForm.Id = () => {
+ProductForm.Id = function Id() {
   const {
     register,
     formState: { errors },
@@ -307,7 +312,7 @@ ProductForm.Id = () => {
     </FormControl>
   )
 }
-ProductForm.Name = () => {
+ProductForm.Name = function Name() {
   const {
     register,
     formState: { errors },
@@ -349,7 +354,7 @@ ProductForm.Name = () => {
   )
 }
 
-ProductForm.Slug = () => {
+ProductForm.Slug = function Slug() {
   const {
     register,
     formState: { errors },
@@ -391,7 +396,7 @@ ProductForm.Slug = () => {
   )
 }
 
-ProductForm.Summary = () => {
+ProductForm.Summary = function Summary() {
   const {
     register,
     formState: { errors },
@@ -432,7 +437,7 @@ ProductForm.Summary = () => {
   )
 }
 
-ProductForm.Brand = () => {
+ProductForm.Brand = function Brand() {
   const { resource } = API['brands']()
   const { action, product, setValue } = useProductFormContext()
 
@@ -454,7 +459,7 @@ ProductForm.Brand = () => {
     }
     const selected = options.find((item) => item.value.id == +brandId)
     if (selected) setValue('brand', selected)
-  }, [product?.brand?.id, options])
+  }, [product?.brand?.id, options, setValue])
 
   const { control } = useProductFormContext()
   return (
@@ -490,7 +495,7 @@ ProductForm.Brand = () => {
             formatOptionLabel: (data) => {
               const {
                 label,
-                value: { logo },
+                value: { image: logo },
               } = data as Option<IBrand>
               return (
                 <Box
@@ -504,7 +509,7 @@ ProductForm.Brand = () => {
                     size="sm"
                     variant="filled"
                     name={label}
-                    src={logo}
+                    src={logo?.url}
                   />
                 </Box>
               )
@@ -516,7 +521,7 @@ ProductForm.Brand = () => {
   )
 }
 
-ProductForm.Category = () => {
+ProductForm.Category = function Category() {
   const { resource } = API['categories']()
   const { action, product, control, setValue, getValues } =
     useProductFormContext()
@@ -549,7 +554,7 @@ ProductForm.Category = () => {
     ) {
       return
     }
-    const categorySpecs = category.value.categorySpecs
+    const categorySpecs = category.value.specifications
     if (!categorySpecs) return
     const updateSpecs = async () => {
       if (currentSpecs && currentSpecs.length) {
@@ -580,7 +585,7 @@ ProductForm.Category = () => {
     }
     const selected = options.find((item) => item.value.id == id)
     if (selected) setValue('category', selected)
-  }, [product?.category?.id, options])
+  }, [product?.category?.id, options, setValue])
   return (
     <>
       <Box mb="10" ml="10">
@@ -624,7 +629,7 @@ ProductForm.Category = () => {
   )
 }
 
-ProductForm.Description = () => {
+ProductForm.Description = function Description() {
   const {
     register,
     formState: { errors },
@@ -665,20 +670,28 @@ ProductForm.Description = () => {
   )
 }
 
-ProductForm.UploadImage = () => {
+ProductForm.Images = function Images() {
   const { setValue, getValues, product } = useProductFormContext()
-  const onFilesChange: UploadProviderProps['onFilesChange'] = (files) => {
-    setValue(`files`, files, {
-      shouldDirty: true,
-    })
-  }
+  const onFilesChange: UploadProviderProps['onFilesChange'] = useCallback(
+    (files: File[]) => {
+      setValue(`files`, files, {
+        shouldDirty: true,
+      })
+    },
+    [setValue],
+  )
+  onFilesChange.isCallback = true
 
-  const onUrlRemove: UploadProviderProps['onRemoveUrl'] = (index) => {
-    setValue(`images.${index}`, null, {
-      shouldDirty: true,
-    })
-    console.warn('have not implement delete image url')
-  }
+  const onUrlRemove: UploadProviderProps['onRemoveUrl'] = useCallback(
+    (index: number) => {
+      setValue(`images.${index}`, null, {
+        shouldDirty: true,
+      })
+    },
+    [setValue],
+  )
+  onUrlRemove.isCallback = true
+
   useEffect(() => {
     const images = product?.images
     if (!images) return
@@ -693,7 +706,7 @@ ProductForm.UploadImage = () => {
   )
 }
 
-ProductForm.Specification = () => {
+ProductForm.Specifications = function Specifications({}) {
   const { findDistinctNames } = API['specifications']()
   const { action, setValue, getValues, resetField, control, product } =
     useProductFormContext()
@@ -782,89 +795,95 @@ ProductForm.Specification = () => {
         defaultValue: toArrayOptionString(formSpecs.map((item) => item.label)),
       })
     }, 300)
-  }, [product])
+  }, [product, resetField])
 
   return (
     <>
-      <>
-        <FormLabel>Thông số kỹ thuật</FormLabel>
-        <div className="border rounded-lg p-4">
+      <FormLabel>Thông số kỹ thuật</FormLabel>
+      <div className="border rounded-lg p-4">
+        <div className="">
           <div className="">
-            <div className="">
-              <Controller
-                render={({ field }) => (
-                  <CreatableSelect
-                    {...field}
-                    options={nameOptions}
-                    isValidNewOption={(input, values, options) => {
-                      const array = [...values, ...options].map(
-                        (item) => item.label,
-                      )
-                      return isValidNewOption(input, array)
-                    }}
-                    onChange={handleChange}
-                    isDisabled={isDisabled}
-                    isClearable={false}
-                    isMulti
-                  />
-                )}
-                name={`specificationGroup`}
-                control={control}
-              />
-            </div>
-            {!fields.length && (
-              <>
-                <div className="h-[300px] border flex items-center justify-center">
-                  <div
-                    className="flex flex-col gap-2 items-center justify-center"
-                    ref={buttonRef}
-                  >
-                    <Inbox className=" w-28 h-28 text-gray-500" />
-                    <p className=" text-muted-foreground text-sm">
-                      Không có dữ liệu
-                    </p>
-                  </div>
-                </div>
-              </>
-            )}
-            {!!fields.length && (
-              <>
-                <div className="header flex">
-                  <p className="flex-grow">Tên thông số</p>
-                  <p className="flex-grow">Chi tiết</p>
-                </div>
-                <div className="body flex flex-col">
-                  {fields.map((field, idx) => (
-                    <SpecificationRow
-                      key={field.id}
-                      index={idx}
-                      field={field}
-                      onRemove={onRemove.bind(this, idx)}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
+            <Controller
+              render={({ field }) => (
+                <CreatableSelect
+                  {...field}
+                  options={nameOptions}
+                  isValidNewOption={(input, values, options) => {
+                    const array = [...values, ...options].map(
+                      (item) => item.label,
+                    )
+                    return isValidNewOption(input, array)
+                  }}
+                  onChange={handleChange}
+                  isDisabled={isDisabled}
+                  isClearable={false}
+                  isMulti
+                />
+              )}
+              name={`specificationGroup`}
+              control={control}
+            />
           </div>
+          {!fields.length && (
+            <>
+              <div className="h-[300px] border flex items-center justify-center">
+                <div
+                  className="flex flex-col gap-2 items-center justify-center"
+                  ref={buttonRef}
+                >
+                  <Inbox className=" w-28 h-28 text-gray-500" />
+                  <p className=" text-muted-foreground text-sm">
+                    Không có dữ liệu
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
+          {!!fields.length && (
+            <>
+              <div className="header flex">
+                <p className="flex-grow">Tên thông số</p>
+                <p className="flex-grow">Chi tiết</p>
+              </div>
+              <div className="body flex flex-col">
+                {fields.map((field, idx) => (
+                  // <SpecificationRow
+                  //   key={field.id}
+                  //   index={idx}
+                  //   field={field}
+                  //   onRemove={onRemove.bind(null, idx)}
+                  // />
+                  <ProductForm.Specifications.Row
+                    key={field.id}
+                    index={idx}
+                    field={field}
+                    onRemove={onRemove.bind(null, idx)}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
 
-          {/* <Button colorScheme="blackAlpha" onClick={onAppend}>
+        {/* <Button colorScheme="blackAlpha" onClick={onAppend}>
                         <Plus />
                     </Button> */}
-        </div>
-      </>
+      </div>
     </>
   )
+} as React.FC & {
+  Row: React.FC<{
+    index: number
+    field?: FieldArrayWithId<IProductField, 'specifications', 'id'>
+    onRemove: () => void
+  }>
 }
 
-const SpecificationRow = ({
+ProductForm.Specifications.Row = function SpecificationRow({
   index,
   onRemove,
   field: rowField,
-}: {
-  index: number
-  field?: FieldArrayWithId<IProductField, 'specifications', 'id'>
-  onRemove: () => void
-}) => {
+}) {
   const { resource, findDistinctByName } = API['specifications']()
   const {
     action,
@@ -963,7 +982,7 @@ const SpecificationRow = ({
   )
 }
 
-ProductForm.Features = () => {
+ProductForm.Features = function Features() {
   const { product, control, reset } = useProductFormContext()
 
   const { fields, remove, prepend, append } = useFieldArray({

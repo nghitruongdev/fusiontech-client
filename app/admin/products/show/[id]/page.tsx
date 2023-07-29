@@ -6,13 +6,7 @@ import {
   useOne,
   useList,
 } from '@refinedev/core'
-import {
-  CreateButton,
-  NumberField,
-  Show,
-  TagField,
-  TextField,
-} from '@refinedev/chakra-ui'
+import { NumberField, TagField, TextField } from '@refinedev/chakra-ui'
 import {
   Box,
   Button,
@@ -61,6 +55,8 @@ import { Rating } from '@smastrom/react-rating'
 import { BiChevronDownCircle } from 'react-icons/bi'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { variantTableColumns } from 'app/admin/variants/(list)/page'
+import { Show } from '@components/crud'
+import { CreateButton } from '@components/buttons'
 
 const ProductShowPage = () => {
   return (

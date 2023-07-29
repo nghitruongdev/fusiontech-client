@@ -1,23 +1,13 @@
 'use client'
 
 import { HttpError, useCustom, useOne } from '@refinedev/core'
-import { Create, Edit } from '@refinedev/chakra-ui'
 import {
   FormControl,
   FormLabel,
   FormErrorMessage,
   Input,
-  Image,
   Button,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  useDisclosure,
   Heading,
-  SkeletonText,
   InputGroup,
   InputLeftElement,
   InputRightElement,
@@ -27,6 +17,7 @@ import { useForm } from '@refinedev/react-hook-form'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -42,12 +33,7 @@ import {
   Option,
 } from 'types'
 import { PropsWithChildren } from 'react'
-import {
-  Controller,
-  FieldArrayWithId,
-  UseFieldArrayReturn,
-  useFieldArray,
-} from 'react-hook-form'
+import { Controller, UseFieldArrayReturn, useFieldArray } from 'react-hook-form'
 import { Inbox, MinusCircle } from 'lucide-react'
 import { API, API_URL } from 'types/constants'
 import useListOption from '@/hooks/useListOption'
@@ -61,9 +47,9 @@ import {
 } from '@/lib/utils'
 import CreatableSelect from 'react-select/creatable'
 import { produce } from 'immer'
-import { join } from 'path'
 import ImageUpload, { UploadProviderProps } from '@components/image-upload'
 import useUploadImage from '@/hooks/useUploadImage'
+import { Create, Edit } from '@components/crud'
 
 const productResource = API.products()
 const variantResource = API.variants()
@@ -74,7 +60,7 @@ type FormProps = {
 
 export const VariantForm = ({ action }: FormProps) => {
   return (
-    <ContextProvider action={action}>
+    <VariantForm.Provider action={action}>
       <div className="grid grid-cols-3 gap-4">
         <div className=" border-r">
           <VariantForm.Images />
@@ -96,7 +82,7 @@ export const VariantForm = ({ action }: FormProps) => {
           </>
         </div>
       </div>
-    </ContextProvider>
+    </VariantForm.Provider>
   )
 }
 
@@ -126,14 +112,16 @@ const useFormProvider = () => {
   }
 }
 
-const ContextProvider = ({
+VariantForm.Provider = function Provider({
   children,
   ...props
-}: PropsWithChildren<FormProps>) => {
+}: PropsWithChildren<FormProps>) {
   const searchParams = useSearchParams()
   const paramProductId = searchParams.get('productId')
   const router = useRouter()
-  const { uploadImages, removeImages } = useUploadImage({ type: 'variants' })
+  const { uploadImages, removeImages } = useUploadImage({
+    resource: 'variants',
+  })
   const { action } = props
   const formMethods = useForm<IVariant, HttpError, IVariantField>({
     refineCoreProps: {
@@ -284,7 +272,7 @@ const ContextProvider = ({
   )
 }
 
-VariantForm.Container = ({ children }: PropsWithChildren) => {
+VariantForm.Container = function Container({ children }: PropsWithChildren) {
   const {
     action,
     formState: { isLoading },
@@ -307,7 +295,7 @@ VariantForm.Container = ({ children }: PropsWithChildren) => {
     )
 }
 
-VariantForm.Product = () => {
+VariantForm.Product = function Product() {
   const {
     paramProductId,
     control,
@@ -368,7 +356,7 @@ VariantForm.Product = () => {
   )
 }
 
-VariantForm.SKU = () => {
+VariantForm.SKU = function SKU() {
   const { existsBySku, findBySku } = variantResource
   const {
     formState: { errors, isValidating },
@@ -505,7 +493,7 @@ VariantForm.SKU = () => {
   )
 }
 
-VariantForm.Price = () => {
+VariantForm.Price = function Price() {
   const {
     formState: { errors },
     register,
@@ -540,20 +528,29 @@ VariantForm.Price = () => {
   )
 }
 
-VariantForm.Images = () => {
+VariantForm.Images = function Images() {
   const { setValue, variant } = useFormProvider()
 
-  const onFilesChange: UploadProviderProps['onFilesChange'] = (files) => {
-    setValue(`files`, files, {
-      shouldDirty: true,
-    })
-  }
-  const onUrlRemove: UploadProviderProps['onRemoveUrl'] = (index) => {
-    setValue(`images.${index}`, null, {
-      shouldDirty: true,
-    })
-    console.warn('have not implement delete image url')
-  }
+  const onFilesChange: UploadProviderProps['onFilesChange'] = useCallback(
+    (files: File[]) => {
+      setValue(`files`, files, {
+        shouldDirty: true,
+      })
+    },
+    [setValue],
+  )
+  onFilesChange.isCallback = true
+  const onUrlRemove: UploadProviderProps['onRemoveUrl'] = useCallback(
+    (index: number) => {
+      setValue(`images.${index}`, null, {
+        shouldDirty: true,
+      })
+      console.warn('have not implement delete image url')
+    },
+    [setValue],
+  )
+  onUrlRemove.isCallback = true
+
   const images = variant?.images
   useEffect(() => {
     if (!images) return
@@ -568,38 +565,7 @@ VariantForm.Images = () => {
   )
 }
 
-// function ViewMoreImageModal() {
-//     const { isOpen, onOpen, onClose } = useDisclosure();
-//     const {
-//         imagesField: { fields, remove },
-//     } = useFormContextProvider();
-//     return (
-//         <>
-//             <Button onClick={onOpen}>....</Button>
-//             <Modal isOpen={isOpen} onClose={onClose} size="lg">
-//                 <ModalOverlay />
-//                 <ModalContent>
-//                     <ModalHeader>Hình ảnh sản phẩm</ModalHeader>
-//                     <ModalCloseButton />
-//                     <ModalBody>
-//                         <div className="flex gap-2 flex-wrap">
-//                             {fields.map(({ id, image }) => (
-//                                 <Image
-//                                     key={id}
-//                                     src={image}
-//                                     boxSize={"200px"}
-//                                     objectFit={"contain"}
-//                                 />
-//                             ))}
-//                         </div>
-//                     </ModalBody>
-//                 </ModalContent>
-//             </Modal>
-//         </>
-//     );
-// }
-
-VariantForm.Specification = () => {
+VariantForm.Specification = function Specification({}) {
   const { findDistinctNames } = API['specifications']()
   const {
     action,
@@ -776,11 +742,11 @@ VariantForm.Specification = () => {
                 </div>
                 <div className="body flex flex-col">
                   {fields.map((field, idx) => (
-                    <SpecificationRow
+                    <VariantForm.Specification.Row
                       key={field.id}
                       index={idx}
                       name={field.label}
-                      onRemove={onRemove.bind(this, idx)}
+                      onRemove={onRemove.bind(null, idx)}
                     />
                   ))}
                 </div>
@@ -802,17 +768,15 @@ VariantForm.Specification = () => {
       )}
     </>
   )
+} as React.FC & {
+  Row: React.FC<{
+    name: string | undefined
+    index: number
+    onRemove?: () => void
+  }>
 }
 
-const SpecificationRow = ({
-  index,
-  onRemove,
-  name = '',
-}: {
-  name: string | undefined
-  index: number
-  onRemove?: () => void
-}) => {
+VariantForm.Specification.Row = function Row({ index, onRemove, name = '' }) {
   const { resource, findDistinctByName } = API['specifications']()
   const {
     action,

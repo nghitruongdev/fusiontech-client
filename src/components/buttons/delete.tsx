@@ -22,6 +22,8 @@ import {
 } from '@refinedev/core'
 import { IconTrash } from '@tabler/icons'
 import type { DeleteButtonProps } from '@refinedev/chakra-ui'
+import { RefineButtonClassNames } from '@refinedev/ui-types'
+import { ButtonText } from 'types/constants'
 
 /**
  * `<DeleteButton>` uses Chakra UI {@link https://chakra-ui.com/docs/components/button `<Button>`} and {@link https://chakra-ui.com/docs/components/popover `<Popover>`} components.
@@ -165,7 +167,8 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
               {confirmCancelText ?? translate('buttons.cancel', 'Cancel')}
             </Button>
             <Button colorScheme="red" onClick={onConfirm} autoFocus size="sm">
-              {confirmOkText ?? translate('buttons.delete', 'Delete')}
+              {confirmOkText ??
+                translate('buttons.delete', ButtonText('delete'))}
             </Button>
           </HStack>
         </PopoverBody>

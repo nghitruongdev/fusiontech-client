@@ -4,11 +4,12 @@ import React from 'react'
 import { IResourceComponentsProps } from '@refinedev/core'
 import { useTable } from '@refinedev/react-table'
 import { ColumnDef } from '@tanstack/react-table'
-import { List, EditButton, ShowButton } from '@refinedev/chakra-ui'
 import { TableContainer, Table, HStack, Image } from '@chakra-ui/react'
 import { IProduct, IVariant } from 'types/index'
 import { useDefaultTableRender } from '@/hooks/useRenderTable'
 import { API } from 'types/constants'
+import { EditButton, ShowButton } from '@components/buttons'
+import { List } from '@components/crud'
 
 const page = () => {
   return (

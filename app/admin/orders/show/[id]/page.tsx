@@ -7,7 +7,7 @@ import {
   useCustom,
   useMany,
 } from '@refinedev/core'
-import { Show, NumberField, TextField, DateField } from '@refinedev/chakra-ui'
+import { NumberField, TextField, DateField } from '@refinedev/chakra-ui'
 import {
   Heading,
   Table,
@@ -22,6 +22,7 @@ import {
 import { IOrderItem, IVariant } from 'types'
 import Image from 'next/image'
 import { loginImg } from '@public/assets/images'
+import { Show } from '@components/crud'
 
 export default function ShowPage() {
   return <OrderShow />

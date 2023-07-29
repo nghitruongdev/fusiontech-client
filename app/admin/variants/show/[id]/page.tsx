@@ -1,12 +1,13 @@
 'use client'
 
 import { useShow, IResourceComponentsProps, useOne } from '@refinedev/core'
-import { Show, NumberField, TagField, TextField } from '@refinedev/chakra-ui'
+import { NumberField, TagField, TextField } from '@refinedev/chakra-ui'
 import { Heading, HStack, Image } from '@chakra-ui/react'
 import { formatPrice } from '@/lib/utils'
 import { IProduct, IVariant } from 'types'
 import { PropsWithChildren, createContext, useContext, useEffect } from 'react'
 import { API } from 'types/constants'
+import { Show } from '@components/crud'
 
 const page = () => {
   return (

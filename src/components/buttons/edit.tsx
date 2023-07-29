@@ -12,6 +12,8 @@ import {
 } from '@refinedev/core'
 import { IconPencil } from '@tabler/icons'
 import type { EditButtonProps } from '@refinedev/chakra-ui'
+import { RefineButtonClassNames } from '@refinedev/ui-types'
+import { ButtonText } from 'types/constants'
 
 /**
  * `<EditButton>` uses Chakra UI {@link https://chakra-ui.com/docs/components/button `<Button> component`}.
@@ -115,7 +117,7 @@ export const EditButton: React.FC<EditButtonProps> = ({
           className={RefineButtonClassNames.EditButton}
           {...rest}
         >
-          {children ?? translate('buttons.edit', 'Edit')}
+          {children ?? translate('buttons.edit', ButtonText('edit'))}
         </Button>
       )}
     </ActiveLink>
