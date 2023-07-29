@@ -3,6 +3,7 @@
 import { firestoreProvider } from "@/lib/firebase";
 import { springDataProvider } from "@/providers/rest-data-provider";
 import { ChakraProvider, ColorModeScript } from "@chakra-ui/react";
+import { Breadcrumb } from "@components/breadcrumb";
 import {
     RefineThemes,
     ThemedLayoutV2,
@@ -35,6 +36,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 options={{
                     syncWithLocation: true,
                     warnWhenUnsavedChanges: true,
+                    mutationMode: "optimistic",
+                    textTransformers: {
+                        plural: (word) => word,
+                        singular: (word) => word,
+                        humanize: (word) => word,
+                    },
+                    disableTelemetry: true,
+                    breadcrumb: <Breadcrumb />,
                 }}
                 resources={[
                     {
@@ -45,6 +54,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         show: "/admin/categories/show/:id",
                         meta: {
                             canDelete: true,
+                            label: "Danh Mục",
                         },
                     },
                     {
@@ -55,6 +65,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         show: "/admin/products/show/:id",
                         meta: {
                             canDelete: false,
+                            label: "Sản Phẩm",
                         },
                     },
                     {

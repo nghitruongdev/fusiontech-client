@@ -1,6 +1,6 @@
-import Footer from "@components/layout/Footer";
-import Header from "@components/layout/Header";
-import RefineProvider from "@components/layout/providers/RefineProvider";
+import RefineProvider from "@components/providers/RefineProvider";
+import Footer from "@components/store/layout/Footer";
+import Header from "@components/store/layout/Header";
 import dynamic from "next/dynamic";
 export const metadata = {
     title: "FusionTech Online Store",

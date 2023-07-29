@@ -1,4 +1,4 @@
-import Banner from "@components/client/Banner";
+import Banner from "@components/store/front/Banner";
 import ProductList from "@components/store/front/ProductList";
 import { Skeleton } from "@components/ui/Skeleton";
 import { Metadata } from "next";
