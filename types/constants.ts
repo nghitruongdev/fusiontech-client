@@ -87,12 +87,10 @@ export const API = {
       },
       findByFirebaseId: (id: string) =>
         `${name}/search/findByFirebaseId?firebaseId=${id}`,
-      existsByEmail: (email: string) => {
-        ;`${name}/search/existsByEmail?email=${email}`
-      },
-      existsByPhoneNumber: (phone: string) => {
-        ;`${name}/search/existsByPhoneNumber?phone=${phone}`
-      },
+      existsByEmail: (email: string) =>
+        `${name}/search/existsByEmail?email=${email}`,
+      existsByPhoneNumber: (phone: string) =>
+        `${name}/search/existsByPhoneNumber?phone=${phone}`,
     }
   },
   shippingAddresses: () => {
@@ -105,6 +103,10 @@ export const API = {
   },
 }
 
+export const ROLES = {
+  user: 'người dùng',
+  admin: 'quản trị viên',
+}
 type Lang = 'vi' | 'en'
 type ButtonType = Action | 'refresh' | 'delete' | 'save'
 export const ButtonText = (key: ButtonType, lang: Lang = 'vi') => {

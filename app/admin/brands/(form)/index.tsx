@@ -190,7 +190,7 @@ Form.Body = function Body() {
 }
 
 Form.Image = function Image() {
-  const { setValue } = Form.useContext()
+  const { brand, setValue } = Form.useContext()
   const onFilesChange: UploadProviderProps['onFilesChange'] = useCallback(
     (files: File[]) => setValue('file', files[0]),
     [setValue],
@@ -203,12 +203,14 @@ Form.Image = function Image() {
     })
   }, [setValue])
   onRemove.isCallback = true
+
   return (
     <FormControl w="full" h="full">
       <ImageUpload
         onFilesChange={onFilesChange}
         onRemoveUrl={onRemove}
         isMulti={false}
+        {...(brand?.image && { initialUrls: [brand.image] })}
       />
     </FormControl>
   )

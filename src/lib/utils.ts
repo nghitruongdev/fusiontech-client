@@ -114,3 +114,14 @@ export function isValidNewOption(
     )
   )
 }
+
+export const getDateFromPast = (pastYear: number) => {
+  // Get the current date
+  const currentDate = new Date()
+
+  // Subtract 18 years from the current date
+  const pastYearDate = new Date(currentDate)
+  pastYearDate.setFullYear(currentDate.getFullYear() - pastYear)
+
+  return pastYearDate
+}

@@ -6,6 +6,7 @@ const type = {
   variants: `images/variants/`,
   categories: `images/categories`,
   brands: `images/brands`,
+  users: `images/users`,
 }
 
 const useUploadImage = ({ resource }: { resource: keyof typeof type }) => {

@@ -1,33 +1,33 @@
-import { User } from "@firebase/auth";
-import { useEffect } from "react";
-import { create } from "zustand";
+import { User } from '@firebase/auth'
+import { produce } from 'immer'
+import { useEffect } from 'react'
+import { create } from 'zustand'
+import { IdTokenResult } from 'firebase/auth'
 
 type State = {
-    user: User | null;
-    roles: string[];
-};
+  user: User | null
+  claims?:
+    | Partial<IdTokenResult['claims']> & {
+        id?: number
+        roles?: string[]
+      }
+}
 
 const store = create<State>()(() => ({
-    user: null,
-    roles: [],
-}));
+  user: null,
+}))
 
 export const useAuthUser = () => {
-    const user = store((state) => state.user);
+  const user = store((state) => state.user)
+  const claims = store((state) => state.claims)
 
-    useEffect(() => {
-        console.log("use");
-        if (user) {
-            user.getIdTokenResult().then((token) =>
-                console.log("token.claims", token.claims),
-            );
-        }
-    }, [user]);
+  return {
+    user,
+    claims,
+  }
+}
+export const setAuthUser = (user: State['user']) => {
+  store.setState(() => ({ user }))
+}
 
-    return {
-        user,
-    };
-};
-export const setAuthUser = (user: State["user"]) => {
-    store.setState(() => ({ user }));
-};
+export { store as authStore }

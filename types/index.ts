@@ -11,8 +11,8 @@ export type ResourceName =
   | 'specifications'
 
 export type FirebaseImage = {
-  storagePath: string
-  name: string
+  storagePath?: string
+  name?: string
   url: string
 }
 
@@ -177,10 +177,20 @@ export interface IUser {
   email?: string
   phoneNumber?: string
   photoUrl?: string
+  image?: FirebaseImage | null
   dateOfBirth?: Date
-  gender?: boolean
+  gender?: 'MALE' | 'FEMALE' | 'OTHER'
+  roles?: string[]
   defaultAddress?: ShippingAddress
-  _links: _links
+  isDisabled?: boolean
+  isStaff?: boolean
+  _links?: _links
+}
+
+export interface IUserForm extends IUser {
+  formGender?: Option<string>
+  formRoles?: Option<string>
+  imageFile?: File | null
 }
 
 export interface ShippingAddress {

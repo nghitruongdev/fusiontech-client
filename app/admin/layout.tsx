@@ -121,6 +121,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               label: 'Chi tiết kho hàng',
             },
           },
+          {
+            name: 'users',
+            list: '/admin/users',
+            create: '/admin/users/create',
+            edit: '/admin/users/edit/:id',
+            show: '/admin/users/show/:id',
+            meta: {
+              canDelete: false,
+              label: 'Người dùng',
+            },
+          },
         ]}
       >
         <ThemedLayoutV2>{children}</ThemedLayoutV2>;

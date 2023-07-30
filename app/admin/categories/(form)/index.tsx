@@ -201,7 +201,7 @@ Form.Body = function Body() {
 }
 
 Form.Image = function Image() {
-  const { setValue } = Form.useContext()
+  const { category, setValue } = Form.useContext()
 
   const onFilesChange: UploadProviderProps['onFilesChange'] = useCallback(
     (files: File[]) => setValue('file', files[0]),
@@ -221,6 +221,7 @@ Form.Image = function Image() {
         onFilesChange={onFilesChange}
         onRemoveUrl={onRemove}
         isMulti={false}
+        {...(category?.image && { initialUrls: [category.image] })}
       />
     </FormControl>
   )

@@ -545,7 +545,6 @@ VariantForm.Images = function Images() {
       setValue(`images.${index}`, null, {
         shouldDirty: true,
       })
-      console.warn('have not implement delete image url')
     },
     [setValue],
   )
