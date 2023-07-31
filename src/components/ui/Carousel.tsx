@@ -13,6 +13,13 @@ import {
 import { BiLeftArrowAlt, BiRightArrowAlt } from "react-icons/bi";
 // And react-slick as our Carousel Lib
 import Slider from "react-slick";
+import {
+    banner1,
+    banner2,
+    banner3,
+    banner4,
+    banner5,
+} from "public/assets/images";
 
 // Settings for the slider
 const settings = {
@@ -48,24 +55,34 @@ export default function CaptionCarousel() {
         {
             title: "Design Projects 1",
             text: "The project board is an exclusive resource for contract work. It's perfect for freelancers, agencies, and moonlighters.",
-            image: "https://images.unsplash.com/photo-1516796181074-bf453fbfa3e6?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1yZWxhdGVkfDV8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60",
+            image: banner1.src,
         },
         {
             title: "Design Projects 2",
             text: "The project board is an exclusive resource for contract work. It's perfect for freelancers, agencies, and moonlighters.",
-            image: "https://images.unsplash.com/photo-1438183972690-6d4658e3290e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=2274&q=80",
+            image: banner2.src,
         },
         {
             title: "Design Projects 3",
             text: "The project board is an exclusive resource for contract work. It's perfect for freelancers, agencies, and moonlighters.",
-            image: "https://images.unsplash.com/photo-1507237998874-b4d52d1dd655?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1yZWxhdGVkfDR8fHxlbnwwfHx8fA%3D%3D&auto=format&fit=crop&w=900&q=60",
+            image: banner3.src,
+        },
+        {
+            title: "Design Projects 3",
+            text: "The project board is an exclusive resource for contract work. It's perfect for freelancers, agencies, and moonlighters.",
+            image: banner4.src,
+        },
+        {
+            title: "Design Projects 3",
+            text: "The project board is an exclusive resource for contract work. It's perfect for freelancers, agencies, and moonlighters.",
+            image: banner5.src,
         },
     ];
 
     return (
         <Box
             position={"relative"}
-            // height={"600px"}
+            // height={"310px"}
             height="full"
             width={"full"}
             overflow={"hidden"}
@@ -73,6 +90,7 @@ export default function CaptionCarousel() {
             color="whiteAlpha.800"
             role="group"
             cursor="pointer"
+            className="rounded-lg"
         >
             {/* CSS files for react-slick */}
             <link
@@ -107,10 +125,10 @@ export default function CaptionCarousel() {
                 variant="ghost"
                 position="absolute"
                 color="whiteAlpha.500"
-                display="none"
-                _groupHover={{
-                    display: "block",
-                }}
+                // display="none"
+                // _groupHover={{
+                //     display: "block",
+                // }}
                 _hover={hoverIconColor}
                 right={side}
                 top={top}
@@ -125,15 +143,17 @@ export default function CaptionCarousel() {
                 {cards.map((card, index) => (
                     <Box
                         key={index}
-                        height={"6xl"}
+                        height={"410px"} // Thay đổi chiều cao của Box ở đây
+                        width={"100%"} // Thay đổi chiều rộng của Box ở đây
                         position="relative"
+                        overflow="hidden"
                         backgroundPosition="center"
                         backgroundRepeat="no-repeat"
-                        backgroundSize="cover"
+                        backgroundSize="100% 100%"
                         backgroundImage={`url(${card.image})`}
                     >
                         {/* This is the block you need to change, to customize the caption */}
-                        <Container
+                        {/* <Container
                             size="container.lg"
                             height="600px"
                             position="relative"
@@ -162,7 +182,7 @@ export default function CaptionCarousel() {
                                     {card.text}
                                 </Text>
                             </Stack>
-                        </Container>
+                        </Container> */}
                     </Box>
                 ))}
             </Slider>

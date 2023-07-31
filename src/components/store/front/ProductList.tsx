@@ -1,3 +1,4 @@
+'use client'
 import { IProduct } from 'types'
 import Image from 'next/image'
 import { BsStarFill } from 'react-icons/bs'
@@ -10,21 +11,125 @@ import {
   ProductCardProvider,
 } from '@components/store/front/client'
 import NextLinkContainer from '@components/ui/NextLinkContainer'
+import { useList } from '@refinedev/core'
+import Slider from 'react-slick'
+import SectionTitle from '@components/ui/SectionTitle'
+import { useRef } from 'react'
+import SliderButton from '@components/ui/SliderButton'
+import { loginImg } from 'public/assets/images'
+import { IoSearchOutline } from 'react-icons/io5'
+import { Button } from '@components/ui/shadcn/button'
 
-const ProductList = async () => {
-  const products = await getProductsWithDetails()
+// const ProductList = async () => {
+//     const products = await getProductsWithDetails();
+//     console.log("product", products.data);
+//     console.log("proudct page", products.page);
+//     return (
+//         <>
+//             <div className="flex justify-between">
+//                 <h3>Sản phẩm nổi bật</h3>
+//                 <p>Xem tất cả</p>
+//             </div>
+//             <div aria-label="product-list" className="flex overflow-scroll">
+//                 {Object.values(products.data).map((item: IProduct) => (
+//                     <ProductCardProvider key={item.id} product={item}>
+//                         <Product item={item} />
+//                     </ProductCardProvider>
+//                 ))}
+//             </div>
+//         </>
+//     );
+// };
+
+const ProductList = () => {
+  const { data, status } = useList<IProduct>({
+    resource: 'products',
+  })
+  console.log('ProductList', data)
+  const settings = {
+    infinite: true,
+    speed: 500,
+    slidesToShow: 5,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    cssEase: 'linear',
+    swipeToSlide: true,
+    arrows: false,
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 6,
+          slidesToScroll: 3,
+        },
+      },
+      {
+        breakpoint: 768,
+        settings: {
+          slidesToShow: 4,
+          slidesToScroll: 4,
+        },
+      },
+      {
+        breakpoint: 640,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 3,
+        },
+      },
+    ],
+  }
+  const sliderRef = useRef<Slider | null>(null)
+  const backgroundImageURL =
+    'https://videohive.img.customer.envatousercontent.com/files/a520307e-8e7a-4b9c-9cb5-60cb91405691/inline_image_preview.jpg?auto=compress%2Cformat&fit=crop&crop=top&max-h=8000&max-w=590&s=8faba409bcd263eeb170d860015ee274'
   return (
     <>
-      <div className="flex justify-between">
-        <h3>Sản phẩm nổi bật</h3>
-        <p>Xem tất cả</p>
-      </div>
-      <div aria-label="product-list" className="flex overflow-x-auto">
-        {Object.values(products.data).map((item: IProduct) => (
-          <ProductCardProvider key={item.id} product={item}>
-            <Product item={item} />
-          </ProductCardProvider>
-        ))}
+      {/* bg-[#ffc42133]? */}
+      <SectionTitle title={'Sản phẩm nổi bật'} className="mt-2" />
+      <div
+        className="grid grid-cols-6 rounded-lg"
+        style={{
+          backgroundImage: `url(${backgroundImageURL})`,
+          backgroundSize: 'cover',
+          backgroundPosition: '100% 100%',
+        }}
+      >
+        <div className="col-span-1">
+          <div className="flex flex-col items-center justify-center h-full ">
+            <Image src={loginImg} width={250} height={10} alt={'/'} />
+            <Button className=" bg-yellow hover:bg-[#f6b911] text-white text-lg  ">
+              Xem tất cả
+            </Button>
+          </div>
+        </div>
+        <div className="col-span-5">
+          <div className="relative p-1 my-2 md:my-4 text-center">
+            {status === 'loading' ? (
+              <div>Loading...</div>
+            ) : status === 'error' ? (
+              <div>Error occurred while fetching data</div>
+            ) : data && data.data && Array.isArray(data.data) ? (
+              <>
+                <SliderButton sliderRef={sliderRef} />
+                <Slider
+                  {...settings}
+                  ref={(slider) => (sliderRef.current = slider)}
+                >
+                  {data.data.map((products: IProduct) => (
+                    <ProductCardProvider key={products.id} product={products}>
+                      <div className="bg-white mx-2 h-80 rounded-lg">
+                        <Product item={products} />
+                      </div>
+                    </ProductCardProvider>
+                  ))}
+                </Slider>
+              </>
+            ) : (
+              <div>No data available</div>
+            )}
+          </div>
+        </div>
       </div>
     </>
   )
@@ -58,10 +163,10 @@ Product.Image = ({ images }: { images: IProduct['images'] }) => {
     <div
       className="
         w-full h-auto overflow-y-hidden
-        ease-in-out duration-300 scale-90 hover:scale-95"
+        ease-in-out duration-300 scale-90 hover:scale-95 max-h-[250px]"
     >
       <Image
-        src={images?.[0]?.url ?? ''}
+        src={thumbnail}
         alt="Product image"
         // fill
         width={200}
@@ -69,7 +174,7 @@ Product.Image = ({ images }: { images: IProduct['images'] }) => {
         loading="lazy"
         placeholder="blur"
         blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMz4irBwAEGQGuUtJ+VQAAAABJRU5ErkJggg=="
-        className="w-full rounded-md max-w-[200px] mx-auto object-contain"
+        className="w-full  max-h-[200px] rounded-md max-w-[200px] mx-auto object-contain"
       />
       <Product.FavoriteButton />
     </div>
