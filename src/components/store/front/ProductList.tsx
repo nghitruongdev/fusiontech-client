@@ -9,6 +9,7 @@ import { formatPrice } from '../../../lib/utils'
 import {
   FavoriteButton,
   ProductCardProvider,
+  useProductCardContext,
 } from '@components/store/front/client'
 import NextLinkContainer from '@components/ui/NextLinkContainer'
 import { useList } from '@refinedev/core'
@@ -45,7 +46,10 @@ const ProductList = () => {
   const { data, status } = useList<IProduct>({
     resource: 'products',
   })
-  console.log('ProductList', data)
+
+  console.log('Data:', data)
+  console.log('Status:', status)
+
   const settings = {
     infinite: true,
     speed: 500,
@@ -55,7 +59,7 @@ const ProductList = () => {
     autoplaySpeed: 3000,
     cssEase: 'linear',
     swipeToSlide: true,
-    arrows: false,
+    // arrows: false,
     responsive: [
       {
         breakpoint: 1024,
@@ -86,7 +90,7 @@ const ProductList = () => {
   return (
     <>
       {/* bg-[#ffc42133]? */}
-      <SectionTitle title={'Sản phẩm nổi bật'} className="mt-2" />
+      {/* <SectionTitle title={'Sản phẩm nổi bật'} className="mt-2" /> */}
       <div
         className="grid grid-cols-6 rounded-lg"
         style={{
@@ -163,28 +167,28 @@ Product.Image = ({ images }: { images: IProduct['images'] }) => {
     <div
       className="
         w-full h-auto overflow-y-hidden
-        ease-in-out duration-300 scale-90 hover:scale-95 max-h-[250px]"
+        ease-in-out duration-300 scale-90 hover:scale-95 "
     >
       <Image
-        src={thumbnail}
+        src={images?.[0]?.url ?? ''}
         alt="Product image"
         // fill
         width={200}
-        height={200}
+        height={10}
         loading="lazy"
         placeholder="blur"
         blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMz4irBwAEGQGuUtJ+VQAAAABJRU5ErkJggg=="
-        className="w-full  max-h-[200px] rounded-md max-w-[200px] mx-auto object-contain"
+        className="w-full  aspect-square rounded-md max-w-[200px] mx-auto object-cover"
       />
       <Product.FavoriteButton />
     </div>
   )
 }
 Product.Brand = () => {
+  const { product } = useProductCardContext()
+  console.log('data producs', product)
   return (
-    <p className="py-2 text-sm font-bold text-muted-foreground leading-tight">
-      ASUS
-    </p>
+    <p className="py-2 text-sm font-bold text-muted-foreground leading-tight"></p>
   )
 }
 Product.Name = ({ name }: { name: IProduct['name'] }) => {

@@ -95,7 +95,6 @@ Form.Provider = function Provider({
         const image = await handleImage()
         const specifications = handleSpecifications()
 
-        throw new Error('not handle enough')
         const result = await onFinish({
           ...value,
           ...(image && { image }),

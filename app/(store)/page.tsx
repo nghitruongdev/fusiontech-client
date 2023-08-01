@@ -33,15 +33,15 @@ const ProductLoading = () => {
 const HomePage = async () => {
   return (
     <>
-      <main className="mx-28">
+      <main className="mx-2 bg-white">
         <div className="max-w-contentContainer mx-auto ">
           <Suspense>
             <Banner />
           </Suspense>
           <Suspense fallback={<ProductLoading />}>
             <div className="mx-20">
-              <Benefits />
               <ProductList />
+              <Benefits />
               <Category />
               <Newest />
               <BannerSale />

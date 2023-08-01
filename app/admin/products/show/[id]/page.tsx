@@ -152,8 +152,8 @@ const ProductInfo = () => {
                 <ProductInfo.Id />
                 <ProductInfo.Name />
               </Flex>
-              <ProductInfo.Features />
               <ProductInfo.Summary />
+              <ProductInfo.Features />
             </Box>
           </GridItem>
           <GridItem rowSpan={2} colSpan={6}>
@@ -319,7 +319,7 @@ ProductInfo.Summary = () => {
           </Text>
           <Textarea
             fontWeight="medium"
-            h="269px"
+            h="150px"
             value={record?.summary ?? ''}
           />
         </div>

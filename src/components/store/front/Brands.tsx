@@ -92,104 +92,103 @@
 // };
 
 // export default Brands;
-"use client";
-import React, { useRef } from "react";
-import Image from "next/image";
-import Slider from "react-slick";
+'use client'
+import React, { useRef } from 'react'
+import Image from 'next/image'
+import Slider from 'react-slick'
 
-import SectionTitle from "@components/ui/SectionTitle";
-import { useList } from "@refinedev/core";
-import { IBrand } from "types";
-import SliderButton from "@components/ui/SliderButton";
-import { loginImg } from "public/assets/images";
-import { getAllBrands } from "@/providers/server-data-provider/data/brands";
+import SectionTitle from '@components/ui/SectionTitle'
+import { useList } from '@refinedev/core'
+import { IBrand } from 'types'
+import SliderButton from '@components/ui/SliderButton'
+import { loginImg } from 'public/assets/images'
+import { getAllBrands } from '@/providers/server-data-provider/data/brands'
 
 const Brands = () => {
-    const { data, status } = useList<IBrand>({
-        resource: "brands",
-    });
-    console.log("brands", data);
+  const { data, status } = useList<IBrand>({
+    resource: 'brands',
+  })
+  console.log('brands', data)
 
-    const settings = {
-        infinite: true,
-        speed: 500,
-        slidesToShow: 6,
-        slidesToScroll: 1,
-        autoplay: true,
-        autoplaySpeed: 3000,
-        cssEase: "linear",
-        swipeToSlide: true,
-        // arrows: false,
-        responsive: [
-            {
-                breakpoint: 1024,
-                settings: {
-                    slidesToShow: 6,
-                    slidesToScroll: 3,
-                },
-            },
-            {
-                breakpoint: 768,
-                settings: {
-                    slidesToShow: 4,
-                    slidesToScroll: 4,
-                },
-            },
-            {
-                breakpoint: 640,
-                settings: {
-                    slidesToShow: 3,
-                    slidesToScroll: 3,
-                },
-            },
-        ],
-    };
+  const settings = {
+    infinite: true,
+    speed: 500,
+    slidesToShow: 6,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3000,
+    cssEase: 'linear',
+    swipeToSlide: true,
+    // arrows: false,
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 6,
+          slidesToScroll: 3,
+        },
+      },
+      {
+        breakpoint: 768,
+        settings: {
+          slidesToShow: 4,
+          slidesToScroll: 4,
+        },
+      },
+      {
+        breakpoint: 640,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 3,
+        },
+      },
+    ],
+  }
 
-    const BrandItem: React.FC<{ brand: IBrand }> = ({ brand }) => {
-        return (
-            <div className="relative flex items-center p-3 lg:p-2 shadow-md ">
-                {/* <Image
-                    src={loginImg}
-                    width={300}
-                    height={175}
-                    alt={brand.name}
-                /> */}
-                <div className="p-4">{brand.name}</div>
-            </div>
-        );
-    };
-
-    const sliderRef = useRef<Slider | null>(null);
-
+  const BrandItem: React.FC<{ brand: IBrand }> = ({ brand }) => {
     return (
-        <>
-            {/* <SectionTitle
+      <div className="relative flex items-center p-3 lg:p-2 shadow-md ">
+        <Image
+          src={brand.image?.url ?? ''}
+          width={300}
+          height={175}
+          alt={brand.name}
+        />
+      </div>
+    )
+  }
+
+  const sliderRef = useRef<Slider | null>(null)
+
+  return (
+    <>
+      {/* <SectionTitle
                 title={"Thương hiệu"}
                 className="flex flex-col items-center"
             /> */}
-            <div className="relative p-1 my-8 md:my-8 text-center">
-                {status === "loading" ? (
-                    <div>Loading...</div>
-                ) : status === "error" ? (
-                    <div>Error occurred while fetching data</div>
-                ) : data && data.data && Array.isArray(data.data) ? (
-                    <>
-                        <SliderButton sliderRef={sliderRef} />
-                        <Slider
-                            {...settings}
-                            ref={(slider) => (sliderRef.current = slider)}
-                        >
-                            {data.data.map((brand: IBrand) => (
-                                <BrandItem key={brand.id} brand={brand} />
-                            ))}
-                        </Slider>
-                    </>
-                ) : (
-                    <div>No data available</div>
-                )}
-            </div>
-        </>
-    );
-};
+      <div className="relative p-1 my-8 md:my-8 text-center">
+        {status === 'loading' ? (
+          <div>Loading...</div>
+        ) : status === 'error' ? (
+          <div>Error occurred while fetching data</div>
+        ) : data && data.data && Array.isArray(data.data) ? (
+          <>
+            <SliderButton sliderRef={sliderRef} />
+            <Slider
+              {...settings}
+              ref={(slider) => (sliderRef.current = slider)}
+            >
+              {data.data.map((brand: IBrand) => (
+                <BrandItem key={brand.id} brand={brand} />
+              ))}
+            </Slider>
+          </>
+        ) : (
+          <div>No data available</div>
+        )}
+      </div>
+    </>
+  )
+}
 
-export default Brands;
+export default Brands
