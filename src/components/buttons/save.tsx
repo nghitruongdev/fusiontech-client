@@ -13,30 +13,31 @@ import { ButtonText } from 'types/constants'
  * @see {@link https://refine.dev/docs/api-reference/chakra-ui/components/buttons/save-button} for more details.
  */
 export const SaveButton: React.FC<SaveButtonProps> = ({
-  hideText = false,
-  svgIconProps,
-  children,
-  ...rest
+    hideText = false,
+    svgIconProps,
+    children,
+    ...rest
 }) => {
-  const translate = useTranslate()
+    const translate = useTranslate()
 
-  return hideText ? (
-    <IconButton
-      colorScheme="green"
-      aria-label={translate('buttons.save', 'Save')}
-      className={RefineButtonClassNames.SaveButton}
-      {...rest}
-    >
-      <IconDeviceFloppy size={20} {...svgIconProps} />
-    </IconButton>
-  ) : (
-    <Button
-      colorScheme="green"
-      leftIcon={<IconDeviceFloppy size={20} {...svgIconProps} />}
-      className={RefineButtonClassNames.SaveButton}
-      {...rest}
-    >
-      {children ?? translate('buttons.save', ButtonText('save'))}
-    </Button>
-  )
+    return hideText ? (
+        <IconButton
+            colorScheme="green"
+            aria-label={translate('buttons.save', ButtonText('save'))}
+            className={RefineButtonClassNames.SaveButton}
+            {...rest}
+        >
+            <IconDeviceFloppy size={20} {...svgIconProps} />
+        </IconButton>
+    ) : (
+        <Button
+            colorScheme="green"
+            leftIcon={<IconDeviceFloppy size={20} {...svgIconProps} />}
+            className={RefineButtonClassNames.SaveButton}
+            {...rest}
+            isDisabled={rest?.disabled}
+        >
+            {children ?? translate('buttons.save', ButtonText('save'))}
+        </Button>
+    )
 }

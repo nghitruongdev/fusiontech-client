@@ -21,4 +21,16 @@ export const ERRORS = {
       valid: 'Độ tuổi hợp lệ từ 18 - 60.',
     },
   },
+  brands: {
+    name: {
+      required: 'Yêu cầu nhập tên thương hiệu',
+      exists: 'Thương hiệu này đã tồn tại.',
+    },
+  },
+  categories: {
+    name: {
+      required: 'Yêu cầu nhập tên danh mục',
+      exists: 'Tên này đã tồn tại',
+    },
+  },
 }

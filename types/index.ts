@@ -11,15 +11,23 @@ export type ResourceName =
   | 'specifications'
 
 export type FirebaseImage = {
+    /**
+     * @deprecated
+     */
   storagePath?: string
+  /**
+   * @deprecated
+   */
   name?: string
-  url: string
+  url?: string
 }
 
-export type ImageUrl = {
-  name?: string
+export type UploadUrl = {
+  name: string | undefined
   url: string
+  file?:File | null
 }
+
 export type IProduct = {
   id: string | undefined
   name: string
@@ -86,6 +94,7 @@ export type ISpecification = {
   name: string
   value: string
 }
+
 export type IVariant = {
   id: number
   sku: string

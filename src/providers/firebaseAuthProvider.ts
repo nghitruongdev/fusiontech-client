@@ -26,6 +26,8 @@ import { getServerSession } from '@/lib/server'
 import { firebaseApp } from '@/lib/firebase'
 import { API_URL } from 'types/constants'
 import { springDataProvider } from './rest-data-provider'
+import { AppError } from 'types/error'
+import { AxiosError } from 'axios'
 
 const auth = getAuth(firebaseApp)
 const googleProvider = new GoogleAuthProvider()
@@ -89,6 +91,7 @@ const handleGooglePostLogin = (userCred: UserCredential) => {
 }
 
 const check = async (): Promise<CheckResponse> => {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const ssr = useSsr()
   console.log('ssr', ssr)
 
@@ -122,8 +125,9 @@ const logout =
     }
   }
 
-const onError = async (error: HttpError): Promise<OnErrorResponse> => {
-  console.debug('Handling error inside on error')
+const onError = async (error: AppError): Promise<OnErrorResponse> => {
+  console.count('Handling error inside on error')
+  console.log('error', error)
   if (error && error.statusCode === 401) {
     return {
       error: new Error('Unauthorized'),
@@ -133,9 +137,12 @@ const onError = async (error: HttpError): Promise<OnErrorResponse> => {
   }
   // console.error(error);
   return {
-    error: error,
+    error: {
+      name: 'Lỗi',
+      message: 'Không thể kết nối mạng',
+      statusCode: 500,
+    },
   }
-  // return { error };
 }
 
 const register = async ({ providerName, ...formValues }: IRegister) => {
@@ -238,7 +245,7 @@ const updatePassword = async (
   throw new Error('Operation is not supported')
 }
 // getPermissions: async (params: any) => ({} as string[]),
-// getIdentity: async (params?: any) => ({}),
+const getIdentity = async (params?: any) => {}
 
 const firebaseAuth = {
   auth: auth,
@@ -249,6 +256,7 @@ const firebaseAuth = {
   forgotPassword,
   register,
   updatePassword,
+  getIdentity,
   authProvider: (router?: AppRouterInstance): AuthBindings => ({
     login,
     logout: logout(router),
@@ -257,6 +265,7 @@ const firebaseAuth = {
     register,
     forgotPassword,
     updatePassword,
+    // getIdentity,
   }),
 }
 export { firebaseAuth }

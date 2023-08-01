@@ -1,7 +1,6 @@
 const { i18n } = require("./next-i18next.config");
 
 module.exports = {
-    i18n,
     experimental: {
         newNextLinkBehavior: true,
     },
@@ -14,5 +13,6 @@ module.exports = {
             "i.pravatar.cc",
             "firebasestorage.googleapis.com",
         ],
+        formats: ['image/webp'],
     },
 };

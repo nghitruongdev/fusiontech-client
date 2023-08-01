@@ -12,6 +12,7 @@ import {
   InputLeftElement,
   InputRightElement,
   Spinner,
+  useConst,
 } from '@chakra-ui/react'
 import { useForm } from '@refinedev/react-hook-form'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -20,6 +21,8 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -36,7 +39,7 @@ import { PropsWithChildren } from 'react'
 import { Controller, UseFieldArrayReturn, useFieldArray } from 'react-hook-form'
 import { Inbox, MinusCircle } from 'lucide-react'
 import { API, API_URL } from 'types/constants'
-import useListOption from '@/hooks/useListOption'
+import useListOption, { ListOptionProps } from '@/hooks/useListOption'
 import { useDebounce } from 'usehooks-ts'
 import { waitPromise } from '@/lib/promise'
 import useCancellable from '@/hooks/useCancellable'
@@ -50,10 +53,11 @@ import { produce } from 'immer'
 import ImageUpload, { UploadProviderProps } from '@components/image-upload'
 import useUploadImage from '@/hooks/useUploadImage'
 import { Create, Edit } from '@components/crud'
-
+import CurrencyInput from 'react-currency-input-field'
+import { ChakraCurrencyInput } from '@components/ui/ChakraCurrencyInput'
 const productResource = API.products()
 const variantResource = API.variants()
-
+const ENABLE_FETCHED = true
 type FormProps = {
   action: 'create' | 'edit'
 }
@@ -117,7 +121,6 @@ VariantForm.Provider = function Provider({
   ...props
 }: PropsWithChildren<FormProps>) {
   const searchParams = useSearchParams()
-  const paramProductId = searchParams.get('productId')
   const router = useRouter()
   const { uploadImages, removeImages } = useUploadImage({
     resource: 'variants',
@@ -144,21 +147,28 @@ VariantForm.Provider = function Provider({
     watch,
     formState: { dirtyFields },
     saveButtonProps: saveProps,
-    refineCore: { onFinish, queryResult },
+    refineCore: {
+      onFinish,
+      queryResult: { data: { data: variant } = { data: undefined } } = {},
+    },
   } = formMethods
   const imagesField = useFieldArray({
     control,
     name: 'images',
   })
-  const variant = queryResult?.data?.data
-  const productId =
-    variant?.product?.id ?? paramProductId ?? watch('product')?.value.id
+
+  const paramProductId = useConst(searchParams.get('productId'))
+  const watchId = watch(`product`)?.value.id
+  const productId = useMemo(
+    () => variant?.product?.id ?? paramProductId ?? watchId,
+    [variant?.product?.id, paramProductId, watchId],
+  )
 
   const productResponse = useOne<IProduct>({
     resource: productResource.resource,
     id: +productId,
     queryOptions: {
-      enabled: !!productId,
+      enabled: !!productId && ENABLE_FETCHED,
     },
     meta: {
       query: {
@@ -166,6 +176,10 @@ VariantForm.Provider = function Provider({
       },
     },
   })
+
+  useEffect(() => {
+    console.count(`productId triggered changed ${productId}`)
+  }, [productId])
 
   //done: check if sku is not exists
   //TODO: convert images to images attribute
@@ -308,18 +322,23 @@ VariantForm.Product = function Product() {
   } = useFormProvider()
 
   const inputDisabled = !!paramProductId || !!id
-
+  const toOption: ListOptionProps<IProduct>['toOption'] = useCallback(
+    (item) => ({ label: item.name, value: item }),
+    [],
+  )
+  toOption.isCallback = true
   const { options } = useListOption<IProduct>({
-    toOption: (item) => ({ label: item.name, value: item }),
+    toOption,
     resource: productResource.resource,
     pagination: {
       mode: 'off',
     },
     queryOptions: {
-      enabled: !inputDisabled,
+      enabled: !inputDisabled && ENABLE_FETCHED,
     },
   })
   useEffect(() => {
+    console.count('use effect product ran')
     if (product) {
       resetField('product', {
         defaultValue: {
@@ -330,7 +349,7 @@ VariantForm.Product = function Product() {
     }
     if (paramProductId) {
     }
-  }, [product, options])
+  }, [product, options, paramProductId, resetField])
   return (
     <>
       <FormControl isInvalid={!!errors.product}>
@@ -423,13 +442,13 @@ VariantForm.SKU = function SKU() {
     return message ?? true
   }
 
-  useEffect(() => {
-    if (!debounceSKU) {
-      setIsFieldValidating(false)
-      return
-    }
-    checkSkuDB(debounceSKU)
-  }, [debounceSKU])
+  //   useEffect(() => {
+  //     if (!debounceSKU) {
+  //       setIsFieldValidating(false)
+  //       return
+  //     }
+  //     checkSkuDB(debounceSKU)
+  //   }, [debounceSKU])
   return (
     <FormControl mb="3" isInvalid={!!(errors as any)?.sku}>
       <FormLabel>Mã SKU</FormLabel>
@@ -495,10 +514,13 @@ VariantForm.SKU = function SKU() {
 
 VariantForm.Price = function Price() {
   const {
+    action,
     formState: { errors },
     register,
+    setValue,
+    watch,
+    variant,
   } = useFormProvider()
-
   return (
     <FormControl mb="3" isInvalid={!!(errors as any)?.price}>
       <FormLabel>Giá tiền</FormLabel>
@@ -510,17 +532,18 @@ VariantForm.Price = function Price() {
         >
           $
         </InputLeftElement>
-
-        <Input
-          type="number"
-          {...register('price', {
-            required: 'This field is required',
+        <ChakraCurrencyInput
+          pl="10"
+          {...register(`price`, {
+            required: 'Yêu cầu nhập giá tiền',
+            validate: (v) => v > 0 || 'Giá tiền không hợp lệ',
             valueAsNumber: true,
-            validate: (v) => v > 0 || 'Giá tiền không được nhỏ hơn 0',
           })}
+          onValueChange={(value) => {
+            if (value) setValue(`price`, +value)
+          }}
         />
       </InputGroup>
-
       <FormErrorMessage>
         {(errors as any)?.price?.message as string}
       </FormErrorMessage>
@@ -529,7 +552,7 @@ VariantForm.Price = function Price() {
 }
 
 VariantForm.Images = function Images() {
-  const { setValue, variant } = useFormProvider()
+  const { setValue, variant: { images } = {} } = useFormProvider()
 
   const onFilesChange: UploadProviderProps['onFilesChange'] = useCallback(
     (files: File[]) => {
@@ -550,14 +573,14 @@ VariantForm.Images = function Images() {
   )
   onUrlRemove.isCallback = true
 
-  const images = variant?.images
   useEffect(() => {
+    console.count('useEffect image ran')
     if (!images) return
     setValue(`images`, images)
-  }, [variant?.images])
+  }, [images, setValue])
   return (
     <ImageUpload
-      initialUrls={variant?.images}
+      initialUrls={images}
       onFilesChange={onFilesChange}
       onRemoveUrl={onUrlRemove}
     />
@@ -584,34 +607,39 @@ VariantForm.Specification = function Specification({}) {
   })
 
   const isDisabled = false
-  const [nameOptions, setNameOptions] = useState<Option<string>[]>([])
   const { data: { data: namesData } = {} } = useCustom<string[]>({
     url: findDistinctNames,
     method: 'get',
     queryOptions: {
-      enabled: !isDisabled,
+      enabled: !isDisabled && ENABLE_FETCHED,
     },
   })
-  useEffect(() => {
-    if (!namesData) return
-    setNameOptions(toArrayOptionString(namesData))
+  const nameOptions = useMemo(() => {
+    console.count('usememo nameoptions ran')
+    return (namesData && toArrayOptionString(namesData)) ?? []
   }, [namesData])
 
-  const onAppend = (value: string) => {
-    setValue(
-      `specificationGroup`,
-      produce(getValues(`specificationGroup`) ?? [], (draft) => {
-        draft.push({
+  const onAppend = useCallback(
+    (value: string, shouldFocus: boolean = true) => {
+      setValue(
+        `specificationGroup`,
+        produce(getValues(`specificationGroup`) ?? [], (draft) => {
+          draft.push({
+            label: value,
+            value: value,
+          })
+        }),
+      )
+      append(
+        {
           label: value,
-          value: value,
-        })
-      }),
-    )
-    append({
-      label: value,
-      options: [],
-    })
-  }
+          options: [],
+        },
+        { shouldFocus },
+      )
+    },
+    [append, getValues, setValue],
+  )
   const onRemove = (index: number) => {
     console.log('index', index)
     setValue(
@@ -628,12 +656,13 @@ VariantForm.Specification = function Specification({}) {
     newValue: MultiValue<Option<string>>,
     meta: ActionMeta<Option<string>>,
   ) => {
+    console.count('handle change ran')
     const { action, option, removedValue } = meta
     switch (action) {
       case 'select-option':
       case 'create-option':
-        console.log('option', option)
-        onAppend((option as Option<string>).label.trim())
+        const label = (option as Option<string>).label.trim()
+        onAppend(label)
         break
       case 'pop-value':
       case 'remove-value':
@@ -643,34 +672,37 @@ VariantForm.Specification = function Specification({}) {
         onRemove(index)
     }
   }
-  const productSpecs = product?.specifications ?? []
+  const productSpecs = useMemo(
+    () => product?.specifications ?? [],
+    [product?.specifications],
+  )
   useEffect(() => {
+    console.count('use layout effect specification product ran')
     if (action === 'edit') return
+    const formSpecs = productSpecs
+      ?.filter((item) => item.values.length > 1)
+      .map((item) => item.name)
+    const reset = () => {
+      console.log('reset ran')
+      resetField(`specificationGroup`, { defaultValue: [] })
+      resetField(`specifications`, { defaultValue: [] })
+      formSpecs.forEach((item) => onAppend(item, false))
+    }
+    reset()
+  }, [productSpecs, action, resetField, onAppend])
 
-    const specifications = productSpecs
-    console.log('useEffect spec ran')
-    const formSpecs = specifications
-      .filter((item) => item.values.length > 1)
-      .flatMap((item) => ({
-        label: item.name,
-        options: [],
-      }))
-    setTimeout(() => {
-      resetField(`specificationGroup`, {
-        defaultValue: toArrayOptionString(formSpecs.map((item) => item.label)),
-      })
-      resetField(`specifications`, {
-        defaultValue: formSpecs,
-      })
-    }, 0)
-  }, [product?.specifications])
+  useEffect(() => {
+    console.count('productSpecs triggered changed')
+  }, [productSpecs])
+  useEffect(() => {
+    console.log('product triggered changed')
+  }, [product])
 
   const variantSpecs = variant?.specifications
   useEffect(() => {
     if (action === 'create' || !variantSpecs) return
-    const specifications = variantSpecs
-    console.log('useEffect spec ran')
-    const formSpecs = specifications
+    console.log('useEffect variant spec ran')
+    const formSpecs = variantSpecs
       .filter((item) =>
         productSpecs.some(
           (spec) => spec.name === item.name && spec.values.length > 1,
@@ -680,6 +712,7 @@ VariantForm.Specification = function Specification({}) {
         label: item.name,
         options: [toObjectOption(item.value, item)],
       }))
+    console.log('formSpecs', formSpecs)
     setTimeout(() => {
       resetField(`specificationGroup`, {
         defaultValue: toArrayOptionString(formSpecs.map((item) => item.label)),
@@ -688,11 +721,20 @@ VariantForm.Specification = function Specification({}) {
         defaultValue: formSpecs,
       })
     }, 0)
-  }, [variant?.specifications])
-
+  }, [productSpecs, variantSpecs, action, resetField])
   return (
     <>
       <div>
+        <button
+          onClick={() => {
+            resetField(`specifications`, {
+              defaultValue: [],
+            })
+          }}
+        >
+          Hello there
+        </button>
+
         <FormLabel>Thông số tuỳ chọn</FormLabel>
         <div className="border rounded-lg p-4">
           <div className="">
@@ -702,12 +744,13 @@ VariantForm.Specification = function Specification({}) {
                   <CreatableSelect
                     {...field}
                     options={nameOptions}
-                    isValidNewOption={(input, values, options) => {
-                      const array = [...values, ...options].map(
-                        (item) => item.label,
-                      )
-                      return isValidNewOption(input, array)
-                    }}
+                    // isValidNewOption={(input, values, options) => {
+                    //   console.log('isValidNew option ran')
+                    //   const array = [...values, ...options].map(
+                    //     (item) => item.label,
+                    //   )
+                    //   return isValidNewOption(input, array)
+                    // }}
                     onChange={handleChange}
                     isDisabled={isDisabled}
                     isClearable={false}
@@ -754,7 +797,7 @@ VariantForm.Specification = function Specification({}) {
           </div>
         </div>
       </div>
-      {!!productSpecs.length && (
+      {!!productSpecs?.length && (
         <div className="">
           <FormLabel>Thông số mặc định</FormLabel>
           {productSpecs.map(({ name, values }) => (
@@ -787,17 +830,23 @@ VariantForm.Specification.Row = function Row({ index, onRemove, name = '' }) {
   } = useFormProvider()
   // const isDisabled = action === "edit";
   const isDisabled = false
-  const [options, setOptions] = useState<Option<ISpecification>[]>([])
-  const { data: { data: specsData } = {} } = useCustom<ISpecification[]>({
+  const { data: { data: specsData = [] } = {} } = useCustom<ISpecification[]>({
     url: findDistinctByName(name ?? ''),
     method: 'get',
     queryOptions: {
-      enabled: !isDisabled,
+      enabled: !isDisabled && ENABLE_FETCHED,
     },
     meta: {
       resource,
     },
   })
+
+  const options = useMemo(() => {
+    // console.count('useMemo spec option ran')
+    return specsData.map(({ id, name, value }) =>
+      toObjectOption(value, { id, name, value }),
+    )
+  }, [specsData])
 
   const append = (input: string) => {
     setValue(`specifications.${index}.options`, [
@@ -810,15 +859,6 @@ VariantForm.Specification.Row = function Row({ index, onRemove, name = '' }) {
       },
     ])
   }
-
-  useEffect(() => {
-    if (!specsData) return
-    setOptions(
-      specsData.map(({ id, name, value }) =>
-        toObjectOption(value, { id, name, value }),
-      ),
-    )
-  }, [specsData])
 
   return (
     <div className="flex border p-4 gap-2">

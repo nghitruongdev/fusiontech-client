@@ -5,37 +5,44 @@ import {
     HStack,
     useColorModeValue,
     BoxProps,
-} from "@chakra-ui/react";
-import React from "react";
+    IconButton,
+    useColorMode,
+    Icon,
+} from '@chakra-ui/react'
+import React from 'react'
 import {
     useGetIdentity,
     useActiveAuthProvider,
     pickNotDeprecated,
-} from "@refinedev/core";
-import { HamburgerMenu } from "./hamburgerMenu";
-import type { RefineThemedLayoutV2HeaderProps } from "@refinedev/chakra-ui";
+} from '@refinedev/core'
+import { HamburgerMenu } from './hamburgerMenu'
+import type { RefineThemedLayoutV2HeaderProps } from '@refinedev/chakra-ui'
+import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
+import { Moon, Sun } from 'lucide-react'
 
 export const ThemedHeaderV2: React.FC<RefineThemedLayoutV2HeaderProps> = ({
     isSticky,
     sticky,
 }) => {
-    const authProvider = useActiveAuthProvider();
-    const { data: user } = useGetIdentity({
-        v3LegacyAuthProviderCompatible: Boolean(authProvider?.isLegacy),
-    });
+    const authProvider = useActiveAuthProvider()
+    //   const { data: user } = useGetIdentity({
+    //     v3LegacyAuthProviderCompatible: Boolean(authProvider?.isLegacy),
+    //   })
 
     const bgColor = useColorModeValue(
-        "refine.header.bg.light",
-        "refine.header.bg.dark",
-    );
+        'refine.header.bg.light',
+        'refine.header.bg.dark',
+    )
 
-    let stickyProps: BoxProps = {};
+    const { colorMode, toggleColorMode } = useColorMode()
+
+    let stickyProps: BoxProps = {}
     if (pickNotDeprecated(sticky, isSticky)) {
         stickyProps = {
-            position: "sticky",
+            position: 'sticky',
             top: 0,
             zIndex: 1,
-        };
+        }
     }
 
     return (
@@ -48,7 +55,7 @@ export const ThemedHeaderV2: React.FC<RefineThemedLayoutV2HeaderProps> = ({
             height="64px"
             bg={bgColor}
             borderBottom="1px"
-            borderBottomColor={useColorModeValue("gray.200", "gray.700")}
+            borderBottomColor={useColorModeValue('gray.200', 'gray.700')}
             {...stickyProps}
         >
             <Box
@@ -58,21 +65,40 @@ export const ThemedHeaderV2: React.FC<RefineThemedLayoutV2HeaderProps> = ({
                 alignItems="center"
             >
                 <HamburgerMenu />
+
                 <HStack>
-                    {user?.name && (
-                        <Text size="sm" fontWeight="bold">
-                            {user.name}
-                        </Text>
-                    )}
-                    {user?.avatar && (
-                        <Avatar
-                            size="sm"
-                            name={user?.name || "Profile Photo"}
-                            src={user.avatar}
-                        />
-                    )}
+                    <IconButton
+                        variant="ghost"
+                        aria-label="Toggle theme"
+                        onClick={toggleColorMode}
+                    >
+                        <Icon as={colorMode === 'light' ? Moon : Sun} w="24px" h="24px" />
+                    </IconButton>
+                    <UserInfo />
                 </HStack>
             </Box>
         </Box>
-    );
-};
+    )
+}
+
+const UserInfo = () => {
+    const { user } = useAuthUser()
+    if (user)
+        return (
+            <>
+                {user.displayName && (
+                    <Text size="sm" fontWeight="bold">
+                        {user.displayName}
+                    </Text>
+                )}
+                {user.photoURL && (
+                    <Avatar
+                        size="sm"
+                        name={user.displayName || 'Profile Photo'}
+                        src={user.photoURL}
+                    />
+                )}
+            </>
+        )
+    return <></>
+}

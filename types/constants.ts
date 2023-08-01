@@ -23,12 +23,16 @@ export const API = {
     const name: ResourceName = 'categories'
     return {
       resource: name,
+      findByName: (value?: string) =>
+        value ? `${name}/search/findByName?name=${value}` : '',
     }
   },
   brands: () => {
     const name: ResourceName = 'brands'
     return {
       resource: name,
+      findByName: (value?: string) =>
+        value ? `${name}/search/findByName?name=${value}` : '',
     }
   },
   variants: () => {
@@ -108,7 +112,7 @@ export const ROLES = {
   admin: 'quản trị viên',
 }
 type Lang = 'vi' | 'en'
-type ButtonType = Action | 'refresh' | 'delete' | 'save'
+type ButtonType = Action | 'refresh' | 'delete' | 'save' | 'logout' | 'cancel'
 export const ButtonText = (key: ButtonType, lang: Lang = 'vi') => {
   switch (lang) {
     case 'vi':
@@ -127,4 +131,6 @@ const ButtonTextVi: { [key in ButtonType]: string } = {
   refresh: 'Tải lại',
   delete: 'Xoá',
   save: 'Lưu',
+  logout: 'Đăng xuất',
+  cancel: 'Quay lại',
 }
