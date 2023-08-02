@@ -17,6 +17,8 @@ import { getOneBrand } from "@/providers/server-data-provider/data/brands";
 import { Suspense } from "react";
 import { ProductOptions } from "./ProductOptions";
 import { getProductVariants } from "@/providers/server-data-provider/data/variants";
+import { Info, InfoIcon } from "lucide-react";
+import { Icon } from "@chakra-ui/react";
 
 type Props = {
     params: {
@@ -108,18 +110,18 @@ Product.Brand = async () => {
     );
 };
 
-Product.StoreInfo = () => {
+Product.StoreInfo = function StoreInfo() {
     return (
         <p className="text-gray-500 text-sm font-medium flex gap-1 items-center ">
             Hàng chính hãng được bán bởi FusionTech
             <span>
-                <BsInfoCircle />
+                <Info className="w-5 h-5" />
             </span>
         </p>
     );
 };
 
-Product.KeyFeatures = () => {
+Product.KeyFeatures = function KeyFeatures() {
     return (
         <div className="">
             <p className="text-lg font-semibold leading-none">

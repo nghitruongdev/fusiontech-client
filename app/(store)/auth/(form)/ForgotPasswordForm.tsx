@@ -1,5 +1,4 @@
-import { loginImg } from "@public/assets/images";
-import Image from "next/image";
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useForm } from "react-hook-form";
 import {
     Button,
@@ -41,10 +40,9 @@ const ForgotPasswordForm = () => {
         <AuthPage
             title={
                 <>
-                    Đặt lại mật khẩu{" "}
-                    {showResult && (
-                        <span className="text-green-600">thành công</span>
-                    )}
+                    {!showResult ?
+                        "Đặt lại mật khẩu" :
+                        <span>Đã gửi email  <span className="text-green-600">thành công</span></span>}
                 </>
             }
         >
@@ -151,5 +149,5 @@ const ForgotPasswordForm = () => {
     );
 };
 
-const SuccessResult = () => {};
+const SuccessResult = () => { };
 export default ForgotPasswordForm;

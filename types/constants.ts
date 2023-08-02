@@ -57,6 +57,8 @@ export const API = {
         full: 'full',
         specifications: 'specifications',
       },
+      getSpecificationsByProduct: (productId: string) =>
+        `${name}/${productId}/specifications`,
       countProductSold: (productId: string) =>
         `${name}/search/countProductSold?productId=${productId}`,
       getFavoriteProductsByUser: (id: number) =>
