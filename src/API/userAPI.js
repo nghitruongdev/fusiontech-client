@@ -10,6 +10,10 @@ const userApi = {
         const url = `http://localhost:8080/api/users/search/existsByPhoneNumber?phone=${phone}`;
         return axiosClient.get(url);
     },
+    updateUser: (id, userData) => {
+        const url =`http://localhost:8080/api/users/updateUser/${id}`;
+        return axiosClient.put(url,userData);
+    }
 };
 
 export default userApi;

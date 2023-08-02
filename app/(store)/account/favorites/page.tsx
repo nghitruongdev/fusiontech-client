@@ -11,8 +11,8 @@ const FavoriteProducts = () => {
     // const [productList, setProductList] = useState<any[]>([]);
     const { deleteFavoriteProduct } = useFavorite();
     const [favorites] = useFavoriteStore((state) => [state.favoriteProducts]);
+    console.log(favorites)
     // dữ liệu mẫu
-    const uid = 1;
     const imageUrl =
         "https://lh3.googleusercontent.com/1S6Ltn5pJWSMWh0U6V4w80Di1Lq8AVQhuDOzVHbQPmxwcztwofrF_3gyuy7Pk8AJ73MVFCYDgm4r1orx6eh88iwVj9nDyXk=w230-rw";
 
@@ -39,7 +39,7 @@ const FavoriteProducts = () => {
                                 </button>
                             </div>
                             <div className="w-full h-[150px] overflow-hidden p-1">
-                                <img src={imageUrl} alt="itemImage" />
+                                <img src={product.images[0].url} alt="" />
                             </div>
                             {/* Description Start */}
                             <div className="px-2 py-4 flex flex-col justify-center">
@@ -70,7 +70,7 @@ const FavoriteProducts = () => {
                                     {product.name}
                                 </p>
                                 <p className="text-base text-zinc-500">
-                                    {product.description.substring(0, 80)}...
+                                    {product.description && product.description.substring(0, 80)}
                                 </p>
                                 <div className="flex items-center gap-2 text-yellow mt-2">
                                     <div className="flex text-sm gap-1 items-center">

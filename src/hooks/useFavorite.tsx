@@ -10,10 +10,11 @@ import { useAuthUser } from './useAuth/useAuthUser'
 import { springDataProvider } from '@/providers/rest-data-provider'
 import { toRecord } from '@/lib/utils'
 
-const uid = 1
-const useFavorite = () => {
-  const toast = useMyToast()
 
+const useFavorite = () => {
+  const { claims } = useAuthUser(); // Lấy thông tin user từ hook useAuthUser
+  const uid = claims?.id ?? 1
+  const toast = useMyToast()
   const [addFavorite, removeFavorite, isFavorite] = useFavoriteStore(
     ({ addFavorite, removeFavorite, isFavorite }) => [
       addFavorite,
@@ -137,10 +138,15 @@ const updateUserFavoriteProduct = async (userId?: number) => {
 }
 
 export const FavoriteProvider = () => {
-  const userId = uid
+  // const userId = uid
+  // useEffect(() => {
+  //   updateUserFavoriteProduct(userId)
+  // }, [])
+  const { claims } = useAuthUser();
+
   useEffect(() => {
-    updateUserFavoriteProduct(userId)
-  }, [])
+    updateUserFavoriteProduct(claims?.id);
+  }, [claims?.id]);
 
   return <></>
 }

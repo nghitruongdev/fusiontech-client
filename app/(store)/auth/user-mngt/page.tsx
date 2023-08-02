@@ -16,6 +16,7 @@ import { firebaseAuth } from "@/providers/firebaseAuthProvider";
 import AuthPage from "../AuthPage";
 import AuthErrorCatch from "../error";
 import { AppError } from "types/error";
+import Link from "next/dist/client/link";
 
 type PasswordForm = {
     password: string;
@@ -91,16 +92,16 @@ const UpdatePasswordPage = () => {
 
     if (error) return <AuthErrorCatch error={error} />;
 
-    //todo: chưa có showSuccess
-    // if (showSuccess) {
-    //     return (
-    //         <>
-    //             Đã cập nhật mật khẩu mới thành công. Bây giờ bạn có thể sử dụng
-    //             mật khẩu mới để đăng nhập.
-    //             <Link href="/auth/login">Quay trở lại đăng nhập</Link>
-    //         </>
-    //     );
-    // }
+    // todo: chưa có showSuccess
+    if (showSuccess) {
+        return (
+            <>
+                Đã cập nhật mật khẩu mới thành công. Bây giờ bạn có thể sử dụng
+                mật khẩu mới để đăng nhập.
+                <Link href="/auth/login">Quay trở lại đăng nhập</Link>
+            </>
+        );
+    }
     if (showForm)
         return (
             <AuthPage title={"Đặt lại mật khẩu"}>
@@ -109,7 +110,7 @@ const UpdatePasswordPage = () => {
                         <FormLabel htmlFor="password">
                             {translate(
                                 "pages.updatePassword.fields.password",
-                                "New Password",
+                                "Mật khẩu mới",
                             )}
                         </FormLabel>
                         <Input
@@ -129,11 +130,11 @@ const UpdatePasswordPage = () => {
                         <FormLabel htmlFor="confirmPassword">
                             {translate(
                                 "pages.updatePassword.fields.confirmPassword",
-                                "Confirm New Password",
+                                "Xác nhận mật khẩu",
                             )}
                         </FormLabel>
                         <Input
-                            id="confirmPassword"
+                            id="Xác nhận mật khẩu"
                             type="password"
                             placeholder="Confirm Password"
                             {...register("confirmPassword", {
@@ -142,7 +143,7 @@ const UpdatePasswordPage = () => {
                                     if (watch("password") != val) {
                                         return translate(
                                             "pages.updatePassword.errors.confirmPasswordNotMatch",
-                                            "Passwords do not match",
+                                            "Mật khẩu không trùng khớp!",
                                         );
                                     }
                                     return;
@@ -162,7 +163,7 @@ const UpdatePasswordPage = () => {
                     >
                         {translate(
                             "pages.updatePassword.buttons.submit",
-                            "Update",
+                            "Cập nhật",
                         )}
                     </Button>
                 </form>
