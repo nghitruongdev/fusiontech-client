@@ -136,17 +136,34 @@ const ProductInfo = () => {
                 mb={8}
                 className="overflow-x-auto shadow-bannerShadow sm:rounded-lg"
               >
-                <Image
-                  sx={{ maxWidth: 280 }}
-                  src={record?.images?.[0]?.url ?? ''}
-                />
+                {record?.images?.[0]?.url ? (
+                  <Image
+                    src={record?.images?.[0]?.url ?? ''}
+                    alt={record.name}
+                    width={200}
+                    height={200}
+                    style={{
+                      width: '200px',
+                      height: '200px',
+                      objectFit: 'contain',
+                    }}
+                    className="shadow-lg rounded-lg"
+                  />
+                ) : (
+                  <Image
+                    alt="/"
+                    width={200}
+                    height={200}
+                    src="https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fvariants%2FlogostuImage.png?alt=media&token=90709f04-0996-4779-ab80-f82e99c62041"
+                  />
+                )}
               </Box>
 
               <ProductInfo.AvgRating />
               <ProductInfo.ReviewCount />
             </Flex>
           </GridItem>
-          <GridItem rowSpan={2} colSpan={2}>
+          <GridItem rowSpan={2} colSpan={5}>
             <Box p={4} mb={10}>
               <Flex>
                 <ProductInfo.Id />
@@ -156,12 +173,8 @@ const ProductInfo = () => {
               <ProductInfo.Features />
             </Box>
           </GridItem>
-          <GridItem rowSpan={2} colSpan={6}>
-            <Box pr={16}>
-              <Box mb={10}>
-                <ProductInfo.Description />
-              </Box>
-            </Box>
+          <GridItem rowSpan={2} colSpan={6} pr={4}>
+            <ProductInfo.Description />
           </GridItem>
         </Grid>
       </div>
@@ -262,7 +275,7 @@ ProductInfo.ReviewCount = () => {
           <Input
             textAlign="center"
             fontWeight="medium"
-            value={record?.id ?? ''}
+            value={record?.reviewCount ?? ''}
           />
         </div>
       </Box>
@@ -397,7 +410,7 @@ ProductInfo.Description = () => {
           </Text>
           <Textarea
             fontWeight="medium"
-            h="313px"
+            h="120px"
             value={record?.description ?? ''}
           />
         </div>

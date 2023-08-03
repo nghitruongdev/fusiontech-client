@@ -9,6 +9,9 @@ import { TableContainer, Table, HStack } from '@chakra-ui/react'
 import { useDefaultTableRender } from '@/hooks/useRenderTable'
 import { List } from '@components/crud'
 import { DeleteButton, EditButton, ShowButton } from '@components/buttons'
+import { FirebaseImage } from 'types'
+import Image from 'next/image'
+import { Images } from 'types/constants'
 
 export default function ListPage() {
   return <BrandList />
@@ -25,12 +28,28 @@ export const BrandList: React.FC<IResourceComponentsProps> = () => {
       {
         id: 'name',
         accessorKey: 'name',
-        header: 'Name',
+        header: 'Tên thương hiệu',
+      },
+      {
+        id: 'image',
+        accessorKey: 'image',
+        header: 'Hình ảnh',
+        cell: function render({ getValue }) {
+          return (
+            // eslint-disable-next-line jsx-a11y/alt-text
+            <Image
+              alt="/"
+              width={70}
+              height={70}
+              src={getValue<FirebaseImage>()?.url ?? Images.brands}
+            />
+          )
+        },
       },
       {
         id: 'actions',
         accessorKey: 'id',
-        header: 'Actions',
+        header: 'Hành động',
         cell: function render({ getValue }) {
           return (
             <HStack>

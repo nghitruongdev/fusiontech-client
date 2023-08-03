@@ -9,6 +9,7 @@ import { FirebaseImage, IProduct } from 'types'
 import { useDefaultTableRender } from '@/hooks/useRenderTable'
 import { List } from '@components/crud'
 import { EditButton, ShowButton } from '@components/buttons'
+import { Images } from 'types/constants'
 
 export default function ListPage() {
   return <ProductList />
@@ -24,27 +25,31 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
       {
         id: 'name',
         accessorKey: 'name',
-        header: 'Name',
+        header: 'Tên sản phẩm',
       },
       {
         id: 'summary',
         accessorKey: 'summary',
-        header: 'Summary',
+        header: 'Mô tả',
       },
       {
         id: 'description',
         accessorKey: 'description',
-        header: 'Description',
+        header: 'Giới thiệu',
       },
       {
-        id: 'thumbnail',
-        accessorKey: 'thumbnail',
-        header: 'Thumbnail',
+        id: 'images',
+        accessorKey: 'images',
+        header: 'Hình ảnh',
         cell: function render({ getValue }) {
           return (
+            // eslint-disable-next-line jsx-a11y/alt-text
+
             <Image
-              sx={{ maxWidth: '100px' }}
-              src={getValue<FirebaseImage>()?.url}
+              alt="/"
+              width={70}
+              height={70}
+              src={getValue<FirebaseImage[]>()?.[0]?.url ?? Images.products}
             />
           )
         },
@@ -52,17 +57,17 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
       {
         id: 'reviewCount',
         accessorKey: 'reviewCount',
-        header: 'Review Count',
+        header: 'Số lượt đánh giá',
       },
       {
         id: 'avgRating',
         accessorKey: 'avgRating',
-        header: 'Avg Rating',
+        header: 'Đánh giá',
       },
       {
         id: 'actions',
         accessorKey: 'id',
-        header: 'Actions',
+        header: 'Hành động',
         cell: function render({ getValue }) {
           return (
             <HStack>

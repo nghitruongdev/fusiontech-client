@@ -5,6 +5,8 @@ import { Heading, HStack } from '@chakra-ui/react'
 import { Show } from '@components/crud'
 import Image from 'next/image'
 import { Box } from 'lucide-react'
+import { FirebaseImage } from 'types'
+import { Images } from 'types/constants'
 
 export default function ShowPage() {
   //   return <ChakraUIShowInferencer />
@@ -31,7 +33,12 @@ export const BrandShow: React.FC<IResourceComponentsProps> = () => {
               className="shadow-lg rounded-lg"
             />
           ) : (
-            <Box>No image available</Box>
+            <Image
+              alt="/"
+              width={200}
+              height={200}
+              src="https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fvariants%2FlogostuImage.png?alt=media&token=90709f04-0996-4779-ab80-f82e99c62041"
+            />
           )}
         </div>
         <div className="col-span-2">

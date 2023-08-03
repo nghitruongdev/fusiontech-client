@@ -65,7 +65,7 @@ export const variantColumns: ColumnDef<IVariant>[] = [
   {
     id: 'actions',
     accessorKey: 'id',
-    header: 'Actions',
+    header: 'Hành động',
     cell: function render({ getValue }) {
       return (
         <HStack>

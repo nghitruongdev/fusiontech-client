@@ -147,13 +147,22 @@ const Brands = () => {
 
   const BrandItem: React.FC<{ brand: IBrand }> = ({ brand }) => {
     return (
-      <div className="relative flex items-center p-3 lg:p-2 shadow-md ">
-        <Image
-          src={brand.image?.url ?? ''}
-          width={300}
-          height={175}
-          alt={brand.name}
-        />
+      <div className="relative flex items-center m-2 p-2 md:p-4 shadow justify-center rounded-lg">
+        {brand.image?.url ?? '' ? (
+          <Image
+            src={brand.image?.url ?? ''}
+            width={90}
+            height={90}
+            alt={brand.name}
+          />
+        ) : (
+          <Image
+            alt="/"
+            width={90}
+            height={90}
+            src="https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fvariants%2FlogostuImage.png?alt=media&token=90709f04-0996-4779-ab80-f82e99c62041"
+          />
+        )}
       </div>
     )
   }

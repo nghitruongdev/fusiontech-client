@@ -26,10 +26,10 @@ const Newest = async () => {
       <SectionTitle title={'Sản phẩm của FusionTech'} />
       {/* <p>Newest</p> */}
       <div className="flex flex-col">
-        <div className="grid grid-cols-5 gap-4 rounded-lg ">
+        <div className="grid grid-cols-5 gap-4 rounded-lg shadow-outline shadow py-4  ">
           {displayedProducts.map((item: IProduct) => (
             // eslint-disable-next-line react/jsx-key
-            <div className="rounded-lg shadow-lg ">
+            <div className="rounded-lg border border-gray-300 shadow  ">
               <ProductCardProvider key={item.id} product={item}>
                 <Product item={item} />
               </ProductCardProvider>
@@ -77,19 +77,29 @@ Product.Image = ({ images }: { images: IProduct['images'] }) => {
     <div
       className="
           w-full h-auto overflow-y-hidden
-          ease-in-out duration-300 scale-90 hover:scale-95 "
+          ease-in-out duration-300 scale-90 hover:scale-95  p-4"
     >
-      <Image
-        src={images?.[0]?.url ?? ''}
-        alt="Product image"
-        // fill
-        width={200}
-        height={200}
-        loading="lazy"
-        placeholder="blur"
-        blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMz4irBwAEGQGuUtJ+VQAAAABJRU5ErkJggg=="
-        className="w-full  aspect-square rounded-md max-w-[200px] mx-auto object-cover"
-      />
+      {images?.[0]?.url ?? '' ? (
+        <Image
+          src={images?.[0]?.url ?? ''}
+          alt="Product image"
+          // fill
+          width={200}
+          height={100}
+          loading="lazy"
+          placeholder="blur"
+          blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMz4irBwAEGQGuUtJ+VQAAAABJRU5ErkJggg=="
+          className="w-full  aspect-square rounded-md max-w-[200px] mx-auto object-cover"
+        />
+      ) : (
+        <Image
+          alt="/"
+          width={200}
+          height={100}
+          className="w-full  aspect-square rounded-md max-w-[200px] mx-auto object-cover"
+          src="https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fvariants%2FlogostuImage.png?alt=media&token=90709f04-0996-4779-ab80-f82e99c62041"
+        />
+      )}
       <Product.FavoriteButton />
     </div>
   )

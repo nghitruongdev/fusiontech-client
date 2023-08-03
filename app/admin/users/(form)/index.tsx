@@ -27,6 +27,7 @@ import { ERRORS } from 'types/messages'
 import { getDateFromPast } from '@/lib/utils'
 import ImageUpload, { UploadProviderProps } from '@components/image-upload'
 import useUploadImage from '@/hooks/useUploadImage'
+import Image from 'next/image'
 
 const { existsByEmail, existsByPhoneNumber } = API['users']()
 const USER_MESSAGE = ERRORS['users']
@@ -141,15 +142,21 @@ Form.Body = function Body() {
   } = Form.useContext()
   return (
     <>
-      <Form.Avatar />
-      <Form.Id />
-      <Form.Email />
-      <Form.FirstName />
-      <Form.LastName />
-      <Form.Phone />
-      <Form.Gender />
-      <Form.Birthday />
-      <Form.Roles />
+      <div className="grid grid-cols-3">
+        <div className="flex flex-row justify-center ">
+          <Form.Avatar />
+        </div>
+        <div className="col-span-2">
+          <Form.Id />
+          <Form.Email />
+          <Form.FirstName />
+          <Form.LastName />
+          <Form.Phone />
+          <Form.Gender />
+          <Form.Birthday />
+          <Form.Roles />
+        </div>
+      </div>
     </>
   )
 }
@@ -444,15 +451,19 @@ Form.Avatar = function Avatar() {
   onRemove.isCallback = true
 
   return (
-    <FormControl rounded={'full'}>
-      <div className="">
-        <ImageUpload
-          isMulti={false}
-          {...(user?.photoUrl && { initialUrls: [{ url: user.photoUrl }] })}
-          {...(user?.image && { initialUrls: [user.image] })}
-        />
-      </div>
-    </FormControl>
+    <div style={{ width: '250px', height: '300px', marginTop: '20px' }}>
+      <ImageUpload
+        isMulti={false}
+        {...(user?.photoUrl && { initialUrls: [{ url: user.photoUrl }] })}
+        {...(user?.image?.url && { initialUrls: [user.image] })}
+      >
+        {/* <Image
+          src={user?.photoUrl || user?.image?.url || ''}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          alt="User Image"
+        /> */}
+      </ImageUpload>
+    </div>
   )
 }
 

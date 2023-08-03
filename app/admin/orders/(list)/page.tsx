@@ -44,7 +44,7 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
       {
         id: 'userId',
         accessorKey: 'userId',
-        header: 'User',
+        header: 'Id người dùng',
         cell: function render({ getValue, table }) {
           const meta = table.options.meta as {
             userData: GetManyResponse
@@ -71,7 +71,7 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
       {
         id: 'purchasedAt',
         accessorKey: 'purchasedAt',
-        header: 'Purchased At',
+        header: 'Ngày mua hàng ',
         cell: function render({ getValue }) {
           return <DateField value={getValue<any>()} />
         },
@@ -79,7 +79,7 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
       {
         id: 'paymentAmount',
         accessorKey: 'paymentId',
-        header: 'Payment Amount',
+        header: 'Phương thức thanh toán',
         cell: function render({ getValue, table }) {
           const meta = table.options.meta as {
             paymentData: GetManyResponse
@@ -95,7 +95,7 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
       {
         id: 'paymentStatus',
         accessorKey: 'paymentId',
-        header: 'Payment Status',
+        header: 'Trạng thái thanh toán',
         cell: function render({ getValue, table }) {
           const meta = table.options.meta as {
             paymentData: GetManyResponse
@@ -122,7 +122,7 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
       {
         id: 'status',
         accessorKey: 'status',
-        header: 'Status',
+        header: 'Trạng thái đơn hàng',
         cell: function render({ getValue, row, table }) {
           const statusName = getValue() as string
           const meta = table.options.meta as {
@@ -161,7 +161,7 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
       {
         id: 'actions',
         accessorKey: 'id',
-        header: 'Actions',
+        header: 'Hành động',
         cell: function render({ getValue }) {
           return (
             <HStack justifyContent="center">

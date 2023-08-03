@@ -242,6 +242,7 @@ export const ProductForm = ({ action }: { action: ContextProps['action'] }) => {
       <div className=" space-y-4">
         <ProductForm.Features />
         <ProductForm.Specifications />
+        <ProductForm.Description />
       </div>
     </ProductFormProvider>
   )

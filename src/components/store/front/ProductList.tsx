@@ -162,6 +162,7 @@ const Product = ({ item: { id, name, slug, images } }: { item: IProduct }) => {
   )
 }
 
+// eslint-disable-next-line react/display-name
 Product.Image = ({ images }: { images: IProduct['images'] }) => {
   return (
     <div
@@ -169,17 +170,27 @@ Product.Image = ({ images }: { images: IProduct['images'] }) => {
         w-full h-auto overflow-y-hidden
         ease-in-out duration-300 scale-90 hover:scale-95 "
     >
-      <Image
-        src={images?.[0]?.url ?? ''}
-        alt="Product image"
-        // fill
-        width={200}
-        height={10}
-        loading="lazy"
-        placeholder="blur"
-        blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMz4irBwAEGQGuUtJ+VQAAAABJRU5ErkJggg=="
-        className="w-full  aspect-square rounded-md max-w-[200px] mx-auto object-cover"
-      />
+      {images?.[0]?.url ?? '' ? (
+        <Image
+          src={images?.[0]?.url ?? ''}
+          alt="Product image"
+          // fill
+          width={200}
+          height={10}
+          loading="lazy"
+          placeholder="blur"
+          blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMz4irBwAEGQGuUtJ+VQAAAABJRU5ErkJggg=="
+          className="w-full  aspect-square rounded-md max-w-[200px] mx-auto object-cover"
+        />
+      ) : (
+        <Image
+          alt="/"
+          width={200}
+          height={10}
+          className="w-full  aspect-square rounded-md max-w-[200px] mx-auto object-cover"
+          src="https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fvariants%2FlogostuImage.png?alt=media&token=90709f04-0996-4779-ab80-f82e99c62041"
+        />
+      )}
       <Product.FavoriteButton />
     </div>
   )

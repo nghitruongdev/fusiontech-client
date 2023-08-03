@@ -13,6 +13,7 @@ import notFoundImg from './404Img.png'
 import emptyCart from './empty-cart.png'
 import warningImg from './warning.png'
 import loginImg from './loginIcon.png'
+import thankLogo from './logoThanks.png'
 import errorImg from './404.png'
 import deliver from './benefit-icons/005-delivery-truck-2.webp'
 import cash from './benefit-icons/003-cash-on-delivery.webp'
@@ -56,4 +57,5 @@ export {
   banner4,
   banner5,
   newProduct,
+  thankLogo,
 }

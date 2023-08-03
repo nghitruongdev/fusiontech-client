@@ -13,7 +13,7 @@ export type ResourceName =
 export type FirebaseImage = {
   storagePath?: string
   name?: string
-  url: string
+  url?: string
 }
 
 export type ImageUrl = {
