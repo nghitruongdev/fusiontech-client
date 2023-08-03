@@ -7,7 +7,7 @@ import userApi from '@/api/userAPI'
 import useMyToast from '@/hooks/useToast'
 import { useForm } from 'react-hook-form'
 export const ProfileForm = () => {
-  const { user, claims } = useAuthUser()
+  const { user } = useAuthUser()
   const { resource, findByFirebaseId } = API['users']()
   const { data, status } = useCustom({
     url: `${API_URL}/${findByFirebaseId(user?.uid ?? '')}`,
@@ -16,23 +16,18 @@ export const ProfileForm = () => {
       enabled: !!user,
     },
   })
-  console.log(data?.data)
-  const userId = claims?.id
+
   // Sử dụng Hook useState để lưu trạng thái thông tin người dùng trong form
-  const [phoneNumber, setPhoneNumber] = useState<string>(
-    data?.data.phoneNumber ?? '',
-  )
+  const [phoneNumber, setPhoneNumber] = useState<string>(data?.data.phoneNumber)
   const [dateOfBirth, setDateOfBirth] = useState(data?.data.dateOfBirth ?? '')
   const [gender, setGender] = useState<string>(data?.data.gender)
   console.log(data?.data)
-  // const [firebaseUid, setFirebaseUid] = useState(data?.data.firebaseUid);
 
   const toast = useMyToast()
   const updateUser = async (id: string, userData: any) => {
     try {
       const response = await userApi.updateUser(id, userData)
       const newUser = response.data // Đánh giá mới được trả về từ API
-      console.log(response.data)
       toast
         .ok({
           title: 'Thành công',
@@ -87,10 +82,8 @@ export const ProfileForm = () => {
     setValue,
   } = useForm()
 
-
   return (
     <>
-      <p>User ID: {userId}</p>
       <h2 className="text-xl font-semibold">Thông tin tài khoản</h2>
       <form className="mt-2">
         <div className="mb-4">
@@ -126,7 +119,7 @@ export const ProfileForm = () => {
           <input
             type="number"
             id="phone"
-            value={phoneNumber}
+            value={data?.data.phoneNumber}
             className="w-full border border-gray-300 rounded-md px-3 py-2"
             {...register('phoneNumber', {
               required: true,
