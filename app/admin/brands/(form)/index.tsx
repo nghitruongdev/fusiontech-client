@@ -85,6 +85,7 @@ Form.Provider = function Provider({
         disabled: formLoading || isSubmitting || isValidating,
         onClick: (e: BaseSyntheticEvent) => {
             handleSubmit(async ({ id, file, ...value }) => {
+
                 const handleImage = async () => {
                     if (action === 'edit' && dirtyFields.image) {
                         const removedImage = brand?.image
@@ -93,7 +94,7 @@ Form.Provider = function Provider({
                     return file && (await uploadImages([file]))[0]
                 }
 
-                const image = await handleImage()
+                const image = (await handleImage())?.url
 
                 const result = await onFinish({
                     ...value,
@@ -261,7 +262,7 @@ Form.Image = function Image() {
     }, [setValue])
     onRemove.isCallback = true
 
-    const imageUrl = brand?.image?.url
+    const imageUrl = brand?.image
     const initialUrls = useMemo(() => {
         console.count('usememo initialUrl ran')
         const name = imageUrl ? uploadUtils.getName("brands", imageUrl) : ""

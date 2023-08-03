@@ -98,10 +98,9 @@ Form.Provider = function Provider({
                     console.log('formSpecifications', formSpecifications)
                     return formSpecifications?.map((item) => item.label)
                 }
-                const image = await handleImage()
+                const image = (await handleImage())?.url
                 const specifications = handleSpecifications()
 
-                throw new Error('not handle enough')
                 const result = await onFinish({
                     ...value,
                     ...(image && { image }),
@@ -265,7 +264,7 @@ Form.Image = function Image() {
     }, [setValue])
     onRemove.isCallback = true
 
-    const imageUrl = category?.image?.url
+    const imageUrl = category?.image
     const initialUrls = useMemo(() => {
         console.count('usememo initialUrl ran')
         const name = imageUrl ? uploadUtils.getName("categories", imageUrl) : ""

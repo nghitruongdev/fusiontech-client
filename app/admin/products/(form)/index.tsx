@@ -6,6 +6,7 @@ import React, {
     useCallback,
     useContext,
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react'
@@ -47,7 +48,7 @@ import { produce } from 'immer'
 import InlineEditable from '@components/ui/InlineEditable'
 import { ActionMeta, MultiValue } from 'react-select'
 import ImageUpload, { UploadProviderProps } from '@components/image-upload'
-import useUploadImage from '@/hooks/useUploadImage'
+import useUploadImage, { uploadUtils } from '@/hooks/useUploadImage'
 import { API } from 'types/constants'
 import { Create, Edit } from '@components/crud'
 import { useRouter } from 'next/navigation'
@@ -519,7 +520,7 @@ ProductForm.Brand = function Brand() {
                                         size="sm"
                                         variant="filled"
                                         name={label}
-                                        src={logo?.url}
+                                        src={logo ?? ""}
                                     />
                                 </Box>
                             )
@@ -707,14 +708,16 @@ ProductForm.Images = function Images() {
     )
     onUrlRemove.isCallback = true
 
-    useEffect(() => {
+    const initialUrls = useMemo(() => {
         const images = product?.images
         if (!images) return
         setValue(`images`, images)
+        return images.map(image => ({ url: image, name: uploadUtils.getName('products', image) }))
     }, [product?.images, setValue])
+
     return (
         <ImageUpload
-            initialUrls={product?.images}
+            initialUrls={initialUrls}
             onFilesChange={onFilesChange}
             onRemoveUrl={onUrlRemove}
         />

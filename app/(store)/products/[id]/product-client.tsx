@@ -76,9 +76,9 @@ export const ProductImages = () => {
         <div className="flex">
             <div className="w-1/5 flex flex-col space-y-2 overflow-auto items-center">
                 {images?.map((item, idx, arr) => (
-                    <div key={`${idx}-${item.url}`} className="p-2 w-1/2 hover:border ">
+                    <div key={`${idx}-${item}`} className="p-2 w-1/2 hover:border ">
                         <Image
-                            src={item.url ?? ""}
+                            src={item}
                             width={"200"}
                             height={"200"}
                             alt="product image"
@@ -89,7 +89,7 @@ export const ProductImages = () => {
             </div>
             <div className="w-4/5">
                 <Image
-                    src={images?.[0]?.url ?? ""}
+                    src={images?.[0] ?? ""}
                     width={"200"}
                     height={"200"}
                     alt="product image"

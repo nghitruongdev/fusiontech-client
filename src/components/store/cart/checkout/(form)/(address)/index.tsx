@@ -9,178 +9,178 @@ import CreateAddressModal from './(modal)/CreateModal'
 import AddressListModal from './(modal)/ListModal'
 import EditAddressModal from './(modal)/EditModal'
 import useCheckout, {
-  CreateAddressProps,
-  EditAddressProps,
+    CreateAddressProps,
+    EditAddressProps,
 } from './(hooks)/useCheckout'
+import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
 
 const AddressSection = ({
-  setAddressId,
+    setAddressId,
 }: {
-  setAddressId: (addressId: number) => void
+    setAddressId: (addressId: number) => void
 }) => {
-  const userId = ''
-  throw Error('User iD is not implemented')
-  const { user, addressList, defaultAddress, address } = useCheckout({
-    userId,
-  })
+    const { claims: { id: userId } = {} } = useAuthUser()
+    const { user, addressList, defaultAddress, address } = useCheckout({
+        userId,
+    })
 
-  const btnRef = React.useRef(null)
+    const btnRef = React.useRef(null)
 
-  const [selectedAddress, setSelectedAddress] = useState<
-    ShippingAddress | undefined
-  >()
+    const [selectedAddress, setSelectedAddress] = useState<
+        ShippingAddress | undefined
+    >()
 
-  useEffect(() => {
-    //nếu user hasn't selected, select default one
-    if (!!!selectedAddress) {
-      setSelectedAddress(defaultAddress.data)
+    useEffect(() => {
+        //nếu user hasn't selected, select default one
+        if (!!!selectedAddress) {
+            setSelectedAddress(defaultAddress.data)
+        }
+    }, [defaultAddress, selectedAddress])
+
+    useEffect(() => {
+        if (selectedAddress?.id) {
+            setAddressId(+selectedAddress.id)
+        }
+    }, [selectedAddress, setAddressId])
+    const { listModalProps, createModalFormProps, editModalFormProps } = useModal(
+        { ...address, refetchAddressList: addressList.refetch },
+    )
+
+    const handler = {
+        updateDefaultAddressHandler: (addressId: number) => {
+            defaultAddress.update(addressId)
+        },
     }
-  }, [defaultAddress])
 
-  useEffect(() => {
-    if (selectedAddress?.id) {
-      setAddressId(+selectedAddress.id)
-    }
-  }, [selectedAddress])
-  const { listModalProps, createModalFormProps, editModalFormProps } = useModal(
-    { ...address, refetchAddressList: addressList.refetch },
-  )
-
-  const handler = {
-    updateDefaultAddressHandler: (addressId: number) => {
-      defaultAddress.update(addressId)
-    },
-  }
-
-  return (
-    <>
-      {!!selectedAddress && (
-        <AddressBox
-          address={selectedAddress}
-          onClick={listModalProps.onOpen}
-          showCheck
-          isDefault={defaultAddress.data?.id === selectedAddress?.id}
-          className="border-blue-600 text-gray-700"
-        />
-      )}
-
-      <div onClick={createModalFormProps.modal.show.bind(null, undefined)}>
-        <EmptyAddressBox />
-      </div>
-
-      <Portal>
-        <CreateAddressModal {...createModalFormProps} user={user.data} />
-        {/* {!!addressList.data && ( */}
+    return (
         <>
-          <AddressListModal
-            addressList={
-              addressList.data?.map((item) => ({
-                ...item,
-                id: item.id + '',
-              })) ?? []
-            }
-            defaultAddress={defaultAddress.data}
-            updateDefaultAddress={handler.updateDefaultAddressHandler}
-            openEditModal={editModalFormProps.modal.show}
-            selectedAddress={selectedAddress}
-            setSelectedAddress={setSelectedAddress}
-            deleteAddress={address.deleteAddress}
-            close={listModalProps.onClose}
-            isOpen={listModalProps.isOpen && !!addressList}
-          />
-          <EditAddressModal {...editModalFormProps} user={user.data} />
+            {selectedAddress && (
+                <AddressBox
+                    address={selectedAddress}
+                    onClick={listModalProps.onOpen}
+                    showCheck
+                    isDefault={defaultAddress.data?.id === selectedAddress?.id}
+                    className="border-blue-600 text-gray-700"
+                />
+            )}
+
+            <div onClick={createModalFormProps.modal.show.bind(null, undefined)}>
+                <EmptyAddressBox />
+            </div>
+
+            <Portal>
+                <CreateAddressModal {...createModalFormProps} user={user.data} />
+                {/* {!!addressList.data && ( */}
+                <>
+                    <AddressListModal
+                        addressList={
+                            addressList.data?.map((item) => ({
+                                ...item,
+                                id: item.id + '',
+                            })) ?? []
+                        }
+                        defaultAddress={defaultAddress.data}
+                        updateDefaultAddress={handler.updateDefaultAddressHandler}
+                        openEditModal={editModalFormProps.modal.show}
+                        selectedAddress={selectedAddress}
+                        setSelectedAddress={setSelectedAddress}
+                        deleteAddress={address.deleteAddress}
+                        close={listModalProps.onClose}
+                        isOpen={listModalProps.isOpen && !!addressList}
+                    />
+                    <EditAddressModal {...editModalFormProps} user={user.data} />
+                </>
+                {/* )} */}
+            </Portal>
         </>
-        {/* )} */}
-      </Portal>
-    </>
-  )
+    )
 }
 
 type Props = {
-  createAddress: (props: CreateAddressProps) => void
-  editAddress: (props: EditAddressProps) => void
-  refetchAddressList: () => void
+    createAddress: (props: CreateAddressProps) => void
+    editAddress: (props: EditAddressProps) => void
+    refetchAddressList: () => void
 }
 const useModal = ({
-  createAddress,
-  editAddress,
-  refetchAddressList,
+    createAddress,
+    editAddress,
+    refetchAddressList,
 }: Props) => {
-  const listModalProps = useDisclosure()
+    const listModalProps = useDisclosure()
 
-  const createProps = useModalForm<ShippingAddress, HttpError, ShippingAddress>(
-    {
-      refineCoreProps: {
-        action: 'create',
-        resource: 'shippingAddresses',
-        onMutationSuccess(data, variables, context) {
-          refetchAddressList()
+    const createProps = useModalForm<ShippingAddress, HttpError, ShippingAddress>(
+        {
+            refineCoreProps: {
+                action: 'create',
+                resource: 'shippingAddresses',
+                onMutationSuccess(data, variables, context) {
+                    refetchAddressList()
+                },
+            },
+            warnWhenUnsavedChanges: false,
         },
-      },
-      warnWhenUnsavedChanges: false,
-    },
-  )
+    )
 
-  const editProps = useModalForm<ShippingAddress, HttpError, ShippingAddress>({
-    refineCoreProps: {
-      action: 'edit',
-      resource: 'shippingAddresses',
-      onMutationSuccess(data, variables, context) {
-        refetchAddressList()
-      },
-    },
-    warnWhenUnsavedChanges: false,
-  })
+    const editProps = useModalForm<ShippingAddress, HttpError, ShippingAddress>({
+        refineCoreProps: {
+            action: 'edit',
+            resource: 'shippingAddresses',
+            onMutationSuccess(data, variables, context) {
+                refetchAddressList()
+            },
+        },
+        warnWhenUnsavedChanges: false,
+    })
 
-  const createButtonProps = () => {
-    const {
-      saveButtonProps,
-      handleSubmit,
-      refineCore: { onFinish },
-      reset,
-      modal: { close: closeModal },
-    } = createProps
+    const createButtonProps = () => {
+        const {
+            saveButtonProps,
+            handleSubmit,
+            refineCore: { onFinish },
+            reset,
+            modal: { close: closeModal },
+        } = createProps
 
-    const onClick = (event: any) => {
-      createAddress({ handleSubmit, onFinish, reset, closeModal })
+        const onClick = (event: any) => {
+            createAddress({ handleSubmit, onFinish, reset, closeModal })
+        }
+
+        return {
+            ...saveButtonProps,
+            onClick,
+        }
+    }
+
+    const editButtonProps = () => {
+        const {
+            saveButtonProps,
+            handleSubmit,
+            refineCore: { onFinish },
+            reset,
+            modal: { close },
+        } = editProps
+
+        const onClick = (event: any) => {
+            editAddress({ handleSubmit, onFinish, reset, closeModal: close })
+        }
+
+        return {
+            ...saveButtonProps,
+            onClick,
+        }
     }
 
     return {
-      ...saveButtonProps,
-      onClick,
+        listModalProps,
+        createModalFormProps: {
+            ...createProps,
+            saveButtonProps: createButtonProps(),
+        },
+        editModalFormProps: {
+            ...editProps,
+            saveButtonProps: editButtonProps(),
+        },
     }
-  }
-
-  const editButtonProps = () => {
-    const {
-      saveButtonProps,
-      handleSubmit,
-      refineCore: { onFinish },
-      reset,
-      modal: { close },
-    } = editProps
-
-    const onClick = (event: any) => {
-      editAddress({ handleSubmit, onFinish, reset, closeModal: close })
-    }
-
-    return {
-      ...saveButtonProps,
-      onClick,
-    }
-  }
-
-  return {
-    listModalProps,
-    createModalFormProps: {
-      ...createProps,
-      saveButtonProps: createButtonProps(),
-    },
-    editModalFormProps: {
-      ...editProps,
-      saveButtonProps: editButtonProps(),
-    },
-  }
 }
 
 export default AddressSection

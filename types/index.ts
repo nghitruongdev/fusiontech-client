@@ -10,22 +10,12 @@ export type ResourceName =
   | 'shippingAddresses'
   | 'specifications'
 
-export type FirebaseImage = {
-    /**
-     * @deprecated
-     */
-  storagePath?: string
-  /**
-   * @deprecated
-   */
-  name?: string
-  url?: string
-}
+export type FirebaseImage = string
 
 export type UploadUrl = {
   name: string | undefined
   url: string
-  file?:File | null
+  file?: File | null
 }
 
 export type IProduct = {
@@ -129,7 +119,6 @@ export type IVariantField = {
   }[]
 } & {
   files: File[]
-  images?: (FirebaseImage | null)[]
 }
 /**
  * @deprecated

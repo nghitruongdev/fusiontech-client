@@ -43,7 +43,7 @@ export const FavoriteButton = () => {
         }
         console.log("isFavorited", isFavorited);
         setFavorited(checkFavorite(+product.id));
-    }, [product, favorites]);
+    }, [product, favorites, checkFavorite, isFavorited]);
 
     const onClick = () => {
         if (!product.id) {
@@ -65,15 +65,13 @@ export const FavoriteButton = () => {
     return (
         <div
             onClick={onClick}
-            className={`absolute ${
-                !isFavorited ? "opacity-0 group-hover:opacity-100" : ""
-            } ${isBouncing ? "animate-pulse !duration-1000" : ""}
+            className={`absolute ${!isFavorited ? "opacity-0 group-hover:opacity-100" : ""
+                } ${isBouncing ? "animate-pulse !duration-1000" : ""}
             ${"active:animate-ping"} top-1 right-2 group-hover:bg-white rounded-full p-1 duration-300 ease-in-out`}
         >
             <Heart
-                className={`text-sm w-5 h-5 font-bold text-rose-500  ${
-                    isFavorited ? "fill-current" : ""
-                }`}
+                className={`text-sm w-5 h-5 font-bold text-rose-500  ${isFavorited ? "fill-current" : ""
+                    }`}
             />
         </div>
     );
