@@ -1,3 +1,5 @@
+/** @format */
+
 import { AuthBindings } from '@refinedev/core'
 import {
   signInWithPopup,

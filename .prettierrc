@@ -1,16 +1,20 @@
 {
-    "arrowParens": "always",
-    "semi": false,
-    "trailingComma": "all",
-    "singleQuote": true,
-    "printWidth": 80,
-    "tabWidth": 2,
-    "overrides": [
-        {
-            "files": ["*.yml", "*.yaml", "*.json"],
-            "options": {
-                "tabWidth": 2
-            }
-        }
-    ]
+  "arrowParens": "always",
+  "semi": false,
+  "trailingComma": "all",
+  "singleQuote": true,
+  "printWidth": 80,
+  "tabWidth": 2,
+  "jsxSingleQuote": true,
+  "bracketSameLine": true,
+  "insertPragma": true,
+  "embeddedLanguageFormatting": "auto",
+  "singleAttributePerLine": true,
+  "overrides": [
+    {
+      "files": ["*.yml", "*.yaml", "*.json", ".prettierrc"],
+
+      "options": { "tabWidth": 2, "insertPragma": false }
+    }
+  ]
 }

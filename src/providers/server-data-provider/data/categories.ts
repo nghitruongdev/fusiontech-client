@@ -1,9 +1,11 @@
-import { ICategory } from "types";
-import { serverDataProvider } from "../provider";
+/** @format */
+
+import { ICategory } from 'types'
+import { serverDataProvider } from '../provider'
 
 export const getCategoriesList = async () => {
-    return serverDataProvider.getList<ICategory, "id">({
-        resource: "categories",
-        key: "id",
-    });
-};
+  return serverDataProvider.getList<ICategory, 'id'>({
+    resource: 'categories',
+    key: 'id',
+  })
+}

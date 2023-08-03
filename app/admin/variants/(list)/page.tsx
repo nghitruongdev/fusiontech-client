@@ -1,3 +1,5 @@
+/** @format */
+
 'use client'
 
 import React from 'react'
@@ -5,7 +7,7 @@ import { IResourceComponentsProps } from '@refinedev/core'
 import { useTable } from '@refinedev/react-table'
 import { ColumnDef } from '@tanstack/react-table'
 import { TableContainer, Table, HStack, Image } from '@chakra-ui/react'
-import { IProduct, IVariant } from 'types/index'
+import { FirebaseImage, IProduct, IVariant } from 'types/index'
 import { useDefaultTableRender } from '@/hooks/useRenderTable'
 import { API } from 'types/constants'
 import { EditButton, ShowButton } from '@components/buttons'
@@ -39,7 +41,7 @@ export const variantColumns: ColumnDef<IVariant>[] = [
     cell: function render({ getValue }) {
       return (
         <HStack>
-          {getValue<any[]>()?.map((item, index) => (
+          {getValue<FirebaseImage[]>()?.map((item, index) => (
             <Image
               src={item}
               key={index}
@@ -65,7 +67,7 @@ export const variantColumns: ColumnDef<IVariant>[] = [
   {
     id: 'actions',
     accessorKey: 'id',
-    header: 'Actions',
+    header: 'Hành động',
     cell: function render({ getValue }) {
       return (
         <HStack>
@@ -142,8 +144,8 @@ export const VariantList: React.FC<IResourceComponentsProps> = () => {
   })
   return (
     <List canCreate={false}>
-      <TableContainer whiteSpace="pre-line">
-        <Table variant="simple">
+      <TableContainer whiteSpace='pre-line'>
+        <Table variant='simple'>
           {headers}
           {body}
         </Table>

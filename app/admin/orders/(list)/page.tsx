@@ -1,3 +1,5 @@
+/** @format */
+
 'use client'
 
 import React from 'react'
@@ -29,7 +31,6 @@ import { EditableControls, OrderStatus, statusColor } from '../OrderStatus'
 import { ShowButton } from '@components/buttons'
 import { List } from '@components/crud'
 export default function ListPage() {
-  // return <ChakraUIListInferencer />;
   return <OrderList />
 }
 
@@ -44,7 +45,7 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
       {
         id: 'userId',
         accessorKey: 'userId',
-        header: 'User',
+        header: 'Id người dùng',
         cell: function render({ getValue, table }) {
           const meta = table.options.meta as {
             userData: GetManyResponse
@@ -71,7 +72,7 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
       {
         id: 'purchasedAt',
         accessorKey: 'purchasedAt',
-        header: 'Purchased At',
+        header: 'Ngày mua hàng ',
         cell: function render({ getValue }) {
           return <DateField value={getValue<any>()} />
         },
@@ -79,7 +80,7 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
       {
         id: 'paymentAmount',
         accessorKey: 'paymentId',
-        header: 'Payment Amount',
+        header: 'Phương thức thanh toán',
         cell: function render({ getValue, table }) {
           const meta = table.options.meta as {
             paymentData: GetManyResponse
@@ -95,7 +96,7 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
       {
         id: 'paymentStatus',
         accessorKey: 'paymentId',
-        header: 'Payment Status',
+        header: 'Trạng thái thanh toán',
         cell: function render({ getValue, table }) {
           const meta = table.options.meta as {
             paymentData: GetManyResponse
@@ -107,13 +108,12 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
 
           return (
             <Badge
-              variant="outline"
-              px="2"
+              variant='outline'
+              px='2'
               // py="1"
-              lineHeight="taller"
-              rounded="md"
-              colorScheme="whatsapp"
-            >
+              lineHeight='taller'
+              rounded='md'
+              colorScheme='whatsapp'>
               {payment?.status ?? 'Loading...'}
             </Badge>
           )
@@ -122,7 +122,7 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
       {
         id: 'status',
         accessorKey: 'status',
-        header: 'Status',
+        header: 'Trạng thái đơn hàng',
         cell: function render({ getValue, row, table }) {
           const statusName = getValue() as string
           const meta = table.options.meta as {
@@ -147,7 +147,10 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
                     }
                   />
                 ) : (
-                  <Badge colorScheme={statusColor(status)} px="4" py="1">
+                  <Badge
+                    colorScheme={statusColor(status)}
+                    px='4'
+                    py='1'>
                     {status.detailName}
                   </Badge>
                 )
@@ -161,11 +164,14 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
       {
         id: 'actions',
         accessorKey: 'id',
-        header: 'Actions',
+        header: 'Hành động',
         cell: function render({ getValue }) {
           return (
-            <HStack justifyContent="center">
-              <ShowButton hideText recordItemId={getValue() as string} />
+            <HStack justifyContent='center'>
+              <ShowButton
+                hideText
+                recordItemId={getValue() as string}
+              />
             </HStack>
           )
         },
@@ -239,8 +245,8 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
 
   return (
     <List>
-      <TableContainer whiteSpace="pre-line">
-        <Table variant="simple">
+      <TableContainer whiteSpace='pre-line'>
+        <Table variant='simple'>
           <Thead>
             {getHeaderGroups().map((headerGroup) => (
               <Tr key={headerGroup.id}>

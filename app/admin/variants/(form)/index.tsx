@@ -13,6 +13,12 @@ import {
     InputRightElement,
     Spinner,
     useConst,
+  Table,
+  Thead,
+  Tr,
+  Th,
+  Tbody,
+  Td,
 } from '@chakra-ui/react'
 import { useForm } from '@refinedev/react-hook-form'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -65,24 +71,18 @@ export const VariantForm = ({ action }: FormProps) => {
     return (
         <VariantForm.Provider action={action}>
             <div className="grid grid-cols-3 gap-4">
-                <div className=" border-r">
+        <div className=" col-span-1 flex flex-col ">
+          <div className="flex justify-center mb-5">
                     <VariantForm.Images />
+          </div>
+          <VariantForm.SpecDefault />
                 </div>
                 <div className=" col-span-2">
                     <VariantForm.Product />
-                    <Heading as="h5">Tên sản phẩm</Heading>
-                    <>Lorem ipsum dolor, sit amet consectetur adipisicing elit.</>
                     <VariantForm.SKU />
                     <VariantForm.Price />
                     {/* <VariantForm.Options /> */}
                     <VariantForm.Specification />
-                    <Heading as="h5">Mô tả</Heading>
-                    <>
-                        Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                        Consequatur laborum, quisquam deserunt, ad commodi ab aspernatur
-                        repellat in dicta quae reiciendis est quia, suscipit minus ducimus
-                        ipsum sunt praesentium. Ratione!
-                    </>
                 </div>
             </div>
         </VariantForm.Provider>
@@ -343,7 +343,7 @@ VariantForm.Product = function Product() {
     return (
         <>
             <FormControl isInvalid={!!errors.product}>
-                <p>Sản phẩm</p>
+        <FormLabel>Tên sản phẩm</FormLabel>
 
                 <Controller
                     render={({ field }) => (
@@ -440,7 +440,7 @@ VariantForm.SKU = function SKU() {
     //     checkSkuDB(debounceSKU)
     //   }, [debounceSKU])
     return (
-        <FormControl mb="3" isInvalid={!!(errors as any)?.sku}>
+    <FormControl mb="3" mt="3" isInvalid={!!(errors as any)?.sku}>
             <FormLabel>Mã SKU</FormLabel>
             <InputGroup>
                 <InputLeftElement
@@ -569,11 +569,85 @@ VariantForm.Images = function Images() {
         return (images)?.map(url => ({ url, name: uploadUtils.getName('variants', url) ?? "" })) ?? []
     }, [images, setValue])
     return (
+    <div className="w-[300px] h-[258px] mt-[20px]">
         <ImageUpload
             initialUrls={formImages}
             onFilesChange={onFilesChange}
             onRemoveUrl={onUrlRemove}
         />
+    </div>
+  )
+}
+
+VariantForm.SpecDefault = function Specification({}) {
+  const { findDistinctNames } = API['specifications']()
+  const {
+    action,
+    setValue,
+    getValues,
+    resetField,
+    control,
+    product: { data: product },
+    variant,
+  } = useFormProvider()
+
+  const productSpecs = product?.specifications ?? []
+  useEffect(() => {
+    if (action === 'edit') return
+
+    const specifications = productSpecs
+    console.log('useEffect spec ran')
+    const formSpecs = specifications
+      .filter((item) => item.values.length > 1)
+      .flatMap((item) => ({
+        label: item.name,
+        options: [],
+      }))
+    setTimeout(() => {
+      resetField(`specificationGroup`, {
+        defaultValue: toArrayOptionString(formSpecs.map((item) => item.label)),
+      })
+      resetField(`specifications`, {
+        defaultValue: formSpecs,
+      })
+    }, 0)
+  }, [product?.specifications])
+
+  return (
+    <>
+      {!!productSpecs.length && (
+        <div className="">
+          <FormLabel>Thông số mặc định</FormLabel>
+          {/* {productSpecs.map(({ name, values }) => (
+            <div key={name} className="flex gap-2">
+              <p>{name}</p>
+              <p>{values.map((val) => val.value).join('/ ')}</p>
+            </div>
+          ))} */}
+          <Table
+            variant="simple"
+            colorScheme="blackAlpha"
+            borderWidth="2px"
+            borderRadius="xl"
+          >
+            <Thead>
+              <Tr>
+                <Th fontWeight="bold">Tên thuộc tính</Th>
+                <Th fontWeight="bold">Giá trị</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {productSpecs.map(({ name, values }) => (
+                <Tr key={name}>
+                  <Td>{name}</Td>
+                  <Td>{values.map((val) => val.value).join('/ ')}</Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </div>
+      )}
+    </>
     )
 }
 
@@ -784,20 +858,9 @@ VariantForm.Specification = function Specification({ }) {
                                 </div>
                             </>
                         )}
-                    </div>
                 </div>
             </div>
-            {!!productSpecs?.length && (
-                <div className="">
-                    <FormLabel>Thông số mặc định</FormLabel>
-                    {productSpecs.map(({ name, values }) => (
-                        <div key={name} className="flex gap-2">
-                            <p>{name}</p>
-                            <p>{values.map((val) => val.value).join('/ ')}</p>
-                        </div>
-                    ))}
                 </div>
-            )}
         </>
     )
 } as React.FC & {

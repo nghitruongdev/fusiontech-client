@@ -1,3 +1,5 @@
+/** @format */
+
 'use client'
 import React, { useEffect, useState } from 'react'
 import favoriteApi from 'src/api/favoriteAPI'
@@ -96,7 +98,6 @@ export const useFavoriteStore = create(
   immer<State>((set, get) => ({
     favoriteProducts: {},
     addFavorite: (product) => {
-      //todo:
       set(({ favoriteProducts }) => {
         if (!product?.id) return
         favoriteProducts[+product.id] = product
@@ -106,7 +107,6 @@ export const useFavoriteStore = create(
       set(({ favoriteProducts }) => {
         delete favoriteProducts[productId]
       })
-      //todo:
     },
     isFavorite: (productId) => {
       return !!get().favoriteProducts[productId]
