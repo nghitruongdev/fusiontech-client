@@ -2,7 +2,7 @@
 
 import { Create } from '@components/crud/create'
 import { Edit } from '@components/crud/edit'
-import { Action, useCustom } from '@refinedev/core'
+import { Action } from '@refinedev/core'
 import { useForm } from '@refinedev/react-hook-form'
 import { HttpError } from 'http-errors'
 import {
