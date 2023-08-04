@@ -1,13 +1,15 @@
+/** @format */
+
 import { useEffect, useState } from 'react'
 import { useBoolean } from 'usehooks-ts'
-import useErrorNotification from './useErrorNotification'
+import useCrudNotification from './useCrudNotification'
 
 const useDebounceFn = <P extends any[], R>(
   fn: (...args: P) => Promise<R>,
   timer: number,
 ) => {
   const [clearFn, setClearFn] = useState<Function>()
-  const { onError } = useErrorNotification()
+  const { onDefaultError: onError } = useCrudNotification()
   const { value: isRunning, setFalse, setTrue } = useBoolean()
   const debounceFn = async (...args: P) => {
     return await new Promise<R | undefined>(async (res) => {

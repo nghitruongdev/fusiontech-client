@@ -1,13 +1,10 @@
+/** @format */
+
 import { persist } from 'zustand/middleware'
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
-import useNotification from '@/hooks/useNotification'
 import { withStorageDOMEvents } from '@/hooks/withStorageEvent'
-import {
-  firebaseStorage,
-  firestoreInstance,
-  firestoreProvider,
-} from '@/lib/firebase'
-import { useCreate, useDelete, useList, useUpdate } from '@refinedev/core'
+import { firestoreInstance, firestoreProvider } from '@/lib/firebase'
+import { useList } from '@refinedev/core'
 import {
   DocumentChangeType,
   collection,
@@ -22,13 +19,10 @@ import { ICart, ICartItem } from 'types'
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import { shallow } from 'zustand/shallow'
-import { springDataProvider } from '@/providers/rest-data-provider'
 type ReturnProps = {
   addItem: (item: ICartItem) => void
   updateItem: (item: ICartItem) => void
   removeItem: (id: string) => void
-  //   createCart: () => void
-  // removeCart: (id: string) => void;
   clearCart: () => void
 }
 
@@ -64,7 +58,7 @@ const useCart = (): ReturnProps => {
   )
 
   const { data: userCartData } = useList<ICart>({
-    ...getResource('cart'),
+    ...getResource(CART_RESOURCE),
     filters: [
       {
         field: 'uid',
@@ -272,7 +266,9 @@ const useCart = (): ReturnProps => {
 
       if (!!cartId) {
         if (!!cart?.uid) {
-          console.warn('Not yet cleaned out the cart of another user')
+          console.error(
+            'Error: Not cleaned out the cart of another user, cart on machine belongs to the other user',
+          )
           return
         }
         //DONE: update localcartid with userId

@@ -1,51 +1,44 @@
+/** @format */
+
 import { IUser, ShippingAddress } from 'types'
 import {
-    Modal,
-    ModalBody,
-    ModalCloseButton,
-    ModalContent,
-    ModalHeader,
-    ModalOverlay,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
 } from '@chakra-ui/react'
-import { SaveButton } from '@refinedev/chakra-ui'
 import { HttpError } from '@refinedev/core'
 import { UseModalFormReturnType } from '@refinedev/react-hook-form'
-import { AddressForm } from '../AddressForm'
+import { AddressFormProvider } from './AddressForm'
+import { SaveButton } from '@components/buttons'
+import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
+import { useEffect } from 'react'
 
 const CreateAddressModal: React.FC<
-    UseModalFormReturnType<ShippingAddress, HttpError, ShippingAddress> & {
-        user: IUser
-    }
-> = ({
-    user,
-    saveButtonProps,
+  UseModalFormReturnType<ShippingAddress, HttpError, ShippingAddress> & {}
+> = (props) => {
+  const {
     modal: { visible, close },
-    register,
-    formState: { errors },
-    handleSubmit,
-    refineCore: { formLoading, onFinish },
     setValue,
-}) => {
-        if (!!user) {
-            setValue('user', user?._links?.self.href)
-        }
-        return (
-            <Modal size="lg" isOpen={visible} onClose={close}>
-                <ModalOverlay />
-                <ModalContent>
-                    <ModalCloseButton />
-                    <ModalHeader>Địa chỉ nhận hàng</ModalHeader>
+  } = props
 
-                    <ModalBody>
-                        <AddressForm
-                            register={register}
-                            errors={errors}
-                            formLoading={formLoading}
-                        />
-                        <SaveButton {...saveButtonProps} isLoading={formLoading}></SaveButton>
-                    </ModalBody>
-                </ModalContent>
-            </Modal>
-        )
-    }
+  return (
+    <Modal
+      size='lg'
+      isOpen={visible}
+      onClose={close}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalCloseButton />
+        <ModalHeader>Địa chỉ nhận hàng</ModalHeader>
+        <ModalBody>
+          <AddressFormProvider {...props} />
+        </ModalBody>
+      </ModalContent>
+    </Modal>
+  )
+}
 export default CreateAddressModal

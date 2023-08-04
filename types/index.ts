@@ -1,3 +1,5 @@
+/** @format */
+
 import { Timestamp } from '@firebase/firestore'
 
 export type ResourceName =
@@ -24,6 +26,8 @@ export type IProduct = {
   slug: string
   summary: string
   description: string
+  minPrice?: number
+  maxPrice?: number
   features?: string[]
   brand?: IBrand
   category?: ICategory
@@ -200,6 +204,7 @@ export interface ShippingAddress {
   district: string
   province: string
   default?: boolean
+  type?: 'Văn phòng' | 'Nhà riêng'
   user?: any
   _links?: _links
 }

@@ -105,7 +105,8 @@ export const API = {
     const name: ResourceName = 'shippingAddresses'
     return {
       resource: name,
-      findAllByUserId: `${name}/search/findAllByUserId`,
+      findAllByUserId: (id: string | number | undefined) =>
+        id ? `${name}/search/findAllByUserId?uid=${id}` : '',
       defaultAddressByUserId: `${name}/search/findDefaultShippingAddressByUserId`,
     }
   },

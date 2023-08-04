@@ -1,5 +1,6 @@
+/** @format */
+
 'use client'
-import VisualWrapper from '@components/ui/VisualWrapper'
 import { useCustomMutation } from '@refinedev/core'
 import { UseFormReturnType, useForm } from '@refinedev/react-hook-form'
 import { useRouter } from 'next/navigation'
@@ -9,7 +10,6 @@ import { API } from 'types/constants'
 import { API_URL } from 'types/constants'
 import { createStore, useStore } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
-import Checkout from '.'
 
 type State = {
   items: ICartItem[]
@@ -28,7 +28,6 @@ const createCheckoutStore = (initProps: StoreState) => {
 }
 
 const Context = createContext<CheckoutStore | null>(null)
-
 type ProviderProps = React.PropsWithChildren<{}>
 export const CheckoutProvider = ({ children }: ProviderProps) => {
   const router = useRouter()
@@ -89,9 +88,9 @@ export const CheckoutProvider = ({ children }: ProviderProps) => {
     storeRef.current = createCheckoutStore({ ...formProps, items: [] })
   }
   return (
-    <VisualWrapper isRenderCount>
+    <>
       <Context.Provider value={storeRef.current}>{children}</Context.Provider>
-    </VisualWrapper>
+    </>
   )
 }
 
