@@ -1,3 +1,5 @@
+/** @format */
+
 import {
   ReadonlyURLSearchParams,
   usePathname,
@@ -12,7 +14,7 @@ export const formatPrice = (amount?: number) => {
     currency: 'VND',
     minimumFractionDigits: 0,
   })
-  return formatted
+  return formatted.replace(/\./g, ',')
 }
 
 export const toRecord = <T, K extends keyof T>(

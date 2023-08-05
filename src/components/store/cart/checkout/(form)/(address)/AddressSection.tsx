@@ -4,7 +4,13 @@
 import { Portal, useDisclosure } from '@chakra-ui/react'
 import { AddressBox, EmptyAddressBox } from './AddressBox'
 import { ShippingAddress } from 'types'
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react'
 import { HttpError, useCustom, useCustomMutation } from '@refinedev/core'
 import {
   UseModalFormReturnType,
@@ -17,6 +23,8 @@ import { Callback, checkIsCallback } from '@/lib/callback'
 import { RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query'
 import useCrudNotification from '@/hooks/useCrudNotification'
 import dynamic from 'next/dynamic'
+import { useCheckoutContext } from '../../CheckoutProvider'
+import { cn } from 'components/lib/utils'
 
 type RefetchFunction = (
   options?: RefetchOptions & RefetchQueryFilters<unknown>,
@@ -38,9 +46,7 @@ type ContextState = {
   selectedAddress: ShippingAddress | undefined
   setSelectedAddress: (address: ContextState['selectedAddress']) => void
 }
-type ProviderProps = {
-  onAddressChange: Callback<(addressId: number) => void>
-}
+type ProviderProps = {}
 const Context = createContext<ContextState | null>(null)
 
 const useContextProvider = () => {
@@ -51,7 +57,6 @@ const useContextProvider = () => {
 
 export const AddressSectionProvider = ({
   children,
-  onAddressChange,
   ...props
 }: PropsWithChildren<ProviderProps>) => {
   const { resource, findAllByUserId, defaultAddressByUserId } =
@@ -65,6 +70,16 @@ export const AddressSectionProvider = ({
   const [selectedAddress, setSelectedAddress] = useState<ShippingAddress>()
   const { userProfile: user } = useAuthUser()
   const listModalProps = useDisclosure()
+
+  const { setValue } = useCheckoutContext(({ setValue }) => ({ setValue }))
+
+  const onAddressChange: Callback<Function> = useCallback(
+    (value: number) => {
+      setValue(`addressId`, value)
+    },
+    [setValue],
+  )
+  onAddressChange.isCallback = true
 
   const createProps = useModalForm<ShippingAddress, HttpError, ShippingAddress>(
     {
@@ -137,7 +152,6 @@ export const AddressSectionProvider = ({
 
   //update address field checkout form
   useEffect(() => {
-    checkIsCallback(onAddressChange)
     selectedAddress?.id && onAddressChange(+selectedAddress.id)
   }, [selectedAddress, onAddressChange])
 
@@ -268,7 +282,7 @@ const AddressSection = ({}: {}) => {
           address={selectedAddress}
           onClick={listModalProps.onOpen}
           showCheck
-          className='border-blue-600 text-gray-700'
+          className={cn(`'border-blue-600 text-gray-700`)}
         />
       )}
 

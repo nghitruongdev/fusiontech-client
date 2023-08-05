@@ -4,21 +4,48 @@
 
 import { Rating } from '@smastrom/react-rating'
 import { CarrotIcon, Heart, Info } from 'lucide-react'
-import { PropsWithChildren, createContext, useContext } from 'react'
+import {
+  PropsWithChildren,
+  Suspense,
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { IProduct, IVariant, ResourceName } from 'types'
 import { API } from 'types/constants'
 import { useCustom } from '@refinedev/core'
 import { cleanUrl, formatPrice } from '@/lib/utils'
-import { useOptionStore } from './ProductOptions'
+import { useOptionStore } from './product-options'
 import useCart, {
   ALLOW_QUANTITY,
   useCartItems,
+  useCartStore,
 } from '@components/store/cart/useCart'
 import { cn } from 'components/lib/utils'
 import useNotification from '@/hooks/useNotification'
 import { Skeleton } from '@components/ui/Skeleton'
 import Image from 'next/image'
+import {
+  Table,
+  TableContainer,
+  TableCaption,
+  Tbody,
+  Tr,
+  Td,
+  Collapse,
+  Button,
+} from '@chakra-ui/react'
+import { useRecentProductViewStore } from '@components/providers/RecentProductViewProvider'
+import { useIsFirstRender } from 'usehooks-ts'
+import useFavorite from '@/hooks/useFavorite'
+import {
+  FavoriteButton,
+  FavoriteButtonWithCardProvider,
+} from '@components/store/front/product/FavoriteButton'
 
+const { findTopFrequentBoughtTogether } = API['products']()
 type ContextState = {
   product: IProduct
   variants: {
@@ -61,6 +88,10 @@ const ProductContextProvider = ({
     },
   })
 
+  const addItems = useRecentProductViewStore((state) => state.addProduct)
+  useEffect(() => {
+    addItems(product)
+  }, [addItems, product])
   return (
     <ProductContext.Provider
       value={{ product, variants: { data: data?.data, status } }}>
@@ -106,36 +137,38 @@ export const ProductImages = () => {
 export const ProductPrice = () => {
   const {
     variants: { data: variants, status },
+    product: { minPrice, maxPrice },
   } = useProductContext()
   const isDiscount = false
 
   if (status === 'loading') {
-    return <Skeleton className='w-full h-6' />
+    return <Skeleton className='w-full h-10' />
   }
   if (!variants?.length) {
-    return <>Không tìm thấy dữ liệu</>
+    return <>Không có dữ liệu</>
   }
-  const min = variants.sort((a, b) => a.price - b.price)[0]
 
   return (
     <>
       {isDiscount && (
         <div className='flex items-end gap-2 my-2'>
           <p className='text-3xl text-green-700 font-bold leading-none'>
-            Now ${formatPrice(min?.price)}
+            {formatPrice(minPrice)}
           </p>
           <p className='text-gray-500 text-md font-normal line-through decoration-[1px] flex gap-1 items-center'>
-            ${formatPrice(min?.price)}{' '}
-            <span>
-              <Info />
-            </span>
+            {formatPrice(minPrice)}
+            {/* <span> */}
+            {/* <Info /> */}
+            {/* </span> */}
           </p>
         </div>
       )}
       {!isDiscount && (
         <div className='my-2'>
-          <p className='text-3xl text-zinc-950 font-bold leading-none'>
-            ${formatPrice(min?.price)}
+          <p className='text-2xl text-zinc-600 font-bold leading-none'>
+            <span>{formatPrice(minPrice)}</span>
+            <span> - </span>
+            <span>{formatPrice(maxPrice)}</span>
           </p>
         </div>
       )}
@@ -167,43 +200,18 @@ export const ProductCartButton = () => {
   const {
     variants: { data: variants, status },
   } = useProductContext()
-  const [groups, selected, variantRecords] = useOptionStore((state) => [
-    state.groups,
-    state.selected,
-    state.variantRecords,
-  ])
   const { addItem, updateItem } = useCart()
-  const cartItems = useCartItems()
+  const cartItems = useCartStore((state) => state.items)
   const { open: show } = useNotification()
-  const groupLength = Object.keys(groups).length
-  const selectedLength = Object.keys(selected).length
-  const isAddable = !!groupLength && groupLength === selectedLength
+  const [selected, getSelectedVariant] = useOptionStore((state) => [
+    state.selected,
+    state.getSelectedVariant,
+  ])
+  const [variant, isAddable] = getSelectedVariant()
   const addToCartHandler = () => {
-    if (!variants) {
-      show({
-        type: 'warning',
-        title: 'Đang chờ tải các tuỳ chọn sản phẩm',
-        colorScheme: 'orange',
-        position: 'top',
-      })
-      return
-    }
-    if (groupLength !== selectedLength) {
-      show({
-        type: 'warning',
-        title: 'Bạn chưa chọn các tuỳ chọn',
-        colorScheme: 'teal',
-        position: 'top',
-      })
-      return
-    }
-    const variant = variants.find(({ id }) =>
-      Object.entries(selected).every(
-        ([name, value]) => variantRecords[id]?.[name]?.value === value,
-      ),
-    )
     if (variant) {
       const item = cartItems[variant.id]
+      console.log('cartItems[variant.id]', cartItems[variant.id])
       if (item) {
         if (item?.quantity === ALLOW_QUANTITY) {
           show({
@@ -227,11 +235,7 @@ export const ProductCartButton = () => {
     show({
       type: 'error',
       title: `Không tìm thấy phiên bản sản phẩm tương ứng`,
-      description: (
-        <>
-          <p>{JSON.stringify(selected)}</p>
-        </>
-      ),
+      description: <>{/* <p>{JSON.stringify(selected)}</p> */}</>,
     })
   }
 
@@ -256,49 +260,119 @@ export const ProductCartButton = () => {
 }
 
 export const ProductFrequentBoughtTogether = () => {
+  const firstRender = useIsFirstRender()
+  const {
+    product: { id },
+  } = useProductContext()
+  const { data: { data: products } = {} } = useCustom<IProduct[]>({
+    url: findTopFrequentBoughtTogether(id, 10),
+    method: 'get',
+    queryOptions: {
+      enabled: !!id && firstRender,
+      suspense: true,
+    },
+  })
   return (
-    <div className=''>
-      <p className=''>Sản phẩm thường được mua cùng</p>
-    </div>
-  )
-}
-
-export const ProductViewRecently = () => {
-  return (
-    <div className=''>
-      <p className='text-2xl font-bold mt-4'>Sản phẩm đã xem gần đây</p>
-      <div className=''></div>
-    </div>
+    <Suspense
+      fallback={
+        <div>
+          {' '}
+          <Skeleton className='h-10 w-full bg-red-500' />
+        </div>
+      }>
+      {' '}
+      <div className=''>
+        <p className=''>Sản phẩm thường được mua cùng</p>
+        <>{JSON.stringify(products)}</>
+      </div>
+    </Suspense>
   )
 }
 
 export const ProductFavoriteDetails = () => {
-  const {
-    product: { id },
-  } = useProductContext()
+  const { product } = useProductContext()
   const { data, status } = useCustom({
-    url: API['products']().countProductSold(id ?? ''),
+    url: API['products']().countProductSold(product.id ?? ''),
     method: 'get',
     queryOptions: {
-      enabled: !!id,
+      enabled: !!product.id,
     },
   })
   const displayText = data?.data
     ? `${data.data}+ khách hàng đã mua sản phẩm`
-    : 'Trở thành khách hàng đầu tiên'
+    : 'Trở thành khách hàng sở hữu sản phẩm đầu tiên'
   return (
     <>
       <div className='flex justify-between gap-2 relative border-b mt-2'>
         <p className='py-2 text-blue-700 text-sm font-semibold line-clamp-1'>
           {displayText}
         </p>
-        <p className='text-gray-600 text-2xl text-center '>
-          <Heart className='' />
+        <p className=''>
+          <FavoriteButton
+            product={product}
+            hideNotActive={false}
+          />
         </p>
       </div>
     </>
   )
 }
 
+export const ProductSpecification = () => {
+  const {
+    product: { specifications },
+  } = useProductContext()
+  const [show, setShow] = useState(false)
+  const handleToggle = () => setShow(!show)
+  if (!specifications?.length) return <></>
+  const renderTable = () => (
+    <TableContainer roundedBottom={'md'}>
+      <Table
+        variant='striped'
+        roundedBottom={'md'}>
+        <Tbody>
+          {specifications?.map(({ name, values }) => (
+            <Tr key={name}>
+              <Td className='font-semibold text-sm'>{name}</Td>
+              <Td className='text-sm font-normal'>
+                {values.map(({ value }) => value).join('/ ')}
+              </Td>
+            </Tr>
+          ))}
+        </Tbody>
+      </Table>
+    </TableContainer>
+  )
+  return (
+    <div className='mx-4'>
+      <p className='font-bold text-xl mb-2'>Thông số kỹ thuật</p>
+      <div className='border shadow-lg rounded-b-md'>
+        {specifications.length <= 6 && renderTable()}
+        {specifications.length > 6 && (
+          <>
+            <Collapse
+              animate
+              startingHeight={300}
+              animateOpacity
+              in={show}>
+              {renderTable()}
+            </Collapse>
+            <div className='flex justify-center pt-6 pb-2 bg-gradient-to-b from-white to-slate-100'>
+              <Button
+                onClick={handleToggle}
+                variant={'link'}
+                fontSize={'sm'}
+                color='gray.500'>
+                Xem thêm
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default ProductContextProvider
 export { useProductContext }
+6

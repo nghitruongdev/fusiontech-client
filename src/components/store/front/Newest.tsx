@@ -1,7 +1,6 @@
 /** @format */
 
 import SectionTitle from '@components/ui/SectionTitle'
-import { FavoriteButton, ProductCardProvider } from './client'
 import { getProductsWithDetails } from '@/providers/server-data-provider/data/products'
 import { IProduct } from 'types'
 import Image from 'next/image'
@@ -11,6 +10,8 @@ import { formatPrice } from '@/lib/utils'
 import { BsStarFill } from 'react-icons/bs'
 import { Plus } from 'lucide-react'
 import { Button } from '@components/ui/shadcn/button'
+import { FavoriteButtonWithCardProvider } from './product/FavoriteButton'
+import { ProductCardProvider } from './product/ProductCardProvider'
 // import { Flex } from "@chakra-ui/react";
 // import { useWindowDimensions } from "@/hooks/useWindowDimensions";
 
@@ -171,6 +172,6 @@ Product.DetailButton = ({
   )
 }
 
-Product.FavoriteButton = FavoriteButton
+Product.FavoriteButton = FavoriteButtonWithCardProvider
 
 export default Newest

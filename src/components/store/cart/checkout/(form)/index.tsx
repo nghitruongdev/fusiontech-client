@@ -6,6 +6,7 @@ import {
   Input,
   Radio,
   RadioGroup,
+  Tooltip,
 } from '@chakra-ui/react'
 import { useCallback, useState } from 'react'
 import AddressSection, {
@@ -14,6 +15,10 @@ import AddressSection, {
 import ChakraFormInput from '@components/ui/ChakraFormInput'
 import { useCheckoutContext } from '../CheckoutProvider'
 import { Callback } from '@/lib/callback'
+import { Controller } from 'react-hook-form'
+import { PaymentMethod } from 'types'
+import { PaymentMethodLabel } from 'types/constants'
+import { TooltipCondition } from '@components/ui/TooltipCondition'
 
 const Form = () => {
   return (
@@ -35,10 +40,19 @@ const Form = () => {
   )
 }
 Form.Address = function Address() {
-  const setValue = useCheckoutContext((state) => state.setValue)
+  const { setValue, addressError } = useCheckoutContext(
+    ({
+      setValue,
+      formState: {
+        errors: { addressId },
+      },
+    }) => ({ setValue, addressError: addressId }),
+  )
   const onAddressChange: Callback<Function> = useCallback(
-    (value: string | number) => {
-      setValue(`addressId`, value)
+    (value: number) => {
+      setValue(`addressId`, value, {
+        shouldValidate: true,
+      })
     },
     [setValue],
   )
@@ -48,7 +62,7 @@ Form.Address = function Address() {
     <div className='px-6 py-3 bg-white mb-4 border rounded-md shadow-md'>
       <h4 className='text-lg font-semibold mb-3'>Địa chỉ giao hàng</h4>
       <div className='justify-around grid grid-cols-2 gap-4 min-h-[100px] mb-4'>
-        <AddressSectionProvider onAddressChange={onAddressChange as any}>
+        <AddressSectionProvider>
           <AddressSection />
         </AddressSectionProvider>
       </div>
@@ -103,29 +117,60 @@ Form.Note = function Note() {
 }
 
 Form.Payment = function Payment() {
-  const [payment, setPayment] = useState('1')
-  const register = useCheckoutContext((state) => state.register)
+  //   const [payment, setPayment] = useState('1')
+  const control = useCheckoutContext((state) => state.control)
+  const notCod = (method: PaymentMethod) => PaymentMethod.COD !== method
   return (
     <div className='px-6 py-3  bg-white mb-4 border rounded-md shadow-md'>
       <h4 className='font-semibold text-lg mb-3'>Phương thức thanh toán</h4>
       <div className='mb-4'>
-        <RadioGroup
-          onChange={setPayment}
-          value={payment}>
-          <div className='flex space-x-8 justify-start'>
-            {['Thẻ Visa/ Mastercard', 'Ví điện tử', 'Thanh toán trả sau'].map(
-              (item, idx) => (
-                <Radio
-                  value={item}
-                  key={idx}>
-                  <span className='text-md font-medium leading-tight text-zinc-600'>
-                    {item}
-                  </span>
-                </Radio>
-              ),
-            )}
-          </div>
-        </RadioGroup>
+        <Controller
+          name='payment.method'
+          control={control}
+          rules={{
+            required: true,
+          }}
+          defaultValue={PaymentMethod.COD}
+          render={({ field }) => (
+            <RadioGroup {...field}>
+              <div className='flex space-x-8 justify-start'>
+                {[PaymentMethod.COD, PaymentMethod.CREDIT_CARD].map(
+                  (item, idx) => (
+                    <Radio
+                      value={item}
+                      key={idx}
+                      isDisabled={notCod(item)}>
+                      <TooltipCondition
+                        condition={notCod(item)}
+                        label={
+                          notCod(item)
+                            ? 'Phương thức thanh toán chưa hỗ trợ'
+                            : ''
+                        }>
+                        <span className='text-md font-medium leading-tight text-zinc-600'>
+                          {PaymentMethodLabel[item]}
+                        </span>
+                      </TooltipCondition>
+                    </Radio>
+                  ),
+                )}
+                {/* {[
+                  'Thẻ Visa/ Mastercard',
+                  'Ví điện tử',
+                  'Thanh toán trả sau',
+                ].map((item, idx) => (
+                  <Radio
+                    value={item}
+                    key={idx}>
+                    <span className='text-md font-medium leading-tight text-zinc-600'>
+                      {item}
+                    </span>
+                  </Radio>
+                ))} */}
+              </div>
+            </RadioGroup>
+          )}
+        />
       </div>
     </div>
   )

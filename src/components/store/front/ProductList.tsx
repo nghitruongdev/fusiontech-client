@@ -4,24 +4,21 @@
 import { IProduct } from 'types'
 import Image from 'next/image'
 import { BsStarFill } from 'react-icons/bs'
-import { getProductsWithDetails } from '../../../providers/server-data-provider/data/products'
 import Link from 'next/link'
-import { Heart, Plus } from 'lucide-react'
-import {
-  FavoriteButton,
-  ProductCardProvider,
-  useProductCardContext,
-} from '@components/store/front/client'
+import { Plus } from 'lucide-react'
 import NextLinkContainer from '@components/ui/NextLinkContainer'
 import { useList } from '@refinedev/core'
 import Slider from 'react-slick'
-import SectionTitle from '@components/ui/SectionTitle'
 import { useRef } from 'react'
 import SliderButton from '@components/ui/SliderButton'
 import { loginImg } from 'public/assets/images'
-import { IoSearchOutline } from 'react-icons/io5'
 import { Button } from '@components/ui/shadcn/button'
 import { formatPrice } from '@/lib/utils'
+import {
+  ProductCardProvider,
+  useProductCardContext,
+} from './product/ProductCardProvider'
+import { FavoriteButtonWithCardProvider } from './product/FavoriteButton'
 
 // const ProductList = async () => {
 //     const products = await getProductsWithDetails();
@@ -262,6 +259,6 @@ Product.DetailButton = function DetailButton({
   )
 }
 
-Product.FavoriteButton = FavoriteButton
+Product.FavoriteButton = FavoriteButtonWithCardProvider
 
 export default ProductList

@@ -11,6 +11,8 @@ import { useAddressContextProvider } from './AddressSection'
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
 import { API } from 'types/constants'
 import useCrudNotification from '@/hooks/useCrudNotification'
+import { useCheckoutContext } from '../../CheckoutProvider'
+import { cn } from 'components/lib/utils'
 
 const hoverBorderColor = 'hover:border-blue-700'
 
@@ -84,9 +86,20 @@ const LoadingAddressBox = () => {
   )
 }
 const EmptyAddressBox = () => {
+  const { addressError } = useCheckoutContext(
+    ({
+      formState: {
+        errors: { addressId },
+      },
+    }) => ({ addressError: addressId }),
+  )
+
   return (
     <div
-      className={`border text-sm shadow-md border-gray-300 min-h-[150px] bg-gray-50 p-4 rounded-md text-gray-400 flex justify-center items-center cursor-pointer hover:text-blue-600 hover:bg-blue-50 ${hoverBorderColor}`}>
+      className={cn(
+        `border text-sm shadow-md border-gray-300 min-h-[150px] bg-gray-50 p-4 rounded-md text-gray-400 flex justify-center items-center cursor-pointer hover:text-blue-600 hover:bg-blue-50 ${hoverBorderColor}`,
+        addressError?.message && `border-red-500`,
+      )}>
       <Plus />
       Thêm mới địa chỉ
     </div>

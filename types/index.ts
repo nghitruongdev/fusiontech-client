@@ -28,6 +28,7 @@ export type IProduct = {
   description: string
   minPrice?: number
   maxPrice?: number
+  discount?: number
   features?: string[]
   brand?: IBrand
   category?: ICategory
@@ -225,6 +226,7 @@ export interface ICheckout {
   items: ICartItem[]
   email?: string
   note?: string
+  payment: IPayment
 }
 export interface ICart {
   id: string
@@ -237,10 +239,7 @@ export interface ICartItem {
   variantId: number
   quantity: number
   updatedAt?: Timestamp
-  /**
-   * @deprecated This field is deprecated. This should be no longer contained.
-   */
-  price?: number
+  variant?: IVariant
 }
 
 export interface IOrder {
@@ -253,14 +252,27 @@ export interface IOrder {
   userId: string
   addressId: number
   paymentId: number
-  payment?: {
-    id: string
-    amount: number
-    paidAt: string
-    status: string
-    method: string
-  }
+  payment?: IPayment
   _links?: _links
+}
+
+export enum PaymentStatus {
+  CHUA_THANH_TOAN = 'Chưa thanh toán',
+  DA_THANH_TOAN = 'Đã thanh toán',
+}
+
+export type PaymentMethodLabel = 'CHUA_THANH_TOAN' | 'DA_THANH_TOAN'
+export enum PaymentMethod {
+  COD = 'COD',
+  CREDIT_CARD = 'CREDIT_CARD',
+}
+
+export interface IPayment {
+  id: string
+  amount: number
+  paidAt: string
+  status: PaymentStatus
+  method: PaymentMethod
 }
 
 export interface IOrderItem {
@@ -291,19 +303,6 @@ export interface IOrderStatusGroup {
   id: number
   name: string
   detailName: string
-}
-
-export enum PaymentStatus {
-  CHUA_THANH_TOAN = 'Chưa thanh toán',
-  DA_THANH_TOAN = 'Đã thanh toán',
-}
-export enum PaymentMethod {
-  COD,
-  CREDIT_CARD,
-}
-
-export interface IPayment {
-  status: PaymentStatus
 }
 
 export interface IInventory {

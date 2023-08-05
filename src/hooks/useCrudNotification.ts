@@ -1,7 +1,6 @@
 /** @format */
 
 import {
-  SuccessErrorNotification,
   useNotification,
   OpenNotificationParams,
   HttpError,
@@ -13,6 +12,7 @@ import { useCallback } from 'react'
 import { messages } from '../../types/messages'
 import { Fields } from '@refinedev/core/dist/interfaces/metaData/fields'
 import { VariableOptions } from '@refinedev/core/dist/interfaces/metaData/variableOptions'
+import { AppError } from 'types/error'
 
 type ValueProps =
   | {
@@ -47,35 +47,15 @@ const useCrudNotification = () => {
     [open],
   )
 
-  //   const onDefaultError = (
-  //     err: HttpError | undefined,
-  //     value: unknown,
-  //     resource: string | undefined,
-  //   ) => {
-  //     const notification: OpenNotificationParams = {
-  //       type: 'error',
-  //       message: '',
-  //     }
-  //     return notification
-  //   }
-
-  //   const onCustomError = (message: string): OpenNotificationParams => {
-  //     return {
-  //       type: 'error',
-  //       message: '',
-  //     }
-  //   }
-  //   function on(this: string | undefined, error: HttpError) {}
-
   const onError = (
-    err?: HttpError | undefined,
+    err?: AppError | HttpError | undefined,
     value?: unknown,
     resource?: string | undefined,
     defaultMessage?: string,
   ): OpenNotificationParams => {
     return {
       type: 'error',
-      message: 'Đã có lỗi xảy ra',
+      message: err?.message ?? 'Đã có lỗi xảy ra',
     }
   }
   const onSuccess = (
