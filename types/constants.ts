@@ -1,7 +1,7 @@
 /** @format */
 
 import { Action } from '@refinedev/core'
-import { ResourceName } from 'types'
+import { PaymentMethod, ResourceName } from 'types'
 
 const throwIfMissing = (name: string) => {
   throw new Error(`${name} is missing from .env.local`)
@@ -45,68 +45,70 @@ export const API = {
         basic: 'basic',
         withSpecs: 'specifications',
         withProduct: 'product',
-        withProductName: 'product-name',
+        withProductBasic: 'product-name',
       },
       existsBySku: (sku: string) => `${name}/search/existsBySku?sku=${sku}`,
       findBySku: (sku: string) => `${name}/search/findBySku?sku=${sku}`,
     }
   },
   products: () => {
-    const name: ResourceName = 'products'
+    const resource: ResourceName = 'products'
+    const variants: ResourceName = 'variants'
     return {
-      resource: name,
+      resource,
       projection: {
         full: 'full',
         specifications: 'specifications',
       },
+      getVariants: (productId: string | number | undefined) =>
+        productId ? `${resource}/${productId}/${variants}` : '',
       getSpecificationsByProduct: (productId: string) =>
-        `${name}/${productId}/specifications`,
+        `${resource}/${productId}/specifications`,
       countProductSold: (productId: string) =>
-        `${name}/search/countProductSold?productId=${productId}`,
+        `${resource}/search/countProductSold?productId=${productId}`,
       getFavoriteProductsByUser: (id: number) =>
-        `${name}/search/favorites?uid=${id}`,
-      /**
-       * @deprecated
-       * @param productId
-       * @returns
-       */
-      distinctAttributesByProduct: (productId: string | number | undefined) => {
-        throw new Error('Deprecated')
-        return `${name}/search/distinct-attributes-name-with-all-values?pid=${productId}`
-      },
+        `${resource}/search/favorites?uid=${id}`,
+      findTopFrequentBoughtTogether: (
+        id: string | number | undefined,
+        size: number = 5,
+      ) =>
+        id
+          ? `${resource}/search/findTopFrequentBoughtTogether?id=${id}&size=${size}`
+          : '',
     }
   },
   specifications: () => {
-    const name: ResourceName = 'specifications'
+    const resource: ResourceName = 'specifications'
     return {
-      resource: name,
-      findDistinctNames: `${name}/search/distinct-names`,
+      resource: resource,
+      findDistinctNames: `${resource}/search/distinct-names`,
       findDistinctByName: (findName: string) =>
-        `${name}/search/findByName?name=${findName}`,
+        `${resource}/search/findByName?name=${encodeURIComponent(findName)}`,
     }
   },
   users: () => {
-    const name: ResourceName = 'users'
+    const resource: ResourceName = 'users'
     return {
-      resource: name,
+      resource: resource,
       defaultAddress: {
         update: (uid: string, aid: number) =>
-          `${name}/${uid}/defaultAddress/${aid}`,
+          `${resource}/${uid}/defaultAddress/${aid}`,
       },
       findByFirebaseId: (id: string) =>
-        `${name}/search/findByFirebaseId?firebaseId=${id}`,
+        `${resource}/search/findByFirebaseId?firebaseId=${id}`,
       existsByEmail: (email: string) =>
-        `${name}/search/existsByEmail?email=${email}`,
+        `${resource}/search/existsByEmail?email=${email}`,
       existsByPhoneNumber: (phone: string) =>
-        `${name}/search/existsByPhoneNumber?phone=${phone}`,
+        `${resource}/search/existsByPhoneNumber?phone=${phone}`,
     }
   },
   shippingAddresses: () => {
-    const name: ResourceName = 'shippingAddresses'
+    const resource: ResourceName = 'shippingAddresses'
     return {
-      resource: name,
-      findAllByUserId: `${name}/search/findAllByUserId`,
-      defaultAddressByUserId: `${name}/search/findDefaultShippingAddressByUserId`,
+      resource: resource,
+      findAllByUserId: (id: string | number | undefined) =>
+        id ? `${resource}/search/findAllByUserId?uid=${id}` : '',
+      defaultAddressByUserId: `${resource}/search/findDefaultShippingAddressByUserId`,
     }
   },
 }
@@ -115,6 +117,12 @@ export const ROLES = {
   user: 'người dùng',
   admin: 'quản trị viên',
 }
+
+export const PaymentMethodLabel: { [key in PaymentMethod]: string } = {
+  COD: 'Trả sau (COD)',
+  CREDIT_CARD: 'Thẻ Visa/ Master Card',
+}
+
 type Lang = 'vi' | 'en'
 type ButtonType = Action | 'refresh' | 'delete' | 'save' | 'logout' | 'cancel'
 export const ButtonText = (key: ButtonType, lang: Lang = 'vi') => {

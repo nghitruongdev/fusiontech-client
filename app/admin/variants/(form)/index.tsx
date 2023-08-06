@@ -21,6 +21,7 @@ import {
   Th,
   Tbody,
   Td,
+  useBoolean,
 } from '@chakra-ui/react'
 import { useForm } from '@refinedev/react-hook-form'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -62,6 +63,7 @@ import ImageUpload, { UploadProviderProps } from '@components/image-upload'
 import useUploadImage, { uploadUtils } from '@/hooks/useUploadImage'
 import { Create, Edit } from '@components/crud'
 import { ChakraCurrencyInput } from '@components/ui/ChakraCurrencyInput'
+import useDebounceFn from '@/hooks/useDebounceFn'
 const productResource = API.products()
 const variantResource = API.variants()
 const ENABLE_FETCHED = true
@@ -135,14 +137,13 @@ VariantForm.Provider = function Provider({
           projection: variantResource.projection.withSpecs,
         },
       },
-      onMutationSuccess(data, variables, context) {
+      onMutationSuccess() {
         console.log('on mutation success')
         setTimeout(router.back, 500)
       },
     },
   })
   const {
-    control,
     handleSubmit,
     watch,
     formState: { dirtyFields },
@@ -155,10 +156,10 @@ VariantForm.Provider = function Provider({
 
   const paramProductId = useConst(searchParams.get('productId'))
   const watchId = watch(`product`)?.value?.id
-  const productId = useMemo(
-    () => variant?.product?.id ?? paramProductId ?? watchId,
-    [variant?.product?.id, paramProductId, watchId],
-  )
+  const productId = useMemo(() => {
+    console.count('product id memo ran')
+    return variant?.product?.id ?? paramProductId ?? watchId
+  }, [variant?.product?.id, paramProductId, watchId])
 
   const productResponse = useOne<IProduct>({
     resource: productResource.resource,
@@ -309,9 +310,7 @@ VariantForm.Product = function Product() {
   const {
     paramProductId,
     control,
-    variant,
     resetField,
-    setValue,
     refineCore: { id },
     formState: { errors },
     productResponse: { data: { data: product } = {} },
@@ -333,6 +332,10 @@ VariantForm.Product = function Product() {
       enabled: !inputDisabled && ENABLE_FETCHED,
     },
   })
+
+  useEffect(() => {
+    console.count('product triggered changed')
+  }, [product])
   useEffect(() => {
     console.count('use effect product ran')
     if (product) {
@@ -343,9 +346,7 @@ VariantForm.Product = function Product() {
         } as any,
       })
     }
-    if (paramProductId) {
-    }
-  }, [product, options, paramProductId, resetField])
+  }, [product, resetField])
   return (
     <>
       <FormControl isInvalid={!!errors.product}>
@@ -370,81 +371,41 @@ VariantForm.Product = function Product() {
     </>
   )
 }
-
-VariantForm.SKU = function SKU() {
-  const { existsBySku, findBySku } = variantResource
-  const {
-    formState: { errors, isValidating },
-    register,
-    watch,
-    variant,
-    getValues,
-    getFieldState,
-    trigger,
-    setError,
-  } = useFormProvider()
-  const [checkSku, setCheckSku] = useState<string | null>(null)
-  const debounceSKU = useDebounce(checkSku, 500)
-  const [isFieldValidating, setIsFieldValidating] = useState<boolean>(false)
-  const { cancellablePromise, cancel } = useCancellable()
-  const checkSkuDB = async (sku: string) => {
-    console.count('checkSKuDB ran')
-    if (!sku) {
-      setCheckSku(null)
-      setIsFieldValidating(false)
-      return
-    }
-    const response = await fetch(`${API_URL}/${findBySku(sku)}`)
-
-    if (!response.ok) {
-      setError('sku', {
-        message: 'Không thể kiểm tra SKU - 500',
-      })
-    } else {
-      const result = (await response.json()) as IVariant
-      if (result) {
-        if (result)
-          setError('sku', {
-            message: 'Mã SKU đã tồn tại',
-          })
-      }
-    }
-    setIsFieldValidating(false)
-    setCheckSku(null)
-    console.log('turn off field validating')
-  }
-
-  const validateSKUExists = async (sku: string) => {
-    if (!sku) return false
-    setIsFieldValidating(true)
-    await waitPromise(300)
-    let message: string = ''
+const validateSKUExists = async (
+  variant: IVariant | undefined,
+  sku: string,
+) => {
+  const { findBySku } = variantResource
+  const id = variant?.id
+  if (!sku) return false
+  let message: string = ''
+  const getResponse = async () => {
     const response = await fetch(`${API_URL}/${findBySku(sku.trim())}`)
     if (response.status === 404) {
-      setIsFieldValidating(false)
       return true
     }
     if (response.ok) {
       const result = await response.json()
       if (result) {
-        if (variant?.id && variant.id === result.id) {
-          setIsFieldValidating(false)
+        if (id && id === result.id) {
           return true
         }
         message = 'Mã SKU đã tồn tại'
       }
     }
-    setIsFieldValidating(false)
-    return message ?? true
   }
+  await getResponse()
+  return message ?? true
+}
 
-  //   useEffect(() => {
-  //     if (!debounceSKU) {
-  //       setIsFieldValidating(false)
-  //       return
-  //     }
-  //     checkSkuDB(debounceSKU)
-  //   }, [debounceSKU])
+VariantForm.SKU = function SKU() {
+  const {
+    formState: { errors },
+    register,
+    variant,
+    setError,
+  } = useFormProvider()
+  const [checkSKU, isValidatingSKU] = useDebounceFn(validateSKUExists, 300)
   return (
     <FormControl
       mb='3'
@@ -452,59 +413,23 @@ VariantForm.SKU = function SKU() {
       isInvalid={!!(errors as any)?.sku}>
       <FormLabel>Mã SKU</FormLabel>
       <InputGroup>
-        <InputLeftElement
-          pointerEvents='none'
-          color='gray.300'
-          fontSize='1.2em'>
-          $
-        </InputLeftElement>
         <Input
           type='text'
           {...register('sku', {
             required: 'This field is required',
-            onChange: (e) => {},
             validate: async (value) => {
-              return await validateSKUExists(value)
-              // cancel();
-              // setCheckSku(null);
-              // return (await cancellablePromise((res, rej) => {
-              //     setIsFieldValidating(true);
-              //     setCheckSku(value);
-              //     console.log(
-              //         "isFieldValidating inside promise",
-              //         isFieldValidating,
-              //     );
-              //     if (!isFieldValidating) return res(true);
-              // })) as any;
-              // console.count("validate called");
-              // return await new Promise(async (res) => {
-              //     await new Promise((validatingRes) => {
-              //         setIsFieldValidating(() => {
-              //             setTimeout(validatingRes, 300);
-              //             return true;
-              //         });
-              //     });
-              //     setCheckSku(value);
-              //     console.log(
-              //         "isFieldValidating inside promise",
-              //         isFieldValidating,
-              //     );
-              //     if (!isFieldValidating) return res(true);
-              // });
+              return await checkSKU.bind(null, variant)(value)
             },
           })}
         />
         <InputRightElement>
-          {isFieldValidating && (
+          {isValidatingSKU && (
             <Spinner
               size={'sm'}
-              speed='0.5s'
-              color='green.500'
+              speed='1s'
+              color='blue.500'
             />
           )}
-          {/* {formSta('sku').} */}
-
-          {/* <CheckIcon color="green.500" /> */}
         </InputRightElement>
       </InputGroup>
       <FormErrorMessage>
@@ -516,12 +441,9 @@ VariantForm.SKU = function SKU() {
 
 VariantForm.Price = function Price() {
   const {
-    action,
     formState: { errors },
     register,
     setValue,
-    watch,
-    variant,
   } = useFormProvider()
   return (
     <FormControl
@@ -601,20 +523,16 @@ VariantForm.SpecDefault = function Specification({}) {
   const { findDistinctNames } = API['specifications']()
   const {
     action,
-    setValue,
-    getValues,
     resetField,
-    control,
     product: { data: product },
-    variant,
   } = useFormProvider()
 
   const productSpecs = product?.specifications ?? []
   useEffect(() => {
+    console.log('useEffect ran')
     if (action === 'edit') return
 
-    const specifications = productSpecs
-    console.log('useEffect spec ran')
+    const specifications = product?.specifications ?? []
     const formSpecs = specifications
       .filter((item) => item.values.length > 1)
       .flatMap((item) => ({
@@ -629,7 +547,7 @@ VariantForm.SpecDefault = function Specification({}) {
         defaultValue: formSpecs,
       })
     }, 0)
-  }, [product?.specifications])
+  }, [product?.specifications, action, resetField])
 
   return (
     <>
@@ -687,7 +605,7 @@ VariantForm.Specification = function Specification({}) {
     control: control,
   })
 
-  const isDisabled = false
+  const isDisabled = true
   const { data: { data: namesData } = {} } = useCustom<string[]>({
     url: findDistinctNames,
     method: 'get',
@@ -695,10 +613,6 @@ VariantForm.Specification = function Specification({}) {
       enabled: !isDisabled && ENABLE_FETCHED,
     },
   })
-  const nameOptions = useMemo(() => {
-    console.count('usememo nameoptions ran')
-    return (namesData && toArrayOptionString(namesData)) ?? []
-  }, [namesData])
 
   const onAppend = useCallback(
     (value: string, shouldFocus: boolean = true) => {
@@ -733,26 +647,6 @@ VariantForm.Specification = function Specification({}) {
     console.log('fields.length', fields.length)
   }
 
-  const handleChange = (
-    newValue: MultiValue<Option<string>>,
-    meta: ActionMeta<Option<string>>,
-  ) => {
-    console.count('handle change ran')
-    const { action, option, removedValue } = meta
-    switch (action) {
-      case 'select-option':
-      case 'create-option':
-        const label = (option as Option<string>).label.trim()
-        onAppend(label)
-        break
-      case 'pop-value':
-      case 'remove-value':
-        const index = fields.findIndex(
-          (field) => field.label === (removedValue as Option<string>).label,
-        )
-        onRemove(index)
-    }
-  }
   const productSpecs = useMemo(
     () => product?.specifications ?? [],
     [product?.specifications],
@@ -765,7 +659,7 @@ VariantForm.Specification = function Specification({}) {
       .map((item) => item.name)
     const reset = () => {
       console.log('reset ran')
-      resetField(`specificationGroup`, { defaultValue: [] })
+      //   resetField(`specificationGroup`, { defaultValue: [] })
       resetField(`specifications`, { defaultValue: [] })
       formSpecs.forEach((item) => onAppend(item, false))
     }
@@ -775,6 +669,7 @@ VariantForm.Specification = function Specification({}) {
   useEffect(() => {
     console.count('productSpecs triggered changed')
   }, [productSpecs])
+
   useEffect(() => {
     console.log('product triggered changed')
   }, [product])
@@ -795,9 +690,9 @@ VariantForm.Specification = function Specification({}) {
       }))
     console.log('formSpecs', formSpecs)
     setTimeout(() => {
-      resetField(`specificationGroup`, {
-        defaultValue: toArrayOptionString(formSpecs.map((item) => item.label)),
-      })
+      //   resetField(`specificationGroup`, {
+      //     defaultValue: toArrayOptionString(formSpecs.map((item) => item.label)),
+      //   })
       resetField(`specifications`, {
         defaultValue: formSpecs,
       })
@@ -806,41 +701,9 @@ VariantForm.Specification = function Specification({}) {
   return (
     <>
       <div>
-        <button
-          onClick={() => {
-            resetField(`specifications`, {
-              defaultValue: [],
-            })
-          }}>
-          Hello there
-        </button>
-
         <FormLabel>Thông số tuỳ chọn</FormLabel>
         <div className='border rounded-lg p-4'>
           <div className=''>
-            <div className=''>
-              <Controller
-                render={({ field }) => (
-                  <CreatableSelect
-                    {...field}
-                    options={nameOptions}
-                    // isValidNewOption={(input, values, options) => {
-                    //   console.log('isValidNew option ran')
-                    //   const array = [...values, ...options].map(
-                    //     (item) => item.label,
-                    //   )
-                    //   return isValidNewOption(input, array)
-                    // }}
-                    onChange={handleChange}
-                    isDisabled={isDisabled}
-                    isClearable={false}
-                    isMulti
-                  />
-                )}
-                name={`specificationGroup`}
-                control={control}
-              />
-            </div>
             {!fields.length && (
               <>
                 <div className='h-[300px] border flex items-center justify-center'>
@@ -867,7 +730,7 @@ VariantForm.Specification = function Specification({}) {
                       key={field.id}
                       index={idx}
                       name={field.label}
-                      onRemove={onRemove.bind(null, idx)}
+                      //   onRemove={onRemove.bind(null, idx)}
                     />
                   ))}
                 </div>
@@ -889,15 +752,14 @@ VariantForm.Specification = function Specification({}) {
 VariantForm.Specification.Row = function Row({ index, onRemove, name = '' }) {
   const { resource, findDistinctByName } = API['specifications']()
   const {
-    action,
     control,
-    getValues,
     setValue,
     formState: { errors },
-    watch,
   } = useFormProvider()
   // const isDisabled = action === "edit";
+
   const isDisabled = false
+  const {} = useBoolean()
   const { data: { data: specsData = [] } = {} } = useCustom<ISpecification[]>({
     url: findDistinctByName(name ?? ''),
     method: 'get',
@@ -910,10 +772,7 @@ VariantForm.Specification.Row = function Row({ index, onRemove, name = '' }) {
   })
 
   const options = useMemo(() => {
-    // console.count('useMemo spec option ran')
-    return specsData.map(({ id, name, value }) =>
-      toObjectOption(value, { id, name, value }),
-    )
+    return specsData.map((item) => toObjectOption(item.value, item))
   }, [specsData])
 
   const append = (input: string) => {
@@ -930,11 +789,11 @@ VariantForm.Specification.Row = function Row({ index, onRemove, name = '' }) {
 
   return (
     <div className='flex border p-4 gap-2'>
-      <div className='flex-grow grid grid-cols-3 gap-2'>
-        <p>{name ?? ''}</p>
+      <div className='flex-grow grid grid-cols-4 gap-2'>
+        <FormLabel>{name ?? ''}</FormLabel>
         <FormControl
           isInvalid={true}
-          className='col-span-2'>
+          className='col-span-3'>
           <Controller
             render={({ field }) => (
               <CreatableSelect
@@ -957,12 +816,12 @@ VariantForm.Specification.Row = function Row({ index, onRemove, name = '' }) {
             }}
           />
           <FormErrorMessage>
-            {JSON.stringify(errors.specifications?.[index]?.message)}
+            {errors.specifications?.[index]?.message}
           </FormErrorMessage>
         </FormControl>
       </div>
-      <div className='min-w-[50px]'>
-        {!!onRemove && (
+      {!!onRemove && (
+        <div className='min-w-[50px]'>
           <Button
             className=''
             onClick={onRemove}
@@ -970,8 +829,8 @@ VariantForm.Specification.Row = function Row({ index, onRemove, name = '' }) {
             isDisabled={isDisabled}>
             <MinusCircle />
           </Button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }

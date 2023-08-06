@@ -118,7 +118,7 @@ export const VariantList: React.FC<IResourceComponentsProps> = () => {
     refineCoreProps: {
       meta: {
         query: {
-          projection: projection.withProductName,
+          projection: projection.withProductBasic,
         },
       },
     },

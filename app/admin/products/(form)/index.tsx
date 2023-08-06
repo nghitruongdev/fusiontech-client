@@ -43,6 +43,7 @@ import {
   toObjectOption,
   toArrayOptionString,
   isValidNewOption,
+  toOptionString,
 } from '@/lib/utils'
 import { useDialog } from '@components/ui/DialogProvider'
 import CreatableSelect from 'react-select/creatable'
@@ -170,7 +171,7 @@ const ProductFormProvider = ({
               dirtyFields.images && removeImages(removed()),
             ])
 
-            return [...productImages, ...uploadedUrls]
+            return [...productImages, ...uploadedUrls.map(({ url }) => url)]
           }
 
           const handleFormSubmit = async () => {
@@ -198,7 +199,8 @@ const ProductFormProvider = ({
               ...(formSpecs && { specifications: formSpecs }),
               ...(formImages && { images: formImages }),
             }
-
+            console.log('submitValues', submitValues)
+            // return
             try {
               const result = await onFinish(submitValues as any)
               console.log('result', result)
@@ -751,7 +753,6 @@ ProductForm.Specifications = function Specifications({}) {
     control: control,
   })
   const isDisabled = action === 'edit'
-  const [nameOptions, setNameOptions] = useState<Option<string>[]>([])
   const { data: { data: namesData } = {} } = useCustom<string[]>({
     url: findDistinctNames,
     method: 'get',
@@ -759,19 +760,16 @@ ProductForm.Specifications = function Specifications({}) {
       enabled: !isDisabled,
     },
   })
-  useEffect(() => {
-    if (!namesData) return
-    setNameOptions(toArrayOptionString(namesData))
-  }, [namesData])
 
+  const nameOptions = useMemo(
+    () => (namesData ? toArrayOptionString(namesData) : []),
+    [namesData],
+  )
   const onAppend = (value: string) => {
     setValue(
       `specificationGroup`,
       produce(getValues(`specificationGroup`) ?? [], (draft) => {
-        draft.push({
-          label: value,
-          value: value,
-        })
+        draft.push(toOptionString(value))
       }),
     )
     append({
@@ -810,7 +808,7 @@ ProductForm.Specifications = function Specifications({}) {
         onRemove(index)
     }
   }
-
+  //reset form when product is fetched
   useEffect(() => {
     console.warn('Change product specification use effect')
     const specs = product?.specifications
@@ -840,17 +838,17 @@ ProductForm.Specifications = function Specifications({}) {
               render={({ field }) => (
                 <CreatableSelect
                   {...field}
+                  isMulti
+                  isClearable={false}
                   options={nameOptions}
+                  onChange={handleChange}
+                  isDisabled={isDisabled}
                   isValidNewOption={(input, values, options) => {
                     const array = [...values, ...options].map(
                       (item) => item.label,
                     )
                     return isValidNewOption(input, array)
                   }}
-                  onChange={handleChange}
-                  isDisabled={isDisabled}
-                  isClearable={false}
-                  isMulti
                 />
               )}
               name={`specificationGroup`}
@@ -879,12 +877,6 @@ ProductForm.Specifications = function Specifications({}) {
               </div>
               <div className='body flex flex-col'>
                 {fields.map((field, idx) => (
-                  // <SpecificationRow
-                  //   key={field.id}
-                  //   index={idx}
-                  //   field={field}
-                  //   onRemove={onRemove.bind(null, idx)}
-                  // />
                   <ProductForm.Specifications.Row
                     key={field.id}
                     index={idx}
@@ -911,9 +903,11 @@ ProductForm.Specifications = function Specifications({}) {
   }>
 }
 
+type SpecOption = Option<ISpecification>
+
 ProductForm.Specifications.Row = function SpecificationRow({
   index,
-  onRemove,
+  onRemove: onRemoveRow,
   field: rowField,
 }) {
   const { resource, findDistinctByName } = API['specifications']()
@@ -927,8 +921,7 @@ ProductForm.Specifications.Row = function SpecificationRow({
   } = useProductFormContext()
   const isDisabled = action === 'edit'
 
-  const [options, setOptions] = useState<Option<ISpecification>[]>([])
-  const { data: { data: data } = {} } = useCustom<ISpecification[]>({
+  const { data: { data } = {} } = useCustom<ISpecification[]>({
     url: findDistinctByName(rowField?.label ?? ''),
     method: 'get',
     queryOptions: {
@@ -938,20 +931,18 @@ ProductForm.Specifications.Row = function SpecificationRow({
       resource,
     },
   })
-  useEffect(() => {
-    if (!data) return
-    setOptions(
-      data.map(({ id, name, value }) =>
-        toObjectOption(name, { id, name, value }),
-      ),
-    )
-  }, [data])
+
+  const options = useMemo(
+    () => data?.map((item) => toObjectOption(item.value, item)) ?? [],
+    [data],
+  )
 
   const getName = () => {
     return getValues(`specifications.${index}.label`)
   }
 
   const append = (input: string) => {
+    console.log('on create new option')
     const updated = produce(
       getValues(`specifications.${index}.options`),
       (draft) => {
@@ -966,30 +957,79 @@ ProductForm.Specifications.Row = function SpecificationRow({
     )
     setValue(`specifications.${index}.options`, updated)
   }
+  //   const onAppend = (option: SpecOption) => {
+  //     const updated = produce(
+  //       getValues(`specifications.${index}.options`),
+  //       (draft) => {
+  //         draft.push(option)
+  //       },
+  //     )
+  //     setValue(`specifications.${index}.options`, updated)
+  //   }
+  //   const onRemove = (label: string) => {
+  //     const selected = getValues(`specifications.${index}.options`)
+  //     const idx = selected.findIndex((item) => item.label === label)
+  //     if (idx === -1) return
+  //     const updated = produce(selected, (draft) => {
+  //       draft.splice(idx, 1)
+  //     })
+  //     setValue(`specifications.${index}.options`, updated)
+  //   }
+
+  //   const handleChange = (
+  //     newValue: MultiValue<SpecOption>,
+  //     meta: ActionMeta<SpecOption>,
+  //   ) => {
+  //     const { action, option, removedValue } = meta
+  //     let optionToAppend = option
+  //     switch (action) {
+  //       case 'create-option':
+  //         const specValue = option.value as unknown as string
+  //         optionToAppend = toObjectOption(specValue, {
+  //           name: getName(),
+  //           value: specValue,
+  //         })
+  //       case 'select-option':
+  //         optionToAppend && onAppend(optionToAppend)
+  //         break
+  //       case 'pop-value':
+  //       case 'remove-value':
+  //         onRemove(removedValue?.label)
+  //     }
+  //   }
 
   return (
     <div className='flex border p-4 gap-2'>
       <div className='flex-grow grid grid-cols-3 gap-2'>
         <p>{rowField?.label ?? getName()}</p>
         <FormControl
-          isInvalid={true}
+          isInvalid={!!errors.specifications?.[index]?.options}
           className='col-span-2'>
           <Controller
+            name={
+              `specifications.${index}.options` as `specifications.0.options`
+            }
+            control={control}
             render={({ field }) => (
               <CreatableSelect
                 {...field}
                 isMulti
                 isDisabled={isDisabled}
-                // onChange={handleOnChange}
                 options={options}
                 menuPosition='fixed'
+                // onChange={handleChange}
                 onCreateOption={append}
+                isOptionSelected={(option, selected) => {
+                  return selected.some((item) => item.label === option.label)
+                }}
+                isValidNewOption={(input, values, options) => {
+                  const array = [...values, ...options].map(
+                    (item) => item.label,
+                  )
+                  return isValidNewOption(input, array)
+                }}
               />
             )}
-            name={
-              `specifications.${index}.options` as `specifications.0.options`
-            }
-            control={control}
             rules={{
               required: true,
               validate: (value) => {
@@ -1005,7 +1045,7 @@ ProductForm.Specifications.Row = function SpecificationRow({
       <div className='min-w-[50px]'>
         <Button
           className=''
-          onClick={onRemove}
+          onClick={onRemoveRow}
           colorScheme='red'
           isDisabled={isDisabled}>
           <MinusCircle />

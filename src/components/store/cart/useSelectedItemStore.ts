@@ -1,56 +1,66 @@
-import { ICartItem } from "types";
-import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
+/** @format */
+
+import { ICartItem } from 'types'
+import { create } from 'zustand'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 type State = {
-    items: ICartItem[];
-};
+  items: ICartItem[]
+}
 type Action = {
-    addSelectedItem: (item: ICartItem) => void;
-    removeSelectedItem: (item: ICartItem) => void;
-    addAll: (items: ICartItem[]) => void;
-    clearAll: () => void;
-    // setHydrated: (status: State["_hydrated"]) => void;
-};
+  addSelectedItem: (item: ICartItem) => void
+  removeSelectedItem: (item: ICartItem) => void
+  addAll: (items: ICartItem[]) => void
+  clearAll: () => void
+  updateItems: (items: Record<number, ICartItem>) => void
+}
 
 export const useSelectedCartItemStore = create<State & Action>()(
-    persist(
-        (set, get) => ({
-            items: [],
-            _hydrated: false,
-            addSelectedItem: (item: ICartItem) =>
-                set((state) => ({ items: [...state.items, item] })),
-            removeSelectedItem: (item: ICartItem) =>
-                set((state) => ({
-                    items: [
-                        ...state.items.filter(
-                            (selected) => selected.variantId !== item.variantId,
-                        ),
-                    ],
-                })),
-            addAll: (items: ICartItem[]) => set({ items: items }),
-            clearAll: () => set({ items: [] }),
-        }),
-        {
-            name: "selected-items", // name of the item in the storage (must be unique)
-            storage: createJSONStorage(() => sessionStorage), // (optional) by default, 'localStorage' is used
-            partialize(state) {
-                return { items: state.items };
-            },
-            onRehydrateStorage: () => (state) => {
-                console.log("hydration starts");
-                // optional
-                return (state: any, error: any) => {
-                    if (error) {
-                        console.log(
-                            "an error happened during hydration",
-                            error,
-                        );
-                    } else {
-                        console.log("hydration finished");
-                    }
-                };
-            },
-        },
-    ),
-);
+  persist(
+    (set, get) => ({
+      items: [],
+      _hydrated: false,
+      addSelectedItem: (item: ICartItem) =>
+        set((state) => ({ items: [...state.items, item] })),
+      removeSelectedItem: (item: ICartItem) =>
+        set((state) => ({
+          items: [
+            ...state.items.filter(
+              (selected) => selected.variantId !== item.variantId,
+            ),
+          ],
+        })),
+      addAll: (items: ICartItem[]) => set({ items: items }),
+      clearAll: () => set({ items: [] }),
+      updateItems: (newItems: Record<number, ICartItem>) => {
+        set(({ items }) => ({
+          items: items
+            .map((item) => newItems[item.variantId])
+            .filter((item) => !!item)
+            .map((item) => item as ICartItem),
+        }))
+      },
+    }),
+    {
+      name: 'selected-items', // name of the item in the storage (must be unique)
+      storage: createJSONStorage(() => sessionStorage), // (optional) by default, 'localStorage' is used
+      partialize(state) {
+        return { items: state.items }
+      },
+      onRehydrateStorage: () => (state) => {
+        console.debug('hydration starts')
+        // optional
+        return (state: any, error: any) => {
+          if (error) {
+            console.error(
+              'an error happened during hydration of selectedCartItems store',
+              error,
+            )
+          } else {
+            console.debug('hydration of selected cart items finished')
+          }
+        }
+      },
+    },
+  ),
+)

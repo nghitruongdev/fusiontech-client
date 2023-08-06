@@ -1,35 +1,26 @@
+/** @format */
+
 import { persist } from 'zustand/middleware'
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
-import useNotification from '@/hooks/useNotification'
-import { withStorageDOMEvents } from '@/hooks/withStorageEvent'
-import {
-  firebaseStorage,
-  firestoreInstance,
-  firestoreProvider,
-} from '@/lib/firebase'
-import { useCreate, useDelete, useList, useUpdate } from '@refinedev/core'
-import {
-  DocumentChangeType,
-  collection,
-  doc,
-  onSnapshot,
-  orderBy,
-  query,
-  serverTimestamp,
-} from 'firebase/firestore'
+import { firestoreProvider } from '@/lib/firebase'
+import { DocumentChangeType, serverTimestamp } from 'firebase/firestore'
 import { useCallback, useEffect, useRef } from 'react'
-import { ICart, ICartItem } from 'types'
+import { ICart, ICartItem, IVariant } from 'types'
 import { create } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 import { shallow } from 'zustand/shallow'
 import { springDataProvider } from '@/providers/rest-data-provider'
+import { API } from 'types/constants'
+import { checkCartExists, createCart, deleteCart } from './utils'
+import { produce } from 'immer'
 type ReturnProps = {
   addItem: (item: ICartItem) => void
   updateItem: (item: ICartItem) => void
   removeItem: (id: string) => void
-  //   createCart: () => void
-  // removeCart: (id: string) => void;
   clearCart: () => void
+  mergeCart: (localCartId: string, userCart: ICart) => void
+  //   updateCart: (id: string, uid: string) => void
+  //   getUserCart: (uid: string | null) => void
 }
 
 const CART_RESOURCE = 'carts'
@@ -43,110 +34,39 @@ const getAllowQuantity = (quantity: number) =>
   Math.round(quantity) > ALLOW_QUANTITY ? ALLOW_QUANTITY : Math.round(quantity)
 
 const useCart = (): ReturnProps => {
-  const cartId = useCartIdStore((state) => state.cartId)
+  const { cartId, setCartId } = useCartIdStore(
+    ({ cartId, cartUserId, setCartId, setCartUserId }) => ({
+      cartId,
+      setCartId,
+    }),
+  )
 
   const cartIdRef = useRef(cartId)
+
   useEffect(() => {
+    console.log('cartId changed', cartId)
     cartIdRef.current = cartId
   }, [cartId])
 
   const { user } = useAuthUser()
 
-  const { items, clearItems, cart, setCart } = useCartStore(
-    ({ items, cart, setCart, onItemsChange, clearItems }) => ({
+  const { items, clearItems, onItemsChange } = useCartStore(
+    ({ items, onItemsChange, clearItems }) => ({
       items,
       onItemsChange,
       clearItems,
-      cart,
-      setCart,
     }),
     shallow,
   )
 
-  const { data: userCartData } = useList<ICart>({
-    ...getResource('cart'),
-    filters: [
-      {
-        field: 'uid',
-        value: user?.uid ?? null,
-        operator: 'eq',
-      },
-    ],
-    pagination: {
-      pageSize: 1,
-    },
-    queryOptions: {
-      enabled: !!user?.uid,
-    },
-  })
-
-  useEffect(() => {
-    const unsub = withStorageDOMEvents(useCartIdStore as any)
-    return unsub
-  }, [])
-
-  //update cart
-  useEffect(() => {
-    console.count('use effect update cart ran times')
-    console.log('cartId', cartId)
-    if (!cartId) {
-      clearItems()
-      return
-    }
-
-    const unsub = onSnapshot(
-      doc(firestoreInstance, 'carts', cartId),
-      (snapshot) => {
-        const cart = snapshot.data() as ICart
-        if (snapshot.exists()) {
-          console.log('snapshot is exists, setting cart')
-          setCart({
-            ...cart,
-            id: snapshot.id,
-          })
-        } else {
-          unsub()
-          setCart(undefined)
-        }
-      },
-    )
-    return unsub
-  }, [cartId, setCart, clearItems])
-
-  //update items
-  useEffect(() => {
-    console.count('use effect update items ran times')
-    if (!cartId) {
-      return
-    }
-    const q = query(
-      collection(firestoreInstance, 'carts', cartId, 'items'),
-      orderBy('updatedAt', 'asc'),
-    )
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      querySnapshot.docChanges()?.forEach(({ doc, type }) => {
-        const { metadata, id } = doc
-        const item = doc.data() as ICartItem
-        // console.log("item", item, type);
-        if (doc.exists()) {
-          // const updatedAt =
-          //     item.updatedAt ??
-          //     doc.get("updatedAt", { serverTimestamps: "estimate" });
-          onItemsChange({ ...item, id: id }, type)
-        }
-      })
-    })
-
-    return unsub
-  }, [cartId])
-
   const clearCurrentCart = () => {
-    if (cartId) deleteCart(cartId)
+    if (!cartId) return
+    Object.entries(items).forEach(([, { id }]) => id && deleteCartItem(id))
   }
 
   const deleteCartItem = useCallback(
     (id: string) => {
-      if (!!!cartId) {
+      if (!cartId) {
         console.error('cart id not found')
         return
       }
@@ -173,6 +93,7 @@ const useCart = (): ReturnProps => {
         return
       }
 
+      console.count('before updating cart item in database')
       const updateItem = async (
         id: string,
         variantId: number,
@@ -210,17 +131,47 @@ const useCart = (): ReturnProps => {
   const addCartItem = useCallback(
     async (addItem: ICartItem) => {
       if (!cartId) {
-        await createCart(user?.uid ?? null)
+        try {
+          await new Promise(async (res, rej) => {
+            let count = 0
+            const interval = setInterval(() => {
+              console.log('interval ran', count++)
+              if (cartIdRef.current) {
+                clearInterval(interval)
+                res(undefined)
+              }
+              if (count === 10) {
+                clearInterval(interval)
+                rej('Operation time out.')
+              }
+            }, 1000)
+            try {
+              const response = await createCart(user?.uid ?? null)
+              setCartId(response?.id)
+            } catch (err) {
+              clearInterval(interval)
+              rej(err)
+            }
+          })
+        } catch (err) {
+          console.log('err', err)
+          return
+        }
       }
+
+      console.log('after check cart id and create')
+
       const itemWithSameVariantId = items[addItem.variantId]
       if (!!itemWithSameVariantId) {
         const { id, variantId, quantity } = itemWithSameVariantId
-        console.error('Duplicate variant id found, do not use interchangably')
-        // updateCartItem({
-        //   id,
-        //   variantId,
-        //   quantity: getAllowQuantity(quantity + addItem.quantity),
-        // })
+        console.debug(
+          'Duplicate variant id found, use update cart item instead',
+        )
+        updateCartItem({
+          id,
+          variantId,
+          quantity: getAllowQuantity(quantity + addItem.quantity),
+        })
         return
       }
       firestoreProvider.create({
@@ -232,7 +183,7 @@ const useCart = (): ReturnProps => {
         },
       })
     },
-    [cartId, items, user?.uid],
+    [cartId, items, user?.uid, updateCartItem, setCartId],
   )
 
   const mergeCart = useCallback(
@@ -251,45 +202,8 @@ const useCart = (): ReturnProps => {
         }, 500)
       })
     },
-    [addCartItem, items],
+    [addCartItem, items, setCartId],
   )
-
-  //update when user changes
-  useEffect(() => {
-    const checkCartWhenLoggedIn = async () => {
-      if (!!!user) {
-        return
-      }
-      const userCart = userCartData?.data?.[0]
-      if (cartId === userCart?.id) return
-
-      if (!!userCart) {
-        if (!!cartId) {
-          mergeCart(cartId, userCart)
-        } else setCartId(userCart.id)
-        return
-      }
-
-      if (!!cartId) {
-        if (!!cart?.uid) {
-          console.warn('Not yet cleaned out the cart of another user')
-          return
-        }
-        //DONE: update localcartid with userId
-        updateCart(cartId, user.uid)
-      }
-    }
-    const checkCartWhenNotLoggedIn = async () => {
-      if (!!!user && !!cart?.uid) {
-        setCartId(undefined)
-      }
-    }
-    if (!!user) {
-      checkCartWhenLoggedIn()
-    } else {
-      checkCartWhenNotLoggedIn()
-    }
-  }, [user?.uid, cart?.uid, cartId, mergeCart, user, userCartData?.data])
 
   return {
     addItem: addCartItem,
@@ -297,16 +211,17 @@ const useCart = (): ReturnProps => {
     removeItem: deleteCartItem,
     // createCart,
     clearCart: clearCurrentCart,
+    mergeCart,
   }
 }
 
 type State = {
-  cart: ICart | undefined
+  //   cart: ICart | undefined
   items: Record<number, ICartItem>
-  setCart: (cart: State['cart']) => void
-  addItem: (item: State['items'][number]) => void
-  removeItem: (item: State['items'][number]) => void
-  updateItem: (item: State['items'][number]) => void
+  //   setCart: (cart: State['cart']) => void
+  //   addItem: (item: State['items'][number]) => void
+  //   removeItem: (item: State['items'][number]) => void
+  //   updateItem: (item: State['items'][number]) => void
   onItemsChange: (
     item: State['items'][number],
     type: DocumentChangeType,
@@ -314,83 +229,60 @@ type State = {
   clearItems: () => void
 }
 
-const createCart = async (userId: string | null) => {
-  console.debug('Creating new cart')
-  const response = await firestoreProvider.create({
-    resource: CART_RESOURCE,
-    variables: {
-      uid: userId,
-      updatedAt: serverTimestamp(),
-    },
-  })
-  setCartId(`${response.data.id}`)
-  return response
-}
-
-const updateCart = (id: string, uid: string) => {
-  return firestoreProvider.update({
-    resource: CART_RESOURCE,
-    id,
-    variables: {
-      uid,
-      updatedAt: serverTimestamp(),
-    },
-  })
-}
-
-const deleteCart = async (id: string) => {
-  if (!id) {
-    console.error('Cart ID is not found')
-    return
-  }
-  console.log('deleteCart id', id)
-  const response = await firestoreProvider.deleteOne({
-    resource: CART_RESOURCE,
-    id: id,
-  })
-  setCartId(null)
-  return response
-}
-
+const {
+  resource,
+  projection: { withProduct: projection },
+} = API['variants']()
 const useCartStore = create(
   immer<State>((set, get) => {
+    const addItem = async (item: State['items'][number]) => {
+      const response = await springDataProvider.getOne<IVariant>({
+        resource,
+        id: item.variantId,
+        meta: {
+          query: {
+            projection,
+          },
+        },
+      })
+
+      set(({ items }) => {
+        items[item.variantId] = { ...item, variant: response.data }
+      })
+    }
+    const removeItem = (item: State['items'][number]) => {
+      set(({ items }) => {
+        delete items[item.variantId]
+      })
+    }
+    const updateItem = (item: State['items'][number]) => {
+      console.log('update item called')
+      const { variantId, quantity } = item
+      set(({ items }) => {
+        if (items[variantId]) {
+          items[variantId]!.quantity = quantity
+        } else {
+          items[variantId] = item
+        }
+      })
+    }
+
     return {
-      cart: undefined,
+      //   cart: undefined,
       items: {},
-      setCart: (cart) => {
-        set(() => ({ cart }))
-      },
-      addItem: (item) => {
-        set(({ items }) => {
-          items[item.variantId] = item
-        })
-      },
-      removeItem: (item) => {
-        set(({ items }) => {
-          delete items[item.variantId]
-        })
-      },
-      updateItem: (item) => {
-        console.count('updating store item')
-        const { variantId, quantity } = item
-        set(({ items }) => {
-          if (items[variantId]) {
-            items[variantId]!.quantity = quantity
-          } else {
-            items[variantId] = item
-          }
-        })
-      },
+      //   setCart: (cart) => {
+      //     set(() => ({ cart }))
+      //   },
       onItemsChange: (item, type) => {
         switch (type) {
           case 'added':
-            get().addItem(item)
+            addItem(item)
             break
           case 'modified':
-            get().updateItem(item)
+            updateItem(item)
             break
           case 'removed':
-            get().removeItem(item)
+            removeItem(item)
             break
         }
       },
@@ -401,28 +293,80 @@ const useCartStore = create(
   }),
 )
 
-const useCartIdStore = create<{
-  cartId?: string | null
-  setId: (id?: string | null) => void
+export const useCartIdStore = create<{
+  cartId: string | null
+  cartUserId: string | null
+  setCartId: (cart: string | null) => void
+  setCartUserId: (userId: string | null) => void
 }>()(
   persist(
-    (set, get) => ({
-      cartId: undefined,
-      setId: (id) => {
-        set(() => ({ cartId: id }))
-        // if (!id) {
-        // //   self?.persist!.clearStorage()
-        // }
-      },
-    }),
+    (set, get) => {
+      return {
+        cartId: null,
+        cartUserId: null,
+        setCartId: async (id) => {
+          if (id) {
+            if (!(await checkCartExists(id))) return
+            set(() => ({ cartId: id }))
+            return
+          }
+
+          set(() => ({ cartId: null, cartUserId: null }))
+        },
+        setCartUserId: (userId) => set(() => ({ cartUserId: userId })),
+      }
+    },
     {
-      name: 'cid',
+      name: 'cart',
     },
   ),
 )
+// const useCartIdStore = create<{
+//   //   setId: (id?: string | null) => void
+//   cart: Partial<ICart> | null
+//   setCart: (cart: Partial<ICart>) => void
+// }>()(
+//   persist(
+//     (set, get) => ({
+//       cart: null,
+//       setId: (id) => {
+//         if (id) {
+//           const checkCartId = async () => {
+//             if (!(await checkCartExists(id))) return
+//             set(({ cart }) => ({ cart: { ...cart, id: id } }))
+//           }
+//           checkCartId()
+//           return
+//         }
+//         set(() => ({ cart: {} }))
+//       },
+//       setCart: (cart) => {
+//         if (cartId) {
+//           console.log('cart', cart)
+//           const checkCartId = async () => {
+//             if (!(await checkCartExists(cart.id ?? ''))) return
+//             set(({}) => ({ cart }))
+//           }
+//           checkCartId()
+//           return
+//         }
+//         set(() => ({ cart: null }))
+//         useCartIdStore.persist.clearStorage()
+//       },
+//     }),
+//     {
+//       name: 'cid',
+//       onRehydrateStorage(state) {
+//         console.log('state', state)
+//       },
+//     },
+//   ),
+// )
 
-const onItemsChange = useCartStore.getState().onItemsChange
-const setCartId = useCartIdStore.getState().setId
+// export const setCart = useCartIdStore.getState().setCart
+
 export default useCart
-export { useCartStore, useCartIdStore }
+export { useCartStore }
 export const useCartItems = () => useCartStore((state) => state.items)
+
+export const setCartId = useCartIdStore.getState().setCartId

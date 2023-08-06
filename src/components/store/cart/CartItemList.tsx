@@ -29,25 +29,28 @@ const CartItemList = () => {
 
 type ContextProps = {
   status: string
+  items: ICartItem[]
 }
-const useCartContext = () => {
+const useListContext = () => {
   const context = useContext(CartItemList.Context)
   if (!!!context) throw new Error('CartItemList.Context is not found')
   return context
 }
 
 CartItemList.Context = createContext<ContextProps | undefined>(undefined)
-CartItemList.Provider = ({ children }: React.PropsWithChildren<{}>) => {
-  // const status = useCartStatus();
+CartItemList.Provider = function Provider({
+  children,
+}: React.PropsWithChildren<{}>) {
+  const items = Object.values(useCartItems()).reverse()
   const status = 'success'
   return (
-    <CartItemList.Context.Provider value={{ status }}>
+    <CartItemList.Context.Provider value={{ status, items }}>
       {children}
     </CartItemList.Context.Provider>
   )
 }
 
-CartItemList.Header = () => {
+CartItemList.Header = function Header() {
   const items = useCartItems()
 
   return (
@@ -68,9 +71,10 @@ CartItemList.Header = () => {
   )
 }
 
-CartItemList.ClearAllButton = () => {
+CartItemList.ClearAllButton = function ClearAllButton() {
   const { confirm } = useDialog()
   const { clearCart } = useCart()
+  const items = useCartItems()
   const onClearCartHandler = () => {
     confirm({
       header: <p className='flex gap-2'>Xoá tất cả sản phẩm</p>,
@@ -82,6 +86,7 @@ CartItemList.ClearAllButton = () => {
     })
   }
 
+  if (!Object.keys(items).length) return <></>
   return (
     <>
       <Button
@@ -95,8 +100,8 @@ CartItemList.ClearAllButton = () => {
   )
 }
 
-CartItemList.Body = () => {
-  const items = Object.values(useCartItems()).reverse()
+CartItemList.Body = function Body() {
+  const { items } = useListContext()
   // use(
   //     new Promise((res) => {
   //         if (ctx.status === "success") {
@@ -110,36 +115,35 @@ CartItemList.Body = () => {
     <>
       <div className='w-full p-5 border-[1px] border-zinc-400 rounded-md flex flex-col gap-4'>
         <div className='flex justify-between'>
-          <CartItemList.SelectAllCheckbox items={items} />
+          <CartItemList.SelectAllCheckbox />
           <div className='flex'>
             {/* <Award color="#1e51c8" className="text-sm" /> */}
             <p className=''>
               <span className='mx-1 font-medium text-xs text-zinc-500'>
                 Hãng chính hãng được bán và phân phối bởi
               </span>
-              <span className='text-blue-800 font-bold uppercase text-base'>
+              <span className='text-primaryBlue font-bold uppercase text-base'>
                 FusionTech
               </span>
             </p>
           </div>
         </div>
         <div className=''>
-          <div className='grid grid-cols-1 gap-4 border-b-[1px] border-b-zinc-200 mb-2'>
-            {items.length === 0 ? (
+          <div className='grid grid-cols-1 gap-2 border-b-[1px] border-b-zinc-200 pb-2'>
+            {!items.length && (
               <div className='flex flex-col items-center justify-center'>
                 <Inbox className='w-28 h-28 text-gray-500' />
                 <p className='text-muted-foreground text-sm'>
                   Không có dữ liệu
                 </p>
               </div>
-            ) : (
-              items.map((item) => (
-                <CartItem
-                  item={item}
-                  key={item.id ?? Math.random()}
-                />
-              ))
             )}
+            {items.map((item) => (
+              <CartItem
+                item={item}
+                key={item.id ?? Math.random()}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -147,8 +151,9 @@ CartItemList.Body = () => {
   )
 }
 
-CartItemList.SelectAllCheckbox = ({ items }: { items: ICartItem[] }) => {
+CartItemList.SelectAllCheckbox = function AllCheckbox() {
   const allRef = useRef<HTMLInputElement>(null)
+  const { items } = useListContext()
   const [selected, addAll, clearAll] = useSelectedCartItemStore((state) => [
     state.items,
     state.addAll,
