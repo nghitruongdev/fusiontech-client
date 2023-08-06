@@ -13,24 +13,27 @@ const Category = async () => {
   const categories = await getCategoriesList()
   console.log('categories', categories)
   return (
-    <>
-      <SectionTitle title={'Danh mục sản phẩm'} />
+    <div className='bg-white rounded-lg mt-6'>
+      <h2 className='px-3 py-3 font-bold  text-xl uppercase '>
+        Danh mục sản phẩm
+      </h2>
+      <hr />
       <div className='flex flex-col items-center'>
         {/* 💻lg break point */}
-        <div className='grid grid-cols-10 gap-4  '>
+        <div className='grid grid-cols-10 border-gray-300 bg-slate-50   '>
           {Object.values(categories.data).map((item: ICategory) => (
             <div
-              className='rounded-lg shadow-md bg-white p-1 flex flex-col justify-center items-center'
+              className='w-full h-36 overflow-y-hidden  bg-white rounded-lg p-4 flex flex-col justify-center items-center ease-in-out duration-300 scale-97 hover:scale-95  '
               key={item.id}>
               {item.image ? (
                 <Image
                   src={item.image ?? ''}
-                  width={300}
-                  height={175}
+                  width={200}
+                  height={100}
                   alt={'/'}
+                  className='w-full p-3  aspect-square rounded-md max-w-[200px] mx-auto object-cover'
                 />
               ) : (
-                // <div className="text-xs">{item.name}</div>
                 <Image
                   alt='/'
                   width={200}
@@ -39,11 +42,22 @@ const Category = async () => {
                   src='https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fvariants%2FlogostuImage.png?alt=media&token=90709f04-0996-4779-ab80-f82e99c62041'
                 />
               )}
+              <div
+                style={{
+                  fontFamily: 'Roboto, sans-serif',
+                  fontStyle: 'normal',
+                  fontWeight: 400,
+                  fontSize: '14px',
+                  lineHeight: '20px',
+                  color: '#333333',
+                }}>
+                {item.name}
+              </div>
             </div>
           ))}
         </div>
       </div>
-    </>
+    </div>
   )
 }
 

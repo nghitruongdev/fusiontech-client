@@ -28,14 +28,14 @@ const BannerSale = () => {
       .padStart(2, '0')} : ${secs.toString().padStart(2, '0')}`
   }
   const backgroundImageURL1 =
-    'https://zishop.vercel.app/_next/image?url=%2Fimages%2Fbanners-img%2Fhome1.webp&w=1080&q=75'
+    'https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fbanner%2Fsale1.webp?alt=media&token=9e001de5-199e-42a9-937f-79af38c7130d'
   const backgroundImageURL2 =
-    'https://zishop.vercel.app/_next/image?url=%2Fimages%2Fbanners-img%2Fhome2.webp&w=1080&q=75'
+    'https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fbanner%2Fsale2.webp?alt=media&token=1b395521-93c6-4231-9c53-975e0bb0f135'
   return (
     <div className='flex items-center flex-col w-full xl:max-w-[2100px] mb-4 md-8 mx-auto'>
       <SectionTitle title={'Giảm giá đặc biệt'} />
       <div className='grid gap-4 grid-cols-6 lg:grid-cols-12'>
-        <div className='col-span-6 lg:col-span-6 flex justify-center shadow-2xl relative rounded-lg overflow-hidden dark:bg-gray-500/70 !dark:bg-blend-multiply'>
+        <div className='col-span-6 lg:col-span-6 flex justify-center shadow-lg relative rounded-lg overflow-hidden dark:bg-gray-500/70 !dark:bg-blend-multiply'>
           <div
             className='w-full bg-[#ffc42133] text-black rounded-lg p-4 hover:scale-105 transition-transform duration-300 ease-in-out'
             style={{
@@ -67,7 +67,7 @@ const BannerSale = () => {
           </div>
         </div>
 
-        <div className='col-span-6 lg:col-span-6 flex justify-center shadow-2xl relative rounded-lg overflow-hidden dark:bg-gray-500/70 !dark:bg-blend-multiply'>
+        <div className='col-span-6 lg:col-span-6 flex justify-center shadow-lg relative rounded-lg overflow-hidden dark:bg-gray-500/70 !dark:bg-blend-multiply'>
           <div
             className='w-full bg-[#ffc42133] text-black rounded-lg p-4 hover:scale-105 transition-transform duration-300 ease-in-out'
             style={{

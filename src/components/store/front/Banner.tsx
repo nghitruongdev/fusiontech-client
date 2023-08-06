@@ -6,7 +6,7 @@ import CaptionCarousel from '@components/ui/Carousel'
 
 const Banner = () => {
   return (
-    <div className='w-full  px-4 py-6 font-titleFont flex gap-4 '>
+    <div className='w-full  px-4 py-4 font-titleFont flex gap-4 '>
       <div className='w-2/3 rounded-lg h-[410px] shadow-md relative'>
         <CaptionCarousel />
       </div>

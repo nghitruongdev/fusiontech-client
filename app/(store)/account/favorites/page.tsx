@@ -44,21 +44,6 @@ const FavoriteProducts = () => {
               </div>
               {/* Description Start */}
               <div className='px-2 py-4 flex flex-col justify-center'>
-                <div className='flex justify-between py-2'>
-                  <button className='w-20 h-9 bg-primaryBlue text-white rounded-full flex gap-1 items-center justify-center hover:bg-hoverPrimaryBlue duration-300'>
-                    <span>
-                      <GoPlus />
-                    </span>{' '}
-                    Add
-                  </button>
-                  <button className='w-24 h-9 bg-white border-[1px] border-black text-black rounded-full flex items-center justify-center gap-1 hover:bg-black hover:text-white duration-300'>
-                    <span>
-                      <GoPlus />
-                    </span>
-                    Details
-                  </button>
-                  {/* </Link> */}
-                </div>
                 <div className='flex items-center gap-3'>
                   <p className='font-titleFont text-lg text-green-700 font-semibold'>
                     Now 999$
@@ -67,10 +52,10 @@ const FavoriteProducts = () => {
                     1500$
                   </p>
                 </div>
-                <p className='text-lg font-semibold py-2 text-black'>
+                <p className='text-sm font-semibold my-2 text-black line-clamp-1'>
                   {product.name}
                 </p>
-                <p className='text-base text-zinc-500'>
+                <p className='text-base text-zinc-500 line-clamp-2'>
                   {product.description && product.description.substring(0, 80)}
                 </p>
                 <div className='flex items-center gap-2 text-yellow mt-2'>

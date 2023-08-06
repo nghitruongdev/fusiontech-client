@@ -11,6 +11,8 @@ import BannerSale from '@components/store/front/BannerSale'
 import Benefits from '@components/store/front/Benefits'
 import Newest from '@components/store/front/Newest'
 import Brands from '@components/store/front/Brands'
+import CardSaleBody from '@components/store/front/CardSaleBody'
+import FusionNews from '@components/store/front/FusionNews'
 
 const metadata: Metadata = {
   title: 'FushionTech - Official Store',
@@ -37,19 +39,23 @@ const ProductLoading = () => {
 const HomePage = async () => {
   return (
     <>
-      <main className='mx-2 bg-white'>
+      <main>
         <div className='max-w-contentContainer mx-auto '>
           <Suspense>
-            <Banner />
+            <div className=''>
+              <Banner />
+            </div>
           </Suspense>
           <Suspense fallback={<ProductLoading />}>
             <div className='mx-20'>
               <ProductList />
-              <Benefits />
               <Category />
+              <CardSaleBody />
               <Newest />
               <BannerSale />
+              {/* <Benefits /> */}
               <Brands />
+              <FusionNews />
             </div>
           </Suspense>
         </div>

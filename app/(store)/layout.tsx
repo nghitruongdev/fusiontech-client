@@ -15,7 +15,7 @@ export default function StoreLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className='font-roboto bg-white'>
+    <div>
       <RefineProvider>
         <Header />
         {/* <Link href="/test">Go to test</Link> */}

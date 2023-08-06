@@ -28,16 +28,37 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
         id: 'name',
         accessorKey: 'name',
         header: 'Tên sản phẩm',
+        cell: function render({ getValue }) {
+          return (
+            <div className='line-clamp-3'>
+              <p>{(getValue() as any) ?? ''}</p>
+            </div>
+          )
+        },
       },
       {
         id: 'summary',
         accessorKey: 'summary',
         header: 'Mô tả',
+        cell: function render({ getValue }) {
+          return (
+            <div className='line-clamp-3'>
+              <p>{(getValue() as any) ?? ''}</p>
+            </div>
+          )
+        },
       },
       {
         id: 'description',
         accessorKey: 'description',
         header: 'Giới thiệu',
+        cell: function render({ getValue }) {
+          return (
+            <div className='line-clamp-3'>
+              <p>{(getValue() as any) ?? ''}</p>
+            </div>
+          )
+        },
       },
       {
         id: 'images',

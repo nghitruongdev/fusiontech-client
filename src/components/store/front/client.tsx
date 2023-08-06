@@ -7,6 +7,8 @@ import { Heart } from 'lucide-react'
 import { createContext, useContext, PropsWithChildren } from 'react'
 import { IProduct } from 'types'
 import useFavorite, { useFavoriteStore } from '@/hooks/useFavorite'
+import { BaseRequestHandler } from 'next/dist/server/base-server'
+import { BaseSyntheticEvent } from 'react'
 
 type ContextState = {
   product: IProduct
@@ -48,7 +50,8 @@ export const FavoriteButton = () => {
     setFavorited(checkFavorite(+product.id))
   }, [product, favorites, checkFavorite, isFavorited])
 
-  const onClick = () => {
+  const onClick = (e: BaseSyntheticEvent) => {
+    e.preventDefault()
     if (!product.id) {
       console.error('Product Id is not found')
       return

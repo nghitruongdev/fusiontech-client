@@ -55,7 +55,7 @@ const ProductList = () => {
   const settings = {
     infinite: true,
     speed: 500,
-    slidesToShow: 5,
+    slidesToShow: 6,
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 3000,
@@ -100,20 +100,19 @@ const ProductList = () => {
           backgroundSize: 'cover',
           backgroundPosition: '100% 100%',
         }}>
-        <div className='col-span-1'>
-          <div className='flex flex-col items-center justify-center h-full '>
-            <Image
-              src={loginImg}
-              width={250}
-              height={10}
-              alt={'/'}
-            />
-            <Button className=' bg-yellow hover:bg-[#f6b911] text-white text-lg  '>
-              Xem tất cả
-            </Button>
+        {/* <div className='col-span-1'>
+          <div className='flex flex-col items-center justify-center h-full  '>
+            <Link href={'http://localhost:3000/search?keyword='}>
+              <Image
+                src={loginImg}
+                width={250}
+                height={10}
+                alt={'/'}
+              />
+            </Link>
           </div>
-        </div>
-        <div className='col-span-5'>
+        </div> */}
+        <div className='col-span-6'>
           <div className='relative p-1 my-2 md:my-4 text-center'>
             {status === 'loading' ? (
               <div>Loading...</div>
@@ -129,7 +128,7 @@ const ProductList = () => {
                     <ProductCardProvider
                       key={products.id}
                       product={products}>
-                      <div className='bg-white mx-2 h-80 rounded-lg'>
+                      <div className='bg-white mx-2 rounded-lg border-gray-300 shadow'>
                         <Product item={products} />
                       </div>
                     </ProductCardProvider>
@@ -150,21 +149,39 @@ const Product = ({ item: { id, name, slug, images } }: { item: IProduct }) => {
   return (
     <div
       aria-label={`Product Item:${name}`}
-      className='p-1 group cursor-pointer lg:min-w-[16.666667%] md:min-w-[25%] sm:min-w-[33.333333%] min-w-[50%]'>
+      className='group cursor-pointer lg:min-w-[16.666667%] md:min-w-[25%] sm:min-w-[33.333333%] min-w-[50%]'>
       <NextLinkContainer href={`/products/${id}`}>
+        <Product.sale />
         <Product.Image images={images} />
         <div className='px-2 flex flex-col justify-center'>
           <div className='flex justify-between'>
             {/* <Product.DetailButton id={id} slug={slug} /> */}
           </div>
           <Product.Brand />
-          <Product.Price />
           <Product.Name name={name} />
+          <Product.Price />
         </div>
       </NextLinkContainer>
 
       {/* <Product.Review /> */}
     </div>
+  )
+}
+Product.sale = () => {
+  return (
+    <>
+      <div className='relative'>
+        <div
+          className='absolute text-xs top-0 left-[-3px] m-0 bg-gradient-to-br from-[#b02d2d] to-[#ff5555] text-white font-bold px-2 py-1 rounded-tl-md rounded-tr-md rounded-br-md shadow'
+          style={{
+            zIndex: 2,
+          }}>
+          50% OFF
+        </div>
+
+        <div className='relative top-[21.5px] left-[-2.2px] w-0 h-0 border-t-[5px] border-l-[5px] border-[#b02d2d] transform rotate-45 '></div>
+      </div>
+    </>
   )
 }
 
@@ -199,14 +216,14 @@ Product.Image = function ProductImage({
 Product.Brand = function Brand() {
   const { product } = useProductCardContext()
   return (
-    <p className='py-2 text-sm font-bold text-muted-foreground leading-tight'>
+    <p className='text-base  font-roboto font-semibold uppercase leading-normal text-zinc-600 line-clamp-1 pt-2'>
       ASUS
     </p>
   )
 }
 Product.Name = function Name({ name }: { name: IProduct['name'] }) {
   return (
-    <p className='text-sm leading-normal text-zinc-700 line-clamp-2'>
+    <p className='text-sm leading-normal text-zinc-500 line-clamp-1 uppercase font-bold '>
       {/* {
                 "Laptop ACER Nitro 5 Eagle AN515-57-54MV (i5-11400H/RAM 8GB/RTX 3050/512GB SSD/ Windows 11)"
             } */}
@@ -217,8 +234,8 @@ Product.Name = function Name({ name }: { name: IProduct['name'] }) {
 
 Product.Price = function Price() {
   return (
-    <div className='grid gap-2'>
-      <p className='font-titleFont text-md font-bold text-sky-800'>
+    <div className='grid my-3'>
+      <p className='font-titleFont text-md font-bold text-red-600 '>
         {formatPrice(25_000_000)}
       </p>
       <p className='text-gray-500 text-sm leading-tight line-through decoration-[1px]'>

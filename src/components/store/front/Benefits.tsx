@@ -1,7 +1,9 @@
 /** @format */
-
+'use client'
 import { benefitContent } from '@/mock/benefits'
 import Image from 'next/image'
+import { useRef } from 'react'
+import Slider from 'react-slick'
 
 const Benefits = () => {
   return (
