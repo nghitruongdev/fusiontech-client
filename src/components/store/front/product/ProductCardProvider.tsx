@@ -1,5 +1,6 @@
 /** @format */
 
+'use client'
 import { createContext, useContext, PropsWithChildren } from 'react'
 import { IProduct } from 'types'
 

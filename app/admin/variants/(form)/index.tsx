@@ -816,7 +816,7 @@ VariantForm.Specification.Row = function Row({ index, onRemove, name = '' }) {
             }}
           />
           <FormErrorMessage>
-            {JSON.stringify(errors.specifications?.[index]?.message)}
+            {errors.specifications?.[index]?.message}
           </FormErrorMessage>
         </FormControl>
       </div>

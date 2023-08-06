@@ -8,6 +8,7 @@ import useFavorite, { useFavoriteStore } from '@/hooks/useFavorite'
 import { useProductCardContext } from './ProductCardProvider'
 import { IProduct } from 'types'
 import { cn } from 'components/lib/utils'
+import { BaseSyntheticEvent } from 'react'
 
 export const FavoriteButtonWithCardProvider = () => {
   const { product } = useProductCardContext()
@@ -38,7 +39,8 @@ export const FavoriteButton = ({
     setFavorited(checkFavorite(+product.id))
   }, [product, favorites, checkFavorite, isFavorited])
 
-  const onClick = () => {
+  const onClick = (e: BaseSyntheticEvent) => {
+    e.preventDefault()
     if (!product?.id) {
       console.error('Product Id is not found')
       return

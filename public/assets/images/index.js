@@ -30,6 +30,8 @@ import banner4 from './banner/1200x628-1.png'
 import banner5 from './banner/laptop-Dell-Inspiron-15-3505-us039.png'
 
 import newProduct from './banner/new.webp'
+import sale1 from './banner/sale1.webp'
+import sale2 from './banner/sale2.webp'
 
 export {
   logo,
@@ -60,4 +62,6 @@ export {
   banner5,
   newProduct,
   thankLogo,
+  sale2,
+  sale1,
 }
