@@ -18,10 +18,21 @@ export const ProfileForm = () => {
   })
 
   // Sử dụng Hook useState để lưu trạng thái thông tin người dùng trong form
-  const [phoneNumber, setPhoneNumber] = useState<string>(data?.data.phoneNumber)
-  const [dateOfBirth, setDateOfBirth] = useState(data?.data.dateOfBirth ?? '')
-  const [gender, setGender] = useState<string>(data?.data.gender)
+  const [phoneNumber, setPhoneNumber] = useState<string>('')
+  const [dateOfBirth, setDateOfBirth] = useState('')
+  const [gender, setGender] = useState<string>('')
   console.log(data?.data)
+  useEffect(() => {
+    if (data?.data.dateOfBirth) {
+      setDateOfBirth(formatDate(data?.data.dateOfBirth));
+    }
+    if (data?.data.phoneNumber) {
+      setPhoneNumber(data.data.phoneNumber);
+    }
+    if (data?.data.gender) {
+      setGender(data.data.gender);
+    }
+  }, [data?.data]);
 
   const toast = useMyToast()
   const updateUser = async (id: string, userData: any) => {
@@ -31,15 +42,15 @@ export const ProfileForm = () => {
       toast
         .ok({
           title: 'Thành công',
-          message: 'Đánh giá thành công',
+          message: 'Cập nhật thông tin thành công',
         })
         .fire()
     } catch (error) {
-      console.log('Lỗi khi tạo đánh giá:', error)
+      console.log('Lỗi khi cập nhật thông tin:', error)
       toast
         .fail({
-          title: 'Thành công',
-          message: 'Đánh giá thất bại',
+          title: 'Thất bại',
+          message: 'Cập nhật thông tin thất bại',
         })
         .fire()
     }
@@ -119,7 +130,7 @@ export const ProfileForm = () => {
           <input
             type="number"
             id="phone"
-            value={data?.data.phoneNumber}
+            value={phoneNumber}
             className="w-full border border-gray-300 rounded-md px-3 py-2"
             {...register('phoneNumber', {
               required: true,

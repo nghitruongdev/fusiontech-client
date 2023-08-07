@@ -13,7 +13,11 @@ const userApi = {
     updateUser: (id, userData) => {
         const url =`http://localhost:8080/api/users/updateUser/${id}`;
         return axiosClient.put(url,userData);
-    }
+    },
+    createShippingAddress:(uid,shippingAdressData) => {
+        const url = `http://localhost:8080/api/shippingAddresses/create/${uid}`;
+        return axiosClient.post(url,shippingAdressData);
+    },
 };
 
 export default userApi;

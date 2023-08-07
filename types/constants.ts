@@ -98,7 +98,7 @@ export const API = {
     return {
       resource: name,
       findAllByUserId: `${name}/search/findAllByUserId`,
-      defaultAddressByUserId: `${name}/search/findDefaultShippingAddressByUserId`,
+      defaultAddressByUserId:(uid: number) => `${name}/search/findDefaultShippingAddressByUserId?uid=${uid}`,
     }
   },
 }
