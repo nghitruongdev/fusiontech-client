@@ -1,3 +1,5 @@
+/** @format */
+
 import { DataProvider, MetaQuery } from '@refinedev/core'
 import { axiosInstance, generateSort, generateFilter } from './utils'
 import { AxiosInstance } from 'axios'

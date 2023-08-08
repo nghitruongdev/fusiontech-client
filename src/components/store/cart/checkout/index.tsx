@@ -20,12 +20,12 @@ const Checkout = () => {
   const hasHydrated = useSelectedCartItemStore.persist?.hasHydrated()
   const itemCount = useSelectedCartItemStore((state) => state.items).length
 
-  useEffect(() => {
-    if (hasHydrated && !itemCount) {
-      router.replace('/cart')
-    }
-  }, [hasHydrated, itemCount, router])
-  use(suspensePromise(hasHydrated))
+  //   useEffect(() => {
+  //     if (hasHydrated && !itemCount) {
+  //       router.replace('/cart')
+  //     }
+  //   }, [hasHydrated, itemCount, router])
+  //   use(suspensePromise(hasHydrated))
 
   const render = () => {
     if (isSubmitting || isLoading) return <Checkout.Loading />

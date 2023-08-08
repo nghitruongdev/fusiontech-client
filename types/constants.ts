@@ -12,6 +12,7 @@ export const API_URL =
   process.env.NEXT_PUBLIC_RESOURCE_SERVER_URL ??
   throwIfMissing('NEXT_PUBLIC_RESOURCE_SERVER_URL')
 
+export const NEXT_API_URL = 'http://localhost:3000/api'
 //todo: const {} =  API['users']()
 export const API = {
   orders: () => {
@@ -110,6 +111,13 @@ export const API = {
         id ? `${resource}/search/findAllByUserId?uid=${id}` : '',
       defaultAddressByUserId: `${resource}/search/findDefaultShippingAddressByUserId`,
     }
+  },
+  address: {
+    provinces: `address/provinces`,
+    districts: (provinceCode: number | string | undefined) =>
+      provinceCode ? `address/districts?query=${provinceCode}` : '',
+    wards: (districtCode: number | string | undefined) =>
+      districtCode ? `address/wards?query=${districtCode}` : '',
   },
 }
 

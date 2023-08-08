@@ -1,29 +1,49 @@
 /** @format */
 
-import { IUser, ShippingAddress } from 'types'
+import { IAddress, IUser, ShippingAddress } from 'types'
 import {
   Checkbox,
+  FormControl,
+  FormErrorIcon,
+  FormErrorMessage,
   FormLabel,
   Input,
   Spinner,
   Stack,
   UseRadioProps,
   chakra,
+  useBoolean,
   useRadio,
   useRadioGroup,
 } from '@chakra-ui/react'
 import ChakraFormInput from '@components/ui/ChakraFormInput'
 import LoadingOverlay from '@components/ui/LoadingOverlay'
 import { Building, HomeIcon, Icon } from 'lucide-react'
-import { UseFormRegister, FieldErrors, RegisterOptions } from 'react-hook-form'
+import {
+  UseFormRegister,
+  FieldErrors,
+  RegisterOptions,
+  Controller,
+} from 'react-hook-form'
 import { UseModalFormReturnType } from '@refinedev/react-hook-form'
-import { HttpError } from '@refinedev/core'
-import { createContext, useContext, useEffect, useMemo } from 'react'
+import { HttpError, useCustom } from '@refinedev/core'
+import {
+  cache,
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { Badge } from '@components/ui/shadcn/badge'
 import { cn } from 'components/lib/utils'
 import { SaveButton } from '@components/buttons'
 import { validatePhoneNumber } from '@/lib/validate'
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
+import AsyncSelect from 'react-select/async'
+import { API, NEXT_API_URL } from 'types/constants'
+import { toObjectOption } from '@/lib/utils'
+import Select from 'react-select'
 
 type State = {} & UseModalFormReturnType<
   ShippingAddress,
@@ -126,37 +146,10 @@ const Body = function Body() {
           {...register('phone', validate.phone)}
         />
       </ChakraFormInput>
-      <div className='grid grid-cols-3 gap-4'>
-        <ChakraFormInput
-          label='Tỉnh/ Thành phố'
-          isInvalid={!!errors?.province}
-          errorMessage={`${errors.province?.message}`}>
-          <Input
-            id='province'
-            type='text'
-            {...register('province', validate.province)}
-          />
-        </ChakraFormInput>
-        <ChakraFormInput
-          label='Quận/ Huyện'
-          id='district'
-          isInvalid={!!errors?.district}
-          errorMessage={`${errors.district?.message}`}>
-          <Input
-            type='text'
-            {...register('district', validate.district)}
-          />
-        </ChakraFormInput>
-        <ChakraFormInput
-          label='Xã/ Phường'
-          id='ward'
-          isInvalid={!!errors?.ward}
-          errorMessage={`${errors.ward?.message}`}>
-          <Input
-            type='text'
-            {...register('ward', validate.ward)}
-          />
-        </ChakraFormInput>
+      <div className='grid gap-2'>
+        <ProvinceSelect />
+        <DistrictSelect />
+        <WardSelect />
       </div>
       <ChakraFormInput
         label='Địa chỉ'
@@ -182,6 +175,189 @@ const Body = function Body() {
   )
 }
 
+const {
+  provinces: provincesApi,
+  districts: districtsApi,
+  wards: wardsApi,
+} = API['address']
+
+const ProvinceSelect = () => {
+  const {
+    register,
+    setValue,
+    getValues,
+    watch,
+    formState: { errors },
+  } = useContextProvider()
+  const { data: { data: provinces } = {} } = useCustom<IAddress[]>({
+    url: `${NEXT_API_URL}/${provincesApi}`,
+    method: 'get',
+  })
+
+  const options = useMemo(
+    () => provinces?.map((item) => toObjectOption(item?.name, item)),
+    [provinces],
+  )
+  return (
+    <FormControl isInvalid={!!errors?.provinceOption}>
+      <FormLabel>Tỉnh/ Thành phố</FormLabel>
+      <Select
+        options={options}
+        value={watch(`provinceOption`)}
+        {...register(`provinceOption`, {
+          required: 'Vui lòng chọn địa chỉ',
+        })}
+        onChange={(newValue, action) => {
+          setValue(`provinceOption`, newValue, {
+            shouldDirty: true,
+          })
+        }}
+        placeholder={'Chọn tỉnh/ thành phố'}
+        noOptionsMessage={(input) => {
+          return <>Không tìm thấy dữ liệu</>
+        }}
+      />
+      <FormErrorMessage>
+        <FormErrorIcon />
+        {errors?.provinceOption?.message}
+      </FormErrorMessage>
+    </FormControl>
+  )
+}
+
+const DistrictSelect = () => {
+  const {
+    register,
+    setValue,
+    getValues,
+    watch,
+    formState: { errors },
+  } = useContextProvider()
+  const provinceCode = watch(`provinceOption`)?.value.code
+  const { data: { data: districts } = {} } = useCustom<IAddress[]>({
+    url: `${NEXT_API_URL}/${districtsApi(provinceCode)}`,
+    method: 'get',
+    queryOptions: {
+      enabled: !!provinceCode,
+    },
+  })
+
+  //   const options = [] as any
+  //   console.log('districts', districts)
+
+  const options = useMemo(
+    () => districts?.map((item) => toObjectOption(item?.name, item)),
+    [districts],
+  )
+  return (
+    <FormControl isInvalid={!!errors?.provinceOption}>
+      <FormLabel>Quận/ huyện</FormLabel>
+      <Select
+        options={options}
+        value={watch(`districtOption`)}
+        {...register(`districtOption`, {
+          required: 'Vui lòng chọn địa chỉ',
+        })}
+        onChange={(newValue, action) => {
+          setValue(`districtOption`, newValue, {
+            shouldDirty: true,
+          })
+        }}
+        placeholder={'Chọn quận/ huyện'}
+        noOptionsMessage={(input) => {
+          return !provinceCode
+            ? 'Vui lòng chọn tỉnh/ thành phố trước'
+            : 'Không tìm thấy dữ liệu'
+        }}
+      />
+      <FormErrorMessage>
+        <FormErrorIcon />
+        {errors?.districtOption?.message}
+      </FormErrorMessage>
+    </FormControl>
+  )
+}
+
+const WardSelect = () => {
+  const {
+    register,
+    setValue,
+    getValues,
+    watch,
+    control,
+    formState: { errors },
+  } = useContextProvider()
+  const districtCode = watch(`districtOption`)?.value.code
+  const provinceCode = watch(`provinceOption`)?.value.code
+
+  const { data: { data: wards } = {} } = useCustom<IAddress[]>({
+    url: `${NEXT_API_URL}/${wardsApi(districtCode)}`,
+    method: 'get',
+    queryOptions: {
+      enabled: !!districtCode,
+    },
+  })
+
+  const options = useMemo(
+    () => wards?.map((item) => toObjectOption(item?.name, item)),
+    [wards],
+  )
+  return (
+    <FormControl isInvalid={!!errors?.wardOption}>
+      <FormLabel>Xã/ phường</FormLabel>
+      <Controller
+        control={control}
+        name='wardOption'
+        rules={{
+          required: 'Vui lòng chọn địa chỉ',
+        }}
+        render={({ field }) => (
+          <Select
+            {...field}
+            options={options}
+            onChange={(newValue, action) => {
+              setValue(`wardOption`, newValue, {
+                shouldDirty: true,
+              })
+            }}
+            placeholder={'Chọn xã/ phường'}
+            // noOptionsMessage={(input) => {
+            //   return !provinceCode
+            //     ? 'Vui lòng chọn tỉnh/ thành phố trước'
+            //     : !districtCode
+            //     ? 'Vui lòng chọn quận/ huyện trước'
+            //     : 'Không tìm thấy dữ liệu'
+            // }}
+          />
+        )}
+      />
+      {/* <Select
+        options={options}
+        value={watch(`wardOption`)}
+        {...register(`wardOption`, {
+          required: 'Vui lòng chọn địa chỉ',
+        })}
+        onChange={(newValue, action) => {
+          setValue(`wardOption`, newValue, {
+            shouldDirty: true,
+          })
+        }} */}
+      {/* placeholder={'Chọn xã/ phường'}
+        noOptionsMessage={(input) => {
+          return !provinceCode
+            ? 'Vui lòng chọn tỉnh/ thành phố trước'
+            : !districtCode
+            ? 'Vui lòng chọn quận/ huyện trước'
+            : 'Không tìm thấy dữ liệu'
+        }}
+      /> */}
+      <FormErrorMessage>
+        <FormErrorIcon />
+        {errors?.wardOption?.message}
+      </FormErrorMessage>
+    </FormControl>
+  )
+}
 type RadioProps = { label: string; icon: JSX.Element } & UseRadioProps
 const AddressTypeRadio = function RadioType({
   label,

@@ -4,6 +4,9 @@
 
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
 import { withStorageDOMEvents } from '@/hooks/withStorageEvent'
+import { CheckoutForm } from '@components/store/cart/checkout/(form)'
+import { AddressFormProvider } from '@components/store/cart/checkout/(form)/(address)/(modal)/AddressForm'
+import AddressSection from '@components/store/cart/checkout/(form)/(address)/AddressSection'
 import { useEffect } from 'react'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
@@ -34,7 +37,9 @@ const AdminPage = () => {
     //     Set Null{' '}
     //   </button>
     // </div>
-    <></>
+    <>
+      <CheckoutForm />
+    </>
   )
 }
 export default AdminPage

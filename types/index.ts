@@ -26,6 +26,8 @@ export type IProduct = {
   slug: string
   summary: string
   description: string
+  status?: 'NGUNG_KINH_DOANH' | 'MOI_RA_MAT'
+  active?: boolean
   minPrice?: number
   maxPrice?: number
   discount?: number
@@ -95,9 +97,6 @@ export type IVariant = {
   sku: string
   images?: FirebaseImage[]
   price: number
-  /**
-   * @deprecated
-   */
   active?: boolean
   availableQuantity?: number
   product?: IProduct
@@ -146,6 +145,15 @@ export type IAttribute = {
   }
 }
 
+type IReview = {
+  id: number
+  comment: string | null
+  createdAt: Date | null
+  rating: '1' | '2' | '3' | '4' | '5' | null
+  productId: number | null
+  USER_ID: number | null
+}
+
 export type IBrand = {
   id?: number
   name: string
@@ -170,6 +178,13 @@ export interface ICategoryField extends ICategory {
   file?: File | null
 }
 
+export type IAddress = {
+  name: string
+  code: number
+  codename: string
+  division_type: string
+  short_codename: string
+}
 export interface IUser {
   id?: number
   firebaseUid: string
@@ -207,6 +222,9 @@ export interface ShippingAddress {
   default?: boolean
   type?: 'Văn phòng' | 'Nhà riêng'
   user?: any
+  provinceOption?: Option<IAddress> | null
+  districtOption?: Option<IAddress> | null
+  wardOption?: Option<IAddress> | null
   _links?: _links
 }
 
@@ -252,8 +270,24 @@ export interface IOrder {
   userId: string
   addressId: number
   paymentId: number
+  voucherId?: number
+  voucher?: {
+    id: number
+  }
   payment?: IPayment
   _links?: _links
+}
+
+export interface IVoucher {
+  id: number
+  code: string | null
+  description?: string | null
+  minOrderAmount?: number | null
+  maxDiscountAmount?: number | null
+  startDate?: string | null
+  expirationDate?: string | null
+  limitUsage?: number | null
+  userLimitUsage?: number | null
 }
 
 export enum PaymentStatus {
