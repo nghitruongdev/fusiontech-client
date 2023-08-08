@@ -35,30 +35,28 @@ const Product = async ({ params: { id } }: Props) => {
   const product = await getOneProduct(id)
   return (
     <DynamicContextProvider product={product}>
-      <section className='bg-white'>
-        <div className='w-[90%] mx-auto p-4'>
-          {/* mx-auto flex items-center py-4 */}
-          <div className='flex'>
-            <div className='w-2/3 relative'>
+      <section className=''>
+        <div className='w-[90%] mx-20 p-4'>
+          <div className='grid grid-cols-3 gap-8'>
+            <div className='col-span-2 relative'>
               <ProductImages />
               <ProductFrequentBoughtTogether />
             </div>
-            <div className='w-1/3 flex flex-col gap-2 mt-4'>
+            <div className='col-span-1 flex flex-col gap-2 '>
               <div className='p-4 pt-0 rounded-lg flex flex-col gap-6 shadow-lg border'>
                 <ProductFavoriteDetails />
                 <Product.Info />
               </div>
             </div>
           </div>
-          <div className='flex border-t shadow-lg rounded-md p-4 mt-4'>
-            <div className='w-2/3'>
+          <div className='grid grid-cols-3 gap-4 border-t shadow-lg rounded-md p-4 mt-4'>
+            <div className='col-span-2'>
               <Description />
-
               <div className=''>
                 <ReviewComponent />
               </div>
             </div>
-            <div className='w-1/3'>
+            <div className='col-span-1'>
               <ProductSpecification />
             </div>
           </div>

@@ -13,6 +13,7 @@ import Newest from '@components/store/front/Newest'
 import Brands from '@components/store/front/Brands'
 import CardSaleBody from '@components/store/front/CardSaleBody'
 import FusionNews from '@components/store/front/FusionNews'
+import RecentProductView from '@components/store/front/section/RecentProductView'
 
 const metadata: Metadata = {
   title: 'FushionTech - Official Store',
@@ -55,6 +56,7 @@ const HomePage = async () => {
               <BannerSale />
               {/* <Benefits /> */}
               <Brands />
+              <RecentProductView />
               <FusionNews />
             </div>
           </Suspense>

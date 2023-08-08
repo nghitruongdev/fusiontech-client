@@ -75,11 +75,10 @@ export const VariantForm = ({ action }: FormProps) => {
   return (
     <VariantForm.Provider action={action}>
       <div className='grid grid-cols-3 gap-4'>
-        <div className=' col-span-1 flex flex-col '>
+        <div className=' col-span-1  '>
           <div className='flex justify-center mb-5'>
             <VariantForm.Images />
           </div>
-          <VariantForm.SpecDefault />
         </div>
         <div className=' col-span-2'>
           <VariantForm.Product />
@@ -87,6 +86,7 @@ export const VariantForm = ({ action }: FormProps) => {
           <VariantForm.Price />
           {/* <VariantForm.Options /> */}
           <VariantForm.Specification />
+          <VariantForm.SpecDefault />
         </div>
       </div>
     </VariantForm.Provider>
@@ -552,7 +552,7 @@ VariantForm.SpecDefault = function Specification({}) {
   return (
     <>
       {!!productSpecs.length && (
-        <div className=''>
+        <div className=' mt-4'>
           <FormLabel>Thông số mặc định</FormLabel>
           {/* {productSpecs.map(({ name, values }) => (
             <div key={name} className="flex gap-2">
@@ -706,7 +706,7 @@ VariantForm.Specification = function Specification({}) {
           <div className=''>
             {!fields.length && (
               <>
-                <div className='h-[300px] border flex items-center justify-center'>
+                <div className='h-[312px] border flex items-center justify-center'>
                   <div
                     className='flex flex-col gap-2 items-center justify-center'
                     ref={buttonRef}>

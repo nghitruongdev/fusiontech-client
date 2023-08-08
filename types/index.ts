@@ -323,6 +323,7 @@ export interface IInventoryDetail {
   variant?: IVariant
   inventory?: IInventory
   _links?: _links
+  formDetail: {}
 }
 
 export interface IProblemResponse {

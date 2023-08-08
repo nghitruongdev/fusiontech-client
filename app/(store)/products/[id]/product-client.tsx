@@ -100,40 +100,84 @@ const ProductContextProvider = ({
   )
 }
 
+// export const ProductImages = () => {
+//   const {
+//     product: { images },
+//   } = useProductContext()
+//   return (
+//     <div className='flex border shadow rounded-lg gap-5 '>
+//       <div className='w-1/5 flex flex-col space-y-2 space-x-2 border-r-2 overflow-auto items-center bg-white '>
+//         {images?.map((item, idx, arr) => (
+//           <div
+//             key={`${idx}-${item}`}
+//             className='p-2 w-1/2 hover:border '>
+//             <Image
+//               src={item}
+//               width={'200'}
+//               height={'200'}
+//               alt='product image'
+//               className='cursor-move duration-500'
+//               priority
+//             />
+//           </div>
+//         ))}
+//       </div>
+//       <div className='w-3/5 bg-white  flex items-center justify-center'>
+//         <Image
+//           src={images?.[0] ?? ''}
+//           width={'200'}
+//           height={'200'}
+//           alt='product image'
+//           className='w-[80%] transform-origin-top-left cursor-move duration-500 '
+//         />
+//       </div>
+//     </div>
+//   )
+// }
 export const ProductImages = () => {
   const {
     product: { images },
   } = useProductContext()
+
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+
+  const handleImageClick = (index) => {
+    setSelectedImageIndex(index)
+  }
+
   return (
-    <div className='flex'>
-      <div className='w-1/5 flex flex-col space-y-2 overflow-auto items-center'>
-        {images?.map((item, idx, arr) => (
+    <div className='grid grid-rows-1 gap-4 mb-10'>
+      <div className='row-span-1 bg-white flex items-center justify-center border shadow rounded-lg'>
+        <div className='h-[400px] p-10 flex items-center'>
+          <Image
+            src={images?.[selectedImageIndex] ?? ''}
+            width={500}
+            height={500}
+            alt='product image'
+            className='max-h-[350px] object-cover cursor-move duration-500 '
+          />
+        </div>
+      </div>
+      <div className='flex flex-row items-center '>
+        {images?.map((item, idx) => (
           <div
             key={`${idx}-${item}`}
-            className='p-2 w-1/2 hover:border '>
+            className='h-[50px ] p-2 mr-4  ease-in-out duration-300 scale-97 hover:scale-95 border  cursor-pointer  shadow rounded-lg  '
+            onClick={() => handleImageClick(idx)}>
             <Image
               src={item}
-              width={'200'}
-              height={'200'}
+              width={80}
+              height={80}
               alt='product image'
-              className='cursor-move duration-500'
+              className='h-[50px] object-cover cursor-move duration-500 rounded-lg'
+              priority
             />
           </div>
         ))}
       </div>
-      <div className='w-4/5'>
-        <Image
-          src={images?.[0] ?? ''}
-          width={'200'}
-          height={'200'}
-          alt='product image'
-          className='w-[80%] transform-origin-top-left cursor-move duration-500'
-        />
-      </div>
     </div>
   )
 }
-
 export const ProductPrice = () => {
   const {
     variants: { data: variants, status },
@@ -264,7 +308,7 @@ export const ProductFrequentBoughtTogether = () => {
   const {
     product: { id },
   } = useProductContext()
-  const { data: { data: products } = {} } = useCustom<IProduct[]>({
+  const { data: { data: products } = {}, status } = useCustom<IProduct[]>({
     url: findTopFrequentBoughtTogether(id, 10),
     method: 'get',
     queryOptions: {
@@ -272,20 +316,36 @@ export const ProductFrequentBoughtTogether = () => {
       suspense: true,
     },
   })
+
+  console.log('top', products)
+
+  if (status === 'loading') {
+    return <div>Loading...</div>
+  }
+
+  if (!Array.isArray(products)) {
+    return <div>No frequent bought together products found.</div>
+  }
+
   return (
-    <Suspense
-      fallback={
+    <div>
+      {products.length === 0 ? (
+        <div>No frequent bought together products found.</div>
+      ) : (
         <div>
-          {' '}
-          <Skeleton className='h-10 w-full bg-red-500' />
+          <p>Sản phẩm thường được mua cùng</p>
+          <ul>
+            {products.map((product) => (
+              <li key={product.id}>
+                <h3>{product.name}</h3>
+                <p>{product.summary}</p>
+                {/* Render other product information as needed */}
+              </li>
+            ))}
+          </ul>
         </div>
-      }>
-      {' '}
-      <div className=''>
-        <p className=''>Sản phẩm thường được mua cùng</p>
-        <>{JSON.stringify(products)}</>
-      </div>
-    </Suspense>
+      )}
+    </div>
   )
 }
 
@@ -375,4 +435,3 @@ export const ProductSpecification = () => {
 
 export default ProductContextProvider
 export { useProductContext }
-6

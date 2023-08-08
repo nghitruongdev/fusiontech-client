@@ -68,7 +68,7 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
           return (
             <Image
               sx={{ maxWidth: '100px' }}
-              src={getValue<FirebaseImage>() ?? Images.products}
+              src={getValue<FirebaseImage[]>()?.[0] ?? Images.products}
               alt={getValue<FirebaseImage>()}
               width={70}
               height={70}
