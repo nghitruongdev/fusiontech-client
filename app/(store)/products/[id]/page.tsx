@@ -55,7 +55,7 @@ const Product = async ({ params: { id } }: Props) => {
               <Description />
 
               <div className=''>
-                <ReviewComponent />
+                <ReviewComponent productId={id} />
               </div>
             </div>
             <div className='w-1/3'>
