@@ -21,6 +21,9 @@ import { AppError } from 'types/error'
 import Link from 'next/dist/client/link'
 import Image from 'next/image'
 import { loginImg } from '@public/assets/images'
+import PasswordInput from '@components/ui/PasswordInput'
+import { cn } from 'components/lib/utils'
+import { useCountdown, useIsFirstRender, useIsMounted } from 'usehooks-ts'
 type PasswordForm = {
   password: string
   confirmPassword: string
@@ -76,7 +79,7 @@ const UpdatePasswordPage = () => {
       }
     }
     verifyAction()
-  }, [])
+  }, [actionCode, mode, router, showFormOn])
 
   const submitHandler = async (data: PasswordForm) => {
     console.log('data', data)
@@ -96,50 +99,29 @@ const UpdatePasswordPage = () => {
   if (error) return <AuthErrorCatch error={error} />
 
   // todo: chưa có showSuccess
-  if (showSuccess) {
-    return (
-      <>
-        <Image
-          src={loginImg}
-          alt='Login icon'
-          width='150'
-        />
-        <p>Đã cập nhật mật khẩu mới thành công.</p>
-        <p>Bây giờ bạn có thể sử dụng mật khẩu mới để đăng nhập.</p>
-        <Link href='/auth/login'>
-          <Button
-            mt='6'
-            type='submit'
-            width='full'
-            colorScheme='brand'>
-            {translate(
-              'pages.backLogin.buttons.submit',
-              'Quay trở lại đăng nhập',
-            )}
-          </Button>
-        </Link>
-      </>
-    )
+  if (!showSuccess) {
+    return <SuccessMessage />
   }
   if (showForm)
     return (
       <AuthPage title={'Đặt lại mật khẩu'}>
-        <form onSubmit={handleSubmit(submitHandler)}>
-          <FormControl
-            mb='3'
-            isInvalid={!!errors?.password}>
-            <FormLabel htmlFor='password'>
+        <form
+          onSubmit={handleSubmit(submitHandler)}
+          className='grid gap-4 w-full mt-4'>
+          <FormControl isInvalid={!!errors?.password}>
+            {/* <FormLabel htmlFor='password'>
               {translate(
                 'pages.updatePassword.fields.password',
                 'Mật khẩu mới',
               )}
-            </FormLabel>
-            <Input
+            </FormLabel> */}
+            <PasswordInput
               id='password'
               type='password'
-              placeholder='Password'
+              h={12}
+              placeholder='Mật khẩu'
               {...register('password', {
-                required: true,
+                required: 'Nhập mật khẩu mới',
                 pattern: {
                   value: /^.{8,}$/,
                   message: 'Mật khẩu phải có ít nhất 8 ký tự.',
@@ -149,21 +131,21 @@ const UpdatePasswordPage = () => {
             <FormErrorMessage>{errors.password?.message}</FormErrorMessage>
           </FormControl>
 
-          <FormControl
-            mb='3'
-            isInvalid={!!errors?.confirmPassword}>
-            <FormLabel htmlFor='confirmPassword'>
+          <FormControl isInvalid={!!errors?.confirmPassword}>
+            {/* <FormLabel htmlFor='confirmPassword'>
               {translate(
                 'pages.updatePassword.fields.confirmPassword',
                 'Xác nhận mật khẩu',
               )}
-            </FormLabel>
-            <Input
+            </FormLabel> */}
+            <PasswordInput
               id='Xác nhận mật khẩu'
               type='password'
-              placeholder='Confirm Password'
+              h={12}
+              placeholder='Xác nhận mật khẩu'
+              showHelperText={true}
               {...register('confirmPassword', {
-                required: true,
+                required: 'Vui lòng xác nhận mật khẩu',
                 validate: (val: any) => {
                   if (watch('password') != val) {
                     return translate(
@@ -180,15 +162,63 @@ const UpdatePasswordPage = () => {
             </FormErrorMessage>
           </FormControl>
 
-          <Button
-            mt='6'
+          <button
+            // disabled={isLoading || !!errorState}
             type='submit'
-            width='full'
-            colorScheme='brand'>
+            className={cn(
+              'bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 mt-4 rounded-lg w-full h-12 shadow-sm',
+              'disabled:cursor-not-allowed',
+            )}>
             {translate('pages.updatePassword.buttons.submit', 'Cập nhật')}
-          </Button>
+          </button>
         </form>
       </AuthPage>
     )
+}
+
+const SuccessMessage = () => {
+  const translate = useTranslate()
+  const router = useRouter()
+  const [countDown, { startCountdown }] = useCountdown({
+    countStart: 5,
+    intervalMs: 1000,
+  })
+  const isMounted = useIsMounted()
+
+  useEffect(() => {
+    if (isMounted()) {
+      router.prefetch('/auth/login')
+      startCountdown()
+    }
+  }, [isMounted, router, startCountdown])
+  useEffect(() => {
+    if (countDown === 0) {
+      router.replace('/auth/login')
+    }
+  }, [countDown, router])
+  return (
+    <>
+      <Image
+        src={loginImg}
+        alt='Login icon'
+        width='150'
+      />
+      <p>Đã cập nhật mật khẩu mới thành công.</p>
+      <p>Bây giờ bạn có thể sử dụng mật khẩu mới để đăng nhập.</p>
+      <Link href='/auth/login'>
+        <Button
+          mt='6'
+          //   type='submit'
+          width='full'
+          colorScheme='blue.600'
+          variant={'link'}>
+          {translate(
+            'pages.backLogin.buttons.submit',
+            `Quay lại trang đăng nhập trong ${countDown}`,
+          )}
+        </Button>
+      </Link>
+    </>
+  )
 }
 export default UpdatePasswordPage

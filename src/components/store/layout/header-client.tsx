@@ -8,11 +8,13 @@ import React, { useState, ChangeEvent } from 'react'
 import Link from 'next/link'
 import {
   Avatar,
+  Button,
   Menu,
   MenuButton,
   MenuDivider,
   MenuItem,
   MenuList,
+  useModal,
 } from '@chakra-ui/react'
 import { IoSearchOutline } from 'react-icons/io5'
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
@@ -20,10 +22,29 @@ import dynamic from 'next/dynamic'
 import { Skeleton } from '@components/ui/Skeleton'
 import { User } from '@firebase/auth'
 // import useModals, { ModalProvider } from "@components/ui/AlertModals";
-import { useLogout } from '@refinedev/core'
+import { useLogout, useNotification } from '@refinedev/core'
 import useCallbackUrl from '@/hooks/useCallbackUrl'
+import { useDialog } from '@components/ui/DialogProvider'
 export const HeaderClient = () => {}
 
+export const VerifyMailBanner = () => {
+  const { user, metadata: { isNew } = {} } = useAuthUser()
+  if (!user || user.emailVerified) return <></>
+  if (isNew)
+    return (
+      <div className='h-8 w-full bg-orange-200'>
+        Email xác thực đã được gửi đến địa chỉ e-mail của bạn. Xác thực tài
+        khoản ngay để được mở khoá nhiều tính năng hấp dẫn.
+      </div>
+    )
+  return (
+    <p className='h-8 w-full bg-[#1e3a8a] align-center'>
+      Tài khoản của bạn chưa được xác thực. Kiểm tra e-mail để xác thực tài
+      khoản hoặc <Button variant={'link'}>click vào đây</Button> để gửi lại
+      mail.
+    </p>
+  )
+}
 export const CartButton = () => {
   const {} = useCart()
   const items = useCartItems()
@@ -49,8 +70,9 @@ export const CartButton = () => {
 export const UserInfoMenu = ({ user }: { user: User }) => {
   const { displayName, email, phoneNumber, photoURL } = user
   const display = displayName ?? email ?? phoneNumber
-  // const { confirm } = useModals();
   const { mutate: logout } = useLogout()
+  const { confirm } = useDialog()
+  const { open } = useNotification()
   return (
     <>
       <Menu>
@@ -86,16 +108,20 @@ export const UserInfoMenu = ({ user }: { user: User }) => {
           <MenuDivider />
           <MenuItem
             onClick={async () => {
-              const result = await confirm(
-                'Bạn có muốn đăng xuất khỏi hệ thống?',
-              )
-              if (!result) {
+              const result = await confirm({
+                message: 'Bạn có muốn đăng xuất khỏi hệ thống?',
+                header: 'Đăng xuất website',
+              })
+              if (!result.status) {
                 console.log('No longer want to logged out')
                 return
               }
               logout(undefined, {
                 onSuccess() {
-                  console.log('log out successfully')
+                  open?.({
+                    type: 'success',
+                    message: 'Đăng xuất thành công',
+                  })
                 },
               })
             }}>

@@ -45,11 +45,12 @@ const LoginForm = () => {
   const callbackUrl = callbackParam ? decodeURIComponent(callbackParam) : '/'
   const isLoading = formSubmitting
   useEffect(() => {
+    console.log('callback url triggered rendered')
     if (callbackUrl)
       router.prefetch(callbackUrl, {
         kind: PrefetchKind.AUTO,
       })
-  }, [])
+  }, [callbackUrl, router])
 
   useEffect(() => {
     console.log('touch field effect ran')
@@ -80,7 +81,6 @@ const LoginForm = () => {
       isRedirecting,
     )
 
-    await waitPromise(0.3 * 1000)
     const result = await firebaseAuth.login({
       providerName: 'credentials',
       credentials: credentials,
@@ -106,12 +106,10 @@ const LoginForm = () => {
       setFocus('email')
     }
   }
-  //todo: have not validate email field
-  //todo: have not validate password field
   return (
     <AuthPage title='Đăng nhập vào FusionTech'>
       <FormProvider {...formMethods}>
-        <div className='w-full sm:w-4/5'>
+        <div className='w-full sm:w-4/5 mt-4'>
           <Stack gap={4}>
             <form className='grid gap-4'>
               <LoginForm.Email />
@@ -190,28 +188,12 @@ const useLoginFormContext = () => {
   return useFormContext<ICredentials['credentials']>()
 }
 
-LoginForm.Email = () => {
+LoginForm.Email = function Email() {
   const {
     register,
-    setError,
-    clearErrors,
     formState: { errors },
   } = useLoginFormContext()
 
-  const onEmailChange = async (email: String) => {
-    // Kiểm tra sự tồn tại của email
-    const exists = await userAPI.checkExistsByEmail(email)
-    console.log(exists)
-    if (exists.data == false) {
-      setError('email', {
-        type: 'manual',
-        message: 'Email không tồn tại.',
-      })
-      console.log('ko tồn tại')
-    } else {
-      clearErrors('email')
-    }
-  }
   return (
     <FormControl
       className=''
@@ -220,15 +202,11 @@ LoginForm.Email = () => {
       <Input
         {...register('email', {
           required: 'Vui lòng nhập địa chỉ email.',
-          validate: (value) => {
-            onEmailChange(value)
-            return true
-          },
         })}
         type='email'
         placeholder='Nhập địa chỉ email'
         _placeholder={{ fontSize: 'sm' }}
-        className={ckMerge(`bg-gray-50 placeholder:text-sm`)}
+        className={ckMerge(`bg-gray-50 placeholder:text-sm h-12`)}
       />
       {errors.email?.message && (
         <FormErrorMessage>
@@ -240,7 +218,7 @@ LoginForm.Email = () => {
   )
 }
 
-LoginForm.Password = () => {
+LoginForm.Password = function PasswordForm() {
   const {
     register,
     formState: { errors },
@@ -256,6 +234,7 @@ LoginForm.Password = () => {
           required: 'Mật khẩu không được để trống',
         })}
         placeholder='Nhập mật khẩu'
+        showHelperText={!errors.password?.message}
         _placeholder={{ fontSize: 'sm' }}
         className={ckMerge(`bg-gray-50 placeholder:text-sm`)}
       />

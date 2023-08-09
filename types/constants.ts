@@ -100,7 +100,7 @@ export const API = {
       existsByEmail: (email: string) =>
         `${resource}/search/existsByEmail?email=${email}`,
       existsByPhoneNumber: (phone: string) =>
-        `${resource}/search/existsByPhoneNumber?phone=${phone}`,
+        `${resource}/search/existsByPhoneNumber?phoneNumber=${phone}`,
     }
   },
   shippingAddresses: () => {

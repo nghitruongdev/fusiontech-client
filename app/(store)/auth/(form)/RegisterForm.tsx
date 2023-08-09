@@ -1,4 +1,6 @@
-import React, { useState } from 'react'
+/** @format */
+
+import React, { useEffect, useMemo, useState } from 'react'
 import { FcGoogle } from 'react-icons/fc'
 import Link from 'next/link'
 import AuthPage from '../AuthPage'
@@ -7,6 +9,9 @@ import {
   FormErrorIcon,
   FormErrorMessage,
   Input,
+  InputGroup,
+  InputRightElement,
+  Spinner,
   useBoolean,
 } from '@chakra-ui/react'
 import { ckMerge } from '@/lib/chakra-merge'
@@ -18,8 +23,11 @@ import { AuthActionResponse } from '@refinedev/core/dist/interfaces'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { IAuthProvider } from 'types/auth'
 import { useRegister } from '@refinedev/core'
-import userAPI from 'src/api/userAPI'
+import useDebounceFn from '@/hooks/useDebounceFn'
+import { cn } from 'components/lib/utils'
+import { API, API_URL } from 'types/constants'
 
+const { existsByPhoneNumber, existsByEmail } = API['users']()
 const Form = () => {
   const formProps = useForm<CredentialsRegister>()
 
@@ -32,20 +40,21 @@ const Form = () => {
   return (
     <AuthPage title={`Đăng ký thành viên FusionTech`}>
       <FormProvider {...formProps}>
-        <div className="flex justify-center bg-white min-h-screen">
-          <div className="w-full sm:w-4/5">
-            <div className="mb-4 space-y-4">
+        <div className='flex justify-center bg-white w-full mt-4'>
+          <div className='w-full sm:w-4/5'>
+            <div className='mb-4 space-y-4'>
               <Form.Email />
+              <Form.Password />
+              <Form.ConfirmPassword />
               <Form.FirstName />
               <Form.LastName />
               <Form.Phone />
-              <Form.Password />
-              <Form.ConfirmPassword />
+              <Form.AgreeCheck />
             </div>
-            <Form.Subscription />
+            {/* <Form.Subscription /> */}
             <Form.SubmitButton />
-            <p className="text-center">Hoặc</p>
-            <hr className="my-4" />
+            <p className='text-center'>Hoặc</p>
+            <hr className='my-4' />
             <Form.GoogleSignup />
             <Form.LoginLink />
           </div>
@@ -61,13 +70,17 @@ Form.FirstName = function FirstName() {
     formState: { errors },
   } = useRegisterFormContext()
   return (
-    <FormControl className="" isRequired isInvalid={!!errors.firstName}>
+    <FormControl
+      className=''
+      isRequired
+      isInvalid={!!errors.firstName}>
       <Input
         {...register('firstName', {
           required: 'Vui lòng nhập tên của bạn.',
+          setValueAs: (value) => value?.trim(),
         })}
-        type="text"
-        placeholder="Nhập tên của bạn"
+        type='text'
+        placeholder='Nhập tên của bạn'
         _placeholder={{ fontSize: 'sm' }}
         className={ckMerge(`bg-gray-50 placeholder:text-sm`)}
       />
@@ -87,13 +100,17 @@ Form.LastName = function LastName() {
     formState: { errors },
   } = useRegisterFormContext()
   return (
-    <FormControl className="" isRequired isInvalid={!!errors.lastName}>
+    <FormControl
+      className=''
+      isRequired
+      isInvalid={!!errors.lastName}>
       <Input
         {...register('lastName', {
-          required: 'Vui lòng nhập họ của bạn.',
+          //   required: 'Vui lòng nhập họ của bạn.',
+          setValueAs: (value) => value?.trim(),
         })}
-        type="text  "
-        placeholder="Nhập họ của bạn"
+        type='text'
+        placeholder='Nhập họ của bạn'
         _placeholder={{ fontSize: 'sm' }}
         className={ckMerge(`bg-gray-50 placeholder:text-sm`)}
       />
@@ -114,46 +131,43 @@ Form.Phone = function Phone() {
     clearErrors,
     formState: { errors },
   } = useRegisterFormContext()
-  const onPhoneChange = async (phone: string) => {
-    // Kiểm tra sự tồn tại của phone number
-    const exists = await userAPI.checkExistsByPhone(phone)
-    if (exists.data == true) {
-      setError('phoneNumber', {
-        type: 'manual',
-        message: 'Số điện thoại đã tồn tại.',
-      })
-    } else {
-      clearErrors(`phoneNumber`)
-      return true
-    }
+  const handlePhoneChange = async (phone: string) => {
+    const exists = await (
+      await fetch(`${API_URL}/${existsByPhoneNumber(phone)}`)
+    ).json()
+    console.log('exists.data', exists)
+    return !!exists ? 'Số điện thoại đã được sử dụng' : true
   }
+  const [onPhoneChange, isLoading] = useDebounceFn(handlePhoneChange, 500)
+
   return (
-    <FormControl className="" isRequired isInvalid={!!errors.phoneNumber}>
-      <Input
-        {...register('phoneNumber', {
-          required: 'Vui lòng nhập số điện thoại.',
-          pattern: {
-            value: /^\d+$/,
-            message: 'Số điện thoại không hợp lệ.',
-          },
-          minLength: {
-            value: 10,
-            message: 'Số điện thoại phải có ít nhất 10 số.',
-          },
-          maxLength: {
-            value: 10,
-            message: 'Số điện thoại không được vượt quá 10 số.',
-          },
-          validate: (value) => {
-            onPhoneChange(value)
-            return true
-          },
-        })}
-        type="number"
-        placeholder="Nhập số điện thoại"
-        _placeholder={{ fontSize: 'sm' }}
-        className={ckMerge(`bg-gray-50 placeholder:text-sm`)}
-      />
+    <FormControl
+      className=''
+      isRequired
+      isInvalid={!!errors.phoneNumber}>
+      <InputGroup>
+        <Input
+          {...register('phoneNumber', {
+            required: 'Vui lòng nhập số điện thoại',
+            pattern: {
+              value: /^0[\d]{9}$/,
+              message: 'Số điện thoại không hợp lệ.',
+            },
+            validate: async (value) => {
+              return await onPhoneChange(value)
+            },
+            setValueAs: (value) => value?.trim(),
+          })}
+          type='tel'
+          placeholder='Nhập số điện thoại'
+          _placeholder={{ fontSize: 'sm' }}
+          className={ckMerge(`bg-gray-50 placeholder:text-sm`)}
+        />
+        <InputRightElement>
+          {isLoading && <Spinner color='blue.600' />}
+        </InputRightElement>
+      </InputGroup>
+
       {errors.phoneNumber?.message && (
         <FormErrorMessage>
           <FormErrorIcon />
@@ -171,40 +185,43 @@ Form.Email = function Email() {
     clearErrors,
     formState: { errors },
   } = useRegisterFormContext()
-
-  const onEmailChange = async (email: String) => {
-    // Kiểm tra sự tồn tại của email
-    const exists = await userAPI.checkExistsByEmail(email)
-    if (exists.data == true) {
-      setError('email', {
-        type: 'manual',
-        message: 'Email đã tồn tại.',
-      })
-    } else {
-      clearErrors('email')
-      return true
-    }
+  const handleEmailChange = async (email: string) => {
+    const error = errors?.email?.message
+    if (error) return error
+    const exists = await (
+      await fetch(`${API_URL}/${existsByEmail(email)}`)
+    ).json()
+    return exists ? 'Địa chỉ email đã được sử dụng' : true
   }
+  const [onEmailChange, isLoading] = useDebounceFn(handleEmailChange, 300)
 
   return (
-    <FormControl className="" isRequired isInvalid={!!errors.email}>
-      <Input
-        {...register('email', {
-          required: 'Vui lòng nhập địa chỉ email.',
-          pattern: {
-            value: /^\S+@\S+$/i,
-            message: 'Email không hợp lệ.',
-          },
-          validate: (value) => {
-            onEmailChange(value)
-            return true
-          },
-        })}
-        type="email"
-        placeholder="Nhập địa chỉ email"
-        _placeholder={{ fontSize: 'sm' }}
-        className={ckMerge(`bg-gray-50 placeholder:text-sm`)}
-      />
+    <FormControl
+      className=''
+      isRequired
+      isInvalid={!!errors.email}>
+      <InputGroup>
+        <Input
+          {...register('email', {
+            required: 'Vui lòng nhập địa chỉ email.',
+            pattern: {
+              value: /^\S+@\S+$/i,
+              message: 'Email không hợp lệ.',
+            },
+            validate: async (value) => {
+              return await onEmailChange(value)
+            },
+            setValueAs: (value) => value?.trim(),
+          })}
+          type='text'
+          placeholder='Nhập địa chỉ email'
+          _placeholder={{ fontSize: 'sm' }}
+          className={ckMerge(`bg-gray-50 placeholder:text-sm`)}
+        />
+        <InputRightElement>
+          {isLoading && <Spinner color='blue.600' />}
+        </InputRightElement>
+      </InputGroup>
       {errors.email?.message && (
         <FormErrorMessage>
           <FormErrorIcon />
@@ -221,7 +238,10 @@ Form.Password = function Password() {
     formState: { errors },
   } = useRegisterFormContext()
   return (
-    <FormControl className="" isRequired isInvalid={!!errors.password}>
+    <FormControl
+      className=''
+      isRequired
+      isInvalid={!!errors.password}>
       <PasswordInput
         {...register('password', {
           required: 'Mật khẩu không được để trống',
@@ -230,7 +250,7 @@ Form.Password = function Password() {
             message: 'Mật khẩu phải có ít nhất 8 ký tự.',
           },
         })}
-        placeholder="Nhập mật khẩu"
+        placeholder='Nhập mật khẩu'
         _placeholder={{ fontSize: 'sm' }}
         className={ckMerge(`bg-gray-50 placeholder:text-sm`)}
       />
@@ -251,14 +271,17 @@ Form.ConfirmPassword = function ConfirmPassword() {
     formState: { errors },
   } = useRegisterFormContext()
   return (
-    <FormControl className="" isRequired isInvalid={!!errors.confirmPassword}>
+    <FormControl
+      className=''
+      isRequired
+      isInvalid={!!errors.confirmPassword}>
       <PasswordInput
         {...register('confirmPassword', {
           required: 'Xác nhận mật khẩu không được để trống',
-          validate: (value) =>
+          validate: (value: string) =>
             value === getValues('password') || 'Xác nhận mật khẩu không khớp.',
         })}
-        placeholder="Xác nhận mật khẩu"
+        placeholder='Xác nhận mật khẩu'
         _placeholder={{ fontSize: 'sm' }}
         className={ckMerge(`bg-gray-50 placeholder:text-sm`)}
       />
@@ -278,35 +301,55 @@ Form.AgreeCheck = function Aggree() {
     formState: { errors },
   } = useRegisterFormContext()
   return (
-    <label className="inline-flex items-center">
-      <input type="checkbox" className="form-radio text-blue-500" />
-      <span className="ml-2">
+    <label className='inline-flex items-center'>
+      <input
+        type='checkbox'
+        className='form-radio text-blue-500'
+        {...register(`agree`, {
+          required: true,
+        })}
+      />
+      <span
+        className={cn(
+          `ml-2 text-zinc-600 text-sm`,
+          errors.agree && 'text-red-500',
+        )}>
         Tôi đồng ý với các điều khoản bảo mật cá nhân
       </span>
     </label>
   )
 }
 
-Form.Subscription = function Subscription() {
-  return (
-    <div className="mb-4">
-      <label className="inline-flex items-center">
-        <input type="checkbox" className="form-radio text-blue-500" />
-        <span className="ml-2">Đăng ký nhận bản tin khuyến mãi qua email</span>
-      </label>
-    </div>
-  )
-}
+// Form.Subscription = function Subscription() {
+//   return (
+//     <div className="mb-4">
+//       <label className="inline-flex items-center">
+//         <input type="checkbox" className="form-radio text-blue-500" />
+//         <span className="ml-2">Đăng ký nhận bản tin khuyến mãi qua email</span>
+//       </label>
+//     </div>
+//   )
+// }
 
 Form.SubmitButton = function SubmitButton() {
-  const { onFormSubmit, handleSubmit } = useRegisterFormContext()
+  const {
+    onFormSubmit,
+    handleSubmit,
+    formState: { isSubmitting, isLoading },
+  } = useRegisterFormContext()
+
   return (
-    <div className="flex flex-col items-center mb-4">
+    <div className='flex flex-col items-center mb-4'>
       <button
+        disabled={isSubmitting}
         onClick={handleSubmit(onFormSubmit)}
-        className="bg-blue-500 text-white font-semibold text-md px-4 py-2 rounded-md w-full h-12 shadow-md"
-      >
-        Đăng ký ngay
+        type='button'
+        className={cn(
+          'bg-blue-500 text-white font-semibold text-md px-4 py-2 rounded-md w-full h-12 shadow-md',
+          isSubmitting &&
+            'pointer-events-none flex items-center justify-center gap-4 select-none',
+        )}>
+        Đăng ký ngay {isSubmitting && <Spinner colorScheme='whiteAlpha' />}
       </button>
     </div>
   )
@@ -316,12 +359,11 @@ Form.GoogleSignup = function GoogleSignup() {
   const { onGoogleSignup } = useRegisterFormContext()
 
   return (
-    <div className="flex my-4">
+    <div className='flex my-4'>
       <button
         onClick={onGoogleSignup}
-        className="bg-white text-black px-4 py-2 rounded-lg w-full border border-gray-400 flex items-center justify-center"
-      >
-        <FcGoogle className="w-8 h-8 mr-2" />
+        className='bg-white text-black px-4 py-2 rounded-lg w-full border border-gray-400 flex items-center justify-center'>
+        <FcGoogle className='w-8 h-8 mr-2' />
         <span>Đăng ký bằng Google</span>
       </button>
     </div>
@@ -330,9 +372,11 @@ Form.GoogleSignup = function GoogleSignup() {
 
 Form.LoginLink = function LoginLink() {
   return (
-    <div className="flex justify-center mb-4">
+    <div className='flex justify-center mb-4'>
       <p>Bạn đã có tài khoản? </p>
-      <Link href="/auth/login" className="text-red-500 font-semibold ml-2">
+      <Link
+        href='/auth/login'
+        className='text-red-500 font-semibold ml-2'>
         Đăng nhập ngay
       </Link>
     </div>
@@ -346,10 +390,16 @@ const useRegisterFormContext = () => {
   const router = useRouter()
   const params = useSearchParams()
   const callbackParam = params.get('callbackUrl')
-  const callbackUrl = callbackParam ? decodeURIComponent(callbackParam) : '/'
+  const callbackUrl = useMemo(
+    () => (callbackParam ? decodeURIComponent(callbackParam) : '/'),
+    [callbackParam],
+  )
+  useEffect(() => {
+    router.prefetch(callbackUrl)
+  }, [callbackUrl, router])
   const [errorState, setErrorState] = useState('')
 
-  const { mutateAsync } = useRegister()
+  const { mutateAsync } = useRegister<CredentialsRegister>()
 
   const onGoogleSignup = async () => {
     reset(undefined, {
@@ -364,11 +414,11 @@ const useRegisterFormContext = () => {
     handlePostSuccess(result)
   }
 
-  //todo: code đăng ký bằng form here
-  //todo: gọi firebaseAuthProvider.register()
   const onFormSubmit = async (value: CredentialsRegister) => {
     try {
+      console.log('value', value)
       const result = await mutateAsync({
+        ...value,
         providerName: IAuthProvider.credentials,
       })
       handlePostSuccess(result)

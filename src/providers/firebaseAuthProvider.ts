@@ -30,6 +30,7 @@ import { API_URL } from 'types/constants'
 import { springDataProvider } from './rest-data-provider'
 import { AppError } from 'types/error'
 import { AxiosError } from 'axios'
+import { setIsNewUser } from '@/hooks/useAuth/useAuthUser'
 
 const auth = getAuth(firebaseApp)
 const googleProvider = new GoogleAuthProvider()
@@ -82,6 +83,7 @@ const handleGooglePostLogin = (userCred: UserCredential) => {
   const infos = getAdditionalUserInfo(userCred)
   const { user } = userCred
   if (infos?.isNewUser) {
+    setIsNewUser(infos.isNewUser)
     console.debug('Register new google user with back-end server')
     return firebaseAuth.register({
       providerName: 'google.com',
@@ -163,25 +165,21 @@ const register = async ({ providerName, ...formValues }: IRegister) => {
     }
     const { token } = await response.json()
     signInWithCustomToken(auth, token)
+    setIsNewUser(true)
     return {
       success: true,
     }
   }
   if (providerName === IAuthProvider['credentials'] && 'email' in formValues) {
-    const {
-      email,
-      password,
-      phoneNumber: phone,
-      firstName,
-      lastName,
-    } = formValues
+    const { email, password, phoneNumber, firstName, lastName } = formValues
+    console.log('formValues', formValues)
     const response = await springDataProvider.custom({
       url: authAPI.registerWithEmail,
       method: 'post',
       payload: {
         firstName,
         lastName,
-        phone,
+        phoneNumber,
         email,
         password,
       },
@@ -189,6 +187,7 @@ const register = async ({ providerName, ...formValues }: IRegister) => {
     if (response.data) {
       const { token } = response.data
       signInWithCustomToken(auth, token)
+      setIsNewUser(true)
       return {
         success: true,
       }
