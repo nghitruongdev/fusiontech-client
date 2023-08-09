@@ -50,7 +50,6 @@ const ReviewComponent = () => {
         setReviewList(response.data)
 
         calculateAverageRating(response.data)
-        averageRating.toFixed(1) // chỉnh lại điểm review trung bình sau khi vừa thêm mới revie
       } catch (error) {
         console.log('fail to fetch review list', error)
       }
@@ -78,16 +77,13 @@ const ReviewComponent = () => {
     /* Hàm tính đánh giá trung bình dựa trên rating */
   }
   const calculateAverageRating = (reviews: any[]) => {
-    if (reviews.length > 0) {
-      const totalRating = reviews.reduce(
-        (sum, review) => sum + review.rating,
-        0,
-      )
-      const averageRating = totalRating / reviews.length
-      setAverageRating(averageRating)
-    } else {
+    if (!reviews.length) {
       setAverageRating(0)
+      return
     }
+    const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0)
+    const averageRating = totalRating / reviews.length
+    setAverageRating(averageRating)
   }
 
   {
@@ -172,7 +168,6 @@ const ReviewComponent = () => {
     { id: 4, rating: 2, percentage: calculatePercentage(reviewList, 2) },
     { id: 5, rating: 1, percentage: calculatePercentage(reviewList, 1) },
   ]
-
   return (
     <div id='review-section'>
       {/* Hiển thị bảng thống kê review */}
@@ -227,6 +222,7 @@ const ReviewComponent = () => {
                           }}>
                           <Box
                             w='100%'
+                            // eslint-disable-next-line react-hooks/rules-of-hooks
                             bg={useColorModeValue('gray.300', 'gray.600')}
                             rounded='md'>
                             <Box
@@ -259,9 +255,7 @@ const ReviewComponent = () => {
           </button>
         </div>
       </div>
-      {!showReviewForm ? (
-        <p></p>
-      ) : (
+      {showReviewForm && (
         <div className='fixed inset-0 flex items-center justify-center  bg-black bg-opacity-50 z-50'>
           <form className='flex flex-col w-1/3 p-4 bg-white rounded-lg '>
             <IoIosArrowBack
@@ -324,7 +318,7 @@ const ReviewComponent = () => {
       )}
 
       {/* Hiển thị reviews */}
-      {reviewList && reviewList.length > 0 ? (
+      {!!reviewList?.length &&
         reviewList.slice(0, visibleComments).map((review) => (
           <div
             className='mb-4'
@@ -347,11 +341,9 @@ const ReviewComponent = () => {
               </div>
             </div>
           </div>
-        ))
-      ) : (
-        <p>No reviews found.</p>
-      )}
-      {reviewList && reviewList.length > 3 && (
+        ))}
+
+      {reviewList?.length > 3 && (
         <div className='w-full flex flex-col justify-center items-center mt-2'>
           {isExpanded ? (
             <button
@@ -366,6 +358,8 @@ const ReviewComponent = () => {
               Xem thêm
             </button>
           )}
+        </div>
+      )}
     </div>
   )
 }

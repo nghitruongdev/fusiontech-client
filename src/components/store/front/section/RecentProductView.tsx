@@ -97,7 +97,11 @@ Product.sale = () => {
   )
 }
 
-Product.Image = ({ images }: { images: IProduct['images'] }) => {
+Product.Image = function ProductImage({
+  images,
+}: {
+  images: IProduct['images']
+}) {
   return (
     <div
       className='
@@ -128,14 +132,14 @@ Product.Image = ({ images }: { images: IProduct['images'] }) => {
     </div>
   )
 }
-Product.Brand = ({ brand }: { brand: IProduct['brand'] }) => {
+Product.Brand = function Brand({ brand }: { brand: IProduct['brand'] }) {
   return (
     <p className='text-base  font-roboto font-semibold uppercase leading-normal text-zinc-600 line-clamp-1 pt-2'>
       {brand?.name}
     </p>
   )
 }
-Product.Name = ({ name }: { name: IProduct['name'] }) => {
+Product.Name = function Name({ name }: { name: IProduct['name'] }) {
   return (
     <p className=' text-xs leading-normal text-zinc-500 line-clamp-1 uppercase font-bold '>
       {/* {
@@ -145,7 +149,11 @@ Product.Name = ({ name }: { name: IProduct['name'] }) => {
     </p>
   )
 }
-Product.Summary = ({ summary }: { summary: IProduct['summary'] }) => {
+Product.Summary = function Summary({
+  summary,
+}: {
+  summary: IProduct['summary']
+}) {
   return (
     <div className='bg-slate-100 rounded-md p-2 mb-2 h-14 max-h-14'>
       <p className='text-sm font-roboto leading-normal text-zinc-700 line-clamp-2 '>
@@ -155,7 +163,7 @@ Product.Summary = ({ summary }: { summary: IProduct['summary'] }) => {
   )
 }
 
-Product.Price = () => {
+Product.Price = function Price() {
   return (
     <div className='flex justify-start items-center py-2'>
       <p className='font-titleFont text-md font-bold text-red-600 mr-2'>
@@ -168,7 +176,11 @@ Product.Price = () => {
   )
 }
 
-Product.Review = ({ avgRating }: { avgRating: IProduct['avgRating'] }) => {
+Product.Review = function Review({
+  avgRating,
+}: {
+  avgRating: IProduct['avgRating']
+}) {
   // return (
   //   <div className='flex items-center gap-2 text-yellow my-2'>
   //     {/* {avgRating} */}
@@ -184,7 +196,7 @@ Product.Review = ({ avgRating }: { avgRating: IProduct['avgRating'] }) => {
   // )
   const starCount = 5
 
-  const filledStars = Math.floor(avgRating)
+  const filledStars = Math.floor(avgRating ?? 0)
 
   const remainingStars = starCount - filledStars
 
@@ -214,13 +226,13 @@ Product.Review = ({ avgRating }: { avgRating: IProduct['avgRating'] }) => {
   )
 }
 
-Product.DetailButton = ({
+Product.DetailButton = function DetailButton({
   id,
   slug,
 }: {
   id: IProduct['id']
   slug: IProduct['slug']
-}) => {
+}) {
   return (
     <Link href={`/products/${id}`}>
       <button className='w-16 h-7 my-2 bg-white border-[1px] border-secondaryBlue text-zinc-700 font-semibold text-sm rounded-full flex items-center justify-center hover:bg-sky-700 hover:text-white duration-150'>

@@ -3,24 +3,21 @@
 'use client'
 
 import { Rating } from '@smastrom/react-rating'
-import { CarrotIcon, Heart, Info } from 'lucide-react'
+import { CarrotIcon } from 'lucide-react'
 import {
   PropsWithChildren,
-  Suspense,
   createContext,
   useContext,
   useEffect,
-  useRef,
   useState,
 } from 'react'
-import { IProduct, IVariant, ResourceName } from 'types'
+import { IProduct, IVariant } from 'types'
 import { API } from 'types/constants'
 import { useCustom } from '@refinedev/core'
 import { cleanUrl, formatPrice } from '@/lib/utils'
 import { useOptionStore } from './product-options'
 import useCart, {
   ALLOW_QUANTITY,
-  useCartItems,
   useCartStore,
 } from '@components/store/cart/useCart'
 import { cn } from 'components/lib/utils'
@@ -30,7 +27,6 @@ import Image from 'next/image'
 import {
   Table,
   TableContainer,
-  TableCaption,
   Tbody,
   Tr,
   Td,
@@ -39,11 +35,7 @@ import {
 } from '@chakra-ui/react'
 import { useRecentProductViewStore } from '@components/providers/RecentProductViewProvider'
 import { useIsFirstRender } from 'usehooks-ts'
-import useFavorite from '@/hooks/useFavorite'
-import {
-  FavoriteButton,
-  FavoriteButtonWithCardProvider,
-} from '@components/store/front/product/FavoriteButton'
+import { FavoriteButton } from '@components/store/front/product/FavoriteButton'
 import Link from 'next/link'
 
 const { findTopFrequentBoughtTogether } = API['products']()
@@ -142,7 +134,7 @@ export const ProductImages = () => {
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
 
-  const handleImageClick = (index) => {
+  const handleImageClick = (index: number) => {
     setSelectedImageIndex(index)
   }
 
