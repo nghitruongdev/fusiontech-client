@@ -1,7 +1,7 @@
 /** @format */
 
 'use client'
-import { AddressPanel, ProfileForm } from '@components/store/account/profile'
+import { AddressPanel, ProfileForm} from '@components/store/account/profile'
 import React from 'react'
 function AccountProfile() {
   return (

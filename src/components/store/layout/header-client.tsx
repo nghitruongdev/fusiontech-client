@@ -100,9 +100,14 @@ export const UserInfoMenu = ({ user }: { user: User }) => {
         <MenuList
           color='blackAlpha.700'
           className='text-zinc-700 text-sm'>
-          <MenuItem>Quản lý tài khoản</MenuItem>
+          <MenuItem>
+              <Link href="/account/profile">Thông tin tài khoản</Link>
+          </MenuItem>
           <MenuItem>
             <Link href='/account/orders'>Quản lý đơn hàng</Link>
+          </MenuItem>
+          <MenuItem>
+            <Link href="/account/favorites">Sản phẩm yêu thích</Link>
           </MenuItem>
 
           <MenuDivider />

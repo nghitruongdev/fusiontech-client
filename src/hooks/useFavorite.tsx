@@ -14,7 +14,7 @@ import { toRecord } from '@/lib/utils'
 
 const useFavorite = () => {
   const { claims } = useAuthUser() // Lấy thông tin user từ hook useAuthUser
-  const uid = claims?.id ?? 1
+  const uid = claims?.id
   const toast = useMyToast()
   const [addFavorite, removeFavorite, isFavorite] = useFavoriteStore(
     ({ addFavorite, removeFavorite, isFavorite }) => [

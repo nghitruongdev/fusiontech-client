@@ -4,17 +4,13 @@
 import React from 'react'
 import { Link } from '@chakra-ui/react'
 import Image from 'next/image'
-import { thankLogo } from '@public/assets/images'
+import { logoThanks } from "@public/assets/images";
 const ThankYouPage = () => {
   return (
-    <div className='bg-gray-100 flex items-center justify-center p-4 '>
-      <div className='bg-white p-4 rounded-lg shadow-lg w-2/3  px-8'>
-        <div className='flex justify-center items-center'>
-          <Image
-            src={thankLogo}
-            alt='Login icon'
-            width='250'
-          />
+        <div className="bg-gray-100 flex items-center justify-center p-4">
+            <div className="bg-white p-8 rounded-lg shadow-lg w-2/3 ">
+                <div className="flex justify-center items-center">
+                    <Image src={logoThanks} alt="Login icon" width="170" />
         </div>
         <h2 className='text-2xl font-semibold my-4 text-center'>
           Xin gửi lời cảm ơn chân thành!
@@ -34,6 +30,9 @@ const ThankYouPage = () => {
             <p className='text-blue-600'>Phong Vũ: https://phongvu.vn/</p>
             <p className='text-blue-600'>
               Cellphones: https://cellphones.com.vn/
+                        </p>
+                        <p className="text-blue-600">
+                            Walmart: https://Walmart.com/
             </p>
             và nhiều trang web bán hàng khác. Những bố cục trang, giao diện,
             hình ảnh và kiến thức mà chúng em đã tham khảo đã là nguồn cảm hứng

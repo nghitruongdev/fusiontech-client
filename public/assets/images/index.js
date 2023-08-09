@@ -34,6 +34,7 @@ import sale1 from './banner/sale1.webp'
 import sale2 from './banner/sale2.webp'
 
 export {
+    logoThanks,
   logo,
   phoneImg,
   sliderImgOne,
@@ -61,7 +62,6 @@ export {
   banner4,
   banner5,
   newProduct,
-  thankLogo,
   sale2,
   sale1,
 }

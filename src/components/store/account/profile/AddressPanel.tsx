@@ -1,5 +1,13 @@
 import { useBoolean } from '@chakra-ui/react'
 import { Edit } from 'lucide-react'
+import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
+import { useCustom, useUpdate } from '@refinedev/core'
+import { API } from 'types/constants'
+import { API_URL } from 'types/constants'
+import { useState, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import userApi from '@/api/userAPI'
+import useMyToast from '@/hooks/useToast'
 
 export const AddressPanel = () => {
   const [isShow, { on: show, off: close, toggle }] = useBoolean()
@@ -21,6 +29,58 @@ export const AddressPanel = () => {
 }
 
 const AddressContent = ({ showModal }: { showModal: boolean }) => {
+  const { user,claims } = useAuthUser()
+  const { resource, defaultAddressByUserId } = API['shippingAddresses']()
+  const { data, status } = useCustom({
+    url: `${API_URL}/${defaultAddressByUserId(claims?.id?? 0)}`,
+    method: 'get',
+    queryOptions: {
+      enabled: !!user,
+    },
+  })
+  console.log(data);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    getValues,
+  } = useForm()
+
+  const toast = useMyToast()
+  const createShippingAddress = async (uid: number, shippingAddressData: Object) => {
+    try {
+      const response = await userApi.createShippingAddress(uid, shippingAddressData)
+      toast
+        .ok({
+          title: 'Thành công',
+          message: 'Thêm địa chỉ nhận hàng thành công',
+        })
+        .fire()
+    } catch (error) {
+      console.log('Lỗi khi thêm địa chỉ nhận hàng:', error)
+      toast
+        .fail({
+          title: 'Thành công',
+          message: 'Thêm địa chỉ nhận hàng thất bại',
+        })
+        .fire()
+    }
+  }
+
+  const handleUpdateShippingAddress = (event: any) => {
+    event.preventDefault()
+    const shippingAddressData = {
+      name: getValues('name'),
+      phone: getValues('phone'),
+      province: getValues('province'),
+      district: getValues('district'),
+      ward: getValues('ward'),
+      address: getValues('address'),
+    }
+    createShippingAddress(claims?.id?? 0,shippingAddressData);
+    !showModal;
+  }
+
   if (!showModal) {
     return (
       <form className="mt-2">
@@ -30,10 +90,11 @@ const AddressContent = ({ showModal }: { showModal: boolean }) => {
           </label>
           <input
             type="text"
-            id="fullName"
+            id="province"
+            value={data?.data.province}
             readOnly
             className="w-full bg-gray-100 border border-gray-300 rounded-md px-3 py-2"
-            // {...register('Full name', { required: true })}
+
           />
         </div>
         <div className="mb-4">
@@ -42,10 +103,11 @@ const AddressContent = ({ showModal }: { showModal: boolean }) => {
           </label>
           <input
             type="text"
-            id="fullName"
+            id="district"
+            value={data?.data.district}
             readOnly
             className="w-full bg-gray-100 border border-gray-300 rounded-md px-3 py-2"
-            // {...register('Full name', { required: true })}
+
           />
         </div>
         <div className="mb-4">
@@ -54,7 +116,8 @@ const AddressContent = ({ showModal }: { showModal: boolean }) => {
           </label>
           <input
             type="text"
-            id="fullName"
+            id="ward"
+            value={data?.data.ward}
             readOnly
             className="w-full bg-gray-100 border border-gray-300 rounded-md px-3 py-2"
             // {...register('Full name', { required: true })}
@@ -66,7 +129,8 @@ const AddressContent = ({ showModal }: { showModal: boolean }) => {
           </label>
           <input
             type="text"
-            id="fullName"
+            id="address"
+            value={data?.data.address}
             readOnly
             className="w-full bg-gray-100 border border-gray-300 rounded-md px-3 py-2"
             // {...register('Full name', { required: true })}
@@ -88,68 +152,68 @@ const AddressContent = ({ showModal }: { showModal: boolean }) => {
               </label>
               <input
                 type="text"
-                id="fullName"
+                id="name"
                 className="w-full  border border-gray-300 rounded-md px-3 py-2"
-                // {...register('Full name', { required: true })}
+                {...register('name', { required: true })}
               />
             </div>
             <div className="mb-4 ">
-              <label htmlFor="phoneNumber" className="block mb-1 text-sm ">
+              <label htmlFor="phone" className="block mb-1 text-sm ">
                 Số điện thoại
               </label>
               <input
                 type="text"
-                id="phoneNumber"
+                id="phone"
                 className="w-full  border border-gray-300 rounded-md px-3 py-2"
-                // {...register('Full name', { required: true })}
+                {...register('phone', { required: true })}
               />
             </div>
             <h2 className="text-xl font-bold mb-4">Địa chỉ nhận hàng</h2>
             <div className="flex space-x-2">
               <div className="mb-4 ">
-                <label htmlFor="phoneNumber" className="block mb-1 text-sm ">
+                <label htmlFor="province" className="block mb-1 text-sm ">
                   Tỉnh/Thành phố
                 </label>
                 <input
                   type="text"
-                  id="phoneNumber"
+                  id="province"
                   className="w-full  border border-gray-300 rounded-md px-3 py-2"
-                  // {...register('Full name', { required: true })}
+                  {...register('province', { required: true })}
                 />
               </div>
               <div className="mb-4 ">
-                <label htmlFor="phoneNumber" className="block mb-1 text-sm ">
+                <label htmlFor="district" className="block mb-1 text-sm ">
                   Quận/Huyện
                 </label>
                 <input
                   type="text"
-                  id="phoneNumber"
+                  id="district"
                   className="w-full  border border-gray-300 rounded-md px-3 py-2"
-                  // {...register('Full name', { required: true })}
+                  {...register('district', { required: true })}
                 />
               </div>
             </div>
             <div className="flex space-x-2">
               <div className="mb-4 ">
-                <label htmlFor="phoneNumber" className="block mb-1 text-sm ">
+                <label htmlFor="ward" className="block mb-1 text-sm ">
                   Phường/Xã
                 </label>
                 <input
                   type="text"
-                  id="phoneNumber"
+                  id="ward"
                   className="w-full  border border-gray-300 rounded-md px-3 py-2"
-                  // {...register('Full name', { required: true })}
+                  {...register('ward', { required: true })}
                 />
               </div>
               <div className="mb-4 ">
-                <label htmlFor="phoneNumber" className="block mb-1 text-sm ">
+                <label htmlFor="address" className="block mb-1 text-sm ">
                   Địa chỉ cụ thể
                 </label>
                 <input
                   type="text"
-                  id="phoneNumber"
+                  id="address"
                   className="w-full  border border-gray-300 rounded-md px-3 py-2"
-                  // {...register('Full name', { required: true })}
+                  {...register('address', { required: true })}
                 />
               </div>
             </div>
@@ -157,14 +221,14 @@ const AddressContent = ({ showModal }: { showModal: boolean }) => {
               <button
                 className="bg-blue-500 text-white px-4 py-2 rounded-md"
                 type="submit"
-                // onClick={handleUpdateUser}
+                // onClick={(!showModal)
               >
                 Hủy bỏ
               </button>
               <button
                 className="bg-blue-500 text-white px-4 py-2 rounded-md"
                 type="submit"
-                // onClick={handleUpdateUser}
+                onClick={handleUpdateShippingAddress}
               >
                 Lưu địa chỉ
               </button>
