@@ -26,6 +26,19 @@ const ReviewComponent = () => {
   const [rating, setRating] = useState<number>(0)
   const [comment, setComment] = useState<string>('')
 
+  const [visibleComments, setVisibleComments] = useState<number>(3)
+  const [isExpanded, setIsExpanded] = useState<boolean>(false)
+
+  const handleViewMore = () => {
+    if (!isExpanded) {
+      setVisibleComments(reviewList.length)
+      setIsExpanded(true)
+    } else {
+      setVisibleComments(3)
+      setIsExpanded(false)
+    }
+  }
+
   {
     /* Call api lấy các review từ product id */
   }
@@ -238,9 +251,9 @@ const ReviewComponent = () => {
         </div>
         {/* Button đánh giá ngay */}
         <div className='w-full flex flex-col justify-center items-center mt-2'>
-          <p>Bạn đánh giá sao sản phẩm này</p>
+          {/* <p>Bạn đánh giá sao sản phẩm này</p> */}
           <button
-            className='bg-blue-500 text-white px-2 w-48 rounded-md h-10 hover:bg-blue-600'
+            className='bg-blue-500 text-white px-2 w-32 h-10 rounded-full hover:bg-blue-600'
             onClick={ReviewFormButtonClick}>
             Đánh giá ngay
           </button>
@@ -312,7 +325,7 @@ const ReviewComponent = () => {
 
       {/* Hiển thị reviews */}
       {reviewList && reviewList.length > 0 ? (
-        reviewList.map((review) => (
+        reviewList.slice(0, visibleComments).map((review) => (
           <div
             className='mb-4'
             key={review.id}>
@@ -338,6 +351,21 @@ const ReviewComponent = () => {
       ) : (
         <p>No reviews found.</p>
       )}
+      {reviewList && reviewList.length > 3 && (
+        <div className='w-full flex flex-col justify-center items-center mt-2'>
+          {isExpanded ? (
+            <button
+              className='bg-blue-500 text-white px-2 w-32 h-10 rounded-full hover:bg-blue-600'
+              onClick={handleViewMore}>
+              Thu gọn
+            </button>
+          ) : (
+            <button
+              className='bg-blue-500 text-white px-2 w-32 h-10 rounded-full hover:bg-blue-600'
+              onClick={handleViewMore}>
+              Xem thêm
+            </button>
+          )}
     </div>
   )
 }

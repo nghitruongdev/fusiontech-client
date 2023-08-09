@@ -130,18 +130,20 @@ CartItemList.Body = function Body() {
         </div>
         <div className=''>
           <div className='grid grid-cols-1 gap-2 border-b-[1px] border-b-zinc-200 pb-2'>
-              {!items.length && ( <div className='flex flex-col items-center justify-center'>
-                  <Inbox className='w-28 h-28 text-gray-500' />
-                  <p className='text-muted-foreground text-sm'>
-                      Không có dữ liệu
-                  </p>
-              </div>)}
-              {items.map((item) => (
+            {!items.length && (
+              <div className='flex flex-col items-center justify-center'>
+                <Inbox className='w-28 h-28 text-gray-500' />
+                <p className='text-muted-foreground text-sm'>
+                  Không có dữ liệu
+                </p>
+              </div>
+            )}
+            {items.map((item) => (
               <CartItem
                 item={item}
                 key={item.id ?? Math.random()}
               />
-                        ))}
+            ))}
           </div>
         </div>
       </div>
