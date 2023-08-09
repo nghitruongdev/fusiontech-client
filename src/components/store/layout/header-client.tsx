@@ -34,7 +34,7 @@ export const VerifyMailBanner = () => {
     return (
       <div className='h-8 w-full bg-orange-200'>
         Email xác thực đã được gửi đến địa chỉ e-mail của bạn. Xác thực tài
-        khoản ngay để được mở khoá nhiều tính năng hấp dẫn.
+        khoản ngay để mở khoá nhiều tính năng hấp dẫn.
       </div>
     )
   return (

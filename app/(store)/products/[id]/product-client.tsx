@@ -44,6 +44,7 @@ import {
   FavoriteButton,
   FavoriteButtonWithCardProvider,
 } from '@components/store/front/product/FavoriteButton'
+import Link from 'next/link'
 
 const { findTopFrequentBoughtTogether } = API['products']()
 type ContextState = {
@@ -191,7 +192,11 @@ export const ProductRating = () => {
         />
       </div>
       <p className=''>({avgRating})</p>
-      <p className='underline leading-none text-sm'>{reviewCount} nhận xét</p>
+      <Link
+        className='underline leading-none text-sm'
+        href={'#review-section'}>
+        {reviewCount} nhận xét
+      </Link>
     </div>
   )
 }

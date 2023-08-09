@@ -53,14 +53,13 @@ const Product = async ({ params: { id } }: Props) => {
           <div className='flex border-t shadow-lg rounded-md p-4 mt-4'>
             <div className='w-2/3'>
               <Description />
-
-              <div className=''>
-                <ReviewComponent />
-              </div>
             </div>
             <div className='w-1/3'>
               <ProductSpecification />
             </div>
+          </div>
+          <div className=''>
+            <ReviewComponent />
           </div>
           <RecentProductView />
         </div>

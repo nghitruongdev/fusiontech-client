@@ -7,7 +7,7 @@ const RecentProductView = () => {
   const [items] = useRecentProductViewStore((state) => [state.items])
   if (!items.length) return <></>
   return (
-    <>
+    <div>
       <p className='text-2xl font-bold mt-4'>Sản phẩm đã xem gần đây</p>
       {items.map(({ product, time }) => (
         <ProductCardProvider
@@ -18,7 +18,7 @@ const RecentProductView = () => {
           <p>{time && new Date(time).toISOString()}</p>
         </ProductCardProvider>
       ))}
-    </>
+    </div>
   )
 }
 export default RecentProductView
