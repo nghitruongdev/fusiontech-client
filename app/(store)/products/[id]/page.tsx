@@ -60,7 +60,7 @@ const Product = async ({ params: { id } }: Props) => {
             </div>
           </div>
           <div className=''>
-            <ReviewComponent />
+            <ReviewComponent productId={id} />
           </div>
           <RecentProductView />
         </div>
