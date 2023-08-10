@@ -25,6 +25,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (user) {
       user.getIdTokenResult().then((token) => {
+        console.log('token.token', token.token)
         authStore.setState(({}) => ({ claims: token.claims }))
       })
       return

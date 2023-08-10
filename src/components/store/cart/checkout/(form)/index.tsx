@@ -40,14 +40,18 @@ const Form = () => {
   )
 }
 Form.Address = function Address() {
-  const { setValue, addressError } = useCheckoutContext(
-    ({
-      setValue,
-      formState: {
-        errors: { addressId },
-      },
-    }) => ({ setValue, addressError: addressId }),
-  )
+  //   const { setValue, addressError } = useCheckoutContext(
+  //     ({
+  //       setValue,
+  //       formState: {
+  //         errors: { addressId },
+  //       },
+  //     }) => ({ setValue, addressError: addressId }),
+  //   )
+  const {
+    setValue,
+    formState: { errors },
+  } = useCheckoutContext()
   const onAddressChange: Callback<Function> = useCallback(
     (value: number) => {
       setValue(`addressId`, value, {
@@ -71,7 +75,8 @@ Form.Address = function Address() {
 }
 
 Form.Mail = function MailInput() {
-  const register = useCheckoutContext((state) => state.register)
+  //   const register = useCheckoutContext((state) => state.register)
+  const { register } = useCheckoutContext()
   return (
     <div className='mb-2'>
       <ChakraFormInput
@@ -94,7 +99,7 @@ Form.Mail = function MailInput() {
   )
 }
 Form.Note = function Note() {
-  const register = useCheckoutContext((state) => state.register)
+  const { register } = useCheckoutContext()
   return (
     <div className='mb-4'>
       <ChakraFormInput
@@ -118,7 +123,7 @@ Form.Note = function Note() {
 
 Form.Payment = function Payment() {
   //   const [payment, setPayment] = useState('1')
-  const control = useCheckoutContext((state) => state.control)
+  const { control } = useCheckoutContext()
   const notCod = (method: PaymentMethod) => PaymentMethod.COD !== method
   return (
     <div className='px-6 py-3  bg-white mb-4 border rounded-md shadow-md'>

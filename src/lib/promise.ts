@@ -14,11 +14,12 @@ export const suspensePromise = (
 ) => {
   return new Promise((res) => {
     const interval = setInterval(() => {
+      console.log('condition inside interval', condition)
       if (condition) {
         clearInterval(interval)
         res(undefined)
       }
-    }, options?.timeout ?? 100)
+    }, options?.timeout ?? 300)
 
     if (options?.stop) {
       clearInterval(interval)

@@ -14,36 +14,49 @@ import { useCheckoutContext } from './CheckoutProvider'
 import { Spinner, useBoolean } from '@chakra-ui/react'
 import { getDiscount, getTotalAmount } from '../utils'
 import { formatPrice } from '../../../../lib/utils'
-import { BaseSyntheticEvent, FormEvent, useRef, useState } from 'react'
+import {
+  BaseSyntheticEvent,
+  FormEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import useDebounceFn from '@/hooks/useDebounceFn'
 import { IVoucher } from 'types'
 import { API, API_URL } from 'types/constants'
 import useNotification from '@/hooks/useNotification'
 import { useCustom } from '@refinedev/core'
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
+import { calculateTotalPayment } from './utils'
+import { useCountdown } from '@/hooks/useCountdown'
 
 const OrderOverview = ({}: // isSubmitting,
 {}) => {
-  const { onCheckout, isSubmitting } = useCheckoutContext(
-    ({ onCheckout, formState: { isSubmitting } }) => ({
-      onCheckout,
-      isSubmitting,
-    }),
-  )
-  const [watch] = useCheckoutContext((state) => [state.watch])
+  //   const { onCheckout, isSubmitting } = useCheckoutContext(
+  //     ({ onCheckout, formState: { isSubmitting } }) => ({
+  //       onCheckout,
+  //       isSubmitting,
+  //     }),
+  //   )
+  //   const [watch] = useCheckoutContext((state) => [state.watch])
+  const {
+    onCheckout,
+    formState: { isSubmitting },
+    watch,
+    setValue,
+  } = useCheckoutContext()
   const voucher = watch(`voucher`)
-  console.log('watch voucher', watch(`voucher`))
   const { code, maxDiscountAmount, discount: voucherDiscount } = voucher ?? {}
   const cartItems = useValidSelectedCartItems()
-  const subTotal = getTotalAmount(cartItems)
-  const discount = getDiscount(cartItems)
-  let vDiscount = (voucherDiscount ?? 0) * (subTotal - discount)
-  if (maxDiscountAmount) {
-    vDiscount = vDiscount <= maxDiscountAmount ? vDiscount : maxDiscountAmount
-  }
-  const shippingFee = 0
+  const { total, discount, vDiscount, subTotal } = calculateTotalPayment(
+    cartItems,
+    voucher,
+  )
 
-  const total = subTotal - discount - vDiscount + shippingFee
+  useEffect(() => {
+    setValue(`items`, cartItems)
+  }, [cartItems, setValue])
 
   return (
     <>
@@ -80,14 +93,14 @@ const OrderOverview = ({}: // isSubmitting,
               <div className='flex gap-2 items-center'>
                 <p className='text-muted text-sm text-zinc-500'>Mã giảm giá</p>
               </div>
-              <p className='font-medium text-sm'>
+              <div className='font-medium text-sm'>
                 <Badge
                   variant={'outline'}
                   className='text-orange-600'>
                   {/* <span className='text-sm ml-2 font-bold'>{`${code} - `}</span> */}
                   {` ${formatPrice(vDiscount)}`}
                 </Badge>
-              </p>
+              </div>
             </div>
           )}
         </div>
@@ -106,7 +119,7 @@ const OrderOverview = ({}: // isSubmitting,
           className='flex items-center justify-center gap-4 w-full rounded-md bg-blue-600 hover:bg-blue-700 px-4 py-2 text-white text-sm leading-loose font-[500] shadow-blue-500 shadow-md'
           onClick={onCheckout}
           disabled={isSubmitting}>
-          {isSubmitting ? 'Loading....' : 'Xác nhận đặt hàng'}
+          {isSubmitting ? 'Đang đặt hàng....' : 'Xác nhận đặt hàng'}
           {isSubmitting && (
             <Spinner
               size={'sm'}
@@ -127,39 +140,51 @@ const Voucher = ({ orderAmount }: { orderAmount: number }) => {
   const { findByCode, countUsage, countUserUsage } = API['vouchers']()
   const { userProfile } = useAuthUser()
   const [isError, { toggle }] = useBoolean()
+  //   const {
+  //     setError,
+  //     formState: { errors },
+  //     getFieldState,
+  //     resetField,
+  //     clearErrors,
+  //     setValue,
+  //   } = useCheckoutContext(
+  //     ({
+  //       setError,
+  //       formState,
+  //       getFieldState,
+  //       resetField,
+  //       clearErrors,
+  //       setValue,
+  //     }) => ({
+  //       setError,
+  //       formState,
+  //       resetField,
+  //       getFieldState,
+  //       clearErrors,
+  //       setValue,
+  //     }),
+  //   )
   const {
     setError,
     formState: { errors },
-    getFieldState,
     resetField,
-    clearErrors,
     setValue,
-  } = useCheckoutContext(
-    ({
-      setError,
-      formState,
-      getFieldState,
-      resetField,
-      clearErrors,
-      setValue,
-    }) => ({
-      setError,
-      formState,
-      resetField,
-      getFieldState,
-      clearErrors,
-      setValue,
-    }),
-  )
+    getFieldState,
+    getValues,
+    clearErrors,
+    register,
+  } = useCheckoutContext()
   const ref = useRef<HTMLInputElement>(null)
   const [current, setCurrent] = useState<IVoucher | null>(null)
   const { open } = useNotification()
-
+  const [timer, countdown] = useCountdown()
   const { data: { data: usageData } = {} } = useCustom({
     url: countUsage(current?.code),
     method: 'get',
     queryOptions: {
       enabled: !!current,
+      refetchInterval: 3 * 1000,
+      refetchIntervalInBackground: true,
     },
   })
 
@@ -177,10 +202,9 @@ const Voucher = ({ orderAmount }: { orderAmount: number }) => {
 
   const clearVoucher = () => {
     console.log('clear voucher ran')
-    resetField(`voucher`)
+    setValue(`voucher`, null)
     setCurrent(null)
     clearErrors(`voucher`)
-    console.log('first', getFieldState(`voucher`).error?.message)
     toggle()
   }
 
@@ -200,21 +224,11 @@ const Voucher = ({ orderAmount }: { orderAmount: number }) => {
       return setError(`voucher`, { message: errorMessage })
 
     setCurrent(voucher)
+    countdown(Date.now(), new Date(voucher.expirationDate).getTime())
     if (orderAmount < (minOrderAmount ?? 0))
       return setError('voucher', {
         message: 'Đơn hàng chưa đạt giá trị tối thiểu để áp dụng',
       })
-
-    const usage = usageData as unknown as number
-    const userUsage = userUsageData as unknown as number
-
-    if (limitUsage && limitUsage <= (usage ?? 0))
-      return setError(`voucher`, { message: 'Voucher đã hết lượt sử dụng' })
-    if (userUsage >= (userLimitUsage ?? 0))
-      return setError(`voucher`, {
-        message: `'Bạn đã hết lượt sử dụng voucher'`,
-      })
-
     setValue(`voucher`, voucher)
   }
 
@@ -238,11 +252,30 @@ const Voucher = ({ orderAmount }: { orderAmount: number }) => {
     const value = ref.current?.value
     if (!value) return
     handleSubmit()
-    console.log('errors.voucher?.message', errors.voucher?.message)
   }
 
+  const validateDynamic = useCallback(() => {
+    if (!current) return
+    const { limitUsage, userLimitUsage } = current
+    const usage = usageData as unknown as number
+    const userUsage = userUsageData as unknown as number
+
+    const onError = (message: string) => {
+      setError(`voucher`, { message })
+      if (getValues('voucher')) setValue(`voucher`, null)
+      return message
+    }
+
+    if (limitUsage && limitUsage <= (usage ?? 0))
+      return onError('Voucher đã hết lượt sử dụng')
+    if (userUsage >= (userLimitUsage ?? 0))
+      return onError('Bạn đã hết lượt sử dụng voucher')
+  }, [current, setError, usageData, userUsageData])
+  useEffect(() => {
+    validateDynamic()
+  }, [validateDynamic])
+
   const fieldError = getFieldState(`voucher`).error?.message
-  console.log('errors.voucher?.message', errors.voucher?.message)
 
   const usageCount = usage
     ? current?.limitUsage
@@ -251,6 +284,14 @@ const Voucher = ({ orderAmount }: { orderAmount: number }) => {
     : undefined
   return (
     <>
+      <input
+        type='hidden'
+        {...register(`voucherInput`, {
+          validate: () => {
+            return getValues(`voucher`) ? validateDynamic() : true
+          },
+        })}
+      />
       <div className=''>
         <p className='font-medium'>Mã giảm giá</p>
         <p className='text-zinc-500 text-sm text-muted'>
@@ -262,10 +303,13 @@ const Voucher = ({ orderAmount }: { orderAmount: number }) => {
         <div className='grid gap-2 mt-3'>
           {current && (
             <p className='text-xs text-red-500'>
-              Đã sử dụng {usageCount ?? usage}, hiệu lực đến{' '}
-              {new Date(current.expirationDate ?? '').toLocaleString('vi-VN', {
-                hour12: false,
-              })}
+              Đã sử dụng {usageCount ?? usage}.{' '}
+              {timer && (
+                <span>
+                  Hết hạn trong{' '}
+                  {`${timer.hours}:${timer.minutes}:${timer.seconds}`}
+                </span>
+              )}
             </p>
           )}
           <div className='flex gap-2'>
@@ -294,15 +338,23 @@ const Voucher = ({ orderAmount }: { orderAmount: number }) => {
         </div>
       </form>
       {current && (
-        <div className='border border-orange-600 rounded-md p-4 mt-4'>
-          <Badge className='bg-orange-600'>{current?.code}</Badge>
-          <p>{current?.description}</p>
+        <div className='border border-orange-600 text-gray-700 text-sm rounded-md p-4 mt-4 grid gap-2'>
+          <Badge className='bg-orange-600 w-fit'>
+            {current?.code?.toUpperCase()}
+          </Badge>
+          <p className='text-md font-semibold'>{current?.description}</p>
           {current?.minOrderAmount && (
             <p>Đơn hàng tối thiểu: {formatPrice(current?.minOrderAmount)}</p>
           )}
           {current.maxDiscountAmount && (
             <p>Giảm giá tối đa: {formatPrice(current?.maxDiscountAmount)}</p>
           )}
+          <p>
+            Hiệu lực đến:{' '}
+            {new Date(current.expirationDate ?? '').toLocaleString('vi-VN', {
+              hour12: false,
+            })}
+          </p>
         </div>
       )}
     </>

@@ -11,6 +11,8 @@ import Image from 'next/image'
 import { ICartItem } from 'types'
 import { useValidSelectedCartItems } from '../useSelectedItemStore'
 import { Images } from 'types/constants'
+import { formatPrice } from '@/lib/utils'
+import { Badge } from '@chakra-ui/react'
 
 const CartItemList = () => {
   const items = useValidSelectedCartItems()
@@ -25,19 +27,6 @@ const CartItemList = () => {
           />
         ))}
       </div>
-      {/* <Accordion
-        type='single'
-        collapsible
-        className='w-full'>
-        <AccordionItem value='item-1'>
-          <AccordionTrigger>
-            <h4 className=' font-semibold text-md text-zinc-700 py-0'>
-              Xem chi tiết ({items.length} sản phẩm)
-            </h4>
-          </AccordionTrigger>
-          <AccordionContent className='bg-transparent'></AccordionContent>
-        </AccordionItem>
-      </Accordion> */}
     </>
   )
 }
@@ -73,6 +62,14 @@ const CartItemBox = ({
             <p className='text-sm text-zinc-500'></p>
           </div>
           <p className='text-sm text-zinc-500'>SKU: {variant?.sku ?? ''}</p>
+          <div className='text-sm text-zinc-500 flex items-center gap-2'>
+            Giá: {formatPrice(variant?.price)}
+            {variant?.product?.discount && (
+              <Badge
+                variant={'subtle'}
+                colorScheme='green'>{`${variant?.product?.discount}%`}</Badge>
+            )}
+          </div>
           <p className='text-sm text-zinc-500'>Số lượng: {quantity}</p>
           {/* <p className='text-sm text-zinc-500 flex items-center gap-1'>
             Free 30-day returns

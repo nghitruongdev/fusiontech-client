@@ -13,6 +13,7 @@ import { messages } from '../../types/messages'
 import { Fields } from '@refinedev/core/dist/interfaces/metaData/fields'
 import { VariableOptions } from '@refinedev/core/dist/interfaces/metaData/variableOptions'
 import { AppError } from 'types/error'
+import { ProblemDetail } from 'types'
 
 type ValueProps =
   | {
@@ -53,9 +54,23 @@ const useCrudNotification = () => {
     resource?: string | undefined,
     defaultMessage?: string,
   ): OpenNotificationParams => {
+    console.log('err', err)
+    if (err?.isAxiosError) {
+      const data = err.response.data as ProblemDetail
+      return {
+        type: 'error',
+        message: `${getErrorTitle(data?.title)} - ${
+          data?.status ?? err.statusCode
+        }`,
+        description:
+          data?.detail ?? 'Đã có lỗi xảy ra, vui lòng liên hệ nhà cung cấp.',
+      }
+    }
     return {
       type: 'error',
-      message: err?.message ?? 'Đã có lỗi xảy ra',
+      message: err?.name,
+      description:
+        err?.message ?? 'Đã có lỗi xảy ra, vui lòng liên hệ nhà cung cấp.',
     }
   }
   const onSuccess = (
@@ -78,5 +93,11 @@ const useCrudNotification = () => {
       close,
     },
   }
+}
+
+const getErrorTitle = (title?: string) => {
+  if ('Bad Request'.toUpperCase() === title?.toUpperCase())
+    return 'Yêu cầu không hợp lệ'
+  return title ?? 'Hệ thống đã xảy ra lỗi'
 }
 export default useCrudNotification

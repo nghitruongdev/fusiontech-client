@@ -88,19 +88,22 @@ const LoadingAddressBox = () => {
   )
 }
 const EmptyAddressBox = () => {
-  const { addressError } = useCheckoutContext(
-    ({
-      formState: {
-        errors: { addressId },
-      },
-    }) => ({ addressError: addressId }),
-  )
+  //   const { addressError } = useCheckoutContext(
+  //     ({
+  //       formState: {
+  //         errors: { addressId },
+  //       },
+  //     }) => ({ addressError: addressId }),
+  //   )
+  const {
+    formState: { errors },
+  } = useCheckoutContext()
 
   return (
     <div
       className={cn(
         `border text-sm shadow-md border-gray-300 min-h-[150px] bg-gray-50 p-4 rounded-md text-gray-400 flex justify-center items-center cursor-pointer hover:text-blue-600 hover:bg-blue-50 ${hoverBorderColor}`,
-        addressError?.message && `border-red-500`,
+        errors.addressId?.message && `border-red-500`,
       )}>
       <Plus />
       Thêm mới địa chỉ

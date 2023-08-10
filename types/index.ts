@@ -248,6 +248,7 @@ export interface ICheckout {
   note?: string
   payment: IPayment
   voucher?: IVoucher | null
+  voucherInput?: any
 }
 export interface ICart {
   id: string
@@ -295,11 +296,14 @@ export interface IVoucher {
 }
 
 export enum PaymentStatus {
-  CHUA_THANH_TOAN = 'Chưa thanh toán',
-  DA_THANH_TOAN = 'Đã thanh toán',
+  PENDING = 'Chưa thanh toán',
+  PAID = 'Đã thanh toán',
+  REFUNDED = 'Đã hoàn tiền',
+  CANCELLED = 'Đã huỷ',
 }
 
-export type PaymentMethodLabel = 'CHUA_THANH_TOAN' | 'DA_THANH_TOAN'
+export type PaymentMethodLabel = 'PENDING' | 'PAID' | 'REFUNDED' | 'CANCELLED'
+
 export enum PaymentMethod {
   COD = 'CASH',
   CREDIT_CARD = 'CREDIT_CARD',
@@ -322,6 +326,33 @@ export interface IOrderItem {
   }
   _links: _links
 }
+enum OrderStatusGroup {
+  VERIFY = 'VERIFY',
+  PROCESSING = 'PROCESSING',
+  ON_DELIVERY = 'ON_DELIVERY',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+  CANCELLED = 'CANCELLED',
+}
+
+export const OrderStatusText = {
+  PLACED: { statusGroup: OrderStatusGroup.VERIFY, text: 'Chờ xác nhận' },
+  VERIFIED: { statusGroup: OrderStatusGroup.PROCESSING, text: 'Đã xác nhận' },
+  PREPARED: { statusGroup: OrderStatusGroup.PROCESSING, text: 'Đang chuẩn bị' },
+  ON_DELIVERY: { statusGroup: OrderStatusGroup.ON_DELIVERY, text: 'Đang giao' },
+  COMPLETED: {
+    statusGroup: OrderStatusGroup.COMPLETED,
+    text: 'Giao thành công',
+  },
+  FAILED: { statusGroup: OrderStatusGroup.FAILED, text: 'Trả hàng' },
+  CANCELLED: { statusGroup: OrderStatusGroup.CANCELLED, text: 'Đã huỷ' },
+  DENIED: {
+    statusGroup: OrderStatusGroup.CANCELLED,
+    text: 'Đã huỷ bởi hệ thống',
+  },
+}
+
+export type OrderStatus = keyof typeof OrderStatusText
 
 export interface IOrderStatus {
   id: number
@@ -364,11 +395,10 @@ export interface IInventoryDetail {
   formDetail: {}
 }
 
-export interface IProblemResponse {
-  data: {
-    title: string
-    detail: string
-  }
+export interface ProblemDetail {
+  title: string
+  status: number
+  detail: string
 }
 
 export type Page = {

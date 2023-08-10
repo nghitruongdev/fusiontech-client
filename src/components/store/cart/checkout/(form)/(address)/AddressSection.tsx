@@ -71,8 +71,8 @@ export const AddressSectionProvider = ({
   const { userProfile: user } = useAuthUser()
   const listModalProps = useDisclosure()
 
-  const { setValue } = useCheckoutContext(({ setValue }) => ({ setValue }))
-
+  //   const { setValue } = useCheckoutContext(({ setValue }) => ({ setValue }))
+  const { setValue } = useCheckoutContext()
   const onAddressChange: Callback<Function> = useCallback(
     (value: number) => {
       setValue(`addressId`, value)
@@ -285,7 +285,6 @@ const AddressSection = ({}: {}) => {
     createModalProps,
     listModalProps,
     selectedAddress,
-    defaultAddress,
     addressList,
   } = useContextProvider()
 

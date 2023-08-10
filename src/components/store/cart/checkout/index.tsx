@@ -8,15 +8,16 @@ import VisualWrapper from '@components/ui/VisualWrapper'
 import { useCheckoutContext } from './CheckoutProvider'
 import { CheckoutForm } from './(form)'
 import { useSelectedCartItemStore } from '../useSelectedItemStore'
-import { use, useEffect } from 'react'
+import { use, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { suspensePromise } from '@/lib/promise'
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
 
 const Checkout = () => {
-  const { isSubmitting, isLoading } = useCheckoutContext(
-    (state) => state.formState,
-  )
+  const {
+    promise,
+    formState: { isSubmitting, isLoading, isSubmitted, isSubmitSuccessful },
+  } = useCheckoutContext()
   const router = useRouter()
   const { user } = useAuthUser()
   const hasHydrated = useSelectedCartItemStore.persist?.hasHydrated()
@@ -34,12 +35,9 @@ const Checkout = () => {
           scroll: true,
         })
       }
-    }, 300)
+    }, 500)
   }, [user, router])
-  //   use(suspensePromise(hasHydrated))
-
   const render = () => {
-    if (isSubmitting || isLoading) return <Checkout.Loading />
     return (
       <>
         <div className=' w-3/4 p-4'>
@@ -57,22 +55,6 @@ const Checkout = () => {
         {render()}
       </div>
     </>
-  )
-}
-
-Checkout.Loading = function ProcessingOrderLoading() {
-  return (
-    <div className='pt-[200px] gap-4 w-full'>
-      <div className='w-full flex justify-center items-center gap-4'>
-        <h1>Đang đặt hàng</h1>
-        <Spinner
-          size='xl'
-          thickness='3px'
-          color='blue.500'
-          speed={'0.45s'}
-        />
-      </div>
-    </div>
   )
 }
 
