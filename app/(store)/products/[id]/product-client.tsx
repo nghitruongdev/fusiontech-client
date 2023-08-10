@@ -192,8 +192,8 @@ export const ProductPrice = () => {
           <p className='text-3xl text-green-700 font-bold leading-none'>
             {formatPrice(minPrice)}
           </p>
-          <p className='text-gray-500 text-md font-normal line-through decoration-[1px] flex gap-1 items-center'>
-            {formatPrice(minPrice)}
+          <p className='text-zinc-700 text-md font-normal line-through decoration-[1px] flex gap-1 items-center'>
+            {formatPrice(maxPrice)}
             {/* <span> */}
             {/* <Info /> */}
             {/* </span> */}
@@ -202,10 +202,14 @@ export const ProductPrice = () => {
       )}
       {!isDiscount && (
         <div className='my-2'>
-          <p className='text-2xl text-zinc-600 font-bold leading-none'>
+          <p className='text-2xl text-zinc-700 font-bold leading-none'>
             <span>{formatPrice(minPrice)}</span>
-            <span> - </span>
-            <span>{formatPrice(maxPrice)}</span>
+            {!!maxPrice && maxPrice !== minPrice && (
+              <>
+                <span> - </span>
+                <span>{formatPrice(maxPrice)}</span>
+              </>
+            )}
           </p>
         </div>
       )}
@@ -253,17 +257,38 @@ export const ProductCartButton = () => {
     if (variant) {
       const item = cartItems[variant.id]
       console.log('cartItems[variant.id]', cartItems[variant.id])
-      if (item) {
-        if (item?.quantity === ALLOW_QUANTITY) {
+      if (!item) {
+        if (!variant.availableQuantity) {
           show({
             type: 'warning',
-            title: `Chỉ được thêm tối đa 10 sản phẩm vào giỏ hàng`,
+            title: 'Xin lỗi quý khách! Sản phẩm đã hết hàng.',
+          })
+          return
+        }
+        addItem({ variantId: variant.id, quantity: 1 })
+      }
+      if (item) {
+        if (
+          !variant.availableQuantity ||
+          item.quantity >= variant.availableQuantity
+        ) {
+          show({
+            type: 'warning',
+            title: 'Sản phẩm trong giỏ hàng vượt quá số lượng tồn kho',
+            message: !variant.availableQuantity
+              ? 'Số lượng không khả dụng'
+              : `Số lượng tồn kho sản phẩm là ${variant.availableQuantity}`,
+          })
+          return
+        }
+        if (item.quantity >= ALLOW_QUANTITY) {
+          show({
+            type: 'warning',
+            title: `Chỉ được thêm tối đa ${ALLOW_QUANTITY} sản phẩm vào giỏ hàng`,
           })
           return
         }
         updateItem({ ...item, quantity: (item?.quantity ?? 0) + 1 })
-      } else {
-        addItem({ variantId: variant.id, quantity: 1 })
       }
 
       show({
@@ -300,6 +325,31 @@ export const ProductCartButton = () => {
   )
 }
 
+export const ProductQuantity = () => {
+  const {
+    product: { id },
+  } = useProductContext()
+  const { getAvailableQuantity } = API['products']()
+  const { getSelectedVariant, selected } = useOptionStore()
+  const { data: { data } = {} } = useCustom({
+    url: getAvailableQuantity(id),
+    method: 'get',
+    queryOptions: {
+      enabled: !!id,
+    },
+  })
+
+  const [variant] = getSelectedVariant()
+  const quantity = variant?.availableQuantity ?? data
+  if (quantity)
+    return (
+      <p className='text-sm font-medium text-gray-500'>
+        Số lượng khả dụng: {quantity + ''}
+      </p>
+    )
+  return <></>
+}
+
 export const ProductFrequentBoughtTogether = () => {
   const firstRender = useIsFirstRender()
   const {
@@ -313,8 +363,6 @@ export const ProductFrequentBoughtTogether = () => {
       suspense: true,
     },
   })
-
-  console.log('top', products)
 
   if (status === 'loading') {
     return <div>Loading...</div>
@@ -364,12 +412,12 @@ export const ProductFavoriteDetails = () => {
         <p className='py-2 text-blue-700 text-sm font-semibold line-clamp-1'>
           {displayText}
         </p>
-        <p className=''>
+        <>
           <FavoriteButton
             product={product}
             hideNotActive={false}
           />
-        </p>
+        </>
       </div>
     </>
   )

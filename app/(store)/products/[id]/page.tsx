@@ -10,6 +10,7 @@ import {
   ProductFrequentBoughtTogether,
   ProductImages,
   ProductPrice,
+  ProductQuantity,
   ProductRating,
   ProductSpecification,
 } from './product-client'
@@ -20,6 +21,7 @@ import { Info } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
 import { Skeleton } from '@components/ui/Skeleton'
 import RecentProductView from '@components/store/front/section/RecentProductView'
+import { API, API_URL } from 'types/constants'
 
 type Props = {
   params: {
@@ -73,16 +75,11 @@ Product.Info = async () => {
     <>
       <div className='flex flex-col gap-1'>
         <Product.Brand />
-        <p className='text-2xl font-bold'>{name}</p>
-        {/* <p className="text-base text-zinc-500">
-                                {product.description}
-                            </p> */}
-        {/* <div className="flex items-center space-x-2 text-zinc-950 mt-2"> */}
+        <p className='text-2xl font-bold text-zinc-700'>{name}</p>
         <ProductRating />
-        {/* </div> */}
-        {/* Product Price */}
         <ProductPrice />
         <Product.StoreInfo />
+        <ProductQuantity />
 
         <Suspense
           fallback={

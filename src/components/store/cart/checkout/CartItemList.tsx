@@ -1,24 +1,31 @@
 /** @format */
 
-// "use client";
+'use client'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@components/ui/shadcn/accordion'
-import { TbReload } from 'react-icons/tb'
 import Image from 'next/image'
 import { ICartItem } from 'types'
+import { useValidSelectedCartItems } from '../useSelectedItemStore'
+import { Images } from 'types/constants'
 
-const CartItemList = ({ items }: { items: ICartItem[] }) => {
-  const tags = Array.from({ length: 10 }).map(
-    (_, i, a) => `v1.2.0-beta.${a.length - i}`,
-  )
+const CartItemList = () => {
+  const items = useValidSelectedCartItems()
 
   return (
     <>
-      <Accordion
+      <div>
+        {items.map((item) => (
+          <CartItemBox
+            item={item}
+            key={`${item.variantId}-${Math.random()}`}
+          />
+        ))}
+      </div>
+      {/* <Accordion
         type='single'
         collapsible
         className='w-full'>
@@ -28,18 +35,9 @@ const CartItemList = ({ items }: { items: ICartItem[] }) => {
               Xem chi tiết ({items.length} sản phẩm)
             </h4>
           </AccordionTrigger>
-          <AccordionContent className='bg-transparent'>
-            {Array.from({ length: 10 })
-              .flatMap((val) => items)
-              .map((item) => (
-                <CartItemBox
-                  item={item}
-                  key={`${item.variantId}-${Math.random()}`}
-                />
-              ))}
-          </AccordionContent>
+          <AccordionContent className='bg-transparent'></AccordionContent>
         </AccordionItem>
-      </Accordion>
+      </Accordion> */}
     </>
   )
 }
@@ -60,24 +58,28 @@ const CartItemBox = ({
             width={500}
             height={500}
             alt='productImg'
-            src={'https://i.ibb.co/1r28gMk/1.webp'}
+            src={
+              variant?.images?.[0] ??
+              variant?.product?.images?.[0] ??
+              Images.products
+            }
           />
         </div>
         <div className='w-full flex flex-col gap-1'>
           <div className='w-full'>
             <h2 className='text-base text-zinc-900 font-[500]'>
-              Canon ABC 2023
+              {variant?.product?.name}
             </h2>
-            <p className='text-sm text-zinc-500'>${price}</p>
+            <p className='text-sm text-zinc-500'></p>
           </div>
-
+          <p className='text-sm text-zinc-500'>SKU: {variant?.sku ?? ''}</p>
           <p className='text-sm text-zinc-500'>Số lượng: {quantity}</p>
-          <p className='text-sm text-zinc-500 flex items-center gap-1'>
+          {/* <p className='text-sm text-zinc-500 flex items-center gap-1'>
             Free 30-day returns
             <span className='bg-primaryBlue rounded-full text-white text-xs w-4 h-4 flex items-center justify-center'>
               <TbReload className='rotate-180' />
             </span>
-          </p>
+          </p> */}
         </div>
       </div>
     </>

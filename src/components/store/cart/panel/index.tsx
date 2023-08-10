@@ -5,11 +5,25 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { warningImg } from '@public/assets/images'
 import { IoMdClose } from 'react-icons/io'
-import { useSelectedCartItemStore } from '../useSelectedItemStore'
-import { FunctionComponent, ReactNode } from 'react'
+import { useValidSelectedCartItems } from '../useSelectedItemStore'
+import {
+  BaseSyntheticEvent,
+  FunctionComponent,
+  ReactNode,
+  useEffect,
+  useMemo,
+} from 'react'
 import { formatPrice } from '@/lib/utils'
 import { getDiscount, getTotalAmount } from '../utils'
 import { cn } from 'components/lib/utils'
+import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
+import { NEXT_PATH } from 'types/constants'
+import { ppid } from 'process'
+import useCallbackUrl from '@/hooks/useCallbackUrl'
+import { useRouter } from 'next/navigation'
+import { useCartStore } from '../useCart'
+import useNotification from '@/hooks/useNotification'
+import { Button } from '@components/ui/shadcn/button'
 
 function Panel() {
   return (
@@ -25,13 +39,60 @@ function Panel() {
 }
 
 Panel.Login = function Login() {
-  // const isAuthenticated = useAuthClientCookie().isAuthenticated;
-  const isAuthenticated = false
-  const isSelected = useSelectedCartItemStore((state) => state.items).length
+  const { user } = useAuthUser()
+  const isAuthenticated = !!user
+  const items = useValidSelectedCartItems()
+  const { callbackUrl } = useCallbackUrl()
+  const router = useRouter()
+  const { open } = useNotification()
+  const isSelected = !!items.length
+  useEffect(() => {
+    if (!user) router.prefetch(`${NEXT_PATH.login}?callbackUrl=${callbackUrl}`)
+    else {
+      router.prefetch('/cart/checkout')
+    }
+  }, [router, user, callbackUrl])
+
+  const onCheckQuantity = (e: BaseSyntheticEvent) => {
+    const isOutOfStock = items.some(
+      (item) => !!!item.variant?.availableQuantity,
+    )
+    if (isOutOfStock) {
+      e.preventDefault()
+      open({
+        type: 'error',
+        title: 'Sản phẩm bạn chọn đã hết hàng.',
+      })
+    }
+  }
+  if (!isAuthenticated) {
+    return (
+      <p className='text-sm font-medium text-zinc-500  text-center leading-none mt-2'>
+        <span>
+          Bạn hãy{' '}
+          <Link
+            className='hover:text-zinc-800'
+            href={{
+              pathname: NEXT_PATH.login,
+              query: {
+                callbackUrl,
+              },
+            }}>
+            <span className='leading-normal text-md font-medium underline underline-offset-2 decoration-[1px]'>
+              đăng nhập ngay
+            </span>
+          </Link>{' '}
+          để có trải nghiệm mua sắm tốt nhất
+        </span>
+      </p>
+    )
+  }
+
   return (
     <div className='mt-2'>
       <Link
-        href='/cart/checkout'
+        href={'/cart/checkout'}
+        onClick={onCheckQuantity}
         className={`${!isSelected && 'pointer-events-none select-none'}`}>
         <p
           className={`flex items-center justify-center mx-auto w-3/4 text-white h-10 font-semibold duration-300 rounded-full ${
@@ -40,17 +101,6 @@ Panel.Login = function Login() {
           {isSelected ? 'Tiếp tục đến thanh toán' : 'Chọn sản phẩm'}
         </p>
       </Link>
-      {isAuthenticated && (
-        <p className='text-sm text-center leading-none mt-1'>
-          <span>
-            Bạn hãy{' '}
-            <span className='leading-normal text-md font-medium underline underline-offset-2 decoration-[1px]'>
-              đăng nhập
-            </span>{' '}
-            để có trải nghiệm mua sắm tốt nhất
-          </span>
-        </p>
-      )}
     </div>
   )
 }
@@ -78,7 +128,7 @@ Panel.Promotion = function Promotion() {
 }
 
 const Overview = () => {
-  const { items } = useSelectedCartItemStore(({ items }) => ({ items }))
+  const items = useValidSelectedCartItems()
   console.log('items', items)
   const total = getTotalAmount(items)
   const discount = getDiscount(items)
@@ -103,23 +153,25 @@ Overview.Price = function OverviewPrice({
   subTotal: number
   discount: number
 }) {
-  const { items } = useSelectedCartItemStore(({ items }) => ({ items }))
-
+  const items = useValidSelectedCartItems()
   return (
     <div className='w-full flex flex-col gap-4 border-b-[1px] border-b-zinc-200'>
-      <div className='flex flex-col gap-1'>
-        <div className='text-sm flex justify-between'>
-          <p className='font-semibold'>
-            Thành tiền <span>({items.length} sản phẩm)</span>
-          </p>
-
-          <p
-            className={cn(
-              `text-zinc-500 text-base`,
-              !!discount && 'line-through',
-            )}>
-            {formatPrice(subTotal)}
-          </p>
+      <div className='flex flex-col gap-4 py-2'>
+        <div className=''>
+          <div className='text-sm flex justify-between'>
+            <p className='font-semibold'>
+              Thành tiền <span>({items.length} sản phẩm)</span>
+            </p>
+            <p className={cn(`text-zinc-700 text-base font-semibold`)}>
+              {formatPrice(subTotal)}
+            </p>
+          </div>
+          {/* <div className='text-sm flex justify-between'>
+            <span></span>
+            <p className={cn(`text-zinc-500 text-sm line-through`)}>
+              {formatPrice(subTotal)}
+            </p>
+          </div> */}
         </div>
         {!!discount && (
           <div className='text-sm flex justify-between mb-1'>

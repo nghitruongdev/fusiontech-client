@@ -1,6 +1,6 @@
 /** @format */
 
-import { IAddress, IUser, ShippingAddress } from 'types'
+import { IAddress, ShippingAddress } from 'types'
 import {
   Checkbox,
   FormControl,
@@ -8,48 +8,34 @@ import {
   FormErrorMessage,
   FormLabel,
   Input,
-  Spinner,
-  Stack,
   UseRadioProps,
   chakra,
-  useBoolean,
   useRadio,
   useRadioGroup,
 } from '@chakra-ui/react'
 import ChakraFormInput from '@components/ui/ChakraFormInput'
 import LoadingOverlay from '@components/ui/LoadingOverlay'
-import { Building, HomeIcon, Icon } from 'lucide-react'
-import {
-  UseFormRegister,
-  FieldErrors,
-  RegisterOptions,
-  Controller,
-} from 'react-hook-form'
+import { Building, HomeIcon } from 'lucide-react'
+import { RegisterOptions, Controller } from 'react-hook-form'
 import { UseModalFormReturnType } from '@refinedev/react-hook-form'
 import { HttpError, useCustom } from '@refinedev/core'
-import {
-  cache,
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
-import { Badge } from '@components/ui/shadcn/badge'
+import { createContext, useContext, useEffect, useMemo } from 'react'
 import { cn } from 'components/lib/utils'
 import { SaveButton } from '@components/buttons'
 import { validatePhoneNumber } from '@/lib/validate'
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
-import AsyncSelect from 'react-select/async'
 import { API, NEXT_API_URL } from 'types/constants'
 import { toObjectOption } from '@/lib/utils'
 import Select from 'react-select'
+import { useAddressContextProvider } from '../AddressSection'
 
 type State = {} & UseModalFormReturnType<
   ShippingAddress,
   HttpError,
   ShippingAddress
 >
+
+type ContextState = { address: ShippingAddress | undefined } & State
 
 const validate: {
   [key in keyof ShippingAddress]: RegisterOptions | undefined
@@ -71,7 +57,7 @@ const validate: {
   province: undefined,
 }
 
-const Context = createContext<State | null>(null)
+const Context = createContext<ContextState | null>(null)
 
 const useContextProvider = () => {
   const ctx = useContext(Context)
@@ -81,29 +67,28 @@ const useContextProvider = () => {
 export const AddressFormProvider = ({ ...props }: State) => {
   const {
     saveButtonProps,
-    modal: { visible, close },
-    register,
-    formState: { errors },
-    handleSubmit,
-    reset,
-    refineCore: { formLoading, onFinish },
+    refineCore: { formLoading, queryResult, id },
     setValue,
   } = props
 
   const { userProfile: user } = useAuthUser()
+  const address = useMemo(
+    () => queryResult?.data?.data,
+    [queryResult?.data?.data],
+  )
+
   useEffect(() => {
-    if (!user) {
-      return
-    }
-    reset({
-      user: user?._links?.self.href,
-      name: user.fullName,
-      phone: user?.phoneNumber,
-    })
-  }, [user, reset])
+    if (!user) return
+    setValue(`user`, user?._links?.self.href)
+
+    if (id) return
+
+    setValue(`name`, user.fullName ?? '')
+    setValue(`phone`, user?.phoneNumber ?? '')
+  }, [user, setValue, id])
 
   return (
-    <Context.Provider value={props}>
+    <Context.Provider value={{ ...props, address }}>
       <div className='relative'>
         {formLoading && <LoadingOverlay />}
         <Body />
@@ -122,8 +107,19 @@ const Body = function Body() {
   const {
     register,
     formState: { errors },
+    refineCore: { id },
+    watch,
+    setValue,
+    getFieldState,
+    resetField,
   } = useContextProvider()
 
+  const { defaultAddress: { id: defaultId } = {} } = useAddressContextProvider()
+  useEffect(() => {
+    resetField(`default`, { defaultValue: defaultId == id })
+    console.log('defaultId === id', defaultId === id)
+    console.log('defaultId, id', defaultId, id)
+  }, [defaultId, id, setValue, resetField])
   return (
     <>
       <ChakraFormInput
@@ -166,7 +162,7 @@ const Body = function Body() {
         gap={2}
         alignItems={'center'}>
         <Checkbox {...register('default')} />
-        <FormLabel m={0}>Đặt làm địa chỉ mặc định</FormLabel>
+        <FormLabel m={0}>Địa chỉ mặc định</FormLabel>
       </ChakraFormInput>
       <ChakraFormInput label='Loại địa chỉ'>
         <AddressType />
@@ -185,19 +181,28 @@ const ProvinceSelect = () => {
   const {
     register,
     setValue,
-    getValues,
     watch,
     formState: { errors },
+    address,
+    resetField,
   } = useContextProvider()
   const { data: { data: provinces } = {} } = useCustom<IAddress[]>({
     url: `${NEXT_API_URL}/${provincesApi}`,
     method: 'get',
   })
-
   const options = useMemo(
     () => provinces?.map((item) => toObjectOption(item?.name, item)),
     [provinces],
   )
+
+  useEffect(() => {
+    if (address) {
+      const selected = options?.find(
+        (option) => address.province === option.label,
+      )
+      selected && resetField(`provinceOption`, { defaultValue: selected })
+    }
+  }, [address, options, resetField])
   return (
     <FormControl isInvalid={!!errors?.provinceOption}>
       <FormLabel>Tỉnh/ Thành phố</FormLabel>
@@ -207,13 +212,13 @@ const ProvinceSelect = () => {
         {...register(`provinceOption`, {
           required: 'Vui lòng chọn địa chỉ',
         })}
-        onChange={(newValue, action) => {
+        onChange={(newValue) => {
           setValue(`provinceOption`, newValue, {
             shouldDirty: true,
           })
         }}
         placeholder={'Chọn tỉnh/ thành phố'}
-        noOptionsMessage={(input) => {
+        noOptionsMessage={() => {
           return <>Không tìm thấy dữ liệu</>
         }}
       />
@@ -229,9 +234,11 @@ const DistrictSelect = () => {
   const {
     register,
     setValue,
-    getValues,
     watch,
-    formState: { errors },
+    formState: { errors, dirtyFields },
+    address,
+    resetField,
+    getValues,
   } = useContextProvider()
   const provinceCode = watch(`provinceOption`)?.value.code
   const { data: { data: districts } = {} } = useCustom<IAddress[]>({
@@ -242,29 +249,44 @@ const DistrictSelect = () => {
     },
   })
 
-  //   const options = [] as any
-  //   console.log('districts', districts)
-
   const options = useMemo(
     () => districts?.map((item) => toObjectOption(item?.name, item)),
     [districts],
   )
+
+  useEffect(() => {
+    if (address) {
+      const selected = options?.find(
+        (option) => address.district === option.label,
+      )
+      selected && resetField(`districtOption`, { defaultValue: selected })
+    }
+  }, [address, options, resetField])
+
+  useEffect(() => {
+    const district = getValues(`districtOption`)
+    if (dirtyFields.provinceOption && district)
+      setValue(`districtOption`, null, {
+        shouldDirty: true,
+      })
+  }, [provinceCode, dirtyFields.provinceOption, setValue, getValues])
+
   return (
     <FormControl isInvalid={!!errors?.provinceOption}>
       <FormLabel>Quận/ huyện</FormLabel>
       <Select
-        options={options}
+        options={provinceCode ? options : []}
         value={watch(`districtOption`)}
         {...register(`districtOption`, {
           required: 'Vui lòng chọn địa chỉ',
         })}
-        onChange={(newValue, action) => {
+        onChange={(newValue) => {
           setValue(`districtOption`, newValue, {
             shouldDirty: true,
           })
         }}
         placeholder={'Chọn quận/ huyện'}
-        noOptionsMessage={(input) => {
+        noOptionsMessage={() => {
           return !provinceCode
             ? 'Vui lòng chọn tỉnh/ thành phố trước'
             : 'Không tìm thấy dữ liệu'
@@ -280,16 +302,16 @@ const DistrictSelect = () => {
 
 const WardSelect = () => {
   const {
-    register,
     setValue,
-    getValues,
     watch,
     control,
-    formState: { errors },
+    formState: { errors, dirtyFields },
+    resetField,
+    address,
+    getValues,
   } = useContextProvider()
   const districtCode = watch(`districtOption`)?.value.code
   const provinceCode = watch(`provinceOption`)?.value.code
-
   const { data: { data: wards } = {} } = useCustom<IAddress[]>({
     url: `${NEXT_API_URL}/${wardsApi(districtCode)}`,
     method: 'get',
@@ -302,6 +324,21 @@ const WardSelect = () => {
     () => wards?.map((item) => toObjectOption(item?.name, item)),
     [wards],
   )
+
+  useEffect(() => {
+    if (address) {
+      const selected = options?.find((option) => address.ward === option.label)
+      selected && resetField(`wardOption`, { defaultValue: selected })
+    }
+  }, [address, options, resetField])
+
+  useEffect(() => {
+    const ward = getValues(`wardOption`)
+    if (dirtyFields.districtOption && ward)
+      setValue(`wardOption`, null, {
+        shouldDirty: true,
+      })
+  }, [districtCode, dirtyFields.districtOption, setValue, getValues])
   return (
     <FormControl isInvalid={!!errors?.wardOption}>
       <FormLabel>Xã/ phường</FormLabel>
@@ -314,43 +351,23 @@ const WardSelect = () => {
         render={({ field }) => (
           <Select
             {...field}
-            options={options}
-            onChange={(newValue, action) => {
+            options={districtCode ? options : []}
+            onChange={(newValue) => {
               setValue(`wardOption`, newValue, {
                 shouldDirty: true,
               })
             }}
             placeholder={'Chọn xã/ phường'}
-            // noOptionsMessage={(input) => {
-            //   return !provinceCode
-            //     ? 'Vui lòng chọn tỉnh/ thành phố trước'
-            //     : !districtCode
-            //     ? 'Vui lòng chọn quận/ huyện trước'
-            //     : 'Không tìm thấy dữ liệu'
-            // }}
+            noOptionsMessage={(input) => {
+              return !provinceCode
+                ? 'Vui lòng chọn tỉnh/ thành phố trước'
+                : !districtCode
+                ? 'Vui lòng chọn quận/ huyện trước'
+                : 'Không tìm thấy dữ liệu'
+            }}
           />
         )}
       />
-      {/* <Select
-        options={options}
-        value={watch(`wardOption`)}
-        {...register(`wardOption`, {
-          required: 'Vui lòng chọn địa chỉ',
-        })}
-        onChange={(newValue, action) => {
-          setValue(`wardOption`, newValue, {
-            shouldDirty: true,
-          })
-        }} */}
-      {/* placeholder={'Chọn xã/ phường'}
-        noOptionsMessage={(input) => {
-          return !provinceCode
-            ? 'Vui lòng chọn tỉnh/ thành phố trước'
-            : !districtCode
-            ? 'Vui lòng chọn quận/ huyện trước'
-            : 'Không tìm thấy dữ liệu'
-        }}
-      /> */}
       <FormErrorMessage>
         <FormErrorIcon />
         {errors?.wardOption?.message}
@@ -364,8 +381,7 @@ const AddressTypeRadio = function RadioType({
   icon,
   ...props
 }: RadioProps) {
-  const { state, getInputProps, getRadioProps, htmlProps, getLabelProps } =
-    useRadio(props)
+  const { state, getInputProps, getRadioProps, htmlProps } = useRadio(props)
   return (
     <>
       <chakra.label
@@ -394,7 +410,7 @@ const AddressType = () => {
     setValue(`type`, value as ShippingAddress['type'])
   }
 
-  const { value, getRadioProps, getRootProps } = useRadioGroup({
+  const { getRadioProps, getRootProps } = useRadioGroup({
     onChange: handleChange,
     defaultValue: 'Nhà riêng',
   })

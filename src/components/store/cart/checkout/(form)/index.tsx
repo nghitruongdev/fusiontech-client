@@ -154,19 +154,6 @@ Form.Payment = function Payment() {
                     </Radio>
                   ),
                 )}
-                {/* {[
-                  'Thẻ Visa/ Mastercard',
-                  'Ví điện tử',
-                  'Thanh toán trả sau',
-                ].map((item, idx) => (
-                  <Radio
-                    value={item}
-                    key={idx}>
-                    <span className='text-md font-medium leading-tight text-zinc-600'>
-                      {item}
-                    </span>
-                  </Radio>
-                ))} */}
               </div>
             </RadioGroup>
           )}

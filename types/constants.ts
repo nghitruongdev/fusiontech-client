@@ -76,6 +76,8 @@ export const API = {
         id
           ? `${resource}/search/findTopFrequentBoughtTogether?id=${id}&size=${size}`
           : '',
+      getAvailableQuantity: (id: string | number | undefined) =>
+        id ? `${resource}/search/availableQuantityByProduct?id=${id}` : '',
     }
   },
   specifications: () => {
@@ -91,6 +93,9 @@ export const API = {
     const resource: ResourceName = 'users'
     return {
       resource: resource,
+      projection: {
+        nameAndImageOnly: 'name-image-only',
+      },
       defaultAddress: {
         update: (uid: string, aid: number) =>
           `${resource}/${uid}/defaultAddress/${aid}`,
@@ -109,7 +114,8 @@ export const API = {
       resource: resource,
       findAllByUserId: (id: string | number | undefined) =>
         id ? `${resource}/search/findAllByUserId?uid=${id}` : '',
-      defaultAddressByUserId:(uid: number) => `${resource}/search/findDefaultShippingAddressByUserId?uid=${uid}`,
+      defaultAddressByUserId: (uid: number | string | undefined) =>
+        `${resource}/search/findDefaultShippingAddressByUserId?uid=${uid}`,
     }
   },
   address: {
@@ -119,6 +125,23 @@ export const API = {
     wards: (districtCode: number | string | undefined) =>
       districtCode ? `address/wards?query=${districtCode}` : '',
   },
+  vouchers: () => {
+    const resource: ResourceName = 'vouchers'
+    return {
+      resource,
+      findByCode: (code: string | undefined | null) =>
+        !code ? '' : `${resource}/search/by-code?code=${code}`,
+      countUserUsage: (
+        code: string | undefined | null,
+        userId: number | string | undefined | null,
+      ) =>
+        !code || !userId
+          ? ''
+          : `${resource}/search/user-usage?code=${code}&userId=${userId}`,
+      countUsage: (code: string | null | undefined) =>
+        !code ? '' : `${resource}/search/usage?code=${code}`,
+    }
+  },
 }
 
 export const ROLES = {
@@ -127,7 +150,7 @@ export const ROLES = {
 }
 
 export const PaymentMethodLabel: { [key in PaymentMethod]: string } = {
-  COD: 'Trả sau (COD)',
+  CASH: 'Trả sau (COD)',
   CREDIT_CARD: 'Thẻ Visa/ Master Card',
 }
 
@@ -155,6 +178,10 @@ const ButtonTextVi: { [key in ButtonType]: string } = {
   cancel: 'Quay lại',
 }
 
+export const NEXT_PATH = {
+  login: '/auth/login',
+}
+
 export const Images: { [key in ResourceName]: string } = {
   products:
     'https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fvariants%2FlogostuImage.png?alt=media&token=90709f04-0996-4779-ab80-f82e99c62041',
@@ -172,4 +199,5 @@ export const Images: { [key in ResourceName]: string } = {
     'https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fvariants%2FlogostuImage.png?alt=media&token=90709f04-0996-4779-ab80-f82e99c62041',
   specifications:
     'https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fvariants%2FlogostuImage.png?alt=media&token=90709f04-0996-4779-ab80-f82e99c62041',
+  vouchers: '',
 }

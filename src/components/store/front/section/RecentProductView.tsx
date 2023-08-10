@@ -29,7 +29,9 @@ const RecentProductView = () => {
         <div className='grid grid-cols-6 gap-3 mb-2'>
           {items.map(({ product, time }) => (
             // eslint-disable-next-line react/jsx-key
-            <div className='rounded-lg shadow border-gray-300 bg-white'>
+            <div
+              key={product.id}
+              className='rounded-lg shadow border-gray-300 bg-white'>
               <ProductCardProvider
                 product={product}
                 key={product.id}>

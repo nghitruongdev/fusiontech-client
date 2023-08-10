@@ -6,30 +6,29 @@ import { useCustomMutation, HttpError } from '@refinedev/core'
 import { UseFormReturnType, useForm } from '@refinedev/react-hook-form'
 import { useRouter } from 'next/navigation'
 import { createContext, useContext, useEffect, useRef } from 'react'
-import { ICartItem, ICheckout, IOrder } from 'types'
+import { ICartItem, ICheckout, IOrder, IVoucher } from 'types'
 import { API } from 'types/constants'
 import { API_URL } from 'types/constants'
 import { createStore, useStore } from 'zustand'
 import { immer } from 'zustand/middleware/immer'
 
 type State = {
-  //   items: ICartItem[]
   onCheckout: () => Promise<void>
 }
 type StoreState = State & UseFormReturnType<IOrder, HttpError, ICheckout>
-type CheckoutStore = ReturnType<typeof createCheckoutStore>
+// type CheckoutStore = ReturnType<typeof createCheckoutStore>
 
-const createCheckoutStore = (initProps: StoreState) => {
-  const defaultProps = {}
-  return createStore<StoreState>()(
-    immer((set, get) => ({
-      ...defaultProps,
-      ...initProps,
-    })),
-  )
-}
+// const createCheckoutStore = (initProps: StoreState) => {
+//   const defaultProps = {}
+//   return createStore<StoreState>()(
+//     immer((set, get) => ({
+//       ...defaultProps,
+//       ...initProps,
+//     })),
+//   )
+// }
 
-const Context = createContext<CheckoutStore | null>(null)
+const Context = createContext<StoreState | null>(null)
 type ProviderProps = React.PropsWithChildren<{}>
 export const CheckoutProvider = ({ children }: ProviderProps) => {
   const router = useRouter()
@@ -64,33 +63,28 @@ export const CheckoutProvider = ({ children }: ProviderProps) => {
     const { cart } = API['orders']()
     const url = `${API_URL}/${cart.checkout}`
     console.log('url', url)
-    // setError(`addressId`, { message: 'Vui lòng nhập địa chỉ' })
-    console.log(
-      'getFieldState(`addressId`)',
-      getFieldState(`addressId`).error?.message,
-    )
-    console.log('errors.addressId?.message', errors.addressId?.message)
     await handleSubmit(async (data) => {
       console.log('data', data)
       if (!data.addressId) {
         open?.(onError({ message: 'Vui lòng chọn địa chỉ nhận hàng' }))
         return
       }
+
       window.scrollTo({
         top: 0,
         behavior: 'smooth', // Smooth scrolling animation
       })
-      await new Promise((resolve) => setTimeout(resolve, 3000))
+      return
+
+      await new Promise((resolve) => setTimeout(resolve, 500))
       mutateAsync(
         {
           url,
           method: 'post',
           values: {
             ...data,
-            payment: {},
           },
         },
-
         {
           onSettled(data, error, variables, context) {
             console.log('Done submitting the order')
@@ -105,16 +99,18 @@ export const CheckoutProvider = ({ children }: ProviderProps) => {
     console.log('Outside handle submit')
   }
 
-  const storeRef = useRef<CheckoutStore>()
-  if (!!!storeRef.current) {
-    storeRef.current = createCheckoutStore({
-      ...formProps,
-      onCheckout: checkoutHandler,
-    })
-  }
+  //   const storeRef = useRef<StoreState>()
+  //   if (!!!storeRef.current) {
+  //     storeRef.current = createCheckoutStore({
+  //       ...formProps,
+  //       onCheckout: checkoutHandler,
+  //     })
+  //   }
   return (
     <>
-      <Context.Provider value={storeRef.current}>{children}</Context.Provider>
+      <Context.Provider value={{ ...formProps, onCheckout: checkoutHandler }}>
+        {children}
+      </Context.Provider>
     </>
   )
 }

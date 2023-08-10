@@ -18,7 +18,7 @@ import { ICartItem, IProduct, IVariant } from 'types'
 import Image from 'next/image'
 import { useSelectedCartItemStore } from './useSelectedItemStore'
 import { useDebounce } from 'usehooks-ts'
-import useCart from './useCart'
+import useCart, { ALLOW_QUANTITY } from './useCart'
 import { formatPrice } from '../../../lib/utils'
 import { API, Images } from 'types/constants'
 import { TooltipCondition } from '@components/ui/TooltipCondition'
@@ -44,7 +44,10 @@ const CartItem = ({ item }: { item: ICartItem }) => {
     </>
   )
 }
-const ItemContext = createContext<{ item: ICartItem } | null>(null)
+const ItemContext = createContext<{
+  item: ICartItem
+  isOutOfStock: boolean
+} | null>(null)
 
 const useItemContextProvider = () => {
   const ctx = useContext(ItemContext)
@@ -58,10 +61,12 @@ CartItem.Provider = function Provider({
   children: ReactNode
   item: ICartItem
 }) {
+  const isOutOfStock = !!!item.variant?.availableQuantity
   return (
     <ItemContext.Provider
       value={{
         item,
+        isOutOfStock,
       }}>
       {children}
     </ItemContext.Provider>
@@ -98,6 +103,7 @@ CartItem.SelectedCheckbox = function Checkbox() {
 CartItem.ProductInfo = function ProductInfo() {
   const {
     item: { variant },
+    isOutOfStock,
   } = useItemContextProvider()
   const product = variant?.product
   const { control } = useForm()
@@ -112,12 +118,16 @@ CartItem.ProductInfo = function ProductInfo() {
           src={variant?.images?.[0] ?? product?.images?.[0] ?? Images.products}
         />
         <div className='mx-4 grid gap-2'>
-          <h2 className='text-base text-zinc-900'>
+          <h2
+            className={`text-base ${
+              isOutOfStock ? 'text-red-500' : 'text-zinc-700'
+            }`}>
             {variant?.product?.name ?? 'Sản phẩm'}
           </h2>
           <p className='text-sm text-zinc-500'>
             Giá: {formatPrice(variant?.price)}
           </p>
+          <CartItem.AvailableQuantity />
           <p className='text-sm text-zinc-500 flex items-center gap-1'>
             <span className='bg-primaryBlue rounded-full text-white text-xs w-4 h-4 flex items-center justify-center'>
               <TbReload className='rotate-180' />
@@ -131,6 +141,17 @@ CartItem.ProductInfo = function ProductInfo() {
         <CartItem.ProductInfoPrice />
       </div>
     </div>
+  )
+}
+
+CartItem.AvailableQuantity = function AvailableQuantity() {
+  const { item, isOutOfStock } = useItemContextProvider()
+  const { availableQuantity } = item?.variant ?? {}
+  if (isOutOfStock) return <p className='text-sm text-red-500'>Hết hàng</p>
+  return (
+    <p className='text-sm text-zinc-500'>
+      Số lượng tồn kho: {availableQuantity}
+    </p>
   )
 }
 
@@ -172,8 +193,16 @@ CartItem.CartButtonGroup = function ButtonGroup() {
   const { item } = useItemContextProvider()
   const { removeItem, updateItem } = useCart()
   const [quantity, setQuantity] = useState<number>(item.quantity)
-  const qtyRef = useRef(quantity)
-  const isAddOk = quantity < 10
+  const availableQuantity = item.variant?.availableQuantity
+  console.log(
+    'item.variant?.availableQuantity',
+    item.variant?.availableQuantity,
+  )
+  const limit =
+    availableQuantity && availableQuantity < ALLOW_QUANTITY
+      ? availableQuantity
+      : ALLOW_QUANTITY
+  const isAddOk = quantity < limit
   const isMinusOk = quantity > 1
 
   const removeItemHandler = () => {
@@ -243,7 +272,11 @@ CartItem.CartButtonGroup = function ButtonGroup() {
 
         <TooltipCondition
           condition={!isAddOk}
-          label='Số lượng đặt tối đa là 10 sản phẩm'>
+          label={
+            availableQuantity && availableQuantity < ALLOW_QUANTITY
+              ? `Số lượng hàng tồn kho là ${availableQuantity}`
+              : `Số lượng đặt tối đa là ${ALLOW_QUANTITY} sản phẩm`
+          }>
           <button
             onClick={updateQuantityHandler.bind(this, true)}
             {...(!isAddOk && { disabled: true })}

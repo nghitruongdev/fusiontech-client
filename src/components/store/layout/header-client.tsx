@@ -4,7 +4,7 @@
 
 import useCart, { useCartItems } from '@components/store/cart/useCart'
 import { ShoppingBag, UserCircle } from 'lucide-react'
-import React, { useState, ChangeEvent } from 'react'
+import React, { useState, useEffect, use, Suspense } from 'react'
 import Link from 'next/link'
 import {
   Avatar,
@@ -14,7 +14,6 @@ import {
   MenuDivider,
   MenuItem,
   MenuList,
-  useModal,
 } from '@chakra-ui/react'
 import { IoSearchOutline } from 'react-icons/io5'
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
@@ -25,6 +24,8 @@ import { User } from '@firebase/auth'
 import { useLogout, useNotification } from '@refinedev/core'
 import useCallbackUrl from '@/hooks/useCallbackUrl'
 import { useDialog } from '@components/ui/DialogProvider'
+import { useRouter } from 'next/navigation'
+import { suspensePromise, waitPromise } from '@/lib/promise'
 export const HeaderClient = () => {}
 
 export const VerifyMailBanner = () => {
@@ -66,13 +67,61 @@ export const CartButton = () => {
     </>
   )
 }
+export const UserInfo = () => {
+  const { user } = useAuthUser()
+  const router = useRouter()
+  const { callbackUrl } = useCallbackUrl()
+  useEffect(() => {
+    if (!user) {
+      router.prefetch('/auth/login')
+    }
+  }, [user, router])
+
+  if (user) return <DynamicUserMenu user={user} />
+  return (
+    <Suspense fallback={<UserInfoLoading />}>
+      <Link
+        href={{
+          pathname: '/auth/login',
+          query: {
+            ...(callbackUrl && { callbackUrl }),
+          },
+        }}
+        className='navBarHover'>
+        {/* <div className="navBarHover"> */}
+        <UserCircle className='text-lg' />
+        <div className=''>
+          <p className='text-xs'>Đăng nhập</p>
+          <h2 className='text-base font-semibold -mt-1'>Tài khoản</h2>
+        </div>
+        {/* </div> */}
+      </Link>
+    </Suspense>
+  )
+}
+
+const DynamicUserMenu = dynamic(
+  () =>
+    new Promise((res) => {
+      setTimeout(() => {
+        res(undefined)
+      }, 300)
+    })
+      .then(() => import('./header-client'))
+      .then((mod) => mod.UserInfoMenu),
+  {
+    loading: () => <UserInfoLoading />,
+  },
+)
 
 export const UserInfoMenu = ({ user }: { user: User }) => {
   const { displayName, email, phoneNumber, photoURL } = user
   const display = displayName ?? email ?? phoneNumber
-  const { mutate: logout } = useLogout()
+  const { mutateAsync: logout } = useLogout()
   const { confirm } = useDialog()
   const { open } = useNotification()
+  const [promise, setPromise] = useState<any>(waitPromise(0))
+  use(promise)
   return (
     <>
       <Menu>
@@ -101,13 +150,13 @@ export const UserInfoMenu = ({ user }: { user: User }) => {
           color='blackAlpha.700'
           className='text-zinc-700 text-sm'>
           <MenuItem>
-              <Link href="/account/profile">Thông tin tài khoản</Link>
+            <Link href='/account/profile'>Thông tin tài khoản</Link>
           </MenuItem>
           <MenuItem>
             <Link href='/account/orders'>Quản lý đơn hàng</Link>
           </MenuItem>
           <MenuItem>
-            <Link href="/account/favorites">Sản phẩm yêu thích</Link>
+            <Link href='/account/favorites'>Sản phẩm yêu thích</Link>
           </MenuItem>
 
           <MenuDivider />
@@ -121,14 +170,18 @@ export const UserInfoMenu = ({ user }: { user: User }) => {
                 console.log('No longer want to logged out')
                 return
               }
-              logout(undefined, {
-                onSuccess() {
+              const promise = new Promise((res) => {
+                setTimeout(async () => {
+                  await logout(undefined)
+                  console.log('onSuccess ran')
+                  res(undefined)
                   open?.({
                     type: 'success',
                     message: 'Đăng xuất thành công',
                   })
-                },
+                }, 1000)
               })
+              setPromise(promise)
             }}>
             Đăng xuất
           </MenuItem>
@@ -138,56 +191,15 @@ export const UserInfoMenu = ({ user }: { user: User }) => {
   )
 }
 
-const DynamicUserMenu = dynamic(
-  () =>
-    new Promise((res) => {
-      setTimeout(() => {
-        res(undefined)
-      }, 300)
-    })
-      .then(() => import('./header-client'))
-      .then((mod) => mod.UserInfoMenu),
-  {
-    loading: () => (
-      <>
-        <div className='flex items-center space-x-4'>
-          <Skeleton className='h-12 w-12 rounded-full' />
-          <div className='space-y-2'>
-            <Skeleton className='h-4 w-[100px]' />
-            <Skeleton className='h-4 w-[100px]' />
-          </div>
-        </div>
-      </>
-    ),
-  },
-)
-export const UserInfo = () => {
-  const { user } = useAuthUser()
-  const { callbackUrl } = useCallbackUrl()
-
-  if (user)
-    return (
-      // <ModalProvider>
-      <DynamicUserMenu user={user} />
-      // </ModalProvider>
-    )
+const UserInfoLoading = () => {
   return (
-    <Link
-      href={{
-        pathname: '/auth/login',
-        query: {
-          ...(callbackUrl && { callbackUrl }),
-        },
-      }}
-      className='navBarHover'>
-      {/* <div className="navBarHover"> */}
-      <UserCircle className='text-lg' />
-      <div className=''>
-        <p className='text-xs'>Đăng nhập</p>
-        <h2 className='text-base font-semibold -mt-1'>Tài khoản</h2>
+    <div className='flex items-center space-x-4'>
+      <Skeleton className='h-12 w-12 rounded-full' />
+      <div className='space-y-2'>
+        <Skeleton className='h-4 w-[100px]' />
+        <Skeleton className='h-4 w-[100px]' />
       </div>
-      {/* </div> */}
-    </Link>
+    </div>
   )
 }
 

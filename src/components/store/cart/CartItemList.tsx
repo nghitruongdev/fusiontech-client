@@ -44,7 +44,7 @@ CartItemList.Provider = function Provider({
   const items = Object.values(useCartItems()).reverse()
   const status = 'success'
   return (
-    <CartItemList.Context.Provider value={{ status, items }}>
+    <CartItemList.Context.Provider value={{ status, items: items }}>
       {children}
     </CartItemList.Context.Provider>
   )
@@ -80,7 +80,7 @@ CartItemList.ClearAllButton = function ClearAllButton() {
       header: <p className='flex gap-2'>Xoá tất cả sản phẩm</p>,
       message: 'Bạn có chắc chắn muốn xoá tất cả sản phẩm trong giỏ hàng?',
     }).then((res) => {
-      if (res) {
+      if (res.status) {
         clearCart()
       }
     })
@@ -169,12 +169,13 @@ CartItemList.SelectAllCheckbox = function AllCheckbox() {
   }
   useUpdateEffect(() => {
     if (!!!allRef.current) return
+    console.log('selected.length, items.length', selected.length, items.length)
     if (selected.length === items.length && !!items.length) {
       allRef.current.checked = true
     } else {
       allRef.current.checked = false
     }
-  }, [selected.length])
+  }, [selected.length, items.length])
 
   return (
     <>

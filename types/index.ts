@@ -11,6 +11,7 @@ export type ResourceName =
   | 'users'
   | 'shippingAddresses'
   | 'specifications'
+  | 'vouchers'
 
 export type FirebaseImage = string
 
@@ -26,7 +27,7 @@ export type IProduct = {
   slug: string
   summary: string
   description: string
-  status?: 'NGUNG_KINH_DOANH' | 'MOI_RA_MAT'
+  status?: 'STOP_SELLING' | 'NEW'
   active?: boolean
   minPrice?: number
   maxPrice?: number
@@ -36,7 +37,7 @@ export type IProduct = {
   category?: ICategory
   reviewCount?: number
   avgRating?: number
-  variants?: IVariant[] | { id: string; price: number }[]
+  //   variants?: IVariant[] | { id: string; price: number }[]
   _links?: {
     self: {
       href: string
@@ -185,6 +186,7 @@ export type IAddress = {
   division_type: string
   short_codename: string
 }
+
 export interface IUser {
   id?: number
   firebaseUid: string
@@ -245,6 +247,7 @@ export interface ICheckout {
   email?: string
   note?: string
   payment: IPayment
+  voucher?: IVoucher | null
 }
 export interface ICart {
   id: string
@@ -281,11 +284,12 @@ export interface IOrder {
 export interface IVoucher {
   id: number
   code: string | null
+  discount: number
   description?: string | null
   minOrderAmount?: number | null
   maxDiscountAmount?: number | null
-  startDate?: string | null
-  expirationDate?: string | null
+  startDate: string
+  expirationDate: string
   limitUsage?: number | null
   userLimitUsage?: number | null
 }
@@ -297,7 +301,7 @@ export enum PaymentStatus {
 
 export type PaymentMethodLabel = 'CHUA_THANH_TOAN' | 'DA_THANH_TOAN'
 export enum PaymentMethod {
-  COD = 'COD',
+  COD = 'CASH',
   CREDIT_CARD = 'CREDIT_CARD',
 }
 

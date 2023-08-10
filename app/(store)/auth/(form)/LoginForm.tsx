@@ -24,10 +24,7 @@ import { ICredentials } from 'types/auth'
 import AuthPage from '../AuthPage'
 import PasswordInput from '@components/ui/PasswordInput'
 import { firebaseAuth } from '@/providers/firebaseAuthProvider'
-import { waitPromise } from '@/lib/promise'
 import { cn } from 'components/lib/utils'
-import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
-import userAPI from 'src/api/userAPI'
 
 const LoginForm = () => {
   const [errorState, setErrorState] = useState('')
@@ -44,6 +41,7 @@ const LoginForm = () => {
   const callbackParam = params.get('callbackUrl')
   const callbackUrl = callbackParam ? decodeURIComponent(callbackParam) : '/'
   const isLoading = formSubmitting
+  console.log('callbackParam', callbackParam)
   useEffect(() => {
     console.log('callback url triggered rendered')
     if (callbackUrl)

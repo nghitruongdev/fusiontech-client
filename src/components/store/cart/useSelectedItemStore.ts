@@ -3,6 +3,8 @@
 import { ICartItem } from 'types'
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
+import { useCartStore } from './useCart'
+import { useMemo } from 'react'
 
 type State = {
   items: ICartItem[]
@@ -13,6 +15,10 @@ type Action = {
   addAll: (items: ICartItem[]) => void
   clearAll: () => void
   updateItems: (items: Record<number, ICartItem>) => void
+  getValidItems: (
+    items: ICartItem[],
+    cartItems: Record<number, ICartItem>,
+  ) => ICartItem[]
 }
 
 export const useSelectedCartItemStore = create<State & Action>()(
@@ -33,12 +39,18 @@ export const useSelectedCartItemStore = create<State & Action>()(
       addAll: (items: ICartItem[]) => set({ items: items }),
       clearAll: () => set({ items: [] }),
       updateItems: (newItems: Record<number, ICartItem>) => {
-        set(({ items }) => ({
-          items: items
-            .map((item) => newItems[item.variantId])
-            .filter((item) => !!item)
-            .map((item) => item as ICartItem),
-        }))
+        // set(({ items }) => ({
+        //   items: items
+        //     .map((item) => newItems[item.variantId])
+        //     .filter((item) => !!item)
+        //     .map((item) => item as ICartItem),
+        // }))
+      },
+      getValidItems: (items, cartItems) => {
+        return items
+          .map((item) => cartItems[item.variantId])
+          .filter((item) => !!item)
+          .map((item) => item as ICartItem)
       },
     }),
     {
@@ -64,3 +76,18 @@ export const useSelectedCartItemStore = create<State & Action>()(
     },
   ),
 )
+
+export const useValidSelectedCartItems = () => {
+  const { items, getValidItems } = useSelectedCartItemStore(
+    ({ items, getValidItems }) => ({ items, getValidItems }),
+  )
+
+  const { items: cartItems } = useCartStore()
+  const selectedItems = useMemo(
+    () => getValidItems(items, cartItems),
+    [items, cartItems, getValidItems],
+  )
+
+  //   const { items } = useSelectedCartItemStore(({ items }) => ({ items }))
+  return items
+}

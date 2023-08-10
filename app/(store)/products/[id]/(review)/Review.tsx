@@ -18,6 +18,10 @@ import {
   HStack,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
+import { useRouter } from 'next/navigation'
+import useCallbackUrl from '@/hooks/useCallbackUrl'
+import { NEXT_PATH } from 'types/constants'
 
 const ReviewComponent = () => {
   const [reviewList, setReviewList] = useState<any[]>([])
@@ -28,6 +32,9 @@ const ReviewComponent = () => {
 
   const [visibleComments, setVisibleComments] = useState<number>(3)
   const [isExpanded, setIsExpanded] = useState<boolean>(false)
+  const { user } = useAuthUser()
+  const router = useRouter()
+  const { callbackUrl } = useCallbackUrl()
 
   const handleViewMore = () => {
     if (!isExpanded) {
@@ -73,9 +80,13 @@ const ReviewComponent = () => {
     return stars
   }
 
-  {
-    /* Hàm tính đánh giá trung bình dựa trên rating */
-  }
+  /* Hàm tính đánh giá trung bình dựa trên rating */
+  //FIXME:dùng useCallback => function dùng trong useEffect
+  /**
+   * @deprecated
+   * @param reviews
+   * @returns
+   */
   const calculateAverageRating = (reviews: any[]) => {
     if (!reviews.length) {
       setAverageRating(0)
@@ -90,6 +101,11 @@ const ReviewComponent = () => {
     /* Button bật / tắt form đánh giá */
   }
   const ReviewFormButtonClick = () => {
+    if (!user) {
+      const url = encodeURIComponent(`${callbackUrl}#review-section`)
+      router.push(`${NEXT_PATH['login']}?callbackUrl=${url}`)
+      return
+    }
     setShowReviewForm(!showReviewForm)
   }
 

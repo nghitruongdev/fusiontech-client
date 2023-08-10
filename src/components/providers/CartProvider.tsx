@@ -157,10 +157,9 @@ const CartProvider = () => {
     }
   }, [user, cartId, mergeCart, setCartId, cartUserId])
 
-  // console.log('use effect update selected items ran')
-  useEffect(() => {
-    updateItems(items)
-  }, [items, updateItems])
+  //   useEffect(() => {
+  //     updateItems(items)
+  //   }, [items, updateItems])
   return <></>
 }
 export default CartProvider

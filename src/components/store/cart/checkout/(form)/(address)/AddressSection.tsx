@@ -110,13 +110,8 @@ export const AddressSectionProvider = ({
     data: { data: defaultAddress } = {},
     refetch: refetchDefaultAddress,
   } = useCustom<ShippingAddress>({
-    url: `${API_URL}/${defaultAddressByUserId}`,
+    url: `${API_URL}/${defaultAddressByUserId(user?.id)}`,
     method: 'get',
-    config: {
-      query: {
-        uid: user?.id,
-      },
-    },
     queryOptions: {
       retry: 3,
       enabled: !!user?.id,
@@ -178,20 +173,30 @@ export const AddressSectionProvider = ({
       } = createProps
 
       const onClick = (event: any) => {
-        handleSubmit(async (data) => {
-          if (!checkUser()) return
+        handleSubmit(
+          async ({ provinceOption, districtOption, wardOption, ...data }) => {
+            if (!checkUser()) return
+            const province = provinceOption?.value.name ?? ''
+            const district = districtOption?.value.name ?? ''
+            const ward = wardOption?.value.name ?? ''
+            const response = await onFinish({
+              ...data,
+              province,
+              district,
+              ward,
+              user: user?._links?.self.href,
+            })
+            if (!!response) {
+              if (data.default || !addressList?.length) {
+                refetchDefaultAddress()
+              }
+              setSelectedAddress(response.data)
+              refetchAddressList()
 
-          const response = await onFinish({
-            ...data,
-            user: user?._links?.self.href,
-          })
-          if (!!response) {
-            // reset()
-            setSelectedAddress(response.data)
-            refetchAddressList()
-            closeModal()
-          }
-        })()
+              closeModal()
+            }
+          },
+        )()
       }
 
       return {
@@ -210,18 +215,31 @@ export const AddressSectionProvider = ({
       } = editProps
 
       const onClick = (event: any) => {
-        handleSubmit(async (data) => {
-          if (!checkUser()) return
-          const response = await onFinish({
-            ...data,
-            user: user?._links?.self.href,
-          })
-          if (!!response) {
-            console.log('response', response)
-            // reset()
-            close()
-          }
-        })()
+        const dirtyFields = editProps.formState.dirtyFields
+        handleSubmit(
+          async ({ wardOption, districtOption, provinceOption, ...data }) => {
+            if (!checkUser()) return
+            const province =
+              dirtyFields.provinceOption && provinceOption?.value.name
+            const district =
+              dirtyFields.districtOption && districtOption?.value.name
+            const ward = dirtyFields.wardOption && wardOption?.value.name
+            const response = await onFinish({
+              ...data,
+              ...(province && { province }),
+              ...(district && { district }),
+              ...(ward && { ward }),
+              user: user?._links?.self.href,
+            })
+            if (!!response) {
+              console.log('response', response)
+              if (dirtyFields.default) {
+                refetchDefaultAddress()
+              }
+              close()
+            }
+          },
+        )()
       }
 
       return {

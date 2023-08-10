@@ -28,8 +28,9 @@ type OptionGroup = {
 
 type StoreProps = {
   groups: Record<string, OptionGroup>
+  validVariants: Record<number, IVariant>
   variants: IVariant[]
-  variantSpecsRecord: Record<number, Record<string, ISpecification>>
+  variantSpecifications: Record<number, Record<string, ISpecification>>
   selected: Record<string, string>
   setSelected: (option: ISpecification) => void
   removeSelected: (name: string) => void
@@ -43,9 +44,11 @@ export const useOptionStore = create<StoreProps>()(
   immer((set, get) => {
     const getValid = (
       selected: StoreProps['selected'],
-      specRecords?: StoreProps['variantSpecsRecord'],
+      specRecords?: StoreProps['variantSpecifications'],
     ) => {
-      const validSpecs = Object.entries(specRecords ?? get().variantSpecsRecord)
+      const validSpecs = Object.entries(
+        specRecords ?? get().variantSpecifications,
+      )
         .filter(([, specs]) =>
           Object.entries(selected).every(
             ([selectedName, selectedvalue]) =>
@@ -105,26 +108,29 @@ export const useOptionStore = create<StoreProps>()(
         groups,
         selected,
         variants,
-        variantSpecsRecord: specRecords,
+        validVariants,
+        variantSpecifications: specRecords,
       } = get()
       const groupLength = Object.keys(groups).length
       const selectedLength = Object.keys(selected).length
       const variantsLength = variants.length
-      const isAddable =
-        variantsLength === 1 ||
-        (!!groupLength && groupLength === selectedLength)
-      const variant = variants.find(({ id }) =>
-        Object.entries(selected).every(
-          ([name, value]) => specRecords[id]?.[name]?.value === value,
-        ),
-      )
-      return [variant, isAddable]
+
+      const isAddable = groupLength === selectedLength
+      //   variantSpecValue === undefined ||
+      const variant = Object.entries(validVariants).find(([id, variant]) => {
+        return Object.entries(groups).every(([name]) => {
+          const variantSpecValue = specRecords[+id]?.[name]?.value
+          return variantSpecValue === selected[name]
+        })
+      })
+      return [variant?.[1], isAddable]
     }
 
     return {
       groups: {},
       variants: [],
-      variantSpecsRecord: {},
+      validVariants: {},
+      variantSpecifications: {},
       validSpecs: {},
       selected: {},
       setGroups: (newGroups) => {
@@ -136,18 +142,30 @@ export const useOptionStore = create<StoreProps>()(
       removeSelected,
 
       setVariants: (variants: IVariant[]) => {
-        const record = variants.reduce(
+        const { groups } = get()
+        const validVariants = variants.filter(
+          (item) =>
+            item.active &&
+            !!item.availableQuantity &&
+            Object.entries(groups).every(
+              ([name]) =>
+                !!item.specifications?.find((spec) => spec.name === name),
+            ),
+        )
+        console.log('validVariants', validVariants)
+        const record = validVariants.reduce(
           (record, { id, specifications = [] }) => {
             record[id] = toRecord(specifications, 'name')
             return record
           },
-          {} as StoreProps['variantSpecsRecord'],
+          {} as StoreProps['variantSpecifications'],
         )
         const validSpecs = getValid({}, record)
 
         set((state) => {
-          state.variantSpecsRecord = record
+          state.variantSpecifications = record
           state.variants = variants
+          state.validVariants = toRecord(validVariants, 'id')
           state.validSpecs = validSpecs
           state.selected = {}
         })
@@ -161,7 +179,7 @@ export const ProductOptions = () => {
   const { getSpecificationsByProduct } = API['products']()
   const setGroups = useOptionStore((state) => state.setGroups)
   const setVariants = useOptionStore((state) => state.setVariants)
-  const variantRecords = useOptionStore((state) => state.variantSpecsRecord)
+  const variantRecords = useOptionStore((state) => state.variantSpecifications)
   const {
     variants: { data: variants, status },
     product,
@@ -178,19 +196,18 @@ export const ProductOptions = () => {
       suspense: true,
     },
   })
-  //set groups to store
-  useEffect(() => {
-    if (!data) return
-    const names: OptionGroup[] = data
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map((group) => ({ ...group, values: toRecord(group.values, 'value') }))
-
-    setGroups(toRecord(names, 'name'))
-  }, [data, setGroups])
 
   useEffect(() => {
+    const updateGroups = () => {
+      if (!data) return
+      const names: OptionGroup[] = data
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((group) => ({ ...group, values: toRecord(group.values, 'value') }))
+      setGroups(toRecord(names, 'name'))
+    }
+    updateGroups()
     setVariants(variants ?? [])
-  }, [variants, setVariants])
+  }, [variants, setVariants, setGroups, data])
 
   if (!variants) return <></>
 
@@ -244,7 +261,6 @@ export const OptionGroup = ({
     // value: selected[name],
   })
   const isValid = (value: string) =>
-    Object.keys(selected)[0] === name ||
     validSpecs[name]?.some((valid) => value == valid)
   return (
     <Stack {...getRootProps()}>
@@ -294,7 +310,7 @@ const OptionRadio = ({ option, ...props }: RadioProps) => {
             `p-2 text-sm rounded-md font-medium min-w-[100px] border-zinc-300 text-zinc-700 flex justify-center cursor-pointer  hover:bg-blue-50 hover:text-blue-700 hover:border-blue-600`,
             state.isChecked && 'bg-blue-100',
             state.isDisabled &&
-              'bg-gray-100 text-zinc-500 cursor-not-allowed hover:bg-gray-50 hover:text-gray-500 hover:border-zinc-300',
+              'bg-gray-100 text-zinc-500 pointer-events-none hover:bg-gray-50 hover:text-gray-500 hover:border-zinc-300',
           )}
           onClick={(e) => {
             if (!state.isChecked) return

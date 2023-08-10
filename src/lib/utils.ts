@@ -6,6 +6,7 @@ import {
   useSearchParams,
 } from 'next/navigation'
 import { stringifyUrl } from 'query-string'
+import { useMemo } from 'react'
 import { Option } from 'types'
 export const formatPrice = (amount?: number) => {
   if (!amount) return 0
@@ -48,10 +49,13 @@ export const blurColorDataUrl = () => {
 export const useCurrentUrl = () => {
   const searchParams = useSearchParams()
   const pathName = usePathname()
-  const query = {} as any
-  searchParams.forEach((value, key) => (query[key] = value))
+  return useMemo(() => {
+    const query = {} as any
+    searchParams.forEach((value, key) => (query[key] = value))
+    return stringifyUrl({ url: pathName, query })
+  }, [pathName, searchParams])
 
-  return stringifyUrl({ url: pathName, query })
+  return
 }
 
 export const cleanUrl = (dirtyUrl: string) => {

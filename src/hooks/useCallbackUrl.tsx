@@ -1,23 +1,23 @@
-import { useCurrentUrl } from "@/lib/utils";
-import { useSearchParams } from "next/navigation";
+/** @format */
+
+import { useCurrentUrl } from '@/lib/utils'
+import { useSearchParams } from 'next/navigation'
+import { useMemo } from 'react'
 
 const useCallbackUrl = () => {
-    const currentUrl = useCurrentUrl();
-    const searchParams = useSearchParams();
-    const isAuthPage = currentUrl.includes("/auth/");
-    const previousCallback = searchParams.get("callbackUrl");
-    if (previousCallback) {
-        return {
-            callbackUrl: previousCallback,
-        };
-    }
-    if (isAuthPage) {
-        return {
-            callbackUrl: null,
-        };
-    }
+  const currentUrl = useCurrentUrl()
+  const searchParams = useSearchParams()
+
+  return useMemo(() => {
+    const previousCallback = searchParams.get('callbackUrl')
+    const isAuthPage = currentUrl?.includes('/auth/')
+    const callbackUrl =
+      previousCallback ?? !isAuthPage
+        ? encodeURIComponent(currentUrl ?? '')
+        : null
     return {
-        callbackUrl: encodeURIComponent(currentUrl),
-    };
-};
-export default useCallbackUrl;
+      callbackUrl,
+    }
+  }, [currentUrl, searchParams])
+}
+export default useCallbackUrl

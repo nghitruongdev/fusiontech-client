@@ -45,13 +45,15 @@ const AddressBox = ({
         </p>
         {addressString && (
           <p className='text-sm'>
-            Địa chỉ:
-            <span className='font-semibold underline'>{addressString}</span>
+            <span className='underline'> Địa chỉ:</span>{' '}
+            <span className='text-sm leading-none font-semibold'>
+              {addressString}
+            </span>
           </p>
         )}
         <p className='text-sm'>
-          Số điện thoại:{' '}
-          <span className='font-semibold underline'>{phone}</span>
+          <span className='underline'>Số điện thoại:</span>{' '}
+          <span className='font-semibold'>{phone}</span>
         </p>
       </div>
 

@@ -14,6 +14,11 @@ import {
   AuthError,
   signInWithCustomToken,
   getAdditionalUserInfo,
+  checkActionCode,
+  parseActionCodeURL,
+  applyActionCode,
+  reauthenticateWithCredential,
+  reauthenticateWithPopup,
 } from 'firebase/auth'
 import {
   AuthActionResponse,
