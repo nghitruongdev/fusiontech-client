@@ -106,6 +106,9 @@ export const UserInfoMenu = ({ user }: { user: User }) => {
           </MenuItem>
 
           <MenuDivider />
+          <MenuItem>
+            <Link href='/auth/change-password'>Đổi mật khẩu</Link>
+          </MenuItem>
           <MenuItem
             onClick={async () => {
               const result = await confirm({

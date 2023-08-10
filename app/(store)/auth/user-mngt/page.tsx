@@ -99,7 +99,7 @@ const UpdatePasswordPage = () => {
   if (error) return <AuthErrorCatch error={error} />
 
   // todo: chưa có showSuccess
-  if (!showSuccess) {
+  if (showSuccess) {
     return <SuccessMessage />
   }
   if (showForm)
