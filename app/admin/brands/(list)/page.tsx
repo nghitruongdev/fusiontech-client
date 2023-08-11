@@ -32,6 +32,11 @@ export const BrandList: React.FC<IResourceComponentsProps> = () => {
         header: 'Tên thương hiệu',
       },
       {
+        id: 'slug',
+        accessorKey: 'slug',
+        header: 'Slug',
+      },
+      {
         id: 'image',
         accessorKey: 'image',
         header: 'Hình ảnh',

@@ -49,6 +49,13 @@ export const BrandShow: React.FC<IResourceComponentsProps> = () => {
             Name
           </Heading>
           <TextField value={record?.name} />
+          <Heading
+            as='h5'
+            size='sm'
+            mt={4}>
+            Slug
+          </Heading>
+          <TextField value={record?.slug} />
         </div>
       </div>
     </Show>

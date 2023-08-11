@@ -235,10 +235,13 @@ Form.Body = function Body() {
             {(errors as any)?.name?.message as string}
           </FormErrorMessage>
         </FormControl>
-        {/* <FormControl mb="3" isInvalid={!!(errors as any)?.slug}>
+
+        <FormControl
+          mb='3'
+          isInvalid={!!(errors as any)?.slug}>
           <FormLabel>Slug</FormLabel>
           <Input
-            type="text"
+            type='text'
             {...register('slug', {
               required: 'Vui lòng nhập slug.',
             })}
@@ -246,7 +249,7 @@ Form.Body = function Body() {
           <FormErrorMessage>
             {(errors as any)?.slug?.message as string}
           </FormErrorMessage>
-        </FormControl> */}
+        </FormControl>
         {/* <FormControl mb="3" isInvalid={!!(errors as any)?.description}>
           <FormLabel>Mô tả danh mục</FormLabel>
           <Textarea {...register('description', {})} />

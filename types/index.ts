@@ -158,6 +158,7 @@ export type IBrand = {
   id?: number
   name: string
   image?: FirebaseImage | null
+  slug: string
 }
 
 export type IBrandField = IBrand & {

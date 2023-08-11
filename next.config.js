@@ -23,6 +23,7 @@ module.exports = {
       'cdn-icons-png.flaticon.com',
       'i.pinimg.com',
       'cdn.freebiesupply.com',
+      'example.com',
     ],
     formats: ['image/webp'],
   },

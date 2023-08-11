@@ -665,26 +665,11 @@ ProductForm.Description = function Description() {
   } = useProductFormContext()
   return (
     <Box>
+      <FormLabel>Bài đăng</FormLabel>
       <Box pos='relative'>
         <FormControl
           mb='3'
           isInvalid={!!(errors as any)?.description}>
-          <Text
-            top='-15px'
-            left='5px'
-            p='0 12px'
-            bg='#fff'
-            transformOrigin='top left'
-            transition='all .2s ease-out'
-            color='#999'
-            pointerEvents='none'
-            pos='absolute'
-            w='fit-content'
-            h='fit-content'
-            zIndex='2'>
-            Bài đăng
-          </Text>
-
           <Textarea
             {...register('description', {
               required: 'This field is required',

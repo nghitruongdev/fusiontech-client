@@ -123,7 +123,7 @@ export const serverDataProvider = {
     // Recommendation: handle errors
     if (!res.ok) {
       // This will activate the closest `error.js` Error Boundary
-      throw new Error(`Failed to fetch ${resource}`)
+      // throw new Error(`Failed to fetch ${resource}`)
     }
     // await waitPromise(1000 * 20);
     const { _embedded: data } = (await res.json()) as ListDataResponse<T>
