@@ -48,31 +48,6 @@ const useCrudNotification = () => {
     [open],
   )
 
-  const onError = (
-    err?: AppError | HttpError | undefined,
-    value?: unknown,
-    resource?: string | undefined,
-    defaultMessage?: string,
-  ): OpenNotificationParams => {
-    console.log('err', err)
-    if (err?.isAxiosError) {
-      const data = err.response.data as ProblemDetail
-      return {
-        type: 'error',
-        message: `${getErrorTitle(data?.title)} - ${
-          data?.status ?? err.statusCode
-        }`,
-        description:
-          data?.detail ?? 'Đã có lỗi xảy ra, vui lòng liên hệ nhà cung cấp.',
-      }
-    }
-    return {
-      type: 'error',
-      message: err?.name,
-      description:
-        err?.message ?? 'Đã có lỗi xảy ra, vui lòng liên hệ nhà cung cấp.',
-    }
-  }
   const onSuccess = (
     data?: CreateResponse<BaseRecord> | undefined,
     values?: ValueProps,
@@ -92,6 +67,43 @@ const useCrudNotification = () => {
       open,
       close,
     },
+  }
+}
+
+export const onSuccess = (
+  data: any,
+  value: any,
+  resource: string | undefined,
+): OpenNotificationParams => {
+  return {
+    type: 'success',
+    message: `${resource} thành công`,
+  }
+}
+
+export const onError = (
+  err?: AppError | HttpError | undefined,
+  value?: unknown,
+  resource?: string | undefined,
+  defaultMessage?: string,
+): OpenNotificationParams => {
+  console.log('err', err)
+  if (err?.isAxiosError) {
+    const data = err.response.data as ProblemDetail
+    return {
+      type: 'error',
+      message: `${getErrorTitle(data?.title)} - ${
+        data?.status ?? err.statusCode
+      }`,
+      description:
+        data?.detail ?? 'Đã có lỗi xảy ra, vui lòng liên hệ nhà cung cấp.',
+    }
+  }
+  return {
+    type: 'error',
+    message: err?.name,
+    description:
+      err?.message ?? 'Đã có lỗi xảy ra, vui lòng liên hệ nhà cung cấp.',
   }
 }
 

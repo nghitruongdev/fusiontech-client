@@ -33,21 +33,19 @@ const ReviewComponent = ({ productId }: { productId: string }) => {
   const { claims } = useAuthUser()
   const sortedReviewList = [...reviewList]
   const uid = claims?.id
-    const { user } = useAuthUser()
-    const router = useRouter()
-    const { callbackUrl } = useCallbackUrl()
-    /* Call api lấy các review từ product id */
+  const { user } = useAuthUser()
+  const router = useRouter()
+  const { callbackUrl } = useCallbackUrl()
+  /* Call api lấy các review từ product id */
   useEffect(() => {
     const fetchReviewList = async () => {
       try {
         const response = await reviewApi.get(`${productId}`)
         setReviewList(response.data)
-        console.log(response.data)
-        calculateAverageRating(response.data)
       } catch (error) {
         console.log('fail to fetch review list', error)
       }
-      }
+    }
     if (productId) {
       fetchReviewList()
     }
@@ -66,29 +64,6 @@ const ReviewComponent = ({ productId }: { productId: string }) => {
       )
     }
     return stars
-  }
-
-  /* Hàm tính đánh giá trung bình dựa trên rating */
-  //FIXME:dùng useCallback => function dùng trong useEffect
-  /**
-   * @deprecated
-   * @param reviews
-   * @returns
-   */
-  const calculateAverageRating = (reviews: any[]) => {
-    if (reviews.length > 0) {
-      const totalRating = reviews.reduce(
-        (sum, review) => sum + review.rating,
-        0,
-      )
-      const averageRating = totalRating / reviews.length
-      setAverageRating(averageRating)
-    } else {
-      setAverageRating(0)
-    }
-  const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0)
-    const averageRating = totalRating / reviews.length
-    setAverageRating(averageRating)
   }
 
   {
@@ -282,13 +257,13 @@ const ReviewComponent = ({ productId }: { productId: string }) => {
         {/* Button đánh giá ngay */}
         {!userReviewed && (
           <div className='w-full flex flex-col justify-center items-center mt-2'>
-          {/* <p>Bạn đánh giá sao sản phẩm này</p> */}
-          <button
-            className='bg-blue-500 text-white px-2 w-32 h-10 rounded-full hover:bg-blue-600'
-            onClick={ReviewFormButtonClick}>
-            Đánh giá ngay
-          </button>
-        </div>
+            {/* <p>Bạn đánh giá sao sản phẩm này</p> */}
+            <button
+              className='bg-blue-500 text-white px-2 w-32 h-10 rounded-full hover:bg-blue-600'
+              onClick={ReviewFormButtonClick}>
+              Đánh giá ngay
+            </button>
+          </div>
         )}
       </div>
       {showReviewForm && (
@@ -355,7 +330,7 @@ const ReviewComponent = ({ productId }: { productId: string }) => {
 
       {/* Hiển thị reviews */}
       <div className='overflow-auto h-[500px]'>
-        {!!sortedReviewList?.length && (
+        {!!sortedReviewList?.length &&
           sortedReviewList.map((review) => (
             <div
               className='mb-4 mr-4 '
@@ -369,37 +344,21 @@ const ReviewComponent = ({ productId }: { productId: string }) => {
                   />
                   <span>{review.user.firstName}</span>
                 </div>
-              <p>{review.createdAt}</p>
-            </div>
-            <div className='flex flex-col border bg-gray-100 rounded-2xl p-4'>
-              <div className='flex'>
-                <p className='font-medium mr-1'>Đánh giá:</p>
-                {renderRatingStars(review.rating)}
+                <p>{review.createdAt}</p>
               </div>
-              <div className='flex'>
-                <p className='font-medium mr-1'>Nhận xét:</p>
-                {review.comment}
+              <div className='flex flex-col border bg-gray-100 rounded-2xl p-4'>
+                <div className='flex'>
+                  <p className='font-medium mr-1'>Đánh giá:</p>
+                  {renderRatingStars(review.rating)}
+                </div>
+                <div className='flex'>
+                  <p className='font-medium mr-1'>Nhận xét:</p>
+                  {review.comment}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-
-      {reviewList?.length > 3 && (
-        <div className='w-full flex flex-col justify-center items-center mt-2'>
-          {isExpanded ? (
-            <button
-              className='bg-blue-500 text-white px-2 w-32 h-10 rounded-full hover:bg-blue-600'
-              onClick={handleViewMore}>
-              Thu gọn
-            </button>
-          ) : (
-            <button
-              className='bg-blue-500 text-white px-2 w-32 h-10 rounded-full hover:bg-blue-600'
-              onClick={handleViewMore}>
-              Xem thêm
-            </button>
-          )}
-        </div>
+          ))}
+      </div>
     </div>
   )
 }

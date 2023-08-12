@@ -47,7 +47,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           options={{
             syncWithLocation: true,
             warnWhenUnsavedChanges: true,
-            mutationMode: 'optimistic',
+            mutationMode: 'pessimistic',
             textTransformers: {
               plural: (word) => word,
               singular: (word) => word,

@@ -7,7 +7,10 @@ import OrderOverview from '@components/store/cart/checkout/OrderOverview'
 import VisualWrapper from '@components/ui/VisualWrapper'
 import { useCheckoutContext } from './CheckoutProvider'
 import { CheckoutForm } from './(form)'
-import { useSelectedCartItemStore } from '../useSelectedItemStore'
+import {
+  useSelectedCartItemStore,
+  useValidSelectedCartItems,
+} from '../useSelectedItemStore'
 import { use, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { suspensePromise } from '@/lib/promise'
@@ -21,7 +24,7 @@ const Checkout = () => {
   const router = useRouter()
   const { user } = useAuthUser()
   const hasHydrated = useSelectedCartItemStore.persist?.hasHydrated()
-  const itemCount = useSelectedCartItemStore((state) => state.items).length
+  const itemCount = useValidSelectedCartItems().length
   useEffect(() => {
     if (hasHydrated && !itemCount) {
       router.replace('/cart')

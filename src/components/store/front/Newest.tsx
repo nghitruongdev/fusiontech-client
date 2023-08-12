@@ -1,27 +1,3 @@
-/**
- * eslint-disable react/display-name
- *
- * @format
- */
-
-/**
- * eslint-disable react/display-name
- *
- * @format
- */
-
-/**
- * eslint-disable react/display-name
- *
- * @format
- */
-
-/**
- * eslint-disable react/display-name
- *
- * @format
- */
-
 /** @format */
 
 import SectionTitle from '@components/ui/SectionTitle'
@@ -212,22 +188,9 @@ Product.Price = () => {
 }
 
 Product.Review = ({ avgRating }: { avgRating: IProduct['avgRating'] }) => {
-  // return (
-  //   <div className='flex items-center gap-2 text-yellow my-2'>
-  //     {/* {avgRating} */}
-  //     <BsStarFill />
-  //     <BsStarFill />
-  //     <BsStarFill />
-  //     <BsStarFill />
-  //     <BsStarFill />
-  //     <p className='line font-bold text-muted-foreground leading-tight'>
-  //       {avgRating}/5
-  //     </p>
-  //   </div>
-  // )
   const starCount = 5
 
-  const filledStars = Math.floor(avgRating)
+  const filledStars = Math.floor(avgRating ?? 0)
 
   const remainingStars = starCount - filledStars
 

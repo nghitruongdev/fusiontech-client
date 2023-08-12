@@ -1,3 +1,5 @@
+/** @format */
+
 import { Callback, checkIsCallback } from '@/lib/callback'
 import { useConst } from '@chakra-ui/react'
 import { BaseRecord, HttpError, useList } from '@refinedev/core'
@@ -16,6 +18,11 @@ import { toOption } from '../lib/utils'
 export type ListOptionProps<T extends BaseRecord, V = T> = {
   toOption: Callback<(item: T) => Option<V>>
 }
+/**
+ * @deprecated
+ * @param param0
+ * @returns
+ */
 function useListOption<T extends BaseRecord, V = T>({
   toOption,
   ...props

@@ -1,3 +1,5 @@
+/** @format */
+
 'use client'
 
 import React from 'react'
@@ -15,13 +17,13 @@ import {
   Td,
   HStack,
 } from '@chakra-ui/react'
-import { IInventory } from 'types'
+import { IBasicUser, IInventory } from 'types'
 import { Pagination } from '@components/pagination'
 import { ShowButton } from '@components/buttons'
 import { List } from '@components/crud'
+import { formatDateTime } from '@/lib/utils'
 
 export default function ListPage() {
-  // return <ChakraUIListInferencer />;
   return <InventoryList />
 }
 
@@ -34,51 +36,53 @@ const InventoryList: React.FC<IResourceComponentsProps> = () => {
         header: 'Id',
       },
       {
-        id: 'createdBy',
-        accessorKey: 'createdBy',
-        header: 'Tạo bởi',
-      },
-      {
         id: 'totalQuantity',
         accessorKey: 'totalQuantity',
         header: 'Số Lượng',
+      },
+      {
+        id: 'createdBy',
+        accessorKey: 'createdBy',
+        header: 'Tạo bởi',
+        cell: function render({ getValue, row }) {
+          return getValue<IBasicUser>()?.name
+        },
+      },
+      {
+        id: 'createdDate',
+        accessorKey: 'createdDate',
+        header: 'Ngày tạo',
+        cell: function render({ getValue }) {
+          return formatDateTime(getValue<string>())
+        },
       },
       {
         id: 'lastModifiedBy',
         accessorKey: 'lastModifiedBy',
         header: 'Cập nhật bởi',
         cell: function render({ getValue, row }) {
-          return getValue<any>() ?? row.original.createdBy
+          return getValue<IBasicUser>()?.name
         },
       },
-      // {
-      //     id: "createdDate",
-      //     accessorKey: "createdDate",
-      //     header: "Created Date",
-      //     cell: function render({ getValue }) {
-      //         return <DateField value={getValue<any>()} />;
-      //     },
-      // },
       {
         id: 'lastModifiedDate',
         accessorKey: 'lastModifiedDate',
         header: 'Thời gian',
         cell: function render({ getValue }) {
-          return <DateField value={getValue<any>()} />
+          return formatDateTime(getValue<string>())
         },
       },
       {
         id: 'actions',
         accessorKey: 'id',
-        header: 'Actions',
+        header: 'Menu',
         cell: function render({ getValue }) {
           return (
             <HStack>
-              <ShowButton hideText recordItemId={getValue() as string} />
-              {/* <EditButton
-                                hideText
-                                recordItemId={getValue() as string}
-                            /> */}
+              <ShowButton
+                hideText
+                recordItemId={getValue() as string}
+              />
             </HStack>
           )
         },
@@ -112,8 +116,8 @@ const InventoryList: React.FC<IResourceComponentsProps> = () => {
 
   return (
     <List>
-      <TableContainer whiteSpace="pre-line">
-        <Table variant="simple">
+      <TableContainer whiteSpace='pre-line'>
+        <Table variant='simple'>
           <Thead>
             {getHeaderGroups().map((headerGroup) => (
               <Tr key={headerGroup.id}>

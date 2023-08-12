@@ -88,6 +88,5 @@ export const useValidSelectedCartItems = () => {
     [items, cartItems, getValidItems],
   )
 
-  //   const { items } = useSelectedCartItemStore(({ items }) => ({ items }))
-  return items
+  return selectedItems
 }

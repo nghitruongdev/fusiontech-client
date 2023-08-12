@@ -143,6 +143,7 @@ export const useOptionStore = create<StoreProps>()(
 
       setVariants: (variants: IVariant[]) => {
         const { groups } = get()
+        console.log('groups', groups)
         const validVariants = variants.filter(
           (item) =>
             item.active &&
@@ -200,8 +201,11 @@ export const ProductOptions = () => {
   useEffect(() => {
     const updateGroups = () => {
       if (!data) return
+      console.log('group data', data)
+      console.log('variants', variants)
       const names: OptionGroup[] = data
         .sort((a, b) => a.name.localeCompare(b.name))
+        // .filter(({ values }) => values.length > 1)
         .map((group) => ({ ...group, values: toRecord(group.values, 'value') }))
       setGroups(toRecord(names, 'name'))
     }

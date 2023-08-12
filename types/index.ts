@@ -12,6 +12,7 @@ export type ResourceName =
   | 'shippingAddresses'
   | 'specifications'
   | 'vouchers'
+  | 'inventory-details'
 
 export type FirebaseImage = string
 
@@ -36,6 +37,7 @@ export type IProduct = {
   brand?: IBrand
   category?: ICategory
   reviewCount?: number
+  variants?: IVariant[]
   avgRating?: number
   //   variants?: IVariant[] | { id: string; price: number }[]
   _links?: {
@@ -295,11 +297,41 @@ export interface IVoucher {
   userLimitUsage?: number | null
 }
 
-export enum PaymentStatus {
+export enum PaymentStatusEnum {
+  //   PENDING,
+  //   PAID,
+  //   REFUNDED,
+  //   CANCELLED,
   PENDING = 'Chưa thanh toán',
   PAID = 'Đã thanh toán',
   REFUNDED = 'Đã hoàn tiền',
   CANCELLED = 'Đã huỷ',
+}
+export type PaymentStatus = 'PENDING' | 'PAID' | 'REFUNDED' | 'CANCELLED'
+
+export const PaymentStatusLabel: {
+  [key in PaymentStatus]: { text: string; color?: string }
+} = {
+  PENDING: {
+    text: 'Chưa thanh toán',
+    color: '',
+  },
+  PAID: {
+    text: 'Đã thanh toán',
+    color: '',
+  },
+  REFUNDED: {
+    text: 'Hoàn tiền',
+    color: '',
+  },
+  CANCELLED: {
+    text: 'Đã huỷ',
+    color: '',
+  },
+  //   PENDING = 'Chưa thanh toán',
+  //   PAID = 'Đã thanh toán',
+  //   REFUNDED = 'Đã hoàn tiền',
+  //   CANCELLED = 'Đã huỷ',
 }
 
 export type PaymentMethodLabel = 'PENDING' | 'PAID' | 'REFUNDED' | 'CANCELLED'
@@ -374,11 +406,16 @@ export interface IOrderStatusGroup {
   detailName: string
 }
 
+export interface IBasicUser {
+  id: number
+  name: string
+  isDisabled?: boolean
+}
 export interface IInventory {
   id: string
-  createdBy: string
+  createdBy: IBasicUser
   createdDate: string
-  lastModifiedBy?: string
+  lastModifiedBy?: IBasicUser
   lastModifiedDate?: string
   totalQuantity?: number
   items?: IInventoryDetail
@@ -392,8 +429,13 @@ export interface IInventoryDetail {
   variant?: IVariant
   inventory?: IInventory
   _links?: _links
-  formDetail: {}
+  formVariant?: Option<IVariant>
 }
+
+export type IInventoryDetailWithoutInventoryRef = Omit<
+  IInventoryDetail,
+  'inventory'
+>
 
 export interface ProblemDetail {
   title: string

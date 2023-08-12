@@ -18,6 +18,7 @@ import { API_URL } from 'types/constants'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { waitPromise } from '@/lib/promise'
+import RecentProductView from '@components/store/front/section/RecentProductView'
 
 const AccountLayout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -27,6 +28,9 @@ const AccountLayout = ({ children }: { children: React.ReactNode }) => {
           <AccountMenu />
         </div>
         <div className='w-3/4  p-4'>{children}</div>
+      </div>
+      <div className='px-8'>
+        <RecentProductView />
       </div>
     </div>
   )

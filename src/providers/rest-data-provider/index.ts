@@ -43,7 +43,7 @@ const dataProvider = (
       page?: number
       size?: number
       sort?: string
-      order?: string
+      //   order?: string
     } = {
       projection: metaQuery?.projection,
     }
@@ -54,15 +54,19 @@ const dataProvider = (
       query.page = current - 1
       query.size = pageSize
     }
-
-    const generatedSort = generateSort(sorters)
-    if (generatedSort) {
-      const { _sort, _order } = generatedSort
-      query.sort = _sort.join(',')
-      query.order = _order.join(',')
-    }
+    query.sort = generateSort(
+      sorters?.length ? sorters : [{ field: 'id', order: 'desc' }],
+    )?.join(',')
+    // if (generatedSort) {
+    //   const { _sort, _order } = generatedSort
+    //   query.sort = _sort.join(',')
+    //   query.order = _order.join(',')
+    // } else {
+    //   query.sort = 'id'
+    //   query.order = 'desc'
+    // }
     const requestUrl = `${url}?${stringify(query)}&${stringify(queryFilters)}`
-    console.log('requestUrl', requestUrl)
+    console.log('getList requestUrl', requestUrl)
     const { data, headers } = await httpClient[requestMethod](requestUrl, {
       headers: headersFromMeta,
     })
@@ -173,20 +177,26 @@ const dataProvider = (
     headers,
     meta,
   }) => {
-    let requestUrl = !!sorters || !!filters || !!query ? `${url}?` : url
+    let requestUrl =
+      !!sorters || !!filters || (!!query && !url.includes('?'))
+        ? `${url}?`
+        : url
     if (!url.startsWith('http')) {
       requestUrl = `${API_URL}/${requestUrl}`
     }
     if (!!sorters) {
       const generatedSort = generateSort(sorters)
-      if (generatedSort) {
-        const { _sort, _order } = generatedSort
-        const sortQuery = {
-          _sort: _sort.join(','),
-          _order: _order.join(','),
-        }
-        requestUrl = `${requestUrl}&${stringify(sortQuery)}`
-      }
+      //   if (generatedSort) {
+      //     const { _sort, _order } = generatedSort
+      //     const sortQuery = {
+      //       _sort: _sort.join(','),
+      //       _order: _order.join(','),
+      //     }
+      //     requestUrl = `${requestUrl}&${stringify(sortQuery)}`
+      //   }
+
+      const sortQuery = generateSort(sorters)?.join(',')
+      requestUrl = `${requestUrl}&${sortQuery}`
     }
 
     if (!!filters) {

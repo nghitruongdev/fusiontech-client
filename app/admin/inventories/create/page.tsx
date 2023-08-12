@@ -1,3 +1,5 @@
+/** @format */
+
 'use client'
 import { IResourceComponentsProps, useSelect } from '@refinedev/core'
 import {
@@ -33,9 +35,11 @@ import { Inbox, PlusCircle } from 'lucide-react'
 import { FieldValue } from 'react-hook-form'
 import { Create } from '@components/crud'
 import { SaveButton } from '@components/buttons'
+import { InventoryForm } from '../(form)'
 
 export default function CreatePage() {
-  return <InventoryCreate />
+  //   return <InventoryCreate />
+  return <InventoryForm action='create' />
 }
 
 export const InventoryCreate: React.FC<IResourceComponentsProps> = () => {
@@ -75,19 +79,26 @@ export const InventoryCreate: React.FC<IResourceComponentsProps> = () => {
         isLoading={formLoading}
         headerButtons={({}) => <SaveButton onClick={submitHandler} />}
         saveButtonProps={{ hidden: true }}
-        contentProps={{ minH: '550px' }}
-      >
-        <div className="border shadow-md my-4 p-4 rounded-md">
+        contentProps={{ minH: '550px' }}>
+        <div className='border shadow-md my-4 p-4 rounded-md'>
           <InventoryDetailForm addItem={addItemHandler} />
         </div>
-        <hr className="my-2" />
-        <Heading as="h2" size="md" mt="4">
+        <hr className='my-2' />
+        <Heading
+          as='h2'
+          size='md'
+          mt='4'>
           Bảng chi tiết
         </Heading>
-        <Collapse in={isVisible} animateOpacity>
-          <Alert status="warning" rounded="md" my="4">
+        <Collapse
+          in={isVisible}
+          animateOpacity>
+          <Alert
+            status='warning'
+            rounded='md'
+            my='4'>
             <AlertIcon />
-            <Box flexGrow="1">
+            <Box flexGrow='1'>
               <AlertTitle>Cảnh báo!</AlertTitle>
               <AlertDescription>
                 Bạn chưa thêm danh sách sản phẩm nhập hàng.
@@ -95,9 +106,9 @@ export const InventoryCreate: React.FC<IResourceComponentsProps> = () => {
             </Box>
             <CloseButton
               onClick={onClose}
-              alignSelf="flex-start"
-              top="-1"
-              right="-1"
+              alignSelf='flex-start'
+              top='-1'
+              right='-1'
             />
           </Alert>
         </Collapse>
@@ -144,18 +155,21 @@ const InventoryDetailForm = ({
   }
 
   return (
-    <div className="flex gap-2">
-      <div className="grid grid-cols-3 gap-4 flex-grow">
-        <FormControl mb="3" isInvalid={!!errors?.variantId}>
+    <div className='flex gap-2'>
+      <div className='grid grid-cols-3 gap-4 flex-grow'>
+        <FormControl
+          mb='3'
+          isInvalid={!!errors?.variantId}>
           <FormLabel>Variant</FormLabel>
           <Select
-            placeholder="Select variant"
+            placeholder='Select variant'
             {...register('variantId', {
               required: 'This field is required',
-            })}
-          >
+            })}>
             {variantOptions?.map((option) => (
-              <option value={option.value} key={option.value}>
+              <option
+                value={option.value}
+                key={option.value}>
                 {option.label}
               </option>
             ))}
@@ -167,10 +181,12 @@ const InventoryDetailForm = ({
             {(errors as any)?.variantId?.message as string}
           </FormErrorMessage>
         </FormControl>
-        <FormControl mb="3" isInvalid={!!(errors as any)?.quantity}>
+        <FormControl
+          mb='3'
+          isInvalid={!!(errors as any)?.quantity}>
           <FormLabel>Quantity</FormLabel>
           <Input
-            type="number"
+            type='number'
             {...register('quantity', {
               required: 'This field is required',
               valueAsNumber: true,
@@ -181,12 +197,11 @@ const InventoryDetailForm = ({
           </FormErrorMessage>
         </FormControl>
       </div>
-      <div className="mt-8 px-4">
+      <div className='mt-8 px-4'>
         <Button
-          className="text-zinc-600"
+          className='text-zinc-600'
           onClick={submitHandler}
-          leftIcon={<PlusCircle />}
-        >
+          leftIcon={<PlusCircle />}>
           Thêm
         </Button>
       </div>
@@ -196,9 +211,9 @@ const InventoryDetailForm = ({
 
 const DetailTable = ({ items }: { items: IInventoryDetail[] }) => {
   return (
-    <div className="border shadow-md rounded-md my-2 p-4">
+    <div className='border shadow-md rounded-md my-2 p-4'>
       <TableContainer>
-        <Table variant="simple">
+        <Table variant='simple'>
           <TableCaption>
             Bảng chi tiết nhập hàng {new Date().toUTCString()}
           </TableCaption>
@@ -214,9 +229,9 @@ const DetailTable = ({ items }: { items: IInventoryDetail[] }) => {
             {!!!items.length && (
               <Tr>
                 <Td colSpan={4}>
-                  <div className="min-h-[300px] flex flex-col items-center justify-center">
-                    <Inbox className="text-muted-foreground w-20 h-20" />
-                    <p className="text-muted-foreground">Không có dữ liệu</p>
+                  <div className='min-h-[300px] flex flex-col items-center justify-center'>
+                    <Inbox className='text-muted-foreground w-20 h-20' />
+                    <p className='text-muted-foreground'>Không có dữ liệu</p>
                   </div>
                 </Td>
               </Tr>

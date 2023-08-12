@@ -1,3 +1,5 @@
+/** @format */
+
 import {
   Box,
   IconButton,
@@ -131,7 +133,10 @@ export const Show: React.FC<ShowProps> = (props) => {
     <>
       {listButtonProps && <ListButton {...listButtonProps} />}
       {isEditButtonVisible && (
-        <EditButton colorScheme="brand" {...editButtonProps} />
+        <EditButton
+          colorScheme='brand'
+          {...editButtonProps}
+        />
       )}
       {isDeleteButtonVisible && <DeleteButton {...deleteButtonProps} />}
       <RefreshButton {...refreshButtonProps} />
@@ -141,17 +146,16 @@ export const Show: React.FC<ShowProps> = (props) => {
   const buttonBack =
     goBackFromProps === (false || null) ? null : (
       <IconButton
-        aria-label="back"
-        variant="ghost"
-        size="sm"
+        aria-label='back'
+        variant='ghost'
+        size='sm'
         onClick={
           action !== 'list' && typeof action !== 'undefined'
             ? routerType === 'legacy'
               ? goBack
               : back
             : undefined
-        }
-      >
+        }>
         {typeof goBackFromProps !== 'undefined' ? (
           goBackFromProps
         ) : (
@@ -185,10 +189,9 @@ export const Show: React.FC<ShowProps> = (props) => {
       if (typeof title === 'string' || typeof title === 'number') {
         return (
           <Heading
-            as="h3"
-            size="lg"
-            className={RefinePageHeaderClassNames.Title}
-          >
+            as='h3'
+            size='lg'
+            className={RefinePageHeaderClassNames.Title}>
             {title}
           </Heading>
         )
@@ -198,7 +201,10 @@ export const Show: React.FC<ShowProps> = (props) => {
     }
 
     return (
-      <Heading as="h3" size="lg" className={RefinePageHeaderClassNames.Title}>
+      <Heading
+        as='h3'
+        size='lg'
+        className={RefinePageHeaderClassNames.Title}>
         {translate(
           `${identifier}.titles.show`,
           `${ButtonText('show')} ${getUserFriendlyName(
@@ -215,30 +221,28 @@ export const Show: React.FC<ShowProps> = (props) => {
 
   return (
     <Box
-      position="relative"
-      bg="chakra-body-bg"
-      borderRadius="md"
-      px="4"
-      py="3"
-      {...wrapperProps}
-    >
+      position='relative'
+      bg='chakra-body-bg'
+      borderRadius='md'
+      px='4'
+      py='3'
+      {...wrapperProps}>
       {isLoading && (
         <Spinner
-          position="absolute"
-          top="50%"
-          left="50%"
-          transform="translate(-50%, -50%)"
+          position='absolute'
+          top='50%'
+          left='50%'
+          transform='translate(-50%, -50%)'
         />
       )}
       <Box
-        mb="3"
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
+        mb='3'
+        display='flex'
+        justifyContent='space-between'
+        alignItems='center'
         flexWrap={{ base: 'wrap', md: 'nowrap' }}
-        gap="3"
-        {...headerProps}
-      >
+        gap='3'
+        {...headerProps}>
         <Box minW={200}>
           {typeof breadcrumb !== 'undefined' ? (
             <>{breadcrumb}</> ?? undefined
@@ -251,25 +255,25 @@ export const Show: React.FC<ShowProps> = (props) => {
           </HStack>
         </Box>
         <Box
-          display="flex"
-          flexWrap="wrap"
+          display='flex'
+          flexWrap='wrap'
           justifyContent={{ base: 'flex-start', md: 'flex-end' }}
-          gap="2"
-          {...headerButtonProps}
-        >
+          gap='2'
+          {...headerButtonProps}>
           {headerButtons}
         </Box>
       </Box>
-      <Box opacity={isLoading ? 0.5 : undefined} {...contentProps}>
+      <Box
+        opacity={isLoading ? 0.5 : undefined}
+        {...contentProps}>
         {children}
       </Box>
       <Box
-        display="flex"
-        justifyContent="flex-end"
-        gap="2"
+        display='flex'
+        justifyContent='flex-end'
+        gap='2'
         mt={8}
-        {...footerButtonProps}
-      >
+        {...footerButtonProps}>
         {footerButtons}
       </Box>
     </Box>

@@ -131,3 +131,12 @@ export const getDateFromPast = (pastYear: number) => {
 
   return pastYearDate
 }
+
+export const formatDateTime = (time: undefined | string | number) => {
+  return !time
+    ? ''
+    : new Date(time).toLocaleString('vi-VN', {
+        // hour12: false,
+        hourCycle: 'h24',
+      })
+}

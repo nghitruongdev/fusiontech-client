@@ -16,10 +16,24 @@ export const NEXT_API_URL = 'http://localhost:3000/api'
 //todo: const {} =  API['users']()
 export const API = {
   orders: () => {
+    const resource: ResourceName = 'orders'
     return {
+      resource,
+      projection: {
+        withPayment: 'with-payment',
+      },
       cart: {
         checkout: `cart/checkout`,
       },
+      findAllStatusByGroup: (group: string | undefined) =>
+        !group ? '' : `${resource}/statuses?group=${group}`,
+      findOrderByUserAndStatus: (
+        uid: number | string | undefined,
+        status: string | undefined,
+      ) =>
+        !uid || !status
+          ? ''
+          : `${resource}/search/byUserIdAndStatusIn?uid=${uid}&st=${status}`,
     }
   },
   categories: () => {
@@ -39,17 +53,19 @@ export const API = {
     }
   },
   variants: () => {
-    const name: ResourceName = 'variants'
+    const resource: ResourceName = 'variants'
     return {
-      resource: name,
+      resource: resource,
       projection: {
         basic: 'basic',
         withSpecs: 'specifications',
         withProduct: 'product',
         withProductBasic: 'product-name',
       },
-      existsBySku: (sku: string) => `${name}/search/existsBySku?sku=${sku}`,
-      findBySku: (sku: string) => `${name}/search/findBySku?sku=${sku}`,
+      existsBySku: (sku: string) => `${resource}/search/existsBySku?sku=${sku}`,
+      findBySku: (sku: string) => `${resource}/search/findBySku?sku=${sku}`,
+      getAvailableQuantity: (id: string | number | undefined) =>
+        !id ? '' : `${resource}/search/get-available-quantity?id=${id}`,
     }
   },
   products: () => {
@@ -60,6 +76,8 @@ export const API = {
       projection: {
         full: 'full',
         specifications: 'specifications',
+        // onlyName: 'only-name',
+        nameWithVariants: 'name-with-variants',
       },
       getVariants: (productId: string | number | undefined) =>
         productId ? `${resource}/${productId}/${variants}` : '',
@@ -78,6 +96,8 @@ export const API = {
           : '',
       getAvailableQuantity: (id: string | number | undefined) =>
         id ? `${resource}/search/availableQuantityByProduct?id=${id}` : '',
+      findByNameLike: (name: string | undefined) =>
+        !name?.length ? '' : `${resource}/search/findByNameLike?name=${name}`,
     }
   },
   specifications: () => {
@@ -142,6 +162,12 @@ export const API = {
         !code ? '' : `${resource}/search/usage?code=${code}`,
     }
   },
+  ['inventory-details']: () => {
+    const resource: ResourceName = 'inventory-details'
+    return {
+      resource,
+    }
+  },
 }
 
 export const ROLES = {
@@ -200,4 +226,5 @@ export const Images: { [key in ResourceName]: string } = {
   specifications:
     'https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fvariants%2FlogostuImage.png?alt=media&token=90709f04-0996-4779-ab80-f82e99c62041',
   vouchers: '',
+  'inventory-details': '',
 }

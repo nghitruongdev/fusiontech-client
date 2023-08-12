@@ -19,7 +19,7 @@ const useDebounceFn = <P extends any[], R>(
   const [isLoading, { on: loadingOn, off: loadingOff }] = useChakraBoolean()
   const { showError = true } = options ?? {}
   const debounceFn = async (...args: P) => {
-    return await new Promise<R | undefined>(async (res) => {
+    const result = await new Promise<R | undefined>(async (res) => {
       setTrue()
       const id = setTimeout(async () => {
         try {
@@ -44,6 +44,7 @@ const useDebounceFn = <P extends any[], R>(
       }
       setClearFn(() => clear)
     })
+    return result ?? null
   }
   useEffect(() => {
     return () => clearFn?.()

@@ -144,13 +144,8 @@ const onError = async (error: AppError): Promise<OnErrorResponse> => {
       redirectTo: '/login',
     }
   }
-  // console.error(error);
   return {
-    error: {
-      name: 'Lỗi',
-      message: 'Không thể kết nối mạng',
-      statusCode: 500,
-    },
+    error: error as HttpError,
   }
 }
 

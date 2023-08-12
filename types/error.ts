@@ -1,13 +1,15 @@
+/** @format */
+
 import { HttpError } from '@refinedev/core'
 import { AxiosError } from 'axios'
 
 export type AppError = Partial<HttpError> &
   Partial<AxiosError> & {
     name?: string
-    message?: string
+    message: string
     detail?: string
     cause?: Error
-    statusCode?: number
+    statusCode: number
   }
 
 //   {

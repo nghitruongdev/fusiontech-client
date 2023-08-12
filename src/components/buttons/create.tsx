@@ -1,3 +1,5 @@
+/** @format */
+
 import { Button, IconButton } from '@chakra-ui/react'
 import React, { useContext } from 'react'
 import {
@@ -85,29 +87,29 @@ export const CreateButton: React.FC<CreateButtonProps> = ({
           e.preventDefault()
           onClick(e)
         }
-      }}
-    >
+      }}>
       {hideText ? (
         <IconButton
-          colorScheme="brand"
-          variant="outline"
+          colorScheme='brand'
+          variant='outline'
           aria-label={translate('buttons.create', 'Create')}
           title={disabledTitle()}
           isDisabled={data?.can === false}
           className={RefineButtonClassNames.CreateButton}
-          {...rest}
-        >
-          <IconSquarePlus size={20} {...svgIconProps} />
+          {...rest}>
+          <IconSquarePlus
+            size={20}
+            {...svgIconProps}
+          />
         </IconButton>
       ) : (
         <Button
-          colorScheme="brand"
+          colorScheme='brand'
           isDisabled={data?.can === false}
           leftIcon={<IconSquarePlus size={20} />}
           title={disabledTitle()}
           className={RefineButtonClassNames.CreateButton}
-          {...rest}
-        >
+          {...rest}>
           {children ?? translate('buttons.create', ButtonText('create'))}
         </Button>
       )}

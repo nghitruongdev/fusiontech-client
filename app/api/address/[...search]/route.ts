@@ -1,6 +1,6 @@
 /** @format */
 
-import { addresses } from 'data/address'
+import { addresses } from 'app/api/address/data'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest) {
