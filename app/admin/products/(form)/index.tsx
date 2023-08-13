@@ -23,6 +23,31 @@ import {
   Textarea,
   Avatar,
   useConst,
+  Slider,
+  SliderMark,
+  SliderTrack,
+  SliderFilledTrack,
+  SliderThumb,
+  Popover,
+  ButtonGroup,
+  PopoverArrow,
+  PopoverBody,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverFooter,
+  PopoverHeader,
+  PopoverTrigger,
+  Switch,
+  InputRightElement,
+  InputGroup,
+  Spinner,
+  EditableInput,
+  Editable,
+  EditablePreview,
+  useEditableControls,
+  IconButton,
+  forwardRef,
+  EditableProps,
 } from '@chakra-ui/react'
 import {
   FirebaseImage,
@@ -37,25 +62,47 @@ import { PropsWithChildren } from 'react'
 import SelectPopout from '@components/ui/SelectPopout'
 import useListOption, { ListOptionProps } from '@/hooks/useListOption'
 import { Controller, FieldArrayWithId, useFieldArray } from 'react-hook-form'
-import { HttpError, OpenNotificationParams, useCustom } from '@refinedev/core'
+import {
+  HttpError,
+  OpenNotificationParams,
+  useCustom,
+  useCustomMutation,
+} from '@refinedev/core'
 import { Inbox, MinusCircle } from 'lucide-react'
 import {
   toObjectOption,
   toArrayOptionString,
   isValidNewOption,
   toOptionString,
+  cleanValue,
+  toRecord,
 } from '@/lib/utils'
 import { useDialog } from '@components/ui/DialogProvider'
 import CreatableSelect from 'react-select/creatable'
+import Select, {
+  GroupBase,
+  MultiValueGenericProps,
+  components,
+} from 'react-select'
 import { produce } from 'immer'
 import InlineEditable from '@components/ui/InlineEditable'
 import { ActionMeta, MultiValue } from 'react-select'
 import ImageUpload, { UploadProviderProps } from '@components/image-upload'
 import useUploadImage, { uploadUtils } from '@/hooks/useUploadImage'
-import { API } from 'types/constants'
+import { API, REG_SLUG_PATTERN } from 'types/constants'
 import { Create, Edit } from '@components/crud'
 import { useRouter } from 'next/navigation'
 import { errorNotification } from 'src/lib/notifications'
+import { Tooltip, useColorModeValue } from '@chakra-ui/react'
+import { QuestionIcon } from '@chakra-ui/icons'
+import { ERRORS } from 'types/messages'
+import useDebounceFn from '@/hooks/useDebounceFn'
+import { validateProductNameExists, validateProductSlugExists } from './utils'
+import useCrudNotification, {
+  onError,
+  onSuccess,
+} from '@/hooks/useCrudNotification'
+import { Badge } from '@components/ui/shadcn/badge'
 
 type ContextProps = {
   action: 'create' | 'edit'
@@ -188,7 +235,7 @@ const ProductFormProvider = ({
                 if (dirtyFields[asKey]) acc[asKey] = val
                 return acc
               },
-              {} as typeof value,
+              {} as { [key: string]: any },
             )
 
             const submitValues = {
@@ -200,7 +247,7 @@ const ProductFormProvider = ({
               ...(formImages && { images: formImages }),
             }
             console.log('submitValues', submitValues)
-            // return
+            return
             try {
               const result = await onFinish(submitValues as any)
               console.log('result', result)
@@ -230,28 +277,7 @@ const { countProductSold } = API['products']()
 export const ProductForm = ({ action }: { action: ContextProps['action'] }) => {
   return (
     <ProductFormProvider action={action}>
-      <div className='bg-white flex gap-5 min-h-[350px]'>
-        <div className='w-1/3 grid gap-4 '>
-          <div className='w-full min-w-1/3 mb-10'>
-            <ProductForm.Images />
-          </div>
-        </div>
-        <div className='flex-grow flex flex-col'>
-          <ProductForm.Id />
-          <ProductForm.Name />
-          <ProductForm.Slug />
-          <div className='flex'>
-            <ProductForm.Brand />
-            <ProductForm.Category />
-          </div>
-          <ProductForm.Summary />
-        </div>
-      </div>
-      <div className=' space-y-4'>
-        <ProductForm.Features />
-        <ProductForm.Specifications />
-        <ProductForm.Description />
-      </div>
+      <ProductForm.Body />
     </ProductFormProvider>
   )
 }
@@ -290,6 +316,42 @@ ProductForm.Container = function Container({ children }: PropsWithChildren) {
   )
 }
 
+ProductForm.Body = function Body() {
+  return (
+    <>
+      <div className='bg-white flex gap-5 min-h-[350px]'>
+        <div className='w-1/3 grid gap-4 '>
+          <div className='w-full min-w-1/3 mb-10'>
+            <ProductForm.Images />
+          </div>
+        </div>
+        <div className='flex-grow flex flex-col'>
+          <ProductForm.Id />
+          <ProductForm.Name />
+          <ProductForm.Slug />
+          <div className='flex mb-5 justify-around'>
+            <ProductForm.Brand />
+            <ProductForm.Category />
+            <ProductForm.Discount />
+          </div>
+          <div className='flex'>
+            <ProductForm.Status />
+          </div>
+
+          <div className='mt-10'>
+            <ProductForm.Summary />
+          </div>
+        </div>
+      </div>
+      <div className=' space-y-4'>
+        <ProductForm.Features />
+        <ProductForm.Specifications />
+        <ProductForm.Description />
+      </div>
+    </>
+  )
+}
+
 ProductForm.Id = function Id() {
   const {
     register,
@@ -298,24 +360,8 @@ ProductForm.Id = function Id() {
   } = useProductFormContext()
   if (!id) return <></>
   return (
-    <FormControl
-      mb='5'
-      isInvalid={!!(errors as any)?.id}>
-      <Text
-        top='-15px'
-        left='5px'
-        p='0 12px'
-        bg='#fff'
-        transformOrigin='top left'
-        transition='all .2s ease-out'
-        color='#999'
-        pointerEvents='none'
-        pos='absolute'
-        w='fit-content'
-        h='fit-content'
-        zIndex='2'>
-        Id
-      </Text>
+    <FormControl isInvalid={!!(errors as any)?.id}>
+      <FormLabel>Id</FormLabel>
       <Input
         type='number'
         {...register('id')}
@@ -328,46 +374,45 @@ ProductForm.Id = function Id() {
     </FormControl>
   )
 }
+
 ProductForm.Name = function Name() {
   const {
     register,
     formState: { errors },
+    refineCore: { queryResult },
   } = useProductFormContext()
+  const { onDefaultError } = useCrudNotification()
+  const [validateDebounce, isChecking] = useDebounceFn(
+    validateProductNameExists,
+    300,
+  )
 
+  const { required } = ERRORS.products.name
   return (
-    <Box mb='10'>
-      <Box pos='relative'>
-        <FormControl
-          mb='3'
-          isInvalid={!!(errors as any)?.name}>
-          <Text
-            top='-15px'
-            left='5px'
-            p='0 12px'
-            bg='#fff'
-            transformOrigin='top left'
-            transition='all .2s ease-out'
-            color='#999'
-            pointerEvents='none'
-            pos='absolute'
-            w='fit-content'
-            h='fit-content'
-            zIndex='2'>
-            Tên:
-          </Text>
-          <Input
-            type='text'
-            {...register('name', {
-              required: 'This field is required',
-            })}
-            w='100%' // Thêm thuộc tính w="100%" để làm cho phần input dài ra
-          />
-          <FormErrorMessage>
-            {(errors as any)?.name?.message as string}
-          </FormErrorMessage>
-        </FormControl>
-      </Box>
-    </Box>
+    <FormControl
+      mb='3'
+      isInvalid={!!errors?.name}>
+      <FormLabel>Tên</FormLabel>
+      <InputGroup>
+        <Input
+          type='text'
+          {...register('name', {
+            required,
+            validate: async (value) =>
+              await validateDebounce(
+                value,
+                queryResult?.data?.data,
+                onDefaultError,
+              ),
+            setValueAs: (value) => cleanValue(value),
+          })}
+        />
+        <InputRightElement>
+          {isChecking && <Spinner color='blue.600' />}
+        </InputRightElement>
+      </InputGroup>
+      <FormErrorMessage>{errors?.name?.message}</FormErrorMessage>
+    </FormControl>
   )
 }
 
@@ -375,42 +420,45 @@ ProductForm.Slug = function Slug() {
   const {
     register,
     formState: { errors },
+    refineCore: { queryResult },
   } = useProductFormContext()
+  const { onDefaultError } = useCrudNotification()
 
+  const [validateDebounce, isChecking] = useDebounceFn(
+    validateProductSlugExists,
+    300,
+  )
   return (
-    <Box mb='10'>
-      <Box pos='relative'>
-        <FormControl
-          mb='3'
-          isInvalid={!!(errors as any)?.name}>
-          <Text
-            top='-15px'
-            left='5px'
-            p='0 12px'
-            bg='#fff'
-            transformOrigin='top left'
-            transition='all .2s ease-out'
-            color='#999'
-            pointerEvents='none'
-            pos='absolute'
-            w='fit-content'
-            h='fit-content'
-            zIndex='2'>
-            Đường dẫn (slug)
-          </Text>
-          <Input
-            type='text'
-            {...register('slug', {
-              required: 'This field is required',
-            })}
-            w='100%' // Thêm thuộc tính w="100%" để làm cho phần input dài ra
-          />
-          <FormErrorMessage>
-            {(errors as any)?.name?.message as string}
-          </FormErrorMessage>
-        </FormControl>
-      </Box>
-    </Box>
+    <FormControl isInvalid={!!errors?.slug}>
+      <div className='flex items-center'>
+        <FormLabel className='flex-shrink-0'>Đường dẫn (slug)</FormLabel>
+        <QuestionIcon /> Tự động tạo bởi hệ thống nếu để trống
+      </div>
+      <InputGroup>
+        <Input
+          type='text'
+          placeholder='ten-san-pham-viet-thuong-khong-dau'
+          {...register('slug', {
+            pattern: {
+              value: REG_SLUG_PATTERN,
+              message: 'Đường dẫn không hợp lệ',
+            },
+            validate: async (value) =>
+              await validateDebounce(
+                value,
+                queryResult?.data?.data,
+                onDefaultError,
+              ),
+            setValueAs: (value) => value?.trim(),
+          })}
+        />
+        <InputRightElement>
+          {isChecking && <Spinner color='blue.600' />}
+        </InputRightElement>
+      </InputGroup>
+
+      <FormErrorMessage>{errors?.slug?.message}</FormErrorMessage>
+    </FormControl>
   )
 }
 
@@ -419,44 +467,16 @@ ProductForm.Summary = function Summary() {
     register,
     formState: { errors },
   } = useProductFormContext()
-
   return (
-    <div className=''>
-      <Box pos='relative'>
-        <FormControl
-          mb='3'
-          isInvalid={!!(errors as any)?.summary}>
-          <Text
-            top='-15px'
-            left='5px'
-            p='0 12px'
-            bg='#fff'
-            transformOrigin='top left'
-            transition='all .2s ease-out'
-            color='#999'
-            pointerEvents='none'
-            pos='absolute'
-            w='fit-content'
-            h='fit-content'
-            zIndex='2'>
-            Mô tả sản phẩm
-          </Text>
-          <Textarea
-            {...register('summary', {})}
-            // h="269px"
-          />
-          <FormErrorMessage>
-            {(errors as any)?.summary?.message as string}
-          </FormErrorMessage>
-        </FormControl>
-      </Box>
-    </div>
+    <FormControl isInvalid={!!(errors as any)?.summary}>
+      <FormLabel>Mô tả ngắn</FormLabel>
+      <Textarea {...register('summary', {})} />
+      <FormErrorMessage>
+        {(errors as any)?.summary?.message as string}
+      </FormErrorMessage>
+    </FormControl>
   )
 }
-const toBrandOption = (item: IBrand) => {
-  return toObjectOption(item.name, item)
-}
-
 ProductForm.Brand = function Brand() {
   const { resource } = API['brands']()
   const { action, product, setValue } = useProductFormContext()
@@ -488,59 +508,43 @@ ProductForm.Brand = function Brand() {
 
   const { control } = useProductFormContext()
   return (
-    <Box mb='10'>
-      <Box pos='relative'>
-        <Text
-          top='-25px'
-          left='-10px'
-          p='0 12px'
-          // bg="#fff"
-          transformOrigin='top left'
-          transition='all .2s ease-out'
-          color='#999'
-          pointerEvents='none'
-          pos='absolute'
-          w='fit-content'
-          h='fit-content'
-          zIndex='2'>
-          Thương hiệu:
-        </Text>
-        <SelectPopout
-          controller={{
-            name: 'brand',
-            control,
-          }}
-          stateLabel={{
-            defaultEmpty: `Chọn thương hiệu`,
-          }}
-          props={{
-            options: options,
-            noOptionsMessage: 'Không có nhãn hàng.',
-            formatOptionLabel: (data) => {
-              const {
-                label,
-                value: { image: logo },
-              } = data as Option<IBrand>
-              return (
-                <Box
-                  display='flex'
-                  justifyContent='space-between'
-                  alignItems='center'>
-                  <Text noOfLines={2}>{label}</Text>
-                  <Avatar
-                    ml='5'
-                    size='sm'
-                    variant='filled'
-                    name={label}
-                    src={logo ?? ''}
-                  />
-                </Box>
-              )
-            },
-          }}
-        />
-      </Box>
-    </Box>
+    <FormControl>
+      <FormLabel>Thương hiệu</FormLabel>
+      <SelectPopout
+        controller={{
+          name: 'brand',
+          control,
+        }}
+        stateLabel={{
+          defaultEmpty: `Chọn thương hiệu`,
+        }}
+        props={{
+          options: options,
+          noOptionsMessage: 'Không có nhãn hàng.',
+          formatOptionLabel: (data) => {
+            const {
+              label,
+              value: { image: logo },
+            } = data as Option<IBrand>
+            return (
+              <Box
+                display='flex'
+                justifyContent='space-between'
+                alignItems='center'>
+                <Text noOfLines={2}>{label}</Text>
+                <Avatar
+                  ml='5'
+                  size='sm'
+                  variant='filled'
+                  name={label}
+                  src={logo ?? ''}
+                />
+              </Box>
+            )
+          },
+        }}
+      />
+    </FormControl>
   )
 }
 
@@ -615,46 +619,25 @@ ProductForm.Category = function Category() {
     if (selected) setValue('category', selected)
   }, [categoryId, options, setValue])
   return (
-    <>
-      <Box
-        mb='10'
-        ml='10'>
-        <Box pos='relative'>
-          <Text
-            top='-25px'
-            left='-10px'
-            p='0 12px'
-            // bg="#fff"
-            transformOrigin='top left'
-            transition='all .2s ease-out'
-            color='#999'
-            pointerEvents='none'
-            pos='absolute'
-            w='fit-content'
-            h='fit-content'
-            zIndex='2'>
-            Danh mục:
-          </Text>
-
-          <SelectPopout
-            controller={{
-              name: 'category',
-              control,
-            }}
-            stateLabel={{
-              defaultEmpty: `Chọn danh mục`,
-            }}
-            props={{
-              options: options,
-              noOptionsMessage: 'Không có danh mục.',
-              onChange: (newValue) => {
-                onChangeCategory(newValue as Option<ICategory>)
-              },
-            }}
-          />
-        </Box>
-      </Box>
-    </>
+    <FormControl>
+      <FormLabel>Danh mục</FormLabel>
+      <SelectPopout
+        controller={{
+          name: 'category',
+          control,
+        }}
+        stateLabel={{
+          defaultEmpty: `Chọn danh mục`,
+        }}
+        props={{
+          options: options,
+          noOptionsMessage: 'Không có danh mục.',
+          onChange: (newValue) => {
+            onChangeCategory(newValue as Option<ICategory>)
+          },
+        }}
+      />
+    </FormControl>
   )
 }
 
@@ -664,39 +647,18 @@ ProductForm.Description = function Description() {
     formState: { errors },
   } = useProductFormContext()
   return (
-    <Box>
-      <Box pos='relative'>
-        <FormControl
-          mb='3'
-          isInvalid={!!(errors as any)?.description}>
-          <Text
-            top='-15px'
-            left='5px'
-            p='0 12px'
-            bg='#fff'
-            transformOrigin='top left'
-            transition='all .2s ease-out'
-            color='#999'
-            pointerEvents='none'
-            pos='absolute'
-            w='fit-content'
-            h='fit-content'
-            zIndex='2'>
-            Bài đăng
-          </Text>
-
-          <Textarea
-            {...register('description', {
-              required: 'This field is required',
-            })}
-            h='224px'
-          />
-          <FormErrorMessage>
-            {(errors as any)?.description?.message as string}
-          </FormErrorMessage>
-        </FormControl>
-      </Box>
-    </Box>
+    <FormControl
+      mb='3'
+      isInvalid={!!(errors as any)?.description}>
+      <FormLabel>Bài đăng mô tả sản phẩm</FormLabel>
+      <Textarea
+        {...register('description')}
+        h='224px'
+      />
+      <FormErrorMessage>
+        {(errors as any)?.description?.message as string}
+      </FormErrorMessage>
+    </FormControl>
   )
 }
 
@@ -741,9 +703,45 @@ ProductForm.Images = function Images() {
   )
 }
 
+const MultiValueLabel = ({
+  data,
+  selectProps,
+  onInputBlur,
+}: MultiValueGenericProps<Option<string>, true, GroupBase<Option<string>>> & {
+  onInputBlur: (
+    newValue: string,
+    currentOption: Option<string>,
+    values: Option<string>[],
+  ) => void
+}) => {
+  const inputRef = useRef(data.value)
+  useEffect(() => {
+    console.log('data.value', data.value)
+    inputRef.current = data.value
+  }, [data.value])
+
+  const handleOnBlur = (nextValue: string) => {
+    const value = inputRef.current
+    Array.isArray(selectProps.value) &&
+      onInputBlur(value, data, selectProps.value)
+  }
+
+  return (
+    <div>
+      <ChakraEditable
+        defaultValue={data.value}
+        onKeyDown={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        onBlur={handleOnBlur}
+        onChange={(e) => (inputRef.current = e)}
+      />
+    </div>
+  )
+}
+
 ProductForm.Specifications = function Specifications({}) {
   const { findDistinctNames } = API['specifications']()
-  const { action, setValue, getValues, resetField, control, product } =
+  const { action, setValue, getValues, resetField, control, product, watch } =
     useProductFormContext()
 
   const buttonRef = useRef(null)
@@ -789,10 +787,12 @@ ProductForm.Specifications = function Specifications({}) {
     console.log('fields.length', fields.length)
   }
 
-  const handleChange = (
+  const handleSelectChange = (
+    onChange: (...event: any[]) => void,
     newValue: MultiValue<Option<string>>,
     meta: ActionMeta<Option<string>>,
   ) => {
+    console.log('newValue, meta', newValue, meta)
     const { action, option, removedValue } = meta
 
     switch (action) {
@@ -807,7 +807,48 @@ ProductForm.Specifications = function Specifications({}) {
         )
         onRemove(index)
     }
+    onChange(newValue, meta)
   }
+
+  const { updateName } = API['specifications']()
+  const { mutateAsync } = useCustomMutation({})
+  const onUpdateName = (
+    newValue: string,
+    currentOption: Option<string>,
+    values: Option<string>[],
+  ) => {
+    const value = cleanValue(currentOption.value)
+    const cleanNewValue = cleanValue(newValue)
+    const updateNameDBHandler = async (newValues: Option<string>[]) => {
+      !currentOption.__isNew__ &&
+        (await mutateAsync(
+          {
+            url: updateName(value, cleanNewValue),
+            method: 'patch',
+            values: {},
+            errorNotification: onError,
+            successNotification: onSuccess,
+          },
+          {
+            onSuccess: () => {},
+          },
+        ))
+      setValue(`specificationGroup`, newValues)
+    }
+
+    if (value === cleanNewValue) return
+    const record = toRecord(values, 'label' as keyof Option<string>)
+    const key = value as keyof Option<string>
+    if (!cleanNewValue)
+      return (
+        delete record[key] &&
+        setValue(`specificationGroup`, Object.values(record))
+      )
+
+    record[key] = toOptionString(cleanNewValue)
+    updateNameDBHandler(Object.values(record))
+  }
+
   //reset form when product is fetched
   useEffect(() => {
     console.warn('Change product specification use effect')
@@ -827,29 +868,67 @@ ProductForm.Specifications = function Specifications({}) {
       })
     }, 300)
   }, [product, resetField])
-
   return (
     <>
       <FormLabel>Thông số kỹ thuật</FormLabel>
       <div className='border rounded-lg p-4'>
         <div className=''>
           <div className=''>
+            {/* <CreatableSelect
+              ref={selectRef}
+              components={{ MultiValueLabel }}
+              value={selectOptions}
+              onChange={(newValues) => {
+                setSelectOptions(newValues)
+              }}
+              isMulti
+              isClearable={false}
+              options={nameOptions}
+              styles={{
+                multiValue(base, props) {
+                  return {
+                    ...base,
+                    backgroundColor: '#f3f4f6',
+                    //   backgroundColor: 'transparent',
+                  }
+                },
+              }}
+              isOptionSelected={(value, options) =>
+                options.some((item) => item.value === value.value)
+              }
+            /> */}
             <Controller
               render={({ field }) => (
-                <CreatableSelect
-                  {...field}
-                  isMulti
-                  isClearable={false}
-                  options={nameOptions}
-                  onChange={handleChange}
-                  isDisabled={isDisabled}
-                  isValidNewOption={(input, values, options) => {
-                    const array = [...values, ...options].map(
-                      (item) => item.label,
-                    )
-                    return isValidNewOption(input, array)
-                  }}
-                />
+                <>
+                  <CreatableSelect
+                    components={{
+                      MultiValueLabel: (props) => (
+                        <MultiValueLabel
+                          {...props}
+                          onInputBlur={onUpdateName}
+                        />
+                      ),
+                    }}
+                    ref={field.ref}
+                    value={field.value}
+                    isMulti
+                    isClearable={false}
+                    options={nameOptions}
+                    onChange={handleSelectChange.bind(null, field.onChange)}
+                    styles={{
+                      multiValue(base, props) {
+                        return {
+                          ...base,
+                          backgroundColor: '#f3f4f6',
+                        }
+                      },
+                    }}
+                    isOptionSelected={(value, options) =>
+                      options.some((item) => item.value === value.value)
+                    }
+                  />
+                  {JSON.stringify(field.value)}
+                </>
               )}
               name={`specificationGroup`}
               control={control}
@@ -888,10 +967,6 @@ ProductForm.Specifications = function Specifications({}) {
             </>
           )}
         </div>
-
-        {/* <Button colorScheme="blackAlpha" onClick={onAppend}>
-                        <Plus />
-                    </Button> */}
       </div>
     </>
   )
@@ -921,6 +996,7 @@ ProductForm.Specifications.Row = function SpecificationRow({
   } = useProductFormContext()
   const isDisabled = action === 'edit'
 
+  //fetch spec values by name
   const { data: { data } = {} } = useCustom<ISpecification[]>({
     url: findDistinctByName(rowField?.label ?? ''),
     method: 'get',
@@ -957,51 +1033,32 @@ ProductForm.Specifications.Row = function SpecificationRow({
     )
     setValue(`specifications.${index}.options`, updated)
   }
-  //   const onAppend = (option: SpecOption) => {
-  //     const updated = produce(
-  //       getValues(`specifications.${index}.options`),
-  //       (draft) => {
-  //         draft.push(option)
-  //       },
-  //     )
-  //     setValue(`specifications.${index}.options`, updated)
-  //   }
-  //   const onRemove = (label: string) => {
-  //     const selected = getValues(`specifications.${index}.options`)
-  //     const idx = selected.findIndex((item) => item.label === label)
-  //     if (idx === -1) return
-  //     const updated = produce(selected, (draft) => {
-  //       draft.splice(idx, 1)
-  //     })
-  //     setValue(`specifications.${index}.options`, updated)
-  //   }
 
-  //   const handleChange = (
-  //     newValue: MultiValue<SpecOption>,
-  //     meta: ActionMeta<SpecOption>,
-  //   ) => {
-  //     const { action, option, removedValue } = meta
-  //     let optionToAppend = option
-  //     switch (action) {
-  //       case 'create-option':
-  //         const specValue = option.value as unknown as string
-  //         optionToAppend = toObjectOption(specValue, {
-  //           name: getName(),
-  //           value: specValue,
-  //         })
-  //       case 'select-option':
-  //         optionToAppend && onAppend(optionToAppend)
-  //         break
-  //       case 'pop-value':
-  //       case 'remove-value':
-  //         onRemove(removedValue?.label)
-  //     }
-  //   }
+  const groupNames = watch(`specificationGroup`)
 
   return (
     <div className='flex border p-4 gap-2'>
       <div className='flex-grow grid grid-cols-3 gap-2'>
-        <p>{rowField?.label ?? getName()}</p>
+        {/* <Controller
+          name={`specificationGroup.${index}.label`}
+          control={control}
+          render={({ field }) => (
+            <Editable
+              {...field}
+              onChange={(nextValue) => {
+                setValue(`specificationGroup.${index}`, {
+                  label: nextValue,
+                  value: nextValue,
+                })
+              }}>
+              <EditablePreview />
+              <EditableInput />
+            </Editable>
+          )}
+        /> */}
+        <p>{groupNames?.[index]?.label}</p>
+
+        {/* <p>{rowField?.label ?? getName()}</p> */}
         <FormControl
           isInvalid={!!errors.specifications?.[index]?.options}
           className='col-span-2'>
@@ -1133,4 +1190,192 @@ ProductForm.Features = function Features() {
       </Box>
     </>
   )
+}
+
+ProductForm.Active = function ProductActive() {
+  const { register } = useProductFormContext()
+  return (
+    <FormControl
+      display='flex'
+      alignItems='center'>
+      <FormLabel
+        htmlFor='show-hide-product'
+        mb='0'>
+        Hiển thị sản phẩm
+      </FormLabel>
+      <Switch
+        {...register(`active`)}
+        id='show-hide-product'
+      />
+    </FormControl>
+  )
+}
+
+ProductForm.Status = function ProductStatus() {
+  const { watch, control } = useProductFormContext()
+  const { findProductStatus } = API['products']()
+  const { data: { data: statuses } = {} } = useCustom<string[]>({
+    url: findProductStatus,
+    method: 'get',
+  })
+  return (
+    <FormControl>
+      <FormLabel>Trạng thái</FormLabel>
+      <div className='grid grid-cols-3 gap-2'>
+        <div className='w-[90%]'>
+          <Select options={statuses} />
+        </div>
+        <ProductForm.Active />
+      </div>
+    </FormControl>
+  )
+}
+
+ProductForm.Discount = function Discount() {
+  return (
+    <FormControl>
+      <FormLabel>Giảm giá</FormLabel>
+      <WalkthroughPopover />
+    </FormControl>
+  )
+}
+
+function WalkthroughPopover() {
+  const { watch } = useProductFormContext()
+  const initialFocusRef = React.useRef(null)
+  const discount = watch(`discount`)
+  return (
+    <Popover
+      initialFocusRef={initialFocusRef}
+      placement='bottom'
+      closeOnBlur={true}>
+      <PopoverTrigger>
+        <Button minW={'100px'}>{discount ?? 0}%</Button>
+      </PopoverTrigger>
+      <PopoverContent
+        color='white'
+        bg='blue.800'
+        borderColor='blue.800'>
+        <PopoverHeader
+          pt={4}
+          fontWeight='bold'
+          border='0'>
+          Điểu chỉnh giảm giá
+        </PopoverHeader>
+        <PopoverArrow bg='blue.800' />
+        <PopoverCloseButton />
+        <PopoverBody>
+          <SliderThumbWithTooltip />
+        </PopoverBody>
+        <PopoverFooter
+          border='0'
+          display='flex'
+          alignItems='center'
+          justifyContent='flex-end'
+          pb={4}></PopoverFooter>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+function SliderThumbWithTooltip() {
+  const { control, watch, getValues } = useProductFormContext()
+
+  const [showTooltip, setShowTooltip] = React.useState(false)
+  return (
+    <Controller
+      name='discount'
+      control={control}
+      render={({ field }) => (
+        <Slider
+          id='slider'
+          min={0}
+          max={100}
+          colorScheme='teal'
+          ref={field.ref}
+          value={field.value ?? 0}
+          onChange={field.onChange}
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}>
+          {[25, 50, 75].map((item) => (
+            <SliderMark
+              key={item}
+              value={item}
+              mt='1'
+              ml='-2.5'
+              fontSize='sm'>
+              {`${item}%`}
+            </SliderMark>
+          ))}
+
+          <SliderTrack>
+            <SliderFilledTrack />
+          </SliderTrack>
+          <Tooltip
+            hasArrow
+            bg='teal.500'
+            color='white'
+            placement='top'
+            isOpen={showTooltip}
+            label={`${field.value ?? 0}%`}>
+            <SliderThumb />
+          </Tooltip>
+        </Slider>
+      )}
+    />
+  )
+}
+
+const ChakraEditable = forwardRef<EditableProps, 'div'>((props, ref) => (
+  <Editable
+    ref={ref}
+    defaultValue='Rasengan ⚡️'
+    isPreviewFocusable={true}
+    selectAllOnFocus={false}
+    {...props}>
+    <Tooltip
+      label='Click to edit'
+      shouldWrapChildren={true}>
+      <EditablePreview
+        py={2}
+        px={4}
+        _hover={{
+          background: useColorModeValue('gray.100', 'gray.700'),
+        }}
+      />
+    </Tooltip>
+    <Input
+      py={2}
+      px={4}
+      as={EditableInput}
+    />
+    {/* <EditableControls /> */}
+  </Editable>
+))
+
+function EditableControls() {
+  const {
+    isEditing,
+    getSubmitButtonProps,
+    getCancelButtonProps,
+    getEditButtonProps,
+  } = useEditableControls()
+
+  // return isEditing ? (
+  //   <ButtonGroup
+  //     justifyContent='end'
+  //     size='sm'
+  //     w='full'
+  //     spacing={2}
+  //     mt={2}>
+  //     <IconButton
+  //       icon={<CheckIcon />}
+  //       {...getSubmitButtonProps()}
+  //     />
+  //     <IconButton
+  //       icon={<CloseIcon boxSize={3} />}
+  //       {...getCancelButtonProps()}
+  //     />
+  //   </ButtonGroup>
+  // ) : null
 }

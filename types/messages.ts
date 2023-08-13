@@ -1,3 +1,5 @@
+/** @format */
+
 export const messages = {}
 
 export const ERRORS = {
@@ -27,10 +29,25 @@ export const ERRORS = {
       exists: 'Thương hiệu này đã tồn tại.',
     },
   },
+  vouchers: {
+    code: {
+      required: 'Yêu cầu nhập code voucher',
+      exists: 'Code này đã tồn tại.',
+    },
+  },
   categories: {
     name: {
       required: 'Yêu cầu nhập tên danh mục',
       exists: 'Tên này đã tồn tại',
+    },
+  },
+  products: {
+    name: {
+      required: 'Yêu cầu nhập tên sản phẩm',
+      exists: 'Tên này đã tồn tại',
+    },
+    slug: {
+      exists: 'Đường dẫn này đã tồn tại',
     },
   },
 }

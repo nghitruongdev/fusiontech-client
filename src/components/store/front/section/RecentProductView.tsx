@@ -25,24 +25,27 @@ const RecentProductView = () => {
       <hr />
       {/* <p>Newest</p> */}
       {/* <div className='grid grid-cols-6 rounded-lg bg-slate-50'> */}
-      <div className='overflow-x-hidden overflow-y-scroll max-h-[260px] pl-2 pt-2 rounded-lg bg-slate-50'>
-        <div className='grid grid-cols-6 gap-3 mb-2'>
-          {items.map(({ product, time }) => (
-            // eslint-disable-next-line react/jsx-key
-            <div
-              key={product.id}
-              className='rounded-lg shadow border-gray-300 bg-white'>
-              <ProductCardProvider
-                product={product}
-                key={product.id}>
-                <Product item={product} />
-                {/* <p>{time && new Date(time).toISOString()}</p> */}
-              </ProductCardProvider>
-            </div>
-          ))}
-        </div>
+      <div
+        aria-label='product-list'
+        className='flex flex-row overflow-auto gap-4  pl-2 pt-2 pb-1'>
+        {' '}
+        {/* Thay đổi kích thước với max-w-[1200px] */}
+        {items.map(({ product, time }) => (
+          // eslint-disable-next-line react/jsx-key
+          <div
+            key={product.id}
+            className='rounded-lg shadow border-gray-300 bg-white'>
+            <ProductCardProvider
+              product={product}
+              key={product.id}>
+              <Product item={product} />
+              {/* <p>{time && new Date(time).toISOString()}</p> */}
+            </ProductCardProvider>
+          </div>
+        ))}
       </div>
     </div>
+
     // </div>
   )
 }
@@ -55,7 +58,7 @@ const Product = ({
   return (
     <div
       aria-label={`Product Item:${name}`}
-      className=' group cursor-pointer lg:min-w-[16.666667%] md:min-w-[25%] sm:min-w-[33.333333%] min-w-[50%]'>
+      className=' group cursor-pointer lg:min-w-[16.666667%] md:min-w-[25%] sm:min-w-[33.333333%] min-w-[100%]'>
       <NextLinkContainer href={`/products/${id}`}>
         <Product.sale />
         <Link href={`/products/${id}`}>

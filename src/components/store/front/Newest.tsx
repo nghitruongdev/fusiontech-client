@@ -43,22 +43,20 @@ const Newest = async () => {
         </Link>
       </div>
       <hr />
-      {/* <p>Newest</p> */}
-      <div className='flex flex-col bg-slate-50'>
-        <div className='overflow-x-auto max-h-[800px] pl-2 pt-2'>
-          <div className='grid grid-cols-5 gap-3'>
-            {Object.values(products.data).map((item: IProduct) => (
-              // eslint-disable-next-line react/jsx-key
-              <div className='rounded-lg  shadow border-gray-300 bg-white  '>
-                <ProductCardProvider
-                  key={item.id}
-                  product={item}>
-                  <Product item={item} />
-                </ProductCardProvider>
-              </div>
-            ))}
+      <div
+        aria-label='product-list'
+        className='flex flex-row overflow-auto max-h-[800px] gap-4 pl-2 pt-2 pb-1'>
+        {/* <div className='grid grid-cols-5 gap-3'> */}
+        {Object.values(products.data).map((item: IProduct) => (
+          // eslint-disable-next-line react/jsx-key
+          <div className='rounded-lg  shadow border-gray-300 bg-white  '>
+            <ProductCardProvider
+              key={item.id}
+              product={item}>
+              <Product item={item} />
+            </ProductCardProvider>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   )

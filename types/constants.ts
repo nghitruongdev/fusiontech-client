@@ -1,5 +1,7 @@
 /** @format */
 
+/** @format */
+
 import { Action } from '@refinedev/core'
 import { PaymentMethod, ResourceName } from 'types'
 
@@ -11,6 +13,8 @@ const throwIfMissing = (name: string) => {
 export const API_URL =
   process.env.NEXT_PUBLIC_RESOURCE_SERVER_URL ??
   throwIfMissing('NEXT_PUBLIC_RESOURCE_SERVER_URL')
+
+export const REG_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
 export const NEXT_API_URL = 'http://localhost:3000/api'
 //todo: const {} =  API['users']()
@@ -37,19 +41,23 @@ export const API = {
     }
   },
   categories: () => {
-    const name: ResourceName = 'categories'
+    const resource: ResourceName = 'categories'
     return {
-      resource: name,
+      resource: resource,
       findByName: (value?: string) =>
-        value ? `${name}/search/findByName?name=${value}` : '',
+        value
+          ? `${resource}/search/findByName?name=${encodeURIComponent(value)}`
+          : '',
     }
   },
   brands: () => {
-    const name: ResourceName = 'brands'
+    const resource: ResourceName = 'brands'
     return {
-      resource: name,
+      resource: resource,
       findByName: (value?: string) =>
-        value ? `${name}/search/findByName?name=${value}` : '',
+        value
+          ? `${resource}/search/findByName?name=${encodeURIComponent(value)}`
+          : '',
     }
   },
   variants: () => {
@@ -97,7 +105,20 @@ export const API = {
       getAvailableQuantity: (id: string | number | undefined) =>
         id ? `${resource}/search/availableQuantityByProduct?id=${id}` : '',
       findByNameLike: (name: string | undefined) =>
-        !name?.length ? '' : `${resource}/search/findByNameLike?name=${name}`,
+        !name?.length
+          ? ''
+          : `${resource}/search/findByNameLike?name=${encodeURIComponent(
+              name,
+            )}`,
+      findByName: (name: string | undefined) =>
+        !name
+          ? ''
+          : `${resource}/search/find-by-name?name=${encodeURIComponent(name)}`,
+      findBySlug: (slug: string | undefined) =>
+        !slug
+          ? ''
+          : `${resource}/search/find-by-slug?slug=${encodeURIComponent(slug)}`,
+      findProductStatus: `${resource}/search/find-all-status`,
     }
   },
   specifications: () => {
@@ -107,6 +128,10 @@ export const API = {
       findDistinctNames: `${resource}/search/distinct-names`,
       findDistinctByName: (findName: string) =>
         `${resource}/search/findByName?name=${encodeURIComponent(findName)}`,
+      updateName: (oldName: string, newName: string) =>
+        `${resource}/update-name?oldName=${encodeURIComponent(
+          oldName,
+        )}&newName=${encodeURIComponent(newName)}`,
     }
   },
   users: () => {

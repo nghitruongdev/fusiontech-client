@@ -5,7 +5,6 @@ import { IOrderStatus, ProblemDetail } from 'types'
 import {
   Badge,
   useEditableControls,
-  Select,
   ButtonGroup,
   IconButton,
   CloseButton,
@@ -16,8 +15,10 @@ import {
 import { useUpdate } from '@refinedev/core'
 import { Check, Loader } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { onError } from '@/hooks/useCrudNotification'
-
+import { onError, onSuccess } from '@/hooks/useCrudNotification'
+import SelectPopout from '@components/ui/SelectPopout'
+import ReactSelect from 'react-select'
+import { Select } from '@chakra-ui/react'
 export const OrderStatus = ({
   status,
   control,
@@ -31,12 +32,15 @@ export const OrderStatus = ({
       isPreviewFocusable={true}
       selectAllOnFocus={false}>
       <Tooltip
-        label='Click to change'
+        label='Click để cập nhật'
         shouldWrapChildren={true}>
         <Badge
           as={EditablePreview}
+          variant='outline'
           colorScheme={statusColor(status)}
-          px={4}
+          px='4'
+          py='1'
+          rounded='md'
         />
       </Tooltip>
       {control}
@@ -75,6 +79,10 @@ export const EditableControls = ({
   }
 
   const submitHandler = async (event: any) => {
+    if (selectedStatus?.name === status.name) {
+      submitProps().onClick?.(event)
+      return
+    }
     mutate(
       {
         resource: 'orders',
@@ -86,6 +94,7 @@ export const EditableControls = ({
           },
         },
         errorNotification: onError,
+        successNotification: onSuccess,
       },
       {
         onSuccess: () => {
@@ -95,24 +104,53 @@ export const EditableControls = ({
     )
   }
 
+  //   if (isEditing)
+  //     return (
+  //       <>
+  //         <ReactSelect
+  //           options={options}
+  //           onChange={() => {}}
+  //           className={`absolute z-50`}
+  //           defaultValue={options.find((item) => item.value.id === status.id)}
+  //         />
+  //         {/* <Select
+  //           as={ReactSelect}
+  //           options={options}
+  //         /> */}
+  //         <ButtonGroup
+  //           justifyContent='end'
+  //           size='sm'
+  //           w='full'
+  //           spacing={2}
+  //           mt={2}>
+  //           <IconButton
+  //             aria-label={''}
+  //             icon={!isLoading ? <Check /> : <Loader />}
+  //             {...submitProps()}
+  //             onClick={(event) => {
+  //               submitHandler(event)
+  //             }}
+  //           />
+  //           <CloseButton {...getCancelButtonProps()} />
+  //         </ButtonGroup>
+  //       </>
+  //     )
   if (isEditing)
     return (
       <>
-        {' '}
         <Select
           value={selectedStatus?.name ?? 'Đang tải...'}
           size='sm'
           variant='outline'
           rounded={'md'}
-          onChange={onChangeHandler}
-          colorScheme={statusColor(selectedStatus)}>
+          onChange={onChangeHandler}>
           {options
             .filter((item) => item.value.id >= status.id)
             .map((item) => (
               <option
                 key={item.label}
                 value={item.value.name}>
-                {item.label}
+                <Badge>{item.label}</Badge>
               </option>
             ))}
         </Select>

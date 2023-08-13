@@ -44,7 +44,7 @@ const useDebounceFn = <P extends any[], R>(
       }
       setClearFn(() => clear)
     })
-    return result ?? null
+    return result
   }
   useEffect(() => {
     return () => clearFn?.()

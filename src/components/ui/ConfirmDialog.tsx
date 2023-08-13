@@ -1,21 +1,23 @@
-import { useCallback } from "react";
+/** @format */
+
+import { useCallback } from 'react'
 import {
-    AlertDialog,
-    AlertDialogBody,
-    AlertDialogContent,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogOverlay,
-    Button,
-    Portal,
-} from "@chakra-ui/react";
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  Button,
+  Portal,
+} from '@chakra-ui/react'
 import React, {
-    PropsWithChildren,
-    ReactNode,
-    createContext,
-    useContext,
-    useState,
-} from "react";
+  PropsWithChildren,
+  ReactNode,
+  createContext,
+  useContext,
+  useState,
+} from 'react'
 
 // type Props = {
 //     children: ReactNode;
@@ -25,7 +27,7 @@ import React, {
 //     confirm: (props: AlertProps) => Promise<unknown>;
 // };
 interface AnyEvent {
-    preventDefault(): void;
+  preventDefault(): void
 }
 
 // type ActionProps = {
@@ -79,52 +81,58 @@ interface AnyEvent {
 // };
 
 type AlertProps = {
-    header: ReactNode;
-    message: ReactNode;
-    cancelText?: string;
-    okText?: string;
-};
+  header: ReactNode
+  message: ReactNode
+  cancelText?: string
+  okText?: string
+}
 
 export function ConfirmDialog({
-    header,
-    message,
-    okText,
-    cancelText,
-    onOk,
-    onCancel,
+  header,
+  message,
+  okText,
+  cancelText,
+  onOk,
+  onCancel,
 }: AlertProps & {
-    onCancel: () => void;
-    onOk: () => void;
+  onCancel: () => void
+  onOk: () => void
 }) {
-    const cancelRef = React.useRef<HTMLButtonElement>(null);
+  const cancelRef = React.useRef<HTMLButtonElement>(null)
 
-    return (
-        <>
-            <AlertDialog
-                isOpen={true}
-                leastDestructiveRef={cancelRef}
-                onClose={onCancel}
-                motionPreset="slideInBottom"
-            >
-                <AlertDialogOverlay>
-                    <AlertDialogContent>
-                        <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                            {header}
-                        </AlertDialogHeader>
+  return (
+    <>
+      <AlertDialog
+        isOpen={true}
+        leastDestructiveRef={cancelRef}
+        onClose={onCancel}
+        motionPreset='slideInBottom'>
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader
+              fontSize='lg'
+              fontWeight='bold'>
+              {header}
+            </AlertDialogHeader>
 
-                        <AlertDialogBody>{message}</AlertDialogBody>
+            <AlertDialogBody>{message}</AlertDialogBody>
 
-                        <AlertDialogFooter>
-                            <Button ref={cancelRef} onClick={onCancel}>
-                                {cancelText ?? "Huỷ bỏ"}
-                            </Button>
-                            <Button colorScheme="red" onClick={onOk} ml={3}>
-                                {okText ?? "Xác nhận"}
-                            </Button>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialogOverlay>
-            </AlertDialog>
-        </>
-    );
+            <AlertDialogFooter>
+              <Button
+                ref={cancelRef}
+                onClick={onCancel}>
+                {cancelText ?? 'Huỷ bỏ'}
+              </Button>
+              <Button
+                colorScheme='red'
+                onClick={onOk}
+                ml={3}>
+                {okText ?? 'Xác nhận'}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
+    </>
+  )
 }

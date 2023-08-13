@@ -9,10 +9,11 @@ import {
   useMany,
   useList,
   GetListResponse,
+  useCustom,
 } from '@refinedev/core'
 import { useTable } from '@refinedev/react-table'
 import { ColumnDef, flexRender } from '@tanstack/react-table'
-import { DateField, NumberField } from '@refinedev/chakra-ui'
+import { DateField, NumberField, TextField } from '@refinedev/chakra-ui'
 import {
   TableContainer,
   Table,
@@ -26,10 +27,20 @@ import {
 } from '@chakra-ui/react'
 
 import { Pagination } from '@components/pagination'
-import { IOrder, IOrderStatus } from 'types'
+import {
+  IBasicUser,
+  IOrder,
+  IOrderStatus,
+  IPayment,
+  IUser,
+  PaymentStatus,
+  PaymentStatusLabel,
+} from 'types'
 import { EditableControls, OrderStatus, statusColor } from '../OrderStatus'
 import { ShowButton } from '@components/buttons'
 import { List } from '@components/crud'
+import { useDefaultTableRender } from '@/hooks/useRenderTable'
+import { formatPrice } from '@/lib/utils'
 export default function ListPage() {
   return <OrderList />
 }
@@ -43,32 +54,13 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
         header: 'Id',
       },
       {
-        id: 'userId',
-        accessorKey: 'userId',
-        header: 'Id người dùng',
+        id: 'user_name',
+        accessorKey: 'user',
+        header: 'Tên người nhận',
         cell: function render({ getValue, table }) {
-          const meta = table.options.meta as {
-            userData: GetManyResponse
-          }
-
-          const user = meta.userData?.data?.find(
-            (item) => item.id === getValue<any>(),
-          )
-
-          return user?.id?.toString().substring(0, 6) ?? 'Loading...'
+          return <TextField value={getValue<IUser>().firstName} />
         },
       },
-      // {
-      //     id: "note",
-      //     accessorKey: "note",
-      //     header: "Note",
-      // },
-      // {
-      //     id: "email",
-      //     accessorKey: "email",
-      //     header: "Email",
-      // },
-
       {
         id: 'purchasedAt',
         accessorKey: 'purchasedAt',
@@ -80,17 +72,16 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
       {
         id: 'paymentAmount',
         accessorKey: 'paymentId',
-        header: 'Phương thức thanh toán',
+        header: 'Tổng tiền',
         cell: function render({ getValue, table }) {
           const meta = table.options.meta as {
             paymentData: GetManyResponse
           }
 
           const payment = meta.paymentData?.data?.find(
-            (item) => item.id === getValue<any>(),
+            (item) => item.id === getValue<number>(),
           )
-
-          return <NumberField value={payment?.amount} /> ?? 'Loading...'
+          return formatPrice(+payment?.amount)
         },
       },
       {
@@ -105,16 +96,27 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
           const payment = meta.paymentData?.data?.find(
             (item) => item.id === getValue<any>(),
           )
-
+          const status =
+            payment?.status &&
+            PaymentStatusLabel[payment.status as PaymentStatus]
+          if (!status) return <></>
           return (
             <Badge
               variant='outline'
-              px='2'
-              // py="1"
-              lineHeight='taller'
+              //   colorScheme={statusColor(status)}
+              px='4'
+              py='1'
               rounded='md'
-              colorScheme='whatsapp'>
-              {payment?.status ?? 'Loading...'}
+              //   variant='outline'
+              //   px='2'
+              //   // py="1"
+              //   lineHeight='taller'
+              //   rounded='md'
+              // colorScheme=''
+              colorScheme={`${status?.color ? status.color : 'facebook'}`}
+              //   colorScheme={`${status?.color ? status.color : 'whatsapp'}`}
+            >
+              {status?.text}
             </Badge>
           )
         },
@@ -132,32 +134,34 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
           const status = meta.statusData?.data?.find(
             (st) => st.name === statusName,
           )
+          if (!status) return <></>
+
+          if (!status.isChangeable)
+            return (
+              <Badge
+                variant='outline'
+                colorScheme={statusColor(status)}
+                px='4'
+                py='1'
+                rounded='md'>
+                {status.detailName}
+              </Badge>
+            )
           return (
-            <>
-              {!!status ? (
-                status.isChangeable ? (
-                  <OrderStatus
+            <div className='min-w-[200px]'>
+              <OrderStatus
+                status={status}
+                control={
+                  <EditableControls
+                    options={meta.statusOptions.filter(
+                      (item) => item.value.name !== 'CANCELLED',
+                    )}
                     status={status}
-                    control={
-                      <EditableControls
-                        options={meta.statusOptions}
-                        status={status}
-                        orderId={row.original.id}
-                      />
-                    }
+                    orderId={row.original.id}
                   />
-                ) : (
-                  <Badge
-                    colorScheme={statusColor(status)}
-                    px='4'
-                    py='1'>
-                    {status.detailName}
-                  </Badge>
-                )
-              ) : (
-                <Badge>Loading...</Badge>
-              )}
-            </>
+                }
+              />
+            </div>
           )
         },
       },
@@ -196,31 +200,25 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
     columns,
   })
 
-  if (!!tableData) {
-    // console.log("tableData?.data", tableData?.data);
-  }
-
-  const { data: statusData } = useList<IOrderStatus>({
-    resource: 'orders/statuses',
+  const { data: statusData } = useCustom<IOrderStatus[]>({
+    url: 'orders/statuses',
+    method: 'get',
     queryOptions: {
       enabled: !!tableData?.data,
     },
-    pagination: {
-      mode: 'off',
-    },
   })
 
-  const userIds = tableData?.data?.map((item) => item?.userId) ?? []
-  const { data: userData } = useMany({
-    resource: 'users',
-    ids: userIds,
-    queryOptions: {
-      enabled: userIds.length > 0,
-    },
-  })
+  //   const userIds = tableData?.data?.map((item) => item?.userId) ?? []
+  //   const { data: userData } = useMany({
+  //     resource: 'users',
+  //     ids: userIds,
+  //     queryOptions: {
+  //       enabled: userIds.length > 0,
+  //     },
+  //   })
 
   const paymentIds = tableData?.data?.map((item) => item?.paymentId) ?? []
-  const { data: paymentData } = useMany({
+  const { data: paymentData } = useMany<IPayment>({
     resource: 'payments',
     ids: paymentIds,
     queryOptions: {
@@ -232,7 +230,7 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
     ...prev,
     meta: {
       ...prev.meta,
-      userData,
+      //   userData,
       statusData,
       paymentData,
       statusOptions:
@@ -242,46 +240,20 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
         })) ?? [],
     },
   }))
-
+  const { headers, body, pagination } = useDefaultTableRender({
+    rowModel: getRowModel(),
+    headerGroups: getHeaderGroups(),
+    pagination: { current, setCurrent, pageCount, pageSize, setPageSize },
+  })
   return (
     <List>
       <TableContainer whiteSpace='pre-line'>
         <Table variant='simple'>
-          <Thead>
-            {getHeaderGroups().map((headerGroup) => (
-              <Tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <Th key={header.id}>
-                    {!header.isPlaceholder &&
-                      flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                  </Th>
-                ))}
-              </Tr>
-            ))}
-          </Thead>
-          <Tbody>
-            {getRowModel().rows.map((row) => (
-              <Tr key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <Td key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </Td>
-                ))}
-              </Tr>
-            ))}
-          </Tbody>
+          {headers}
+          {body}
         </Table>
       </TableContainer>
-      <Pagination
-        current={current}
-        pageCount={pageCount}
-        setCurrent={setCurrent}
-        pageSize={pageSize}
-        setPageSize={setPageSize}
-      />
+      {pagination}
     </List>
   )
 }

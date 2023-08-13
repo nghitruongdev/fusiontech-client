@@ -28,7 +28,7 @@ export type IProduct = {
   slug: string
   summary: string
   description: string
-  status?: 'STOP_SELLING' | 'NEW'
+  status?: string
   active?: boolean
   minPrice?: number
   maxPrice?: number
@@ -73,10 +73,17 @@ export type IProductField = {
   slug: string
   summary: string
   description: string
+  discount?: number
+  status?: string
+  active?: boolean
   features?: { value: string }[]
 } & {
   files: File[]
   images?: (FirebaseImage | null)[]
+  specGroups?: Option<string>[]
+  /**
+   * @deprecated
+   */
   specificationGroup?: Option<string>[]
   specifications?: (
     | {
@@ -314,19 +321,19 @@ export const PaymentStatusLabel: {
 } = {
   PENDING: {
     text: 'Chưa thanh toán',
-    color: '',
+    color: 'blue',
   },
   PAID: {
     text: 'Đã thanh toán',
-    color: '',
+    color: 'whatsapp',
   },
   REFUNDED: {
     text: 'Hoàn tiền',
-    color: '',
+    color: 'orange',
   },
   CANCELLED: {
     text: 'Đã huỷ',
-    color: '',
+    color: 'red',
   },
   //   PENDING = 'Chưa thanh toán',
   //   PAID = 'Đã thanh toán',

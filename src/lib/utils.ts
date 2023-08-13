@@ -140,3 +140,6 @@ export const formatDateTime = (time: undefined | string | number) => {
         hourCycle: 'h24',
       })
 }
+
+export const cleanValue = (input: string | undefined) =>
+  input?.replace(/\s+/g, ' ').trim() ?? ''

@@ -18,7 +18,7 @@ import routerProvider from '@refinedev/nextjs-router/app'
 import { UserCircle } from 'lucide-react'
 import { Cpu, LucideLaptop2, MemoryStick, ShoppingCart } from 'lucide-react'
 import { Warehouse } from 'lucide-react'
-import { Monitor } from 'lucide-react'
+import { Monitor, Ticket } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
 
@@ -83,6 +83,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 canDelete: true,
                 label: 'Thương hiệu',
                 icon: <LucideLaptop2 size={18} />,
+              },
+            },
+            {
+              name: 'vouchers',
+              list: '/admin/vouchers',
+              create: '/admin/vouchers/create',
+              edit: '/admin/vouchers/edit/:id',
+              show: '/admin/vouchers/show/:id',
+              meta: {
+                canDelete: true,
+                label: 'Mã giảm giá',
+                icon: <Ticket size={18} />,
               },
             },
             {
