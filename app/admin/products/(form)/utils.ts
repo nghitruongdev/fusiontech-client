@@ -36,6 +36,8 @@ const validateIfExists = async (
       console.error('validate name is not ok')
       return false
     }
+    // if (response.type === 'cors')
+    //   throw new Error('Yêu cầu đã bị chặn bởi CORS.')
     const data = (await response.json()) as BaseType
     if (data) {
       if (!current) return exists ?? false

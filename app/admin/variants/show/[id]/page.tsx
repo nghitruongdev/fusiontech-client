@@ -16,7 +16,7 @@ import {
   Tr,
 } from '@chakra-ui/react'
 import { formatPrice } from '@/lib/utils'
-import { IProduct, IVariant } from 'types'
+import { IProduct, ISpecification, IVariant } from 'types'
 import { PropsWithChildren, createContext, useContext, useEffect } from 'react'
 import { API } from 'types/constants'
 import { Show } from '@components/crud'
@@ -110,10 +110,8 @@ export const VariantShow: React.FC<IResourceComponentsProps> = () => {
               mt={4}>
               Thông số kỹ thuật
             </Heading>
-            {record?.specifications ? (
+            {record?.specifications && (
               <SpecificationsTable specifications={record.specifications} />
-            ) : (
-              <p>No attributes found.</p>
             )}
           </div>
         </div>
@@ -174,7 +172,11 @@ export const VariantShow: React.FC<IResourceComponentsProps> = () => {
     </Show>
   )
 }
-const SpecificationsTable = ({ specifications }) => {
+const SpecificationsTable = ({
+  specifications,
+}: {
+  specifications: ISpecification[]
+}) => {
   return (
     <table className='w-full border-collapse table-auto'>
       <thead>
@@ -184,10 +186,10 @@ const SpecificationsTable = ({ specifications }) => {
         </tr>
       </thead>
       <tbody>
-        {specifications.map((specifications) => (
-          <tr key={specifications.id}>
-            <td className='border px-4 py-2'>{specifications.name}</td>
-            <td className='border px-4 py-2'>{specifications.value}</td>
+        {specifications.map(({ id, name, value }) => (
+          <tr key={id}>
+            <td className='border px-4 py-2'>{name}</td>
+            <td className='border px-4 py-2'>{value}</td>
           </tr>
         ))}
       </tbody>

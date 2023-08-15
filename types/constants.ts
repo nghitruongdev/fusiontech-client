@@ -84,7 +84,7 @@ export const API = {
       projection: {
         full: 'full',
         specifications: 'specifications',
-        // onlyName: 'only-name',
+        nameAndVariantCount: 'name-and-variant-count',
         nameWithVariants: 'name-with-variants',
       },
       getVariants: (productId: string | number | undefined) =>

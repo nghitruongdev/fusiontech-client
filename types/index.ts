@@ -80,10 +80,6 @@ export type IProductField = {
 } & {
   files: File[]
   images?: (FirebaseImage | null)[]
-  specGroups?: Option<string>[]
-  /**
-   * @deprecated
-   */
   specificationGroup?: Option<string>[]
   specifications?: (
     | {
@@ -94,6 +90,7 @@ export type IProductField = {
   )[]
   brand?: Option<IBrand>
   category?: Option<ICategory>
+  formStatus?: Option<string>
 }
 
 export type ISpecification = {
@@ -119,18 +116,17 @@ export type IVariantField = {
   sku: string
   images?: (FirebaseImage | null)[]
   price: number
+  active?: boolean
   product: {
     label: string
     value: {
       id: string
       name: string
+      variantCount: number
     }
   }
   specificationGroup?: Option<string>[]
-  specifications?: {
-    label: string
-    options: Option<ISpecification | undefined>[]
-  }[]
+  specifications: Option<ISpecification>[]
 } & {
   files: File[]
 }
@@ -462,6 +458,7 @@ export type Option<T> = {
   value: T
   __isNew__?: boolean
   __isFixed__?: boolean
+  __isDisabled__?: boolean
 }
 
 export type GroupOption<T> = {

@@ -6,7 +6,14 @@ import React from 'react'
 import { IResourceComponentsProps } from '@refinedev/core'
 import { useTable } from '@refinedev/react-table'
 import { ColumnDef, flexRender } from '@tanstack/react-table'
-import { TableContainer, Table, Image, HStack } from '@chakra-ui/react'
+import {
+  TableContainer,
+  Table,
+  Image,
+  HStack,
+  FormControl,
+  Switch,
+} from '@chakra-ui/react'
 import { FirebaseImage, IProduct } from 'types'
 import { useDefaultTableRender } from '@/hooks/useRenderTable'
 import { List } from '@components/crud'
@@ -30,8 +37,8 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
         header: 'Tên sản phẩm',
         cell: function render({ getValue }) {
           return (
-            <div className='line-clamp-3'>
-              <p>{(getValue() as any) ?? ''}</p>
+            <div className=''>
+              <p>{getValue<string>() ?? ''}</p>
             </div>
           )
         },
@@ -40,18 +47,6 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
         id: 'summary',
         accessorKey: 'summary',
         header: 'Mô tả',
-        cell: function render({ getValue }) {
-          return (
-            <div className='line-clamp-3'>
-              <p>{(getValue() as any) ?? ''}</p>
-            </div>
-          )
-        },
-      },
-      {
-        id: 'description',
-        accessorKey: 'description',
-        header: 'Giới thiệu',
         cell: function render({ getValue }) {
           return (
             <div className='line-clamp-3'>
@@ -87,9 +82,26 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
         header: 'Đánh giá',
       },
       {
+        id: 'active',
+        accessorKey: 'active',
+        header: 'Hiển thị',
+        cell: function render({ getValue }) {
+          return (
+            <FormControl
+              display='flex'
+              alignItems='center'>
+              <Switch
+                id='show-hide-product'
+                defaultChecked={getValue<boolean>()}
+              />
+            </FormControl>
+          )
+        },
+      },
+      {
         id: 'actions',
         accessorKey: 'id',
-        header: 'Hành động',
+        header: 'Menu',
         cell: function render({ getValue }) {
           return (
             <HStack>

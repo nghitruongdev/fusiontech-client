@@ -1,5 +1,7 @@
+/** @format */
+
 import { FirestoreDatabase } from '@/providers/firestore-data-provider/FirestoreDatabase'
-import { initializeApp } from 'firebase/app'
+import { FirebaseApp, getApp, getApps, initializeApp } from 'firebase/app'
 import { getFirestore } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 
@@ -12,8 +14,10 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_APP_ID,
 }
 
-export const firebaseApp = initializeApp(firebaseConfig, 'CLIENT')
-
+const apps = getApps()
+export const firebaseApp = !!apps.length
+  ? (apps[0] as FirebaseApp)
+  : initializeApp(firebaseConfig, 'CLIENT')
 export const firebaseStorage = getStorage(firebaseApp)
 export const firestoreInstance = getFirestore(firebaseApp)
 export const firestoreDatabase = new FirestoreDatabase(

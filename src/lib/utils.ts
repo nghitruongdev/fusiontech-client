@@ -109,6 +109,13 @@ export function toObjectOption<T>(label: string, value: T): Option<T> {
   return { label, value }
 }
 
+/**
+ *
+ * @deprecated
+ * @param input
+ * @param values
+ * @returns
+ */
 export function isValidNewOption(
   input: string | undefined,
   values: (string | undefined)[],
@@ -143,3 +150,16 @@ export const formatDateTime = (time: undefined | string | number) => {
 
 export const cleanValue = (input: string | undefined) =>
   input?.replace(/\s+/g, ' ').trim() ?? ''
+
+export const isValidNewSelectOption = <T extends { label?: string }>(
+  input: string | undefined,
+  values: readonly T[],
+  options: readonly T[],
+) => {
+  const cleanInput = cleanValue(input).toLowerCase()
+  return (
+    !!cleanInput &&
+    !values.some((item) => item.label?.toLowerCase() === cleanInput) &&
+    !options.some((item) => item.label?.toLowerCase() === cleanInput)
+  )
+}

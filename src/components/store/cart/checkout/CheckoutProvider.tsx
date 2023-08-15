@@ -64,7 +64,7 @@ export const CheckoutProvider = ({ children }: ProviderProps) => {
   }, [isSubmitting])
   useEffect(() => {
     id && setValue(`userId`, id + '')
-  }, [id])
+  }, [id, setValue])
   const [promise, setPromise] = useState<Promise<any>>(Promise.resolve())
 
   const checkoutHandler = async () => {
@@ -81,7 +81,10 @@ export const CheckoutProvider = ({ children }: ProviderProps) => {
     const submitHandler = handleSubmit(async (data) => {
       console.log('data', data)
       if (!data.addressId) {
-        open?.(onError({ message: 'Vui lòng chọn địa chỉ nhận hàng' }))
+        open?.({
+          type: 'error',
+          message: 'Vui lòng chọn địa chỉ nhận hàng',
+        })
         return
       }
       const { items: cartItems, voucher } = data

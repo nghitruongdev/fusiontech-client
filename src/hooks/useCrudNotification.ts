@@ -7,9 +7,7 @@ import {
   CreateResponse,
   BaseRecord,
 } from '@refinedev/core'
-import { AxiosError } from 'axios'
 import { useCallback } from 'react'
-import { messages } from '../../types/messages'
 import { Fields } from '@refinedev/core/dist/interfaces/metaData/fields'
 import { VariableOptions } from '@refinedev/core/dist/interfaces/metaData/variableOptions'
 import { AppError } from 'types/error'
@@ -74,7 +72,13 @@ export const onSuccess = (
   data: any,
   value: any,
   resource: string | undefined,
+  defaultMessage?: string,
 ): OpenNotificationParams => {
+  if (defaultMessage)
+    return {
+      type: 'success',
+      message: defaultMessage,
+    }
   return {
     type: 'success',
     message: `${resource} thành công`,
@@ -89,11 +93,11 @@ export const onError = (
 ): OpenNotificationParams => {
   console.log('err', err)
   if (err?.isAxiosError) {
-    const data = err.response.data as ProblemDetail
+    const data = err.response?.data as ProblemDetail
     return {
       type: 'error',
       message: `${getErrorTitle(data?.title)} - ${
-        data?.status ?? err.statusCode
+        data?.status ?? err?.statusCode
       }`,
       description:
         data?.detail ?? 'Đã có lỗi xảy ra, vui lòng liên hệ nhà cung cấp.',
