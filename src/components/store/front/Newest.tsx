@@ -63,7 +63,17 @@ const Newest = async () => {
 }
 
 const Product = ({
-  item: { id, name, slug, images, summary, avgRating, brand },
+  item: {
+    id,
+    name,
+    slug,
+    images,
+    summary,
+    avgRating,
+    brand,
+    minPrice,
+    maxPrice,
+  },
 }: {
   item: IProduct
 }) => {
@@ -85,7 +95,10 @@ const Product = ({
             />
           </div> */}
           <Product.Name name={name} />
-          <Product.Price />
+          <Product.Price
+            minPrice={minPrice}
+            maxPrice={maxPrice}
+          />
           <Product.Summary summary={summary} />
           <Product.Review avgRating={avgRating} />
         </div>
@@ -172,14 +185,21 @@ Product.Summary = ({ summary }: { summary: IProduct['summary'] }) => {
   )
 }
 
-Product.Price = () => {
+Product.Price = ({
+  minPrice,
+  maxPrice,
+}: {
+  minPrice: IProduct['minPrice']
+  maxPrice: IProduct['maxPrice']
+}) => {
   return (
     <div className='flex justify-start items-center py-2'>
       <p className='font-titleFont text-md font-bold text-red-600 mr-2'>
-        {formatPrice(25_000_000)}
+        {formatPrice(minPrice)}
       </p>
-      <p className='text-gray-500 font-titleFont text-sm leading-tight line-through decoration-[1px] ml-2'>
-        {formatPrice(29_000_000)}
+      <p className='font-titleFont text-md font-bold text-red-600 mr-2'>-</p>
+      <p className='font-titleFont text-md font-bold text-red-600 mr-2'>
+        {formatPrice(maxPrice)}
       </p>
     </div>
   )

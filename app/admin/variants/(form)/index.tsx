@@ -164,17 +164,18 @@ VariantForm.Provider = function Provider({
       images,
       files,
       specifications,
+      formSpecifications,
       specificationGroup,
       product: { value: product },
       ...values
     } = formValues
 
     const handleSpecifications = () =>
-      specifications &&
-      specifications
-        .filter((item) => !!item?.value)
-        .map((item) => {
-          return { name: item?.label, values: [item?.value] }
+      formSpecifications &&
+      formSpecifications
+        .filter((item) => !!item?.option?.value)
+        .map(({ label, option: { value: spec } = {} }) => {
+          return { name: label, values: [spec] }
         })
 
     const handleImages = async () => {
@@ -195,7 +196,7 @@ VariantForm.Provider = function Provider({
       return [...variantImages, ...uploadedUrls]
     }
     const onSubmit = async () => {
-      const formSpecs = dirtyFields.specifications && handleSpecifications()
+      const formSpecs = dirtyFields.formSpecifications && handleSpecifications()
       const formImages = dirtyFields.files && (await handleImages())
 
       const formValues = Object.entries(values).reduce((acc, [key, val]) => {
@@ -287,12 +288,14 @@ VariantForm.Body = function Body() {
         <VariantForm.Product />
         <VariantForm.SKU />
         <VariantForm.Price />
+        <VariantForm.Active />
         <VariantForm.Specification />
         <VariantForm.SpecDefault />
       </div>
     </div>
   )
 }
+
 VariantForm.Product = function Product() {
   const {
     paramProductId,
@@ -348,7 +351,7 @@ VariantForm.Product = function Product() {
   return (
     <>
       <FormControl isInvalid={!!errors.product}>
-        <FormLabel>Tên sản phẩm</FormLabel>
+        <FormLabel>Chọn sản phẩm</FormLabel>
 
         <Controller
           render={({ field }) => (
@@ -670,7 +673,7 @@ VariantForm.Specification = function Specification({}) {
       //   setValue(`specifications`, [])
       //   resetField(`specifications`, { defaultValue: [] })
       formSpecs.forEach((name) =>
-        append({ label: name, value: undefined }, { shouldFocus: false }),
+        append({ label: name, option: undefined }, { shouldFocus: false }),
       )
       //   append({ label: '', value: undefined }, { shouldFocus: false })
 
@@ -716,12 +719,6 @@ VariantForm.Specification = function Specification({}) {
     <>
       <div>
         <FormLabel>Thông số tuỳ chọn</FormLabel>
-        <Button
-          onClick={() => {
-            console.log('fields', fields)
-          }}>
-          Log
-        </Button>
         <div className='border rounded-lg p-4'>
           <div className=''>
             <div className='header flex'>
@@ -729,7 +726,6 @@ VariantForm.Specification = function Specification({}) {
               <p className='flex-grow'>Chi tiết</p>
             </div>
             <div className='body flex flex-col'>
-              {JSON.stringify(fields)}
               {fields.map((field, idx) => (
                 <VariantForm.Specification.Row
                   key={field.id}
@@ -740,13 +736,13 @@ VariantForm.Specification = function Specification({}) {
             </div>
           </div>
         </div>
-        {/* <VariantForm.OtherVariant /> */}
+        <VariantForm.OtherVariant />
       </div>
     </>
   )
 } as React.FC & {
   Row: React.FC<{
-    field: FieldArrayWithId<IVariantField, 'specifications', 'id'>
+    field: FieldArrayWithId<IVariantField, 'formSpecifications', 'id'>
     index: number
     onRemove?: () => void
   }>
@@ -773,13 +769,16 @@ VariantForm.OtherVariant = function OtherVariants() {
       resource: variantResource.resource,
     },
   })
-  const specsChange = watch(`specifications`)
+  const specsChange = watch(`formSpecifications`)
+
   const otherVariant = useMemo(() => {
-    const isInvalid = specsChange.some((spec) => !spec)
+    console.log('specsChange', specsChange)
+    const isInvalid = specsChange.some((spec) => !spec.option?.value)
+    console.log('isInvalid', isInvalid)
     if (isInvalid) return
     const specs = specsChange
-      .filter((item) => !!item)
-      .map((item) => item?.value as ISpecification)
+      .filter((item) => !!item.option)
+      .map((item) => item?.option?.value as ISpecification)
     const containsAllSpecs = (v: IVariant) =>
       !specs.some(
         ({ name, value }) =>
@@ -815,106 +814,75 @@ VariantForm.Active = function VariantActive() {
   )
 }
 
-// VariantForm.Specification.Row = function Row({ index, onRemove, name = '' }) {
-//   const { resource, findDistinctByName } = API['specifications']()
-//   const {
-//     control,
-//     setValue,
-//     formState: { errors },
-//   } = useFormProvider()
-//   // const isDisabled = action === "edit";
-
-//   const isDisabled = false
-//   const { data: { data: specsData = [] } = {} } = useCustom<ISpecification[]>({
-//     url: findDistinctByName(name ?? ''),
-//     method: 'get',
-//     queryOptions: {
-//       enabled: !isDisabled && ENABLE_FETCHED,
-//     },
-//     meta: {
-//       resource,
-//     },
-//   })
-
-//   const options = useMemo(() => {
-//     return specsData.map((item) => toObjectOption(item.value, item))
-//   }, [specsData])
-
-//   const append = (input: string) => {
-//     console.log('append item ran')
-//     setValue(`specifications.${index}`, {
-//       label: cleanValue(input),
-//       value: {
-//         name,
-//         value: cleanValue(input),
-//       },
-//     })
-//   }
-//   return (
-//     <div>
-//       <div className='flex border p-4 gap-2'>
-//         <div className='flex-grow grid grid-cols-4 gap-2'>
-//           <FormLabel>{name ?? ''}</FormLabel>
-//           <FormControl
-//             isInvalid={true}
-//             className='col-span-3'>
-//             <Controller
-//               render={({ field }) => (
-//                 <CreatableSelect
-//                   //   {...field}
-//                   //   ref={field.ref}
-//                   //   value={field.value}
-//                   //   onChange={field.onChange}
-//                   isDisabled={isDisabled}
-//                   options={options}
-//                   menuPosition='fixed'
-//                   //   onCreateOption={append}
-//                   formatCreateLabel={(input) => `Tạo ${cleanValue(input)}`}
-//                   //   isValidNewOption={isValidNewSelectOption}
-//                 />
-//               )}
-//               name={`specifications.${index}`}
-//               control={control}
-//               rules={{
-//                 required: true,
-//               }}
-//             />
-//             <FormErrorMessage>
-//               {errors.specifications?.[index]?.message}
-//             </FormErrorMessage>
-//           </FormControl>
-//         </div>
-//         {!!onRemove && (
-//           <div className='min-w-[50px]'>
-//             <Button
-//               className=''
-//               onClick={onRemove}
-//               colorScheme='red'
-//               isDisabled={isDisabled}>
-//               <MinusCircle />
-//             </Button>
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   )
-// }
-
 VariantForm.Specification.Row = function Row({ index, onRemove, field }) {
-  const { control, watch } = useFormProvider()
-  const specs = watch(`formSpecifications`)
-  console.log('specs', specs)
+  const { resource, findDistinctByName } = API['specifications']()
+  const {
+    control,
+    setValue,
+    formState: { errors },
+  } = useFormProvider()
+
+  const isDisabled = false
+  const { data: { data: specsData = [] } = {} } = useCustom<ISpecification[]>({
+    url: findDistinctByName(field.label ?? ''),
+    method: 'get',
+    queryOptions: {
+      enabled: !isDisabled && ENABLE_FETCHED,
+    },
+    meta: {
+      resource,
+    },
+  })
+
+  const options = useMemo(() => {
+    return specsData.map((item) => toObjectOption(item.value, item))
+  }, [specsData])
+
+  const onCreateOption = (input: string) => {
+    console.log('append item ran')
+    const cleanInput = cleanValue(input)
+    setValue(`formSpecifications.${index}.option`, {
+      label: cleanInput,
+      value: {
+        name: field.label,
+        value: cleanInput,
+      },
+    })
+  }
+
   return (
-    <>
-      {JSON.stringify(specs)}
-      {/* {field.label}
+    <FormControl>
+      <FormLabel>{field.label}</FormLabel>
       <Controller
-        name={`specifications.${index}`}
+        name={`formSpecifications.${index}.option`}
         control={control}
-        render={({ field }) => {
-          return <CreatableSelect />
+        rules={{
+          required: true,
         }}
-      /> */}
-    </>
+        render={({ field }) => {
+          return (
+            <CreatableSelect
+              {...field}
+              options={options}
+              menuPosition={'fixed'}
+              onChange={(newValue, meta) => {
+                const { action } = meta
+                console.log('newValue, action', newValue, action)
+
+                // switch(action){
+                //   // case 'create-option': {
+
+                //   // }
+                // }
+              }}
+              formatCreateLabel={(input) => `Tạo ${cleanValue(input)}`}
+            />
+          )
+        }}
+      />
+      <FormErrorMessage>
+        {errors.specifications?.[index]?.message}
+      </FormErrorMessage>
+    </FormControl>
   )
 }

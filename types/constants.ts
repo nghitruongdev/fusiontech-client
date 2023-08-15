@@ -87,6 +87,7 @@ export const API = {
         nameAndVariantCount: 'name-and-variant-count',
         nameWithVariants: 'name-with-variants',
       },
+      getProductsDiscount: () => `${resource}/search/discount-products`,
       getVariants: (productId: string | number | undefined) =>
         productId ? `${resource}/${productId}/${variants}` : '',
       getSpecificationsByProduct: (productId: string) =>

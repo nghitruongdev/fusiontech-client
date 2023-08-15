@@ -1,5 +1,5 @@
 /** @format */
-
+'use client'
 import SectionTitle from '@components/ui/SectionTitle'
 import { getProductsWithDetails } from '@/providers/server-data-provider/data/products'
 import { IProduct } from 'types'
@@ -12,20 +12,51 @@ import { ChevronRight, Plus } from 'lucide-react'
 import { Button } from '@components/ui/shadcn/button'
 import { FavoriteButtonWithCardProvider } from './product/FavoriteButton'
 import { ProductCardProvider } from './product/ProductCardProvider'
-// import { Flex } from "@chakra-ui/react";
-// import { useWindowDimensions } from "@/hooks/useWindowDimensions";
+import { useEffect, useState } from 'react'
+import { useCustom, useMany } from '@refinedev/core'
 
-const SellingProducts = async () => {
-  // const { width } = useWindowDimensions();
-  // let numProductToShow = 10
+const SellingProducts = () => {
+  // const products = await getProductsWithDetails()
+  // const [products, setProducts] = useState<IProduct[]>([])
+  const startDate = '2022-08-01'
+  const endDate = '2024-08-30'
+  const size = 5 // số lượng sản phẩm hiển thị lên
+  const { data: { data } = {} } = useCustom<{ id: number }[]>({
+    url: `http://100.82.6.136:8080/api/statistical/best-seller?startDate=${startDate}&endDate=${endDate}&size=${size}`,
+    method: 'get',
+  })
 
-  const products = await getProductsWithDetails()
+  const ids = data?.map((item) => item.id) ?? []
+  const drop = useMany<IProduct>({
+    resource: 'products',
+    ids: ids,
+    queryOptions: {
+      enabled: !!ids.length,
+    },
+  })
 
-  // const displayedProducts = Object.values(products.data).slice(
-  //   0,
-  //   numProductToShow,
-  // )
-  console.log(products)
+  const { data: { data: products = [] } = {}, isFetching } = drop
+
+  // useEffect(() => {
+  //   async function fetchProducts() {
+  //     try {
+  //       const response = await fetch(
+  //         `http://100.82.6.136:8080/api/statistical/best-seller?startDate=${startDate}&endDate=${endDate}&size=${size}`,
+  //       ) // Thay YOUR_API_URL bằng URL của API bạn muốn gọi
+  //       if (!response.ok) {
+  //         throw new Error('Failed to fetch products')
+  //       }
+  //       const data = await response.json() // Dữ liệu từ API
+  //       setProducts(data)
+  //     } catch (error) {
+  //       console.error('Error fetching products:', error)
+  //     }
+  //   }
+
+  //   fetchProducts()
+  // }, [])
+
+  console.log('seller', ids)
 
   return (
     <div className='bg-white rounded-lg '>
@@ -48,7 +79,7 @@ const SellingProducts = async () => {
         aria-label='product-list'
         className='flex flex-row overflow-auto max-h-[800px] gap-4 pl-2 pt-2 pb-1'>
         {/* <div className='grid grid-cols-5 gap-3'> */}
-        {Object.values(products.data).map((item: IProduct) => (
+        {products.map((item: IProduct) => (
           // eslint-disable-next-line react/jsx-key
           <div className='rounded-lg  shadow border-gray-300 bg-white  '>
             <ProductCardProvider
@@ -64,7 +95,17 @@ const SellingProducts = async () => {
 }
 
 const Product = ({
-  item: { id, name, slug, images, summary, avgRating, brand },
+  item: {
+    id,
+    name,
+    slug,
+    images,
+    summary,
+    avgRating,
+    brand,
+    minPrice,
+    maxPrice,
+  },
 }: {
   item: IProduct
 }) => {
@@ -86,7 +127,10 @@ const Product = ({
             />
           </div> */}
           <Product.Name name={name} />
-          <Product.Price />
+          <Product.Price
+            minPrice={minPrice}
+            maxPrice={maxPrice}
+          />
           <Product.Summary summary={summary} />
           <Product.Review avgRating={avgRating} />
         </div>
@@ -173,14 +217,22 @@ Product.Summary = ({ summary }: { summary: IProduct['summary'] }) => {
   )
 }
 
-Product.Price = () => {
+// eslint-disable-next-line react/display-name
+Product.Price = ({
+  minPrice,
+  maxPrice,
+}: {
+  minPrice: IProduct['minPrice']
+  maxPrice: IProduct['maxPrice']
+}) => {
   return (
     <div className='flex justify-start items-center py-2'>
       <p className='font-titleFont text-md font-bold text-red-600 mr-2'>
-        {formatPrice(25_000_000)}
+        {formatPrice(minPrice)}
       </p>
-      <p className='text-gray-500 font-titleFont text-sm leading-tight line-through decoration-[1px] ml-2'>
-        {formatPrice(29_000_000)}
+      <p className='font-titleFont text-md font-bold text-red-600 mr-2'>-</p>
+      <p className='font-titleFont text-md font-bold text-red-600 mr-2'>
+        {formatPrice(maxPrice)}
       </p>
     </div>
   )

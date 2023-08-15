@@ -7,7 +7,7 @@ import { BsStarFill } from 'react-icons/bs'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import NextLinkContainer from '@components/ui/NextLinkContainer'
-import { useList } from '@refinedev/core'
+import { useCustom, useList, useMany } from '@refinedev/core'
 import Slider from 'react-slick'
 import { useRef } from 'react'
 import SliderButton from '@components/ui/SliderButton'
@@ -19,6 +19,7 @@ import {
   useProductCardContext,
 } from './product/ProductCardProvider'
 import { FavoriteButtonWithCardProvider } from './product/FavoriteButton'
+import { API } from 'types/constants'
 
 // const ProductList = async () => {
 //     const products = await getProductsWithDetails();
@@ -42,10 +43,19 @@ import { FavoriteButtonWithCardProvider } from './product/FavoriteButton'
 // };
 
 const ProductList = () => {
-  const { data, status } = useList<IProduct>({
-    resource: 'products',
+  // const { data, status } = useList<IProduct>({
+  //   resource: 'products',
+  // })
+  const { getProductsDiscount, resource } = API.products()
+
+  const { data: { data: products = [] } = {} } = useCustom<IProduct[]>({
+    // url: `http://100.82.6.136:8080/api/products/search/discount-products`,
+    url: getProductsDiscount(),
+    method: 'get',
+    meta: { resource },
   })
 
+  // console.log('discount', data)
   const settings = {
     infinite: true,
     speed: 500,
@@ -108,30 +118,20 @@ const ProductList = () => {
         </div> */}
         <div className='col-span-6'>
           <div className='relative p-1 my-2 md:my-4 text-center'>
-            {status === 'loading' ? (
-              <div>Loading...</div>
-            ) : status === 'error' ? (
-              <div>Error occurred while fetching data</div>
-            ) : data && data.data && Array.isArray(data.data) ? (
-              <>
-                <SliderButton sliderRef={sliderRef} />
-                <Slider
-                  {...settings}
-                  ref={(slider) => (sliderRef.current = slider)}>
-                  {data.data.map((products: IProduct) => (
-                    <ProductCardProvider
-                      key={products.id}
-                      product={products}>
-                      <div className='bg-white mx-2 rounded-lg border-gray-300 shadow'>
-                        <Product item={products} />
-                      </div>
-                    </ProductCardProvider>
-                  ))}
-                </Slider>
-              </>
-            ) : (
-              <div>No data available</div>
-            )}
+            <SliderButton sliderRef={sliderRef} />
+            <Slider
+              {...settings}
+              ref={(slider) => (sliderRef.current = slider)}>
+              {products.map((product: IProduct) => (
+                <ProductCardProvider
+                  key={product.id}
+                  product={product}>
+                  <div className='bg-white mx-2 rounded-lg border-gray-300 shadow'>
+                    <Product item={product} />
+                  </div>
+                </ProductCardProvider>
+              ))}
+            </Slider>
           </div>
         </div>
       </div>
@@ -139,13 +139,17 @@ const ProductList = () => {
   )
 }
 
-const Product = ({ item: { id, name, slug, images } }: { item: IProduct }) => {
+const Product = ({
+  item: { id, name, slug, images, discount },
+}: {
+  item: IProduct
+}) => {
   return (
     <div
       aria-label={`Product Item:${name}`}
       className='group cursor-pointer lg:min-w-[16.666667%] md:min-w-[25%] sm:min-w-[33.333333%] min-w-[50%]'>
       <NextLinkContainer href={`/products/${id}`}>
-        <Product.sale />
+        <Product.sale sale={discount} />
         <Product.Image images={images} />
         <div className='px-2 flex flex-col justify-center'>
           <div className='flex justify-between'>
@@ -161,7 +165,7 @@ const Product = ({ item: { id, name, slug, images } }: { item: IProduct }) => {
     </div>
   )
 }
-Product.sale = () => {
+Product.sale = ({ sale }: { sale: IProduct['discount'] }) => {
   return (
     <>
       <div className='relative'>
@@ -170,7 +174,7 @@ Product.sale = () => {
           style={{
             zIndex: 2,
           }}>
-          50% OFF
+          {sale}% OFF
         </div>
 
         <div className='relative top-[21.5px] left-[-2.2px] w-0 h-0 border-t-[5px] border-l-[5px] border-[#b02d2d] transform rotate-45 '></div>

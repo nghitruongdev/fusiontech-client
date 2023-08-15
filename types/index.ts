@@ -130,7 +130,11 @@ export type IVariantField = {
    * @deprecated
    */
   specifications: Option<ISpecification | undefined>[]
-  formSpecifications: Option<ISpecification> | undefined[]
+  // formSpecifications: (Option<ISpecification | undefined> | undefined)[]
+  formSpecifications: {
+    label: string
+    option: Option<ISpecification> | undefined
+  }[]
 } & {
   files: File[]
 }
