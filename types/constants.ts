@@ -2,6 +2,7 @@
 
 /** @format */
 
+import { formatDate } from '@/lib/utils'
 import { Action } from '@refinedev/core'
 import { PaymentMethod, ResourceName } from 'types'
 
@@ -17,7 +18,7 @@ export const API_URL =
 export const REG_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 
 export const NEXT_API_URL = 'http://localhost:3000/api'
-//todo: const {} =  API['users']()
+
 export const API = {
   orders: () => {
     const resource: ResourceName = 'orders'
@@ -87,7 +88,16 @@ export const API = {
         nameAndVariantCount: 'name-and-variant-count',
         nameWithVariants: 'name-with-variants',
       },
+      getAllProducts: () => `${resource}`,
       getProductsDiscount: () => `${resource}/search/discount-products`,
+      getHotProducts: (size: number) =>
+        `${resource}/search/hot-products?size=${size}`,
+      getProductsLastest: (size: number) =>
+        `${resource}/search/latest-products?size=${size}`,
+      getSellingProducts: (startDate: Date, endDate: Date, size: number = 10) =>
+        `statistical/best-seller?startDate=${formatDate(
+          startDate,
+        )}&endDate=${formatDate(endDate)}&size=${size}`,
       getVariants: (productId: string | number | undefined) =>
         productId ? `${resource}/${productId}/${variants}` : '',
       getSpecificationsByProduct: (productId: string) =>

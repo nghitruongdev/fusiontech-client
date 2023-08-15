@@ -44,9 +44,7 @@ import {
 } from 'types'
 import { PropsWithChildren } from 'react'
 import { Controller, FieldArrayWithId, useFieldArray } from 'react-hook-form'
-import { Inbox, MinusCircle } from 'lucide-react'
 import { API, API_URL } from 'types/constants'
-import useListOption, { ListOptionProps } from '@/hooks/useListOption'
 import {
   cleanValue,
   isValidNewSelectOption,
@@ -174,6 +172,7 @@ VariantForm.Provider = function Provider({
       formSpecifications &&
       formSpecifications
         .filter((item) => !!item?.option?.value)
+        //todo: check again what is proper request for create variants
         .map(({ label, option: { value: spec } = {} }) => {
           return { name: label, values: [spec] }
         })
@@ -621,104 +620,41 @@ VariantForm.Specification = function Specification({}) {
   })
 
   const isDisabled = true
-  //   const { data: { data: namesData } = {} } = useCustom<string[]>({
-  //     url: findDistinctNames,
-  //     method: 'get',
-  //     queryOptions: {
-  //       enabled: !isDisabled && ENABLE_FETCHED,
-  //     },
-  //   })
-
-  //   const onAppend = useCallback(
-  //     (value: string, shouldFocus: boolean = true) => {
-  //       console.count('onAppend called')
-  //       //   setValue(
-  //       //     `specificationGroup`,
-  //       //     produce(getValues(`specificationGroup`) ?? [], (draft) => {
-  //       //       draft.push({
-  //       //         label: value,
-  //       //         value: value,
-  //       //       })
-  //       //     }),
-  //       //   )
-  //       //   append(null, { shouldFocus })
-  //     },
-  //     [append],
-  //   )
-  //   const onRemove = (index: number) => {
-  //     setValue(
-  //       `specificationGroup`,
-  //       produce(getValues(`specificationGroup`) ?? [], (draft) => {
-  //         draft.splice(index, 1)
-  //       }),
-  //     )
-  //     remove(index)
-  //     console.log('fields.length', fields.length)
-  //   }
 
   const productSpecs = useMemo(
-    () => product?.specifications ?? [],
+    () =>
+      product?.specifications
+        ?.filter((item) => item.values.length > 1)
+        .map((item) => item.name) ?? [],
     [product?.specifications],
   )
   //reset and update spec item row when create new
   useEffect(() => {
-    // console.count('use layout effect specification product ran')
     if (action === 'edit') return
     const formSpecs = productSpecs
-      ?.filter((item) => item.values.length > 1)
-      .map((item) => item.name)
+    resetField(`formSpecifications`, { defaultValue: [] })
+    const variantSpecs = toRecord(
+      variant?.specifications ?? [],
+      'name' as keyof ISpecification,
+    )
 
-    console.log('formSpecs', formSpecs)
-    const reset = () => {
-      //   setValue(`specifications`, [])
-      //   resetField(`specifications`, { defaultValue: [] })
-      formSpecs.forEach((name) =>
-        append({ label: name, option: undefined }, { shouldFocus: false }),
+    formSpecs.forEach((name) => {
+      const value = variantSpecs[name as keyof ISpecification]
+      append(
+        {
+          label: name,
+          option: value ? toObjectOption(value.value, value) : undefined,
+        },
+        { shouldFocus: false },
       )
-      //   append({ label: '', value: undefined }, { shouldFocus: false })
-
-      //   resetField(`specificationGroup`, { defaultValue: [] })
-      //   resetField(`specifications`, { defaultValue: [] })
-      //   formSpecs.forEach((item) => {
-      //     console.count('on append item')
-      //     append({ label: '', value: undefined }, { shouldFocus: false })
-      //   })
-    }
-    reset()
-  }, [productSpecs, action, resetField, append])
-
-  //   const variantSpecs = variant?.specifications
-
-  //   useEffect(() => {
-  //     if (action === 'create' || !variantSpecs) return
-  //     console.log('useEffect variant spec ran')
-  //     const formSpecs = variantSpecs
-  //       .filter((item) =>
-  //         productSpecs.some(
-  //           (spec) => spec.name === item.name && spec.values.length > 1,
-  //         ),
-  //       )
-  //       //   .map((item) => ({
-  //       //     label: item.name,
-  //       //     options: [toObjectOption(item.value, item)],
-  //       //   }))
-  //       .map((item) => toObjectOption(item.value, item))
-  //     console.log('formSpecs', formSpecs)
-  //     setTimeout(() => {
-  //       //   resetField(`specificationGroup`, {
-  //       //     defaultValue: toArrayOptionString(formSpecs.map((item) => item.label)),
-  //       //   })
-  //       resetField(`specifications`, {
-  //         defaultValue: formSpecs,
-  //       })
-  //     }, 0)
-  //   }, [productSpecs, variantSpecs, action, resetField])
+    })
+  }, [productSpecs, action, resetField, append, variant?.specifications])
 
   if (!fields.length) return <></>
   return (
     <>
       <div>
-        <FormLabel>Thông số tuỳ chọn</FormLabel>
+        <FormLabel>Thông số kỹ thuật</FormLabel>
         <div className='border rounded-lg p-4'>
           <div className=''>
             <div className='header flex'>
@@ -752,7 +688,11 @@ VariantForm.OtherVariant = function OtherVariants() {
   const {
     product: { data: product },
     watch,
+    trigger,
     getValues,
+    variant,
+    setError,
+    clearErrors,
   } = useFormProvider()
   const { data: { data: variants } = {} } = useCustom<IVariant[]>({
     url: productResource.getVariants(product?.id),
@@ -770,7 +710,9 @@ VariantForm.OtherVariant = function OtherVariants() {
     },
   })
   const specsChange = watch(`formSpecifications`)
+  //   trigger(`formSpecifications`, {})
 
+  //todo: update this using trigger without rerendering the form
   const otherVariant = useMemo(() => {
     console.log('specsChange', specsChange)
     const isInvalid = specsChange.some((spec) => !spec.option?.value)
@@ -786,8 +728,17 @@ VariantForm.OtherVariant = function OtherVariants() {
             (spec) => spec.name === name && spec.value === value,
           ),
       )
-    return variants?.find(containsAllSpecs)
-  }, [specsChange, variants])
+    const other = variants?.find(containsAllSpecs)
+    if (!other || other.id === variant?.id) {
+      clearErrors(`formSpecifications`)
+      return
+    }
+    setError(`formSpecifications`, {
+      message: 'Phiên bản sản phẩm đã tồn tại',
+    })
+    return other
+  }, [specsChange, variants, variant?.id, setError, clearErrors])
+
   return (
     <>
       <div>{JSON.stringify(otherVariant)}</div>
@@ -814,17 +765,23 @@ VariantForm.Active = function VariantActive() {
   )
 }
 
-VariantForm.Specification.Row = function Row({ index, onRemove, field }) {
+VariantForm.Specification.Row = function Row({
+  index,
+  onRemove,
+  field: rowField,
+}) {
   const { resource, findDistinctByName } = API['specifications']()
   const {
     control,
     setValue,
+    watch,
+    getValues,
     formState: { errors },
   } = useFormProvider()
 
   const isDisabled = false
   const { data: { data: specsData = [] } = {} } = useCustom<ISpecification[]>({
-    url: findDistinctByName(field.label ?? ''),
+    url: findDistinctByName(rowField.label ?? ''),
     method: 'get',
     queryOptions: {
       enabled: !isDisabled && ENABLE_FETCHED,
@@ -838,21 +795,9 @@ VariantForm.Specification.Row = function Row({ index, onRemove, field }) {
     return specsData.map((item) => toObjectOption(item.value, item))
   }, [specsData])
 
-  const onCreateOption = (input: string) => {
-    console.log('append item ran')
-    const cleanInput = cleanValue(input)
-    setValue(`formSpecifications.${index}.option`, {
-      label: cleanInput,
-      value: {
-        name: field.label,
-        value: cleanInput,
-      },
-    })
-  }
-
   return (
     <FormControl>
-      <FormLabel>{field.label}</FormLabel>
+      <FormLabel>{rowField.label}</FormLabel>
       <Controller
         name={`formSpecifications.${index}.option`}
         control={control}
@@ -865,17 +810,38 @@ VariantForm.Specification.Row = function Row({ index, onRemove, field }) {
               {...field}
               options={options}
               menuPosition={'fixed'}
-              onChange={(newValue, meta) => {
-                const { action } = meta
-                console.log('newValue, action', newValue, action)
-
-                // switch(action){
-                //   // case 'create-option': {
-
-                //   // }
-                // }
-              }}
               formatCreateLabel={(input) => `Tạo ${cleanValue(input)}`}
+              isValidNewOption={isValidNewSelectOption}
+              onChange={(newValue, meta) => {
+                console.log('newValue', newValue)
+                const { action } = meta
+                let updateOption = newValue
+                switch (action) {
+                  case 'create-option': {
+                    updateOption =
+                      typeof updateOption?.value === 'string'
+                        ? {
+                            ...updateOption,
+                            label: cleanValue(updateOption.value),
+                            value: {
+                              name: rowField.label,
+                              value: cleanValue(updateOption.value),
+                            },
+                          }
+                        : updateOption
+                  }
+                }
+                const formSpecs = [...getValues(`formSpecifications`)]
+                const index = formSpecs.findIndex(
+                  (item) => item.label === rowField.label,
+                )
+                if (index === -1) return
+                formSpecs[index] = {
+                  label: rowField.label,
+                  option: updateOption ?? undefined,
+                }
+                setValue(`formSpecifications`, formSpecs)
+              }}
             />
           )
         }}

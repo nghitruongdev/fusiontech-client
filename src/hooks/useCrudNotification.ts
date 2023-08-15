@@ -85,6 +85,15 @@ export const onSuccess = (
   }
 }
 
+export const onDefaultSuccess = (
+  message: string,
+  description?: string,
+): OpenNotificationParams => ({
+  type: 'success',
+  message,
+  description,
+})
+
 export const onError = (
   err?: AppError | HttpError | undefined,
   value?: unknown,
@@ -116,4 +125,5 @@ const getErrorTitle = (title?: string) => {
     return 'Yêu cầu không hợp lệ'
   return title ?? 'Hệ thống đã xảy ra lỗi'
 }
+
 export default useCrudNotification

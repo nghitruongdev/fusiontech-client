@@ -1,9 +1,3 @@
-/**
- * eslint-disable react/display-name
- *
- * @format
- */
-
 /** @format */
 'use client'
 import SectionTitle from '@components/ui/SectionTitle'
@@ -23,25 +17,25 @@ import { useCustom } from '@refinedev/core'
 // import { Flex } from "@chakra-ui/react";
 // import { useWindowDimensions } from "@/hooks/useWindowDimensions";
 
-const Newest = () => {
+const AllProducts = () => {
   // const { width } = useWindowDimensions();
   // let numProductToShow = 10
   // const products = await getProductsWithDetails()
 
-  const { getProductsLastest, resource } = API.products()
+  const { getAllProducts, resource } = API.products()
 
   const { data: { data: products = [] } = {} } = useCustom<IProduct[]>({
-    url: getProductsLastest(10),
+    url: getAllProducts(),
     method: 'get',
     meta: { resource },
   })
-  console.log('newest', products)
+  console.log(products)
 
   return (
     <div className='bg-white rounded-lg '>
       <div className='flex  justify-between items-center px-3 pt-3 md:my-4 lg:mt-10  '>
         <h5 className='font-bold  text-xl uppercase '>
-          Sản phẩm mới nhất của FusionTech
+          Sản phẩm của FusionTech
         </h5>
         <Link href={'http://localhost:3000/search?keyword='}>
           <div className=' flex flex-row items-center '>
@@ -142,7 +136,6 @@ Product.sale = ({ sale }: { sale: IProduct['discount'] }) => {
   )
 }
 
-// eslint-disable-next-line react/display-name
 Product.Image = ({ images }: { images: IProduct['images'] }) => {
   return (
     <div
@@ -174,7 +167,6 @@ Product.Image = ({ images }: { images: IProduct['images'] }) => {
     </div>
   )
 }
-// eslint-disable-next-line react/display-name
 Product.Brand = ({ brand }: { brand: IProduct['brand'] }) => {
   return (
     <p className='text-base  font-roboto font-semibold uppercase leading-normal text-zinc-600 line-clamp-1 pt-2'>
@@ -182,7 +174,6 @@ Product.Brand = ({ brand }: { brand: IProduct['brand'] }) => {
     </p>
   )
 }
-// eslint-disable-next-line react/display-name
 Product.Name = ({ name }: { name: IProduct['name'] }) => {
   return (
     <p className=' text-xs leading-normal text-zinc-500 line-clamp-1 uppercase font-bold '>
@@ -193,7 +184,6 @@ Product.Name = ({ name }: { name: IProduct['name'] }) => {
     </p>
   )
 }
-// eslint-disable-next-line react/display-name
 Product.Summary = ({ summary }: { summary: IProduct['summary'] }) => {
   return (
     <div className='bg-slate-100 rounded-md p-2 mb-2 h-14 max-h-14'>
@@ -224,7 +214,7 @@ Product.Price = ({
     </div>
   )
 }
-// eslint-disable-next-line react/display-name
+
 Product.Review = ({ avgRating }: { avgRating: IProduct['avgRating'] }) => {
   const starCount = 5
 
@@ -257,7 +247,7 @@ Product.Review = ({ avgRating }: { avgRating: IProduct['avgRating'] }) => {
     </div>
   )
 }
-// eslint-disable-next-line react/display-name
+
 Product.DetailButton = ({
   id,
   slug,
@@ -279,4 +269,4 @@ Product.DetailButton = ({
 
 Product.FavoriteButton = FavoriteButtonWithCardProvider
 
-export default Newest
+export default AllProducts

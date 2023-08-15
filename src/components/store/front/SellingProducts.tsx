@@ -6,7 +6,7 @@ import { IProduct } from 'types'
 import Image from 'next/image'
 import Link from 'next/link'
 import NextLinkContainer from '@components/ui/NextLinkContainer'
-import { formatPrice } from '@/lib/utils'
+import { formatDate, formatPrice } from '@/lib/utils'
 import { BsStarFill } from 'react-icons/bs'
 import { ChevronRight, Plus } from 'lucide-react'
 import { Button } from '@components/ui/shadcn/button'
@@ -14,16 +14,24 @@ import { FavoriteButtonWithCardProvider } from './product/FavoriteButton'
 import { ProductCardProvider } from './product/ProductCardProvider'
 import { useEffect, useState } from 'react'
 import { useCustom, useMany } from '@refinedev/core'
+import { API } from 'types/constants'
 
 const SellingProducts = () => {
   // const products = await getProductsWithDetails()
   // const [products, setProducts] = useState<IProduct[]>([])
-  const startDate = '2022-08-01'
-  const endDate = '2024-08-30'
-  const size = 5 // số lượng sản phẩm hiển thị lên
+  // const startDate = '2022-08-01'
+  // const endDate = '2024-08-30'
+  // const size = 5 // số lượng sản phẩm hiển thị lên
+
+  const { getSellingProducts, resource } = API.products()
+  const startDate = new Date('2022-08-30')
+  const endDate = new Date('2024-08-30')
+
   const { data: { data } = {} } = useCustom<{ id: number }[]>({
-    url: `http://100.82.6.136:8080/api/statistical/best-seller?startDate=${startDate}&endDate=${endDate}&size=${size}`,
+    // url: `http://100.82.6.136:8080/api/statistical/best-seller?startDate=${startDate}&endDate=${endDate}&size=${size}`,
+    url: getSellingProducts(startDate, endDate),
     method: 'get',
+    meta: { resource },
   })
 
   const ids = data?.map((item) => item.id) ?? []
@@ -105,6 +113,7 @@ const Product = ({
     brand,
     minPrice,
     maxPrice,
+    discount,
   },
 }: {
   item: IProduct
@@ -114,7 +123,7 @@ const Product = ({
       aria-label={`Product Item:${name}`}
       className=' group cursor-pointer lg:min-w-[16.666667%] md:min-w-[25%] sm:min-w-[33.333333%] min-w-[50%]'>
       <NextLinkContainer href={`/products/${id}`}>
-        <Product.sale />
+        <Product.sale sale={discount} />
         <Link href={`/products/${id}`}>
           <Product.Image images={images} />
         </Link>
@@ -141,24 +150,25 @@ const Product = ({
   )
 }
 
-Product.sale = () => {
-  return (
-    <>
-      <div className='relative'>
-        <div
-          className='absolute text-xs top-0 left-[-3px] m-0 bg-gradient-to-br from-[#b02d2d] to-[#ff5555] text-white font-bold px-2 py-1 rounded-tl-md rounded-tr-md rounded-br-md shadow'
-          style={{
-            zIndex: 2,
-          }}>
-          50% OFF
-        </div>
+Product.sale = ({ sale }: { sale: IProduct['discount'] }) => {
+  if (!sale) {
+    return null // Ẩn đi nếu không có dữ liệu giảm giá
+  }
 
-        <div className='relative top-[21.5px] left-[-2.2px] w-0 h-0 border-t-[5px] border-l-[5px] border-[#b02d2d] transform rotate-45 '></div>
+  return (
+    <div className='relative'>
+      <div
+        className='absolute text-xs top-0 left-[-3px] m-0 bg-gradient-to-br from-[#b02d2d] to-[#ff5555] text-white font-bold px-2 py-1 rounded-tl-md rounded-tr-md rounded-br-md shadow'
+        style={{
+          zIndex: 2,
+        }}>
+        {sale}% OFF
       </div>
-    </>
+
+      <div className='relative top-[21.5px] left-[-2.2px] w-0 h-0 border-t-[5px] border-l-[5px] border-[#b02d2d] transform rotate-45 '></div>
+    </div>
   )
 }
-
 Product.Image = ({ images }: { images: IProduct['images'] }) => {
   return (
     <div
@@ -227,11 +237,11 @@ Product.Price = ({
 }) => {
   return (
     <div className='flex justify-start items-center py-2'>
-      <p className='font-titleFont text-md font-bold text-red-600 mr-2'>
+      <p className='font-titleFont text-base font-bold text-red-600 mr-1'>
         {formatPrice(minPrice)}
       </p>
-      <p className='font-titleFont text-md font-bold text-red-600 mr-2'>-</p>
-      <p className='font-titleFont text-md font-bold text-red-600 mr-2'>
+      <p className='font-titleFont text-base font-bold text-red-600 mr-1'>-</p>
+      <p className='font-titleFont text-base font-bold text-red-600 '>
         {formatPrice(maxPrice)}
       </p>
     </div>
