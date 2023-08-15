@@ -42,6 +42,7 @@ const ReviewComponent = ({ productId }: { productId: string }) => {
       try {
         const response = await reviewApi.get(`${productId}`)
         setReviewList(response.data)
+        calculateAverageRating(response.data)
       } catch (error) {
         console.log('fail to fetch review list', error)
       }
@@ -136,7 +137,23 @@ const ReviewComponent = ({ productId }: { productId: string }) => {
     setRating(0)
     setComment('')
   }
+  {
+    /* Hàm tính đánh giá trung bình dựa trên rating */
+  }
+  const calculateAverageRating = (reviews: any[]) => {
+    if (reviews.length > 0) {
+      const totalRating = reviews.reduce(
+        (sum, review) => sum + review.rating,
+        0,
+      )
+      const averageRating = totalRating / reviews.length
+      setAverageRating(averageRating)
+    } else {
+      setAverageRating(0)
+    }
+  }
 
+  // tính phần trăm review của 1,2,3,4,5 sao
   const calculatePercentage = (reviews: any[], rating: number) => {
     const totalReviews = reviews.length
     if (totalReviews === 0) {

@@ -175,7 +175,7 @@ export type IBrandField = IBrand & {
 }
 
 export interface ICategory {
-  id?: number
+  id?: number | undefined
   name: string
   slug: string
   description?: string

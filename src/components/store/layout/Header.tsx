@@ -1,5 +1,4 @@
 /** @format */
-
 import Image from 'next/image'
 import { IoSearchOutline } from 'react-icons/io5'
 import { AiOutlineHeart } from 'react-icons/ai'
@@ -35,7 +34,6 @@ const Header = async () => {
 
 Header.Navbar = async () => {
   const categories = await getCategoriesList()
-
   return (
     <div className='mx-auto max-w-container px-4 h-20 flex items-center justify-between gap-2 '>
       <Header.Logo />

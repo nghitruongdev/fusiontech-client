@@ -210,7 +210,7 @@ Product.Image = function ProductImage({
     </div>
   )
 }
-Product.Brand = function Brand() {
+Product.Brand = function    Brand() {
   const { product } = useProductCardContext()
   return (
     <p className='text-base  font-roboto font-semibold uppercase leading-normal text-zinc-600 line-clamp-1 pt-2'>
