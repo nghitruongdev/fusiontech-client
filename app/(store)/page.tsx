@@ -10,6 +10,7 @@ import Category from '@components/store/front/Category'
 import BannerSale from '@components/store/front/BannerSale'
 import Benefits from '@components/store/front/Benefits'
 import Newest from '@components/store/front/Newest'
+import SellingProducts from '@components/store/front/SellingProducts'
 import Brands from '@components/store/front/Brands'
 import CardSaleBody from '@components/store/front/CardSaleBody'
 import FusionNews from '@components/store/front/FusionNews'
@@ -53,6 +54,7 @@ const HomePage = async () => {
               <Category />
               <CardSaleBody />
               <Newest />
+              <SellingProducts />
               <BannerSale />
               {/* <Benefits /> */}
               <Brands />

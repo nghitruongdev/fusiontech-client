@@ -39,7 +39,7 @@ import { AppError } from '../../../../types/error'
 type ContextProps = {
   action: Action
   voucher: IVoucher | undefined
-} & ReturnType<typeof useForm<IVoucher, HttpError, IVoucher>>
+} & ReturnType<typeof useForm<IVoucher, AppError, IVoucher>>
 
 export const Form = ({ action }: { action: ContextProps['action'] }) => {
   return (
@@ -84,29 +84,6 @@ Form.Provider = function Provider({
     formState: { dirtyFields, isSubmitting, isValidating },
   } = formProps
 
-  // const saveProps = {
-  //   isLoading: isSubmitting,
-  //   disabled: formLoading || isSubmitting || isValidating,
-  //   onClick: (e: BaseSyntheticEvent) => {
-  //     handleSubmit(async ({ id, file, ...value }) => {
-  //       const handleImage = async () => {
-  //         if (action === 'edit' && dirtyFields.image) {
-  //           const removedImage = brand?.image
-  //           removedImage && removeImages([removedImage])
-  //         }
-  //         return file && (await uploadImages([file]))[0]
-  //       }
-
-  //       const image = (await handleImage())?.url
-
-  //       const result = await onFinish({
-  //         ...value,
-  //         ...(image && { image }),
-  //       })
-  //       console.log('result', result)
-  //     })(e)
-  //   },
-  // }
   return (
     <Form.Context.Provider
       value={{
@@ -348,41 +325,5 @@ Form.Body = function Body() {
     </div>
   )
 }
-
-// Form.Image = function Image() {
-//   const { brand, setValue } = Form.useContext()
-//   const onFilesChange: UploadProviderProps['onFilesChange'] = useCallback(
-//     (files: File[]) => setValue('file', files[0]),
-//     [setValue],
-//   )
-//   onFilesChange.isCallback = true
-
-//   const onRemove: UploadProviderProps['onRemoveUrl'] = useCallback(() => {
-//     setValue(`image`, null, {
-//       shouldDirty: true,
-//     })
-//   }, [setValue])
-//   onRemove.isCallback = true
-
-//   const imageUrl = brand?.image
-//   const initialUrls = useMemo(() => {
-//     console.count('usememo initialUrl ran')
-//     const name = imageUrl ? uploadUtils.getName('brands', imageUrl) : ''
-//     return imageUrl ? [{ name, url: imageUrl }] : []
-//   }, [imageUrl])
-
-//   return (
-//     <FormControl
-//       w='full'
-//       h='full'>
-//       <ImageUpload
-//         onFilesChange={onFilesChange}
-//         onRemoveUrl={onRemove}
-//         isMulti={false}
-//         {...(brand?.image && { initialUrls: initialUrls })}
-//       />
-//     </FormControl>
-//   )
-// }
 
 export { Form as VoucherForm }

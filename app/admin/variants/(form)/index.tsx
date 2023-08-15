@@ -43,11 +43,17 @@ import {
   IVariantField,
 } from 'types'
 import { PropsWithChildren } from 'react'
-import { Controller, useFieldArray } from 'react-hook-form'
+import { Controller, FieldArrayWithId, useFieldArray } from 'react-hook-form'
 import { Inbox, MinusCircle } from 'lucide-react'
 import { API, API_URL } from 'types/constants'
 import useListOption, { ListOptionProps } from '@/hooks/useListOption'
-import { toArrayOptionString, toObjectOption } from '@/lib/utils'
+import {
+  cleanValue,
+  isValidNewSelectOption,
+  toArrayOptionString,
+  toObjectOption,
+  toRecord,
+} from '@/lib/utils'
 import CreatableSelect from 'react-select/creatable'
 import { produce } from 'immer'
 import ImageUpload, { UploadProviderProps } from '@components/image-upload'
@@ -165,12 +171,11 @@ VariantForm.Provider = function Provider({
 
     const handleSpecifications = () =>
       specifications &&
-      specifications.map((item) => {
-        const values = item?.options.map(({ value }) => ({
-          ...value,
-        }))
-        return { name: item?.label, values }
-      })
+      specifications
+        .filter((item) => !!item?.value)
+        .map((item) => {
+          return { name: item?.label, values: [item?.value] }
+        })
 
     const handleImages = async () => {
       const variantImages = [...(variant?.images ?? [])]
@@ -339,6 +344,7 @@ VariantForm.Product = function Product() {
         })
     }
   }, [product, resetField, options])
+
   return (
     <>
       <FormControl isInvalid={!!errors.product}>
@@ -548,18 +554,15 @@ VariantForm.SpecDefault = function SpecificationDefault({}) {
     if (action === 'edit') return
 
     const specifications = product?.specifications ?? []
-    const formSpecs = specifications
-      .filter((item) => item.values.length > 1)
-      .flatMap((item) => ({
-        label: item.name,
-        options: [],
-      }))
+    const formSpecs = specifications.filter((item) => item.values.length > 1)
     setTimeout(() => {
       resetField(`specificationGroup`, {
-        defaultValue: toArrayOptionString(formSpecs.map((item) => item.label)),
+        defaultValue: toArrayOptionString(formSpecs.map((item) => item.name)),
       })
       resetField(`specifications`, {
-        defaultValue: formSpecs,
+        defaultValue: formSpecs
+          .flatMap(({ values }) => values)
+          .map((item) => toObjectOption(item.name, item)),
       })
     }, 0)
   }, [product?.specifications, action, resetField])
@@ -610,108 +613,115 @@ VariantForm.Specification = function Specification({}) {
   const buttonRef = useRef(null)
 
   const { fields, append, remove } = useFieldArray({
-    name: 'specifications',
+    name: 'formSpecifications',
     control: control,
   })
 
   const isDisabled = true
-  const { data: { data: namesData } = {} } = useCustom<string[]>({
-    url: findDistinctNames,
-    method: 'get',
-    queryOptions: {
-      enabled: !isDisabled && ENABLE_FETCHED,
-    },
-  })
+  //   const { data: { data: namesData } = {} } = useCustom<string[]>({
+  //     url: findDistinctNames,
+  //     method: 'get',
+  //     queryOptions: {
+  //       enabled: !isDisabled && ENABLE_FETCHED,
+  //     },
+  //   })
 
-  const onAppend = useCallback(
-    (value: string, shouldFocus: boolean = true) => {
-      setValue(
-        `specificationGroup`,
-        produce(getValues(`specificationGroup`) ?? [], (draft) => {
-          draft.push({
-            label: value,
-            value: value,
-          })
-        }),
-      )
-      append(
-        {
-          label: value,
-          options: [],
-        },
-        { shouldFocus },
-      )
-    },
-    [append, getValues, setValue],
-  )
-  const onRemove = (index: number) => {
-    // console.log('index', index)
-    setValue(
-      `specificationGroup`,
-      produce(getValues(`specificationGroup`) ?? [], (draft) => {
-        draft.splice(index, 1)
-      }),
-    )
-    remove(index)
-    console.log('fields.length', fields.length)
-  }
+  //   const onAppend = useCallback(
+  //     (value: string, shouldFocus: boolean = true) => {
+  //       console.count('onAppend called')
+  //       //   setValue(
+  //       //     `specificationGroup`,
+  //       //     produce(getValues(`specificationGroup`) ?? [], (draft) => {
+  //       //       draft.push({
+  //       //         label: value,
+  //       //         value: value,
+  //       //       })
+  //       //     }),
+  //       //   )
+  //       //   append(null, { shouldFocus })
+  //     },
+  //     [append],
+  //   )
+  //   const onRemove = (index: number) => {
+  //     setValue(
+  //       `specificationGroup`,
+  //       produce(getValues(`specificationGroup`) ?? [], (draft) => {
+  //         draft.splice(index, 1)
+  //       }),
+  //     )
+  //     remove(index)
+  //     console.log('fields.length', fields.length)
+  //   }
 
   const productSpecs = useMemo(
     () => product?.specifications ?? [],
     [product?.specifications],
   )
+  //reset and update spec item row when create new
   useEffect(() => {
     // console.count('use layout effect specification product ran')
     if (action === 'edit') return
     const formSpecs = productSpecs
       ?.filter((item) => item.values.length > 1)
       .map((item) => item.name)
+
+    console.log('formSpecs', formSpecs)
     const reset = () => {
-      console.log('reset ran')
+      //   setValue(`specifications`, [])
+      //   resetField(`specifications`, { defaultValue: [] })
+      formSpecs.forEach((name) =>
+        append({ label: name, value: undefined }, { shouldFocus: false }),
+      )
+      //   append({ label: '', value: undefined }, { shouldFocus: false })
+
       //   resetField(`specificationGroup`, { defaultValue: [] })
-      resetField(`specifications`, { defaultValue: [] })
-      formSpecs.forEach((item) => onAppend(item, false))
+      //   resetField(`specifications`, { defaultValue: [] })
+      //   formSpecs.forEach((item) => {
+      //     console.count('on append item')
+      //     append({ label: '', value: undefined }, { shouldFocus: false })
+      //   })
     }
     reset()
-  }, [productSpecs, action, resetField, onAppend])
+  }, [productSpecs, action, resetField, append])
+
+  //   const variantSpecs = variant?.specifications
 
   //   useEffect(() => {
-  //     console.count('productSpecs triggered changed')
-  //   }, [productSpecs])
+  //     if (action === 'create' || !variantSpecs) return
+  //     console.log('useEffect variant spec ran')
+  //     const formSpecs = variantSpecs
+  //       .filter((item) =>
+  //         productSpecs.some(
+  //           (spec) => spec.name === item.name && spec.values.length > 1,
+  //         ),
+  //       )
+  //       //   .map((item) => ({
+  //       //     label: item.name,
+  //       //     options: [toObjectOption(item.value, item)],
+  //       //   }))
+  //       .map((item) => toObjectOption(item.value, item))
+  //     console.log('formSpecs', formSpecs)
+  //     setTimeout(() => {
+  //       //   resetField(`specificationGroup`, {
+  //       //     defaultValue: toArrayOptionString(formSpecs.map((item) => item.label)),
+  //       //   })
+  //       resetField(`specifications`, {
+  //         defaultValue: formSpecs,
+  //       })
+  //     }, 0)
+  //   }, [productSpecs, variantSpecs, action, resetField])
 
-  //   useEffect(() => {
-  //     console.log('product triggered changed')
-  //   }, [product])
-
-  const variantSpecs = variant?.specifications
-  useEffect(() => {
-    if (action === 'create' || !variantSpecs) return
-    console.log('useEffect variant spec ran')
-    const formSpecs = variantSpecs
-      .filter((item) =>
-        productSpecs.some(
-          (spec) => spec.name === item.name && spec.values.length > 1,
-        ),
-      )
-      .map((item) => ({
-        label: item.name,
-        options: [toObjectOption(item.value, item)],
-      }))
-    console.log('formSpecs', formSpecs)
-    setTimeout(() => {
-      //   resetField(`specificationGroup`, {
-      //     defaultValue: toArrayOptionString(formSpecs.map((item) => item.label)),
-      //   })
-      resetField(`specifications`, {
-        defaultValue: formSpecs,
-      })
-    }, 0)
-  }, [productSpecs, variantSpecs, action, resetField])
   if (!fields.length) return <></>
   return (
     <>
       <div>
         <FormLabel>Thông số tuỳ chọn</FormLabel>
+        <Button
+          onClick={() => {
+            console.log('fields', fields)
+          }}>
+          Log
+        </Button>
         <div className='border rounded-lg p-4'>
           <div className=''>
             <div className='header flex'>
@@ -719,23 +729,24 @@ VariantForm.Specification = function Specification({}) {
               <p className='flex-grow'>Chi tiết</p>
             </div>
             <div className='body flex flex-col'>
+              {JSON.stringify(fields)}
               {fields.map((field, idx) => (
                 <VariantForm.Specification.Row
                   key={field.id}
                   index={idx}
-                  name={field.label}
+                  field={field}
                 />
               ))}
             </div>
           </div>
         </div>
-        <VariantForm.OtherVariant />
+        {/* <VariantForm.OtherVariant /> */}
       </div>
     </>
   )
 } as React.FC & {
   Row: React.FC<{
-    name: string | undefined
+    field: FieldArrayWithId<IVariantField, 'specifications', 'id'>
     index: number
     onRemove?: () => void
   }>
@@ -745,6 +756,7 @@ VariantForm.OtherVariant = function OtherVariants() {
   const {
     product: { data: product },
     watch,
+    getValues,
   } = useFormProvider()
   const { data: { data: variants } = {} } = useCustom<IVariant[]>({
     url: productResource.getVariants(product?.id),
@@ -757,16 +769,29 @@ VariantForm.OtherVariant = function OtherVariants() {
         projection: variantResource.projection.withSpecs,
       },
     },
+    meta: {
+      resource: variantResource.resource,
+    },
   })
-
   const specsChange = watch(`specifications`)
-
   const otherVariant = useMemo(() => {
-    specsChange?.some((option) => !!option)
-  }, [specsChange])
+    const isInvalid = specsChange.some((spec) => !spec)
+    if (isInvalid) return
+    const specs = specsChange
+      .filter((item) => !!item)
+      .map((item) => item?.value as ISpecification)
+    const containsAllSpecs = (v: IVariant) =>
+      !specs.some(
+        ({ name, value }) =>
+          !v.specifications?.find(
+            (spec) => spec.name === name && spec.value === value,
+          ),
+      )
+    return variants?.find(containsAllSpecs)
+  }, [specsChange, variants])
   return (
     <>
-      <div>{JSON.stringify(specsChange)}</div>
+      <div>{JSON.stringify(otherVariant)}</div>
     </>
   )
 }
@@ -790,86 +815,106 @@ VariantForm.Active = function VariantActive() {
   )
 }
 
-VariantForm.Specification.Row = function Row({ index, onRemove, name = '' }) {
-  const { resource, findDistinctByName } = API['specifications']()
-  const {
-    control,
-    setValue,
-    formState: { errors },
-  } = useFormProvider()
-  // const isDisabled = action === "edit";
+// VariantForm.Specification.Row = function Row({ index, onRemove, name = '' }) {
+//   const { resource, findDistinctByName } = API['specifications']()
+//   const {
+//     control,
+//     setValue,
+//     formState: { errors },
+//   } = useFormProvider()
+//   // const isDisabled = action === "edit";
 
-  const isDisabled = false
-  const {} = useBoolean()
-  const { data: { data: specsData = [] } = {} } = useCustom<ISpecification[]>({
-    url: findDistinctByName(name ?? ''),
-    method: 'get',
-    queryOptions: {
-      enabled: !isDisabled && ENABLE_FETCHED,
-    },
-    meta: {
-      resource,
-    },
-  })
+//   const isDisabled = false
+//   const { data: { data: specsData = [] } = {} } = useCustom<ISpecification[]>({
+//     url: findDistinctByName(name ?? ''),
+//     method: 'get',
+//     queryOptions: {
+//       enabled: !isDisabled && ENABLE_FETCHED,
+//     },
+//     meta: {
+//       resource,
+//     },
+//   })
 
-  const options = useMemo(() => {
-    return specsData.map((item) => toObjectOption(item.value, item))
-  }, [specsData])
+//   const options = useMemo(() => {
+//     return specsData.map((item) => toObjectOption(item.value, item))
+//   }, [specsData])
 
-  const append = (input: string) => {
-    setValue(`specifications.${index}.options`, [
-      {
-        label: input,
-        value: {
-          name: name,
-          value: input,
-        },
-      },
-    ])
-  }
+//   const append = (input: string) => {
+//     console.log('append item ran')
+//     setValue(`specifications.${index}`, {
+//       label: cleanValue(input),
+//       value: {
+//         name,
+//         value: cleanValue(input),
+//       },
+//     })
+//   }
+//   return (
+//     <div>
+//       <div className='flex border p-4 gap-2'>
+//         <div className='flex-grow grid grid-cols-4 gap-2'>
+//           <FormLabel>{name ?? ''}</FormLabel>
+//           <FormControl
+//             isInvalid={true}
+//             className='col-span-3'>
+//             <Controller
+//               render={({ field }) => (
+//                 <CreatableSelect
+//                   //   {...field}
+//                   //   ref={field.ref}
+//                   //   value={field.value}
+//                   //   onChange={field.onChange}
+//                   isDisabled={isDisabled}
+//                   options={options}
+//                   menuPosition='fixed'
+//                   //   onCreateOption={append}
+//                   formatCreateLabel={(input) => `Tạo ${cleanValue(input)}`}
+//                   //   isValidNewOption={isValidNewSelectOption}
+//                 />
+//               )}
+//               name={`specifications.${index}`}
+//               control={control}
+//               rules={{
+//                 required: true,
+//               }}
+//             />
+//             <FormErrorMessage>
+//               {errors.specifications?.[index]?.message}
+//             </FormErrorMessage>
+//           </FormControl>
+//         </div>
+//         {!!onRemove && (
+//           <div className='min-w-[50px]'>
+//             <Button
+//               className=''
+//               onClick={onRemove}
+//               colorScheme='red'
+//               isDisabled={isDisabled}>
+//               <MinusCircle />
+//             </Button>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   )
+// }
+
+VariantForm.Specification.Row = function Row({ index, onRemove, field }) {
+  const { control, watch } = useFormProvider()
+  const specs = watch(`formSpecifications`)
+  console.log('specs', specs)
   return (
-    <div>
-      <div className='flex border p-4 gap-2'>
-        <div className='flex-grow grid grid-cols-4 gap-2'>
-          <FormLabel>{name ?? ''}</FormLabel>
-          <FormControl
-            isInvalid={true}
-            className='col-span-3'>
-            <Controller
-              render={({ field }) => (
-                <CreatableSelect
-                  {...field}
-                  isDisabled={isDisabled}
-                  options={options}
-                  menuPosition='fixed'
-                  onCreateOption={append}
-                />
-              )}
-              name={
-                `specifications.${index}.options` as `specifications.0.options`
-              }
-              control={control}
-              rules={{
-                required: true,
-              }}
-            />
-            <FormErrorMessage>
-              {errors.specifications?.[index]?.message}
-            </FormErrorMessage>
-          </FormControl>
-        </div>
-        {!!onRemove && (
-          <div className='min-w-[50px]'>
-            <Button
-              className=''
-              onClick={onRemove}
-              colorScheme='red'
-              isDisabled={isDisabled}>
-              <MinusCircle />
-            </Button>
-          </div>
-        )}
-      </div>
-    </div>
+    <>
+      {JSON.stringify(specs)}
+      {/* {field.label}
+      <Controller
+        name={`specifications.${index}`}
+        control={control}
+        render={({ field }) => {
+          return <CreatableSelect />
+        }}
+      /> */}
+    </>
   )
 }

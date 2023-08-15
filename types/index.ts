@@ -126,7 +126,11 @@ export type IVariantField = {
     }
   }
   specificationGroup?: Option<string>[]
-  specifications: Option<ISpecification>[]
+  /**
+   * @deprecated
+   */
+  specifications: Option<ISpecification | undefined>[]
+  formSpecifications: Option<ISpecification> | undefined[]
 } & {
   files: File[]
 }

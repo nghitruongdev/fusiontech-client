@@ -46,9 +46,6 @@ const ProductList = () => {
     resource: 'products',
   })
 
-  console.log('Data:', data)
-  console.log('Status:', status)
-
   const settings = {
     infinite: true,
     speed: 500,
