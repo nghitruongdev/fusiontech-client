@@ -28,6 +28,10 @@ export const ERRORS = {
       required: 'Yêu cầu nhập tên thương hiệu',
       exists: 'Thương hiệu này đã tồn tại.',
     },
+    slug: {
+      required: 'Yêu cầu nhập đường dẫn slug',
+      exists: 'Đường dẫn này đã tồn tại',
+    },
   },
   vouchers: {
     code: {

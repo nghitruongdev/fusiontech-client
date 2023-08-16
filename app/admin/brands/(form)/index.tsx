@@ -4,6 +4,7 @@ import useDebounceFn from '@/hooks/useDebounceFn'
 import useCrudNotification from '@/hooks/useCrudNotification'
 import useUploadImage, { uploadUtils } from '@/hooks/useUploadImage'
 import {
+  Button,
   FormControl,
   FormErrorMessage,
   FormLabel,
@@ -33,6 +34,9 @@ import { IBrand, IBrandField } from 'types'
 import { API, API_URL } from 'types/constants'
 import { ERRORS } from 'types/messages'
 import { useBoolean, useDebounce } from 'usehooks-ts'
+import { slugifyName } from '@/lib/slug-utils'
+import { cleanValue } from '@/lib/utils'
+import { validateBrandNameExists } from './utils'
 
 type ContextProps = {
   action: Action
@@ -146,38 +150,6 @@ Form.Container = function Container({ children }: PropsWithChildren) {
   )
 }
 
-type onError = ReturnType<typeof useCrudNotification>['onDefaultError']
-const validateName = async (
-  brand: IBrand | undefined,
-  onError: onError,
-  name: string,
-) => {
-  const { findByName } = API['brands']()
-  const { exists, required } = ERRORS.brands.name
-  if (!name) return required
-  const sendRequest = async () => {
-    const response = await fetch(`${API_URL}/${findByName(name)}`)
-
-    if (!response.ok) {
-      if (response.status === 404) return true
-      console.error('validate name is not ok')
-      return false
-    }
-    const data = (await response.json()) as IBrand
-    if (data) {
-      if (!brand) return exists
-
-      if (data.id !== brand.id) return exists
-    }
-    return true
-  }
-  try {
-    return await sendRequest()
-  } catch (err) {
-    onError(err as Error)
-    return false
-  }
-}
 Form.Body = function Body() {
   const {
     action,
@@ -189,7 +161,7 @@ Form.Body = function Body() {
   const { onDefaultError: onError } = useCrudNotification()
 
   const [checkValue, isChecking] = useDebounceFn(
-    validateName.bind(null, brand, onError),
+    validateBrandNameExists.bind(null, brand, onError),
     300,
   )
 
@@ -223,8 +195,8 @@ Form.Body = function Body() {
               type='text'
               {...register('name', {
                 required: ERRORS.brands.name.required,
-                validate: async (value) => await checkValue(value.trim()),
-                setValueAs: (value) => value && value.trim(),
+                // validate: async (value) => await checkValue(value.trim()),
+                setValueAs: (value) => value && cleanValue(value),
               })}
             />
             <InputRightElement>
@@ -235,20 +207,9 @@ Form.Body = function Body() {
             {(errors as any)?.name?.message as string}
           </FormErrorMessage>
         </FormControl>
-        {/* <FormControl mb="3" isInvalid={!!(errors as any)?.slug}>
-          <FormLabel>Slug</FormLabel>
-          <Input
-            type="text"
-            {...register('slug', {
-              required: 'Vui lòng nhập slug.',
-            })}
-          />
-          <FormErrorMessage>
-            {(errors as any)?.slug?.message as string}
-          </FormErrorMessage>
-        </FormControl> */}
+        <Form.Slug />
         {/* <FormControl mb="3" isInvalid={!!(errors as any)?.description}>
-          <FormLabel>Mô tả danh mục</FormLabel>
+          <FormLabel>Mô tả</FormLabel>
           <Textarea {...register('description', {})} />
           <FormErrorMessage>
             {(errors as any)?.description?.message as string}
@@ -259,6 +220,42 @@ Form.Body = function Body() {
   )
 }
 
+Form.Slug = function BrandSlug() {
+  const {
+    register,
+    trigger,
+    getValues,
+    setValue,
+    formState: { errors },
+  } = Form.useContext()
+
+  return (
+    <FormControl
+      mb='3'
+      isInvalid={!!errors?.slug}>
+      <FormLabel>
+        Slug
+        <Button
+          variant={'link'}
+          onClick={async () => {
+            const nameValid = await trigger(`name`)
+            if (!nameValid) return
+            setValue(`slug`, slugifyName(getValues(`name`)))
+          }}>
+          Tạo tự động
+        </Button>
+      </FormLabel>
+      <Input
+        type='text'
+        {...register('slug', {
+          required: 'Vui lòng nhập slug.',
+          deps: ['name'],
+        })}
+      />
+      <FormErrorMessage>{errors?.slug?.message}</FormErrorMessage>
+    </FormControl>
+  )
+}
 Form.Image = function Image() {
   const { brand, setValue } = Form.useContext()
   const onFilesChange: UploadProviderProps['onFilesChange'] = useCallback(

@@ -70,13 +70,13 @@ import {
 } from '@/lib/utils'
 import { useDialog } from '@components/ui/DialogProvider'
 import CreatableSelect from 'react-select/creatable'
-import Select, { SingleValue, components, SelectInstance } from 'react-select'
+import { SingleValue, components, SelectInstance } from 'react-select'
 import { produce } from 'immer'
 import InlineEditable from '@components/ui/InlineEditable'
 import { ActionMeta, MultiValue } from 'react-select'
 import ImageUpload, { UploadProviderProps } from '@components/image-upload'
 import useUploadImage, { uploadUtils } from '@/hooks/useUploadImage'
-import { API, REG_SLUG_PATTERN } from 'types/constants'
+import { API } from 'types/constants'
 import { Create, Edit } from '@components/crud'
 import { useRouter } from 'next/navigation'
 import { errorNotification } from 'src/lib/notifications'
@@ -90,7 +90,7 @@ import useCrudNotification, {
   onSuccess,
 } from '@/hooks/useCrudNotification'
 import { EditableMultiValueLabel } from '@components/ui/EditableMultivalueTable'
-import { MultiValueLabel } from 'react-select/dist/declarations/src/components/MultiValue'
+import { SLUG_PATTERN } from '@/lib/validate-utils'
 
 type ContextProps = {
   action: 'create' | 'edit'
@@ -420,6 +420,7 @@ ProductForm.Slug = function Slug() {
     validateProductSlugExists,
     300,
   )
+
   return (
     <FormControl isInvalid={!!errors?.slug}>
       <FormLabel
@@ -439,10 +440,7 @@ ProductForm.Slug = function Slug() {
           type='text'
           placeholder='ten-san-pham-viet-thuong-khong-dau'
           {...register('slug', {
-            pattern: {
-              value: REG_SLUG_PATTERN,
-              message: 'Đường dẫn không hợp lệ',
-            },
+            pattern: SLUG_PATTERN,
             validate: async (value) =>
               await validateDebounce(
                 value,

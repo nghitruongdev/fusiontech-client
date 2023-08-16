@@ -1,15 +1,16 @@
 /** @format */
 
 import axiosClient from './axiosClient'
+import { API_URL } from 'types/constants'
 
 const reviewApi = {
   get: (id) => {
-    const url = `http://localhost:8080/api/reviews/search/findAllReviewsByProductId?pid=${id}`
+    const url = `${API_URL}/reviews/search/findAllReviewsByProductId?pid=${id}`
     return axiosClient.get(url)
   },
 
   create: (reviewData) => {
-    const url = 'http://localhost:8080/api/reviews'
+    const url = `${API_URL}/reviews`
     return axiosClient.post(url, reviewData)
   },
 }

@@ -4,11 +4,11 @@ import { BaseType, onError, validateIfExists } from '@/lib/validate-utils'
 import { API, API_URL } from 'types/constants'
 import { ERRORS } from 'types/messages'
 
-const { name, slug } = ERRORS.products
+const { name, slug } = ERRORS.brands
 
-const { findByName, findBySlug } = API['products']()
+const { findByName, findBySlug } = API['brands']()
 
-export const validateProductSlugExists = async (
+export const validateBrandSlugExists = async (
   value: string | undefined,
   current: BaseType,
   onError: onError,
@@ -18,7 +18,7 @@ export const validateProductSlugExists = async (
         errors: { onError, exists: slug.exists },
       })
     : undefined
-export const validateProductNameExists = async (
+export const validateBrandNameExists = async (
   value: string | undefined,
   current: BaseType,
   onError: onError,

@@ -172,6 +172,7 @@ export type IBrand = {
   id?: number
   name: string
   image?: FirebaseImage | null
+  slug?: string
 }
 
 export type IBrandField = IBrand & {
@@ -181,7 +182,7 @@ export type IBrandField = IBrand & {
 export interface ICategory {
   id?: number
   name: string
-  slug: string
+  slug?: string
   description?: string
   image?: FirebaseImage | null
   specifications?: string[]

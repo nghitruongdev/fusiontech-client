@@ -1,25 +1,26 @@
 /** @format */
 
 import axiosClient from './axiosClient'
+import { API_URL } from 'types/constants'
 
 const userApi = {
   checkExistsByEmail: (email) => {
-    const url = `http://localhost:8080/api/users/search/existsByEmail?email=${email}`
+    const url = `${API_URL}/users/search/existsByEmail?email=${email}`
     return axiosClient.get(url)
   },
 
   checkExistsByPhone: (phone) => {
-    const url = `http://localhost:8080/api/users/search/existsByPhoneNumber?phoneNumber=${phone}`
+    const url = `${API_URL}/users/search/existsByPhoneNumber?phoneNumber=${phone}`
     return axiosClient.get(url)
   },
-    updateUser: (id, userData) => {
-        const url =`http://localhost:8080/api/users/updateUser/${id}`;
-        return axiosClient.put(url,userData);
-    },
-    createShippingAddress:(uid,shippingAdressData) => {
-        const url = `http://localhost:8080/api/shippingAddresses/create/${uid}`;
-        return axiosClient.post(url,shippingAdressData);
-    },
-};
+  updateUser: (id, userData) => {
+    const url = `${API_URL}/api/users/updateUser/${id}`
+    return axiosClient.put(url, userData)
+  },
+  createShippingAddress: (uid, shippingAdressData) => {
+    const url = `${API_URL}/shippingAddresses/create/${uid}`
+    return axiosClient.post(url, shippingAdressData)
+  },
+}
 
 export default userApi

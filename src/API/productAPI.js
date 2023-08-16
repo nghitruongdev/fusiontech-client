@@ -1,12 +1,13 @@
-import axiosClient from "./axiosClient";
+/** @format */
+
+import axiosClient from './axiosClient'
+import { API_URL } from 'types/constants'
 
 const productApi = {
-
   searchByKeyword: (keyword) => {
-    const url = `http://localhost:8080/api/products/search/byKeyWord?keyword=${keyword}`;
-    return axiosClient.get(url);
+    const url = `${API_URL}/products/search/byKeyWord?keyword=${keyword}`
+    return axiosClient.get(url)
   },
-  
-};
+}
 
-export default productApi;
+export default productApi

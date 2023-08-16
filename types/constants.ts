@@ -15,8 +15,6 @@ export const API_URL =
   process.env.NEXT_PUBLIC_RESOURCE_SERVER_URL ??
   throwIfMissing('NEXT_PUBLIC_RESOURCE_SERVER_URL')
 
-export const REG_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
-
 export const NEXT_API_URL = 'http://localhost:3000/api'
 
 export const API = {

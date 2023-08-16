@@ -171,3 +171,5 @@ export const isValidNewSelectOption = <T extends { label?: string }>(
     !options.some((item) => item.label?.toLowerCase() === cleanInput)
   )
 }
+
+export * from './slug-utils'
