@@ -1,3 +1,5 @@
+/** @format */
+
 import { FirebaseImage } from 'types'
 import { firebaseStorage } from '@/lib/firebase'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
@@ -75,11 +77,12 @@ function getName(
   url?: string,
   path?: string,
 ) {
-  const filePath = url ? getPath(url) : path
-  if (!filePath) {
+  if (!url && !path) {
     console.error('Missing url and path parameters')
     return
   }
+  const filePath = url ? getPath(url) : path
+  if (!filePath) return url ?? path
 
   return filePath
     .substring(0, filePath.lastIndexOf('-'))

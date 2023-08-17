@@ -231,7 +231,7 @@ Product.Review = ({ avgRating }: { avgRating: IProduct['avgRating'] }) => {
   const filledStars = Math.floor(avgRating ?? 0)
 
   const remainingStars = starCount - filledStars
-
+  const roundedAvgRating = (avgRating ?? 0).toFixed(1)
   const filledStarsArray = Array.from({ length: filledStars }, (_, index) => (
     <BsStarFill key={index} />
   ))
@@ -252,7 +252,7 @@ Product.Review = ({ avgRating }: { avgRating: IProduct['avgRating'] }) => {
       {filledStarsArray}
       {remainingStarsArray}
       <p className='line font-bold text-muted-foreground leading-tight'>
-        {avgRating}/5
+        {roundedAvgRating}/5
       </p>
     </div>
   )

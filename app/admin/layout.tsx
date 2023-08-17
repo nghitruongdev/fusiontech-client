@@ -15,7 +15,7 @@ import {
 } from '@refinedev/chakra-ui'
 import { Refine } from '@refinedev/core'
 import routerProvider from '@refinedev/nextjs-router/app'
-import { UserCircle } from 'lucide-react'
+import { UserCircle, Users } from 'lucide-react'
 import { Cpu, LucideLaptop2, MemoryStick, ShoppingCart } from 'lucide-react'
 import { Warehouse } from 'lucide-react'
 import { Monitor, Ticket } from 'lucide-react'
@@ -166,7 +166,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {
               name: 'users',
               identifier: 'user-staff',
-              list: '/admin/users?staff=true',
+              list: '/admin/users',
               create: '/admin/users/create',
               edit: '/admin/users/edit/:id',
               show: '/admin/users/show/:id',
@@ -174,15 +174,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 label: 'Nhân viên',
                 parent: 'users',
                 canDelete: false,
+                icon: <Users size={18} />,
               },
             },
             {
               name: 'users',
               identifier: 'user-customer',
-              list: '/admin/users',
-              create: '/admin/users/create',
-              edit: '/admin/users/edit/:id',
-              show: '/admin/users/show/:id',
+              list: '/admin/users/customers',
+              show: '/admin/users/customers/show/:id',
               meta: {
                 label: 'Khách hàng',
                 icon: <UserCircle size={18} />,

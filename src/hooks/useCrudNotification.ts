@@ -11,7 +11,8 @@ import { useCallback } from 'react'
 import { Fields } from '@refinedev/core/dist/interfaces/metaData/fields'
 import { VariableOptions } from '@refinedev/core/dist/interfaces/metaData/variableOptions'
 import { AppError } from 'types/error'
-import { ProblemDetail } from 'types'
+import { ProblemDetail, ResourceName } from 'types'
+import { RESOURCE_LABEL } from 'types/constants'
 
 type ValueProps =
   | {
@@ -52,6 +53,7 @@ const useCrudNotification = () => {
     resource?: string | undefined,
     defaultMessage?: string,
   ): OpenNotificationParams => {
+    console.log('values', values)
     return {
       type: 'success',
       message: '',
@@ -68,9 +70,16 @@ const useCrudNotification = () => {
   }
 }
 
+type Action = 'create' | 'edit' | 'delete'
+const ActionText: { [key in Action]: string } = {
+  create: 'Thêm mới',
+  edit: 'Cập nhật',
+  delete: 'Xoá',
+}
 export const onSuccess = (
+  action: Action,
   data: any,
-  value: any,
+  values: any,
   resource: string | undefined,
   defaultMessage?: string,
 ): OpenNotificationParams => {
@@ -79,9 +88,12 @@ export const onSuccess = (
       type: 'success',
       message: defaultMessage,
     }
+
   return {
     type: 'success',
-    message: `${resource} thành công`,
+    message: `${ActionText[action]} ${
+      resource && RESOURCE_LABEL[resource as ResourceName]
+    } thành công`,
   }
 }
 

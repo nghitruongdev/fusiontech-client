@@ -12,7 +12,7 @@ export default function ShowPage() {
   return <BrandShow />
 }
 
-export const BrandShow: React.FC<IResourceComponentsProps> = () => {
+const BrandShow: React.FC<IResourceComponentsProps> = () => {
   const { queryResult } = useShow<IBrand>()
   const { data, isLoading } = queryResult
 
@@ -46,9 +46,16 @@ export const BrandShow: React.FC<IResourceComponentsProps> = () => {
             as='h5'
             size='sm'
             mt={4}>
-            Name
+            Tên thương hiệu
           </Heading>
           <TextField value={record?.name} />
+          <Heading
+            as='h5'
+            size='sm'
+            mt={4}>
+            Đường dẫn (slug)
+          </Heading>
+          <TextField value={record?.slug} />
         </div>
       </div>
     </Show>

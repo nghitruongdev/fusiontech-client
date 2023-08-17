@@ -9,9 +9,9 @@ const { name, slug } = ERRORS.products
 const { findByName, findBySlug } = API['products']()
 
 export const validateProductSlugExists = async (
-  value: string | undefined,
   current: BaseType,
   onError: onError,
+  value: string | undefined,
 ) =>
   !!value
     ? validateIfExists(`${API_URL}/${findBySlug(value)}`, current, {
@@ -19,9 +19,9 @@ export const validateProductSlugExists = async (
       })
     : undefined
 export const validateProductNameExists = async (
-  value: string | undefined,
   current: BaseType,
   onError: onError,
+  value: string | undefined,
 ) =>
   !!value
     ? validateIfExists(`${API_URL}/${findByName(value)}`, current, {

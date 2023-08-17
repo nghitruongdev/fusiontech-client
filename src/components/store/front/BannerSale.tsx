@@ -28,9 +28,9 @@ const BannerSale = () => {
       .padStart(2, '0')} : ${secs.toString().padStart(2, '0')}`
   }
   const backgroundImageURL1 =
-    'https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fbanner%2Fsale1.webp?alt=media&token=9e001de5-199e-42a9-937f-79af38c7130d'
+    'https://9to5toys.com/wp-content/uploads/sites/5/2020/12/Microsoft-Surface-Laptop-Go.jpg?w=1200&h=600&crop=1'
   const backgroundImageURL2 =
-    'https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fbanner%2Fsale2.webp?alt=media&token=1b395521-93c6-4231-9c53-975e0bb0f135'
+    'https://cdn.vox-cdn.com/uploads/chorus_asset/file/22440392/Surface_Laptop_4_Family.jpg'
   return (
     <div className='flex items-center flex-col w-full xl:max-w-[2100px] mb-4 md-8 mx-auto'>
       <SectionTitle title={'Giảm giá đặc biệt'} />
@@ -49,7 +49,7 @@ const BannerSale = () => {
                   <h2 className='text-xl font-bold text-left mb-2 text-white'>
                     Special Sale
                   </h2>
-                  <p className='text-base text-left mb-4'>
+                  <p className='text-base text-left mb-4 text-white'>
                     Here are the biggest enterprise technology acquisitions of
                     2021 so far, in reverse chronological order.
                   </p>
@@ -58,7 +58,7 @@ const BannerSale = () => {
                       Mua ngay
                     </Button>
                   </div>
-                  <div className='text-base mt-3 font-bold text-red-600 text-left mb-4'>
+                  <div className='text-base mt-3 font-bold text-red-500 text-left mb-4'>
                     Sale ends in: {formatTime(countdown)}
                   </div>
                 </div>
@@ -81,7 +81,7 @@ const BannerSale = () => {
                   <h2 className='text-xl font-bold text-left mb-2 text-white'>
                     Special Sale
                   </h2>
-                  <p className='text-base text-left mb-4'>
+                  <p className='text-base text-left mb-4 text-white'>
                     Here are the biggest enterprise technology acquisitions of
                     2021 so far, in reverse chronological order.
                   </p>
@@ -90,7 +90,7 @@ const BannerSale = () => {
                       Mua ngay
                     </Button>
                   </div>
-                  <div className='text-base mt-3 font-bold text-red-600 text-left mb-4'>
+                  <div className='text-base mt-3 font-bold text-red-500 text-left mb-4'>
                     Sale ends in: {formatTime(countdown)}
                   </div>
                 </div>

@@ -23,6 +23,7 @@ import {
   useBoolean,
   Tooltip,
   Switch,
+  FormErrorIcon,
 } from '@chakra-ui/react'
 import { useForm } from '@refinedev/react-hook-form'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -41,6 +42,7 @@ import {
   ISpecification,
   IVariant,
   IVariantField,
+  Option,
 } from 'types'
 import { PropsWithChildren } from 'react'
 import { Controller, FieldArrayWithId, useFieldArray } from 'react-hook-form'
@@ -137,7 +139,7 @@ VariantForm.Provider = function Provider({
   } = formMethods
 
   const paramProductId = useConst(searchParams.get('productId'))
-  const watchId = watch(`product`)?.value?.id
+  const watchId = watch(`formProduct`)?.value?.id
   const productId = useMemo(() => {
     console.count('product id memo ran')
     return variant?.product?.id ?? paramProductId ?? watchId
@@ -164,7 +166,7 @@ VariantForm.Provider = function Provider({
       specifications,
       formSpecifications,
       specificationGroup,
-      product: { value: product },
+      formProduct: { value: product },
       ...values
     } = formValues
 
@@ -306,6 +308,7 @@ VariantForm.Product = function Product() {
   } = useFormProvider()
 
   const inputDisabled = !!paramProductId || !!id
+  // const inputDisabled = false
   const { data: { data: products } = {} } = useList<
     IProduct & { variantCount: number }
   >({
@@ -323,58 +326,76 @@ VariantForm.Product = function Product() {
     },
   })
 
-  const options = useMemo(() => {
-    return (
-      products
-        ?.map(({ id, name, variantCount }) =>
-          toObjectOption(name, { id: id ?? '', name, variantCount }),
-        )
-        .filter((item) => item.value.variantCount > 1) ?? []
-    )
-  }, [products])
+  const options: Option<{ id: string; name: string; variantCount: number }>[] =
+    useMemo(() => {
+      return (
+        products
+          ?.map(({ id, name, variantCount }) =>
+            toObjectOption(name, { id: id ?? '', name, variantCount }),
+          )
+          .map((item) => ({
+            ...item,
+            ...(item.value.variantCount === 1 && { __isDisabled__: true }),
+          })) ?? []
+      )
+    }, [products])
 
   useEffect(() => {
     console.count('use effect product ran')
     if (product) {
-      const option = options.find(
-        ({ value: { id, variantCount } }) =>
-          variantCount > 1 && product.id === id,
-      )
+      let option = toObjectOption(product.name, {
+        ...product,
+        variantCount: product.variantCount ?? 0,
+      })
+      option = {
+        ...option,
+        ...(option.value.variantCount === 1 && { __isDisabled__: true }),
+      }
       !!option &&
-        resetField('product', {
+        resetField('formProduct', {
           defaultValue: option,
         })
     }
   }, [product, resetField, options])
+  console.log(options)
 
   return (
     <>
-      <FormControl isInvalid={!!errors.product}>
+      <FormControl
+        isRequired
+        isInvalid={!!errors.formProduct}>
         <FormLabel>Chọn sản phẩm</FormLabel>
-
         <Controller
           render={({ field }) => (
             <Select
               options={options}
               {...field}
               isDisabled={inputDisabled}
-              formatOptionLabel={({ value: { name, variantCount } }) => (
-                <p className='flex items-center gap-2'>
-                  <span>{name}</span>{' '}
-                  <span className=' text-xs text-center text-zinc-500 bg-gray-50 rounded-full w-4 h-4'>
-                    {variantCount}
-                  </span>
-                </p>
-              )}
+              isOptionDisabled={(option) => !!option.__isDisabled__}
+              formatOptionLabel={({ value }) =>
+                !value ? (
+                  <>Không có dữ liệu</>
+                ) : (
+                  <p className='flex items-center gap-2'>
+                    <span>{value?.name}</span>
+                    <span className=' text-xs text-center text-zinc-500 bg-gray-100 rounded-full w-4 h-4'>
+                      {value?.variantCount}
+                    </span>
+                  </p>
+                )
+              }
             />
           )}
           control={control}
-          name={`product`}
+          name={`formProduct`}
           rules={{
             required: 'Chọn một sản phẩm để thêm biến thể.',
           }}
         />
-        <FormErrorMessage>{errors.product?.message as string}</FormErrorMessage>
+        <FormErrorMessage>
+          <FormErrorIcon />
+          {errors.formProduct?.message as string}
+        </FormErrorMessage>
       </FormControl>
     </>
   )
@@ -412,8 +433,10 @@ VariantForm.SKU = function SKU() {
     register,
     variant,
     setError,
+    action,
   } = useFormProvider()
-  const [checkSKU, isValidatingSKU] = useDebounceFn(validateSKUExists, 300)
+  if (action === 'create') return <></>
+  // const [checkSKU, isValidatingSKU] = useDebounceFn(validateSKUExists, 300)
   return (
     <FormControl
       mb='3'
@@ -456,6 +479,7 @@ VariantForm.SKU = function SKU() {
         </InputRightElement>
       </InputGroup> */}
       <FormErrorMessage>
+        <FormErrorIcon />
         {(errors as any)?.sku?.message as string}
       </FormErrorMessage>
     </FormControl>
@@ -493,6 +517,7 @@ VariantForm.Price = function Price() {
         />
       </InputGroup>
       <FormErrorMessage>
+        <FormErrorIcon />
         {(errors as any)?.price?.message as string}
       </FormErrorMessage>
     </FormControl>
@@ -524,6 +549,7 @@ VariantForm.Images = function Images() {
   const formImages = useMemo(() => {
     console.count('useMemo image ran')
     setValue(`images`, images)
+    console.log(images)
     return (
       images?.map((url) => ({
         url,
@@ -847,6 +873,7 @@ VariantForm.Specification.Row = function Row({
         }}
       />
       <FormErrorMessage>
+        <FormErrorIcon />
         {errors.specifications?.[index]?.message}
       </FormErrorMessage>
     </FormControl>

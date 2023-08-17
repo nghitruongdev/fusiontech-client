@@ -18,7 +18,7 @@ export default function ListPage() {
   return <VoucherList />
 }
 
-export const VoucherList: React.FC<IResourceComponentsProps> = () => {
+const VoucherList: React.FC<IResourceComponentsProps> = () => {
   const columns = React.useMemo<ColumnDef<IVoucher>[]>(
     () => [
       {
@@ -29,17 +29,17 @@ export const VoucherList: React.FC<IResourceComponentsProps> = () => {
       {
         id: 'code',
         accessorKey: 'code',
-        header: 'code',
+        header: 'Code',
       },
       {
         id: 'discount',
         accessorKey: 'discount',
-        header: 'discount',
+        header: 'Giảm giá',
       },
       {
         id: 'description',
         accessorKey: 'description',
-        header: 'description',
+        header: 'Mô tả',
       },
       // {
       //   id: 'minOrderAmount',
@@ -64,12 +64,12 @@ export const VoucherList: React.FC<IResourceComponentsProps> = () => {
       {
         id: 'limitUsage',
         accessorKey: 'limitUsage',
-        header: 'limitUsage',
+        header: 'Số lần sử dụng',
       },
       {
         id: 'userLimitUsage',
         accessorKey: 'userLimitUsage',
-        header: 'userLimitUsage',
+        header: 'Số lần sử dụng của người dùng',
       },
       {
         id: 'actions',

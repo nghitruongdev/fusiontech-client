@@ -394,7 +394,10 @@ Form.Quantity = function DetailQuantity({
           <NumberDecrementStepper />
         </NumberInputStepper>
       </NumberInput>
-      <FormErrorMessage>{errors?.quantity?.message}</FormErrorMessage>
+      <FormErrorMessage>
+        <FormErrorIcon />
+        {errors?.quantity?.message}
+      </FormErrorMessage>
     </FormControl>
   )
 }
@@ -472,6 +475,7 @@ const DetailTable = () => {
                       </NumberInputStepper>
                     </NumberInput>
                     <FormErrorMessage>
+                      <FormErrorIcon />
                       {errors?.items?.[idx]?.quantity?.message}
                     </FormErrorMessage>
                   </FormControl>

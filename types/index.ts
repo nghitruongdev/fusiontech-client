@@ -23,7 +23,7 @@ export type UploadUrl = {
 }
 
 export type IProduct = {
-  id: string | undefined
+  id: string
   name: string
   slug: string
   summary: string
@@ -38,6 +38,7 @@ export type IProduct = {
   category?: ICategory
   reviewCount?: number
   variants?: IVariant[]
+  variantCount?: number
   avgRating?: number
   //   variants?: IVariant[] | { id: string; price: number }[]
   _links?: {
@@ -75,6 +76,7 @@ export type IProductField = {
   description: string
   discount?: number
   status?: string
+  price?: number
   active?: boolean
   features?: { value: string }[]
 } & {
@@ -106,6 +108,7 @@ export type IVariant = {
   price: number
   active?: boolean
   availableQuantity?: number
+  soldCount?: number
   product?: IProduct
   specifications?: ISpecification[]
   _links: _links
@@ -117,14 +120,11 @@ export type IVariantField = {
   images?: (FirebaseImage | null)[]
   price: number
   active?: boolean
-  product: {
-    label: string
-    value: {
-      id: string
-      name: string
-      variantCount: number
-    }
-  }
+  formProduct: Option<{
+    id: string
+    name: string
+    variantCount: number
+  }>
   specificationGroup?: Option<string>[]
   /**
    * @deprecated
@@ -169,26 +169,26 @@ type IReview = {
 }
 
 export type IBrand = {
-  id?: number
+  id: number
   name: string
   image?: FirebaseImage | null
-  slug?: string
+  slug: string
 }
 
-export type IBrandField = IBrand & {
+export type IBrandField = Omit<IBrand, 'id'> & {
   file?: File | null
 }
 
 export interface ICategory {
-  id?: number
+  id: number
   name: string
-  slug?: string
+  slug: string
   description?: string
   image?: FirebaseImage | null
   specifications?: string[]
 }
 
-export interface ICategoryField extends ICategory {
+export interface ICategoryField extends Omit<ICategory, 'id'> {
   formSpecifications?: Option<string>[]
   file?: File | null
 }
@@ -201,6 +201,7 @@ export type IAddress = {
   short_codename: string
 }
 
+export type Gender = 'MALE' | 'FEMALE' | 'OTHER'
 export interface IUser {
   id?: number
   firebaseUid: string
@@ -213,11 +214,11 @@ export interface IUser {
   photoUrl?: string
   image?: FirebaseImage | null
   dateOfBirth?: Date
-  gender?: 'MALE' | 'FEMALE' | 'OTHER'
+  gender?: Gender | undefined
   roles?: string[]
   defaultAddress?: ShippingAddress
-  isDisabled?: boolean
-  isStaff?: boolean
+  disabled?: boolean
+  staff?: boolean
   _links?: _links
 }
 

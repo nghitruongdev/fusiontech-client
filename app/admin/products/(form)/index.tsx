@@ -36,8 +36,11 @@ import {
   PopoverTrigger,
   Switch,
   InputRightElement,
-  InputGroup,
   Spinner,
+  Icon,
+  FormErrorIcon,
+  InputLeftElement,
+  InputGroup,
 } from '@chakra-ui/react'
 import {
   FirebaseImage,
@@ -58,7 +61,7 @@ import {
   useCustomMutation,
   useUpdate,
 } from '@refinedev/core'
-import { Inbox, MinusCircle } from 'lucide-react'
+import { Inbox, Info, MinusCircle } from 'lucide-react'
 import {
   toObjectOption,
   toArrayOptionString,
@@ -67,6 +70,7 @@ import {
   cleanValue,
   toRecord,
   isValidNewSelectOption,
+  slugifyName,
 } from '@/lib/utils'
 import { useDialog } from '@components/ui/DialogProvider'
 import CreatableSelect from 'react-select/creatable'
@@ -91,6 +95,7 @@ import useCrudNotification, {
 } from '@/hooks/useCrudNotification'
 import { EditableMultiValueLabel } from '@components/ui/EditableMultivalueTable'
 import { SLUG_PATTERN } from '@/lib/validate-utils'
+import { ChakraCurrencyInput } from '@components/ui/ChakraCurrencyInput'
 
 type ContextProps = {
   action: 'create' | 'edit'
@@ -125,6 +130,8 @@ const ProductFormProvider = ({
         },
       },
       redirect: false,
+      errorNotification: onError,
+      successNotification: onSuccess.bind(null, action),
     },
     defaultValues: {
       features: [],
@@ -184,7 +191,7 @@ const ProductFormProvider = ({
               ? undefined
               : features.filter((item) => !!item).map(({ value }) => value)
           const handleSpecifications = () => {
-            console.log('specifications', specifications)
+            // console.log('specifications', specifications)
             const result =
               specifications &&
               specifications.map((item) => {
@@ -193,7 +200,10 @@ const ProductFormProvider = ({
               })
             return action === 'create'
               ? result
-              : result?.filter((item) => item.values?.length === 1)
+              : result
+                  ?.filter((item) => item.values?.length === 1)
+                  .flatMap((item) => item.values)
+                  .filter((item) => !!item)
           }
 
           const handleImages = async () => {
@@ -244,7 +254,6 @@ const ProductFormProvider = ({
               ...(status && { status }),
             }
             console.log('submitValues', submitValues)
-            return
             try {
               const result = await onFinish(submitValues as any)
               console.log('result', result)
@@ -361,7 +370,10 @@ ProductForm.Id = function Id() {
         value={id}
         isDisabled
       />
-      <FormErrorMessage>{errors?.id?.message as string}</FormErrorMessage>
+      <FormErrorMessage>
+        <FormErrorIcon />
+        {errors?.id?.message as string}
+      </FormErrorMessage>
     </FormControl>
   )
 }
@@ -371,10 +383,11 @@ ProductForm.Name = function Name() {
     register,
     formState: { errors },
     refineCore: { queryResult },
+    product,
   } = useProductFormContext()
-  const { onDefaultError } = useCrudNotification()
+  const { onDefaultError: onError } = useCrudNotification()
   const [validateDebounce, isChecking] = useDebounceFn(
-    validateProductNameExists,
+    validateProductNameExists.bind(null, product, onError),
     300,
   )
 
@@ -389,12 +402,7 @@ ProductForm.Name = function Name() {
           type='text'
           {...register('name', {
             required,
-            validate: async (value) =>
-              await validateDebounce(
-                value,
-                queryResult?.data?.data,
-                onDefaultError,
-              ),
+            validate: async (value) => await validateDebounce(value),
             setValueAs: (value) => cleanValue(value),
           })}
         />
@@ -402,60 +410,76 @@ ProductForm.Name = function Name() {
           {isChecking && <Spinner color='blue.600' />}
         </InputRightElement>
       </InputGroup>
-      <FormErrorMessage>{errors?.name?.message}</FormErrorMessage>
+      <FormErrorMessage>
+        <FormErrorIcon />
+        {errors?.name?.message}
+      </FormErrorMessage>
     </FormControl>
   )
 }
 
-ProductForm.Slug = function Slug() {
+ProductForm.Slug = function ProductSlug() {
   const {
     action,
     register,
     formState: { errors },
     refineCore: { queryResult },
+    product,
+    trigger,
+    setValue,
+    getValues,
   } = useProductFormContext()
-  const { onDefaultError } = useCrudNotification()
+  const { onDefaultError: onError } = useCrudNotification()
 
   const [validateDebounce, isChecking] = useDebounceFn(
-    validateProductSlugExists,
+    validateProductSlugExists.bind(null, product, onError),
     300,
   )
-
   return (
-    <FormControl isInvalid={!!errors?.slug}>
-      <FormLabel
-        display={'flex'}
-        alignItems={'center'}>
+    <FormControl
+      mb='3'
+      isInvalid={!!errors?.slug}>
+      <FormLabel>
         Đường dẫn (slug)
-        {action === 'create' && (
-          <span className='text-gray-400 text-sm ml-2'>
-            <Tooltip label={`Tự động tạo bởi hệ thống nếu để trống`}>
-              <QuestionIcon />
+        <Button
+          variant={'link'}
+          fontSize={'sm'}
+          ml='1'
+          fontWeight={'normal'}
+          rightIcon={
+            <Tooltip label='Đường dẫn sẽ được tạo tự động từ tên. Cần chỉnh sửa nếu bị trùng lặp.'>
+              <Icon as={Info} />
             </Tooltip>
-          </span>
-        )}
+          }
+          onClick={async () => {
+            const nameValid = await trigger(`name`)
+            if (!nameValid) return
+            setValue(`slug`, slugifyName(getValues(`name`)))
+            trigger(`slug`)
+          }}>
+          Tạo tự động
+        </Button>
       </FormLabel>
       <InputGroup>
+        {' '}
         <Input
           type='text'
-          placeholder='ten-san-pham-viet-thuong-khong-dau'
           {...register('slug', {
+            required: 'Vui lòng nhập slug.',
             pattern: SLUG_PATTERN,
-            validate: async (value) =>
-              await validateDebounce(
-                value,
-                queryResult?.data?.data,
-                onDefaultError,
-              ),
-            setValueAs: (value) => value?.trim(),
+            validate: async (value) => await validateDebounce(value),
+            setValueAs: (value) => (value as string)?.trim().toLowerCase(),
+            deps: ['name'],
           })}
         />
         <InputRightElement>
           {isChecking && <Spinner color='blue.600' />}
         </InputRightElement>
       </InputGroup>
-
-      <FormErrorMessage>{errors?.slug?.message}</FormErrorMessage>
+      <FormErrorMessage>
+        <FormErrorIcon />
+        {errors?.slug?.message}
+      </FormErrorMessage>
     </FormControl>
   )
 }
@@ -470,11 +494,13 @@ ProductForm.Summary = function Summary() {
       <FormLabel>Mô tả ngắn</FormLabel>
       <Textarea {...register('summary', {})} />
       <FormErrorMessage>
+        <FormErrorIcon />
         {(errors as any)?.summary?.message as string}
       </FormErrorMessage>
     </FormControl>
   )
 }
+
 ProductForm.Brand = function Brand() {
   const { resource } = API['brands']()
   const { action, product, setValue } = useProductFormContext()
@@ -639,6 +665,45 @@ ProductForm.Category = function Category() {
   )
 }
 
+ProductForm.Price = function Price() {
+  const {
+    formState: { errors },
+    register,
+    setValue,
+    action,
+  } = useProductFormContext()
+  if (action === 'edit') return <></>
+  return (
+    <FormControl
+      mb='3'
+      isInvalid={!!(errors as any)?.price}>
+      <FormLabel>Giá mặc định</FormLabel>
+      <InputGroup>
+        <InputLeftElement
+          pointerEvents='none'
+          color='gray.300'
+          fontSize='1.2em'>
+          $
+        </InputLeftElement>
+        <ChakraCurrencyInput
+          pl='10'
+          {...register(`price`, {
+            validate: (v) => (v && v > 0) || 'Giá tiền không hợp lệ',
+            valueAsNumber: true,
+          })}
+          onValueChange={(value) => {
+            if (value) setValue(`price`, +value)
+          }}
+        />
+      </InputGroup>
+      <FormErrorMessage>
+        <FormErrorIcon />
+        {(errors as any)?.price?.message as string}
+      </FormErrorMessage>
+    </FormControl>
+  )
+}
+
 ProductForm.Description = function Description() {
   const {
     register,
@@ -654,6 +719,7 @@ ProductForm.Description = function Description() {
         h='224px'
       />
       <FormErrorMessage>
+        <FormErrorIcon />
         {(errors as any)?.description?.message as string}
       </FormErrorMessage>
     </FormControl>
@@ -1140,6 +1206,7 @@ ProductForm.Specifications.Row = function SpecificationRow({
             }}
           />
           <FormErrorMessage>
+            <FormErrorIcon />
             {errors.specifications?.[index]?.options?.message}
           </FormErrorMessage>
         </FormControl>

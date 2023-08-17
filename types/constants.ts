@@ -4,8 +4,7 @@
 
 import { formatDate } from '@/lib/utils'
 import { Action } from '@refinedev/core'
-import { PaymentMethod, ResourceName } from 'types'
-
+import { Gender, IUser, PaymentMethod, ResourceName } from 'types'
 const throwIfMissing = (name: string) => {
   throw new Error(`${name} is missing from .env.local`)
   return ''
@@ -15,11 +14,13 @@ export const API_URL =
   process.env.NEXT_PUBLIC_RESOURCE_SERVER_URL ??
   throwIfMissing('NEXT_PUBLIC_RESOURCE_SERVER_URL')
 
-export const NEXT_API_URL = 'http://localhost:3000/api'
+// export const NEXT_API_URL = 'http://localhost:3000/api'
+export const NEXT_API_URL = 'http://100.107.221.79:3000/api'
 
 export const API = {
   orders: () => {
     const resource: ResourceName = 'orders'
+
     return {
       resource,
       projection: {
@@ -45,7 +46,11 @@ export const API = {
       resource: resource,
       findByName: (value?: string) =>
         value
-          ? `${resource}/search/findByName?name=${encodeURIComponent(value)}`
+          ? `${resource}/search/find-by-name?name=${encodeURIComponent(value)}`
+          : '',
+      findBySlug: (slug?: string) =>
+        slug
+          ? `${resource}/search/find-by-slug?slug=${encodeURIComponent(slug)}`
           : '',
     }
   },
@@ -55,7 +60,11 @@ export const API = {
       resource: resource,
       findByName: (value?: string) =>
         value
-          ? `${resource}/search/findByName?name=${encodeURIComponent(value)}`
+          ? `${resource}/search/find-by-name?name=${encodeURIComponent(value)}`
+          : '',
+      findBySlug: (slug?: string) =>
+        slug
+          ? `${resource}/search/find-by-slug?slug=${encodeURIComponent(slug)}`
           : '',
     }
   },
@@ -93,7 +102,7 @@ export const API = {
       getProductsLastest: (size: number) =>
         `${resource}/search/latest-products?size=${size}`,
       getSellingProducts: (startDate: Date, endDate: Date, size: number = 10) =>
-        `statistical/best-seller?startDate=${formatDate(
+        `stat/best-seller?startDate=${formatDate(
           startDate,
         )}&endDate=${formatDate(endDate)}&size=${size}`,
       getVariants: (productId: string | number | undefined) =>
@@ -160,6 +169,11 @@ export const API = {
         `${resource}/search/existsByEmail?email=${email}`,
       existsByPhoneNumber: (phone: string) =>
         `${resource}/search/existsByPhoneNumber?phoneNumber=${phone}`,
+      findByEmail: (email: string) =>
+        `${resource}/search/find-by-email?email=${email}`,
+      findByPhone: (phone: string) =>
+        `${resource}/search/find-by-phone?phoneNumber=${phone}`,
+      findStaff: `${resource}/search/staffs`,
     }
   },
   shippingAddresses: () => {
@@ -204,9 +218,27 @@ export const API = {
   },
 }
 
+export const RESOURCE_LABEL: { [key in ResourceName]: string } = {
+  'inventory-details': 'Chi tiết kho',
+  categories: 'Danh mục',
+  brands: 'Thương hiệu',
+  products: 'Sản phẩm',
+  variants: 'Biến thể sản phẩm',
+  orders: 'Đơn hàng',
+  users: 'Người dùng',
+  shippingAddresses: 'Địa chỉ',
+  specifications: 'Thông số',
+  vouchers: 'Voucher',
+}
 export const ROLES = {
   user: 'người dùng',
   admin: 'quản trị viên',
+}
+
+export const GenderLabel: { [key in Gender]: string } = {
+  MALE: 'Nam',
+  FEMALE: 'Nữ',
+  OTHER: 'Khác',
 }
 
 export const PaymentMethodLabel: { [key in PaymentMethod]: string } = {
@@ -238,6 +270,11 @@ const ButtonTextVi: { [key in ButtonType]: string } = {
   cancel: 'Quay lại',
 }
 
+export const ActionText = {
+  create: 'Thêm mới',
+  edit: 'Cập nhật',
+  delete: 'Xoá',
+}
 export const NEXT_PATH = {
   login: '/auth/login',
 }

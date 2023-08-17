@@ -140,7 +140,7 @@ const ProductList = () => {
 }
 
 const Product = ({
-  item: { id, name, slug, images, discount },
+  item: { id, name, slug, images, discount, brand },
 }: {
   item: IProduct
 }) => {
@@ -155,7 +155,7 @@ const Product = ({
           <div className='flex justify-between'>
             {/* <Product.DetailButton id={id} slug={slug} /> */}
           </div>
-          <Product.Brand />
+          <Product.Brand brand={brand} />
           <Product.Name name={name} />
           <Product.Price />
         </div>
@@ -211,11 +211,10 @@ Product.Image = function ProductImage({
     </div>
   )
 }
-Product.Brand = function Brand() {
-  const { product } = useProductCardContext()
+Product.Brand = ({ brand }: { brand: IProduct['brand'] }) => {
   return (
     <p className='text-base  font-roboto font-semibold uppercase leading-normal text-zinc-600 line-clamp-1 pt-2'>
-      ASUS
+      {brand?.name}
     </p>
   )
 }
@@ -239,21 +238,6 @@ Product.Price = function Price() {
       <p className='text-gray-500 text-sm leading-tight line-through decoration-[1px]'>
         {formatPrice(29_000_000)}
       </p>
-    </div>
-  )
-}
-
-Product.Review = function Review() {
-  return (
-    <div className='flex items-center gap-2 text-yellow mt-2'>
-      <div className='flex text-sm gap-1 items-center'>
-        <BsStarFill />
-        <BsStarFill />
-        <BsStarFill />
-        <BsStarFill />
-        <BsStarFill />
-        <p className=' text-black'>25</p>
-      </div>
     </div>
   )
 }

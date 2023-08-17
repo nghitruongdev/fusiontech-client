@@ -48,7 +48,7 @@ const Banner = () => {
     slidesToShow: 1,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 3000,
+    autoplaySpeed: 6000,
     cssEase: 'linear',
     swipeToSlide: true,
     // arrows: false,
@@ -78,12 +78,13 @@ const Banner = () => {
   }
   const sliderRef = useRef<Slider | null>(null)
   const backgroundImageURL =
-    'https://media.istockphoto.com/id/496310783/vector/blue-boxes-background.jpg?s=170667a&w=0&k=20&c=7VgnHxd9MiDx21RsgF6bjlgdyvaxwbjOOyfI-QAdg5Q='
+    'https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fbanner%2FNew%20Project.png?alt=media&token=f397a98e-005d-42e5-a230-89001aeaf079'
   return (
     <div className='w-full  px-4 py-4 font-titleFont flex gap-4 '>
       <div className='w-2/3 rounded-lg h-[410px] shadow-md relative'>
         <CaptionCarousel />
       </div>
+
       <div
         className='w-1/3 border-[1px] border-gray-200 rounded-lg shadow-md p-4 flex flex-col justify-between'
         style={{
@@ -92,24 +93,16 @@ const Banner = () => {
           backgroundPosition: '100% 100%',
         }}>
         <div className='flex items-center justify-between'>
-          <h2 className='text-xl font-semibold uppercase text-black'>
+          <h2 className='text-xl font-bold uppercase text-black  '>
             Sản phẩm 🔥
           </h2>
-          <p className='text-base text-zinc-600 underline underline-offset-2'>
+          <p className='text-base text-zinc-700 underline underline-offset-2'>
             View all
           </p>
         </div>
-        {/* <div className='flex justify-center items-center h-60'>
-          <a href='#'>
-            <Image
-              className='h-full w-60 object-cover'
-              src={newProduct}
-              alt=''
-            />
-          </a>
-        </div> */}
+
         <div className=''>
-          <div className='relative px-2 pb-2 text-center'>
+          <div className='relative px-2 pb-2'>
             <Slider
               {...settings}
               ref={(slider) => (sliderRef.current = slider)}>
@@ -117,9 +110,9 @@ const Banner = () => {
                 <ProductCardProvider
                   key={product.id}
                   product={product}>
-                  {/* <div className='bg-white mx-2 rounded-lg border-gray-300 shadow'> */}
-                  <Product item={product} />
-                  {/* </div> */}
+                  <div className='bg-white p-2 mx-2 rounded-lg border-gray-300 shadow'>
+                    <Product item={product} />
+                  </div>
                 </ProductCardProvider>
               ))}
             </Slider>
@@ -247,7 +240,7 @@ Product.Brand = ({ brand }: { brand: IProduct['brand'] }) => {
 // eslint-disable-next-line react/display-name
 Product.Name = ({ name }: { name: IProduct['name'] }) => {
   return (
-    <p className=' text-xs leading-normal text-zinc-500 line-clamp-1 uppercase font-bold '>
+    <p className=' text-base leading-normal text-zinc-500 line-clamp-1 uppercase font-bold '>
       {/* {
                   "Laptop ACER Nitro 5 Eagle AN515-57-54MV (i5-11400H/RAM 8GB/RTX 3050/512GB SSD/ Windows 11)"
               } */}

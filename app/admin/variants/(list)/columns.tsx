@@ -2,8 +2,15 @@
 
 import { onDefaultSuccess, onError } from '@/hooks/useCrudNotification'
 import { formatPrice } from '@/lib/utils'
-import { Button, FormControl, HStack, Image, Switch } from '@chakra-ui/react'
-import { EditButton, ShowButton } from '@components/buttons'
+import {
+  Button,
+  FormControl,
+  HStack,
+  Image,
+  Switch,
+  Tooltip,
+} from '@chakra-ui/react'
+import { DeleteButton, EditButton, ShowButton } from '@components/buttons'
 import { useUpdate } from '@refinedev/core'
 import { ColumnDef } from '@tanstack/react-table'
 import { useRef, useState } from 'react'
@@ -14,36 +21,36 @@ import { AppError } from 'types/error'
 const { resource } = API['variants']()
 
 const variantColumns: ColumnDef<IVariant>[] = [
-  {
-    id: 'id',
-    accessorKey: 'id',
-    header: 'Id',
-  },
+  // {
+  //   id: 'id',
+  //   accessorKey: 'id',
+  //   header: 'Id',
+  // },
   {
     id: 'sku',
     accessorKey: 'sku',
     header: 'Mã SKU',
   },
-  {
-    id: 'images',
-    accessorKey: 'images',
-    header: 'Hình ảnh',
+  // {
+  //   id: 'images',
+  //   accessorKey: 'images',
+  //   header: 'Hình ảnh',
 
-    cell: function render({ getValue, row }) {
-      return (
-        <HStack>
-          {getValue<FirebaseImage[]>()?.map((item, index) => (
-            <Image
-              src={item}
-              key={index}
-              sx={{ height: '50px', maxWidth: '100px' }}
-              alt={`${row.getValue<string>('sku')}`}
-            />
-          ))}
-        </HStack>
-      )
-    },
-  },
+  //   cell: function render({ getValue, row }) {
+  //     return (
+  //       <HStack>
+  //         {getValue<FirebaseImage[]>()?.map((item, index) => (
+  //           <Image
+  //             src={item}
+  //             key={index}
+  //             sx={{ height: '50px', maxWidth: '100px' }}
+  //             alt={`${row.getValue<string>('sku')}`}
+  //           />
+  //         ))}
+  //       </HStack>
+  //     )
+  //   },
+  // },
   {
     id: 'price',
     accessorKey: 'price',
@@ -54,6 +61,14 @@ const variantColumns: ColumnDef<IVariant>[] = [
     id: 'availableQuantity',
     accessorKey: 'availableQuantity',
     header: 'Số lượng khả dụng',
+    enableHiding: true,
+    enableResizing: true,
+    enablePinning: true,
+  },
+  {
+    id: 'soldCount',
+    accessorKey: 'soldCount',
+    header: 'Số lượng đã bán',
     enableHiding: true,
     enableResizing: true,
     enablePinning: true,
@@ -79,7 +94,7 @@ const variantColumns: ColumnDef<IVariant>[] = [
     },
     cell: function render({ getValue }) {
       return (
-        <HStack>
+        <HStack pos={'relative'}>
           <ShowButton
             resource={resource}
             hideText
@@ -90,6 +105,13 @@ const variantColumns: ColumnDef<IVariant>[] = [
             hideText
             recordItemId={getValue() as string}
           />
+          <Tooltip label={'Chỉ có thể xoá những bán thể chưa được bán'}>
+            <DeleteButton
+              resource={resource}
+              hideText
+              recordItemId={getValue() as string}
+            />
+          </Tooltip>
         </HStack>
       )
     },

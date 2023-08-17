@@ -17,10 +17,15 @@ import { BiLeftArrowAlt, BiRightArrowAlt } from 'react-icons/bi'
 import Slider from 'react-slick'
 import {
   banner1,
+  banner10,
   banner2,
   banner3,
   banner4,
   banner5,
+  banner6,
+  banner7,
+  banner8,
+  banner9,
 } from 'public/assets/images'
 
 // Settings for the slider
@@ -78,6 +83,31 @@ export default function CaptionCarousel() {
       title: 'Design Projects 3',
       text: "The project board is an exclusive resource for contract work. It's perfect for freelancers, agencies, and moonlighters.",
       image: banner5.src,
+    },
+    {
+      title: 'Design Projects 3',
+      text: "The project board is an exclusive resource for contract work. It's perfect for freelancers, agencies, and moonlighters.",
+      image: banner6.src,
+    },
+    {
+      title: 'Design Projects 3',
+      text: "The project board is an exclusive resource for contract work. It's perfect for freelancers, agencies, and moonlighters.",
+      image: banner7.src,
+    },
+    {
+      title: 'Design Projects 3',
+      text: "The project board is an exclusive resource for contract work. It's perfect for freelancers, agencies, and moonlighters.",
+      image: banner8.src,
+    },
+    {
+      title: 'Design Projects 3',
+      text: "The project board is an exclusive resource for contract work. It's perfect for freelancers, agencies, and moonlighters.",
+      image: banner9.src,
+    },
+    {
+      title: 'Design Projects 3',
+      text: "The project board is an exclusive resource for contract work. It's perfect for freelancers, agencies, and moonlighters.",
+      image: banner10.src,
     },
   ]
 

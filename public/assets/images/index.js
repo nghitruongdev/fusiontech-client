@@ -23,14 +23,19 @@ import cash from './benefit-icons/003-cash-on-delivery.webp'
 import support from './benefit-icons/004-headphones.webp'
 import warrantyBenefit from './benefit-icons/006-best-seller.webp'
 import digital from './category-img/digital-category.webp'
-import banner1 from './banner/xf5thi3l.png'
-import banner2 from './banner/1vjov20v.png'
+import banner1 from './banner/Gaming_laptops_Banner.png'
+import banner2 from './banner/asus-laptops-2022.webp'
 import banner3 from './banner/banner3.webp'
 import banner4 from './banner/1200x628-1.png'
-import banner5 from './banner/laptop-Dell-Inspiron-15-3505-us039.png'
+import banner5 from './banner/Chien-Binh-Da-Phong-Cach-Aspire-7-2023-Laptop-Gaming-Pho-Thong-CPU-Chip-H.png'
+import banner6 from './banner/product_banner_mo.jpeg'
+import banner7 from './banner/intel-rtx-3080-gaming-laptops-banner-980px-v1.jpg'
+import banner8 from './banner/pngtree-digital-cool-game-laptop-banner-png-image_7538305.png'
+import banner9 from './banner/banner-laptop-gaming-he-1683277063.png'
+import banner10 from './banner/laptop-back-to-school-bannerblog-800x400px-923a9132-522f-4628-b660-986b1a6c4ad8.webp'
 
 import newProduct from './banner/new.webp'
-import sale1 from './banner/sale1.webp'
+import sale1 from './banner/Chien-Binh-Da-Phong-Cach-Aspire-7-2023-Laptop-Gaming-Pho-Thong-CPU-Chip-H.png'
 import sale2 from './banner/sale2.webp'
 
 export {
@@ -61,6 +66,11 @@ export {
   banner3,
   banner4,
   banner5,
+  banner6,
+  banner7,
+  banner8,
+  banner9,
+  banner10,
   newProduct,
   sale2,
   sale1,

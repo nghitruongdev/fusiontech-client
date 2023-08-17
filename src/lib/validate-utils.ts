@@ -7,6 +7,16 @@ export const SLUG_PATTERN = {
   message: 'Đường dẫn không hợp lệ',
 }
 
+export const EMAIL_PATTERN = {
+  value: /^\S+@\S+$/i,
+  message: 'Email không hợp lệ.',
+}
+
+export const PHONE_PATTERN = {
+  value: /^0[\d]{9}/,
+  message: 'Số điện thoại không hợp lệ.',
+}
+
 export const validatePhoneNumber = (phoneNum: string) => {
   const phone = phoneNum.trim()
   return phone.length === 10 && phone.charAt(0) === '0'

@@ -56,9 +56,9 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Rating } from '@smastrom/react-rating'
 import { BiChevronDownCircle } from 'react-icons/bi'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { variantTableColumns } from 'app/admin/variants/(list)/page'
 import { Show } from '@components/crud'
 import { CreateButton } from '@components/buttons'
+import { variantTableColumns as columns } from 'app/admin/variants/(list)/columns'
 
 const ProductShowPage = () => {
   return (
@@ -70,7 +70,7 @@ const ProductShowPage = () => {
   )
 }
 
-export const ProductShow: React.FC<IResourceComponentsProps> = () => {
+const ProductShow: React.FC<IResourceComponentsProps> = () => {
   const {
     queryResult: { isLoading },
     record,
@@ -480,11 +480,6 @@ const ContextProvider = ({ children }: PropsWithChildren) => {
     // syncUrl(index);
   }
 
-  const columns = React.useMemo<ColumnDef<IVariant>[]>(
-    () => variantTableColumns,
-    [],
-  )
-
   const {
     resource,
     projection: { withSpecs: projection },
@@ -544,5 +539,4 @@ const ContextProvider = ({ children }: PropsWithChildren) => {
   )
 }
 
-const useVariantTable = () => {}
 export default ProductShowPage

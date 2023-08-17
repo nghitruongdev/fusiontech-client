@@ -44,6 +44,10 @@ export const ERRORS = {
       required: 'Yêu cầu nhập tên danh mục',
       exists: 'Tên này đã tồn tại',
     },
+    slug: {
+      required: 'Yêu cầu nhập đường dẫn slug',
+      exists: 'Đường dẫn này đã tồn tại',
+    },
   },
   products: {
     name: {

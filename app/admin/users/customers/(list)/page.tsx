@@ -1,7 +1,6 @@
 /** @format */
 
 'use client'
-
 import React from 'react'
 import { IResourceComponentsProps } from '@refinedev/core'
 import { useTable } from '@refinedev/react-table'
@@ -12,13 +11,13 @@ import { EditButton, ShowButton } from '@components/buttons'
 import { List } from '@components/crud'
 import Image from 'next/image'
 import { FirebaseImage, Gender, IUser } from 'types'
-import { API, GenderLabel, Images } from 'types/constants'
+import { API, Images } from 'types/constants'
+import { GenderLabel } from 'types/constants'
 
-export default function ListPage() {
+const page = () => {
   return <UserList />
 }
 
-const { resource, findStaff } = API['users']()
 const UserList: React.FC<IResourceComponentsProps> = () => {
   const columns = React.useMemo<ColumnDef<IUser>[]>(
     () => [
@@ -66,25 +65,25 @@ const UserList: React.FC<IResourceComponentsProps> = () => {
         },
       },
 
-      {
-        id: 'actions',
-        accessorKey: 'id',
-        header: 'Hành động',
-        cell: function render({ getValue }) {
-          return (
-            <HStack>
-              <ShowButton
-                hideText
-                recordItemId={getValue() as string}
-              />
-              <EditButton
-                hideText
-                recordItemId={getValue() as string}
-              />
-            </HStack>
-          )
-        },
-      },
+      //   {
+      //     id: 'actions',
+      //     accessorKey: 'id',
+      //     header: 'Hành động',
+      //     cell: function render({ getValue }) {
+      //       return (
+      //         <HStack>
+      //           <ShowButton
+      //             hideText
+      //             recordItemId={getValue() as string}
+      //           />
+      //           <EditButton
+      //             hideText
+      //             recordItemId={getValue() as string}
+      //           />
+      //         </HStack>
+      //       )
+      //     },
+      //   },
     ],
     [],
   )
@@ -103,15 +102,8 @@ const UserList: React.FC<IResourceComponentsProps> = () => {
     },
   } = useTable({
     columns,
-    refineCoreProps: {
-      resource: findStaff,
-      meta: {
-        resource,
-      },
-    },
   })
 
-  console.log('tableData', tableData)
   setOptions((prev) => ({
     ...prev,
     meta: {
@@ -142,3 +134,5 @@ const UserList: React.FC<IResourceComponentsProps> = () => {
     </List>
   )
 }
+
+export default page

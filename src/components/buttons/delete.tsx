@@ -27,7 +27,10 @@ import { IconTrash } from '@tabler/icons'
 import type { DeleteButtonProps } from '@refinedev/chakra-ui'
 import { RefineButtonClassNames } from '@refinedev/ui-types'
 import { ButtonText } from 'types/constants'
-import { onError } from '@/hooks/useCrudNotification'
+import {
+  onError,
+  onSuccess as notificationOnSuccess,
+} from '@/hooks/useCrudNotification'
 
 /**
  * `<DeleteButton>` uses Chakra UI {@link https://chakra-ui.com/docs/components/button `<Button>`} and {@link https://chakra-ui.com/docs/components/popover `<Popover>`} components.
@@ -103,7 +106,8 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
           id: recordItemId ?? id ?? '',
           resource: identifier,
           mutationMode,
-          successNotification,
+          successNotification:
+            successNotification ?? notificationOnSuccess.bind(null, 'delete'),
           errorNotification: errorNotification ?? onError,
           meta: pickNotDeprecated(meta, metaData),
           metaData: pickNotDeprecated(meta, metaData),
