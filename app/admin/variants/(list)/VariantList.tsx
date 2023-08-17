@@ -71,7 +71,7 @@ export const VariantList: React.FC<IResourceComponentsProps> = () => {
     },
   })
   return (
-    <List canCreate={false}>
+    <List>
       <TableContainer whiteSpace='pre-line'>
         <Table variant='simple'>
           {headers}

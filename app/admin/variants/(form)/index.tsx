@@ -285,7 +285,7 @@ VariantForm.Body = function Body() {
           <VariantForm.Images />
         </div>
       </div>
-      <div className=' col-span-2'>
+      <div className=' col-span-2 flex flex-col gap-2'>
         <VariantForm.Product />
         <VariantForm.SKU />
         <VariantForm.Price />
@@ -357,7 +357,6 @@ VariantForm.Product = function Product() {
         })
     }
   }, [product, resetField, options])
-  console.log(options)
 
   return (
     <>
@@ -578,7 +577,6 @@ VariantForm.SpecDefault = function SpecificationDefault({}) {
 
   const productSpecs = product?.specifications ?? []
   useEffect(() => {
-    console.log('useEffect ran')
     if (action === 'edit') return
 
     const specifications = product?.specifications ?? []
@@ -636,6 +634,7 @@ VariantForm.Specification = function Specification({}) {
     control,
     product: { data: product },
     variant,
+    formState: { errors },
   } = useFormProvider()
 
   const buttonRef = useRef(null)
@@ -679,14 +678,17 @@ VariantForm.Specification = function Specification({}) {
   if (!fields.length) return <></>
   return (
     <>
-      <div>
+      <FormControl isInvalid={!!errors.formSpecifications}>
         <FormLabel>Thông số kỹ thuật</FormLabel>
+        <FormErrorMessage>
+          {errors?.formSpecifications?.message}
+        </FormErrorMessage>
         <div className='border rounded-lg p-4'>
           <div className=''>
-            <div className='header flex'>
+            {/* <div className='header flex'>
               <p className='flex-grow'>Tên thông số</p>
               <p className='flex-grow'>Chi tiết</p>
-            </div>
+            </div> */}
             <div className='body flex flex-col'>
               {fields.map((field, idx) => (
                 <VariantForm.Specification.Row
@@ -699,7 +701,7 @@ VariantForm.Specification = function Specification({}) {
           </div>
         </div>
         <VariantForm.OtherVariant />
-      </div>
+      </FormControl>
     </>
   )
 } as React.FC & {
@@ -741,6 +743,7 @@ VariantForm.OtherVariant = function OtherVariants() {
   //todo: update this using trigger without rerendering the form
   const otherVariant = useMemo(() => {
     console.log('specsChange', specsChange)
+    console.log('variants', variants)
     const isInvalid = specsChange.some((spec) => !spec.option?.value)
     console.log('isInvalid', isInvalid)
     if (isInvalid) return
@@ -764,10 +767,20 @@ VariantForm.OtherVariant = function OtherVariants() {
     })
     return other
   }, [specsChange, variants, variant?.id, setError, clearErrors])
-
+  const other = variants?.[0]
   return (
     <>
-      <div>{JSON.stringify(otherVariant)}</div>
+      {/* <div>{JSON.stringify(other)}</div> */}
+      {other && (
+        <div>
+          <h2>Thông tin biến thể khác</h2>
+          <p>ID: {other.id}</p>
+          <p>SKU: {other.sku}</p>
+          <p>Giá: {other.price}</p>
+          <p>Tên sản phẩm: {other.product?.name}</p>
+          <p>Số lượt bán: {other.soldCount}</p>
+        </div>
+      )}
     </>
   )
 }
