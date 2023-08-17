@@ -95,10 +95,10 @@ export const CheckoutProvider = ({ children }: ProviderProps) => {
       })
 
       const items = cartItems.map(
-        ({ variantId, variant: { price } = {}, quantity }) => ({
+        ({ variantId, variant: { price, product } = {}, quantity }) => ({
           variantId,
           quantity,
-          price,
+          price: ((100 - (product?.discount ?? 0)) / 100) * price,
         }),
       )
       await waitPromise(2000)

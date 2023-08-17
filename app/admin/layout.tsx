@@ -15,7 +15,7 @@ import {
 } from '@refinedev/chakra-ui'
 import { Refine } from '@refinedev/core'
 import routerProvider from '@refinedev/nextjs-router/app'
-import { UserCircle, Users } from 'lucide-react'
+import { BarChart3, UserCircle, Users } from 'lucide-react'
 import { Cpu, LucideLaptop2, MemoryStick, ShoppingCart } from 'lucide-react'
 import { Warehouse } from 'lucide-react'
 import { Monitor, Ticket } from 'lucide-react'
@@ -154,6 +154,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               meta: {
                 canDelete: false,
                 label: 'Chi tiết kho hàng',
+              },
+            },
+            {
+              name: 'stat',
+              list: '/admin/stat',
+              // create: '/admin/categories/create',
+              // edit: '/admin/categories/edit/:id',
+              // show: '/admin/categories/show/:id',
+              meta: {
+                canDelete: true,
+                label: 'Thống kê',
+                icon: <BarChart3 size={18} />,
               },
             },
             {

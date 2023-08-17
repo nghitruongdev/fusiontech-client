@@ -29,6 +29,7 @@ export const API = {
       cart: {
         checkout: `cart/checkout`,
       },
+      countOrder: () => `${resource}/count`,
       findAllStatusByGroup: (group: string | undefined) =>
         !group ? '' : `${resource}/statuses?group=${group}`,
       findOrderByUserAndStatus: (
@@ -102,7 +103,7 @@ export const API = {
       getProductsLastest: (size: number) =>
         `${resource}/search/latest-products?size=${size}`,
       getSellingProducts: (startDate: Date, endDate: Date, size: number = 10) =>
-        `stat/best-seller?startDate=${formatDate(
+        `statistical/best-seller?startDate=${formatDate(
           startDate,
         )}&endDate=${formatDate(endDate)}&size=${size}`,
       getVariants: (productId: string | number | undefined) =>
@@ -174,6 +175,7 @@ export const API = {
       findByPhone: (phone: string) =>
         `${resource}/search/find-by-phone?phoneNumber=${phone}`,
       findStaff: `${resource}/search/staffs`,
+      countUser: () => `${resource}/count`,
     }
   },
   shippingAddresses: () => {
@@ -186,6 +188,16 @@ export const API = {
         `${resource}/search/findDefaultShippingAddressByUserId?uid=${uid}`,
     }
   },
+  statistical: () => {
+    const resource: ResourceName = 'statistical'
+    return {
+      resource: resource,
+      revenue: () => `${resource}/revenue/all`,
+      bestCustomer: (size: number = 10) =>
+        `${resource}/best-customer?size=${size}`,
+      revenueDay: () => `${resource}/revenue/day`,
+    }
+  },
   address: {
     provinces: `address/provinces`,
     districts: (provinceCode: number | string | undefined) =>
@@ -193,6 +205,7 @@ export const API = {
     wards: (districtCode: number | string | undefined) =>
       districtCode ? `address/wards?query=${districtCode}` : '',
   },
+
   vouchers: () => {
     const resource: ResourceName = 'vouchers'
     return {
@@ -229,6 +242,7 @@ export const RESOURCE_LABEL: { [key in ResourceName]: string } = {
   shippingAddresses: 'Địa chỉ',
   specifications: 'Thông số',
   vouchers: 'Voucher',
+  statistical: 'Thống kê',
 }
 export const ROLES = {
   user: 'người dùng',
@@ -298,4 +312,6 @@ export const Images: { [key in ResourceName]: string } = {
     'https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fvariants%2FlogostuImage.png?alt=media&token=90709f04-0996-4779-ab80-f82e99c62041',
   vouchers: '',
   'inventory-details': '',
+  statistical:
+    'https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fvariants%2FlogostuImage.png?alt=media&token=90709f04-0996-4779-ab80-f82e99c62041',
 }

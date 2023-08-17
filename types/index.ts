@@ -12,6 +12,7 @@ export type ResourceName =
   | 'shippingAddresses'
   | 'specifications'
   | 'vouchers'
+  | 'statistical'
   | 'inventory-details'
 
 export type FirebaseImage = string
@@ -219,6 +220,7 @@ export interface IUser {
   defaultAddress?: ShippingAddress
   disabled?: boolean
   staff?: boolean
+  totalOrder?: number
   _links?: _links
 }
 
