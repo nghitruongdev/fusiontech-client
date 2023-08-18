@@ -14,7 +14,8 @@ import { springDataProvider } from '@/providers/rest-data-provider'
 import { useCustom } from '@refinedev/core'
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
 import { formatDateTime, formatPrice } from '@/lib/utils'
-
+import Link from 'next/link'
+import React, { useState } from 'react'
 const getOrderByGroup = (group: string) => {
   const {
     resource,
@@ -48,12 +49,14 @@ const getOrderByGroup = (group: string) => {
       enabled: !!id && !!statusParam,
     },
   })
+  console.log(data)
   return data
 }
 
 const OrderByGroup = ({ params: { group } }: { params: { group: string } }) => {
   //   const orders = ((await getOrderByGroup(group)) ?? []) as IOrder[]
   const orders = getOrderByGroup(group)
+  console.log(orders)
   return (
     <div>
       <div className='bg-white rounded-lg overflow-y-auto'>
@@ -71,19 +74,27 @@ const OrderByGroup = ({ params: { group } }: { params: { group: string } }) => {
             {orders
               ?.sort((a, b) => +b.id - +a.id)
               .map(({ id, purchasedAt, total, status, payment }) => (
-                <tr
-                  key={id}
-                  className='border-t'>
-                  <td className='px-4 py-4 text-blue-500'>{id}</td>
-                  <td className='px-4 py-4'>{formatDateTime(purchasedAt)}</td>
-                  <td className='px-4 py-4'>{formatPrice(payment?.amount)}</td>
-                  <td className={`px-4 py-4 text-blue-500`}>
-                    {OrderStatusText[status as OrderStatus].text}
-                  </td>
-                  <td className='px-4 py-4 text-blue-500'>
-                    {PaymentStatusLabel[payment?.status as PaymentStatus].text}
-                  </td>
-                </tr>
+                  <tr
+                    key={id}
+                    className='border-t'>
+                    <Link href={`/account/orders/order-detail/${id}`}>
+                      <td className='px-4 py-4 text-blue-500'>{id}</td>
+                    </Link>
+                    <td className='px-4 py-4'>{formatDateTime(purchasedAt)}</td>
+                    <td className='px-4 py-4'>
+                      {formatPrice(payment?.amount)}
+                    </td>
+                    <td className={`px-4 py-4 text-blue-500`}>
+                      {OrderStatusText[status as OrderStatus].text}
+                    </td>
+                    <td className='px-4 py-4 text-blue-500'>
+                      {
+                        PaymentStatusLabel[payment?.status as PaymentStatus]
+                          .text
+                      }
+                    </td>
+                  </tr>
+                
               ))}
           </tbody>
         </table>
@@ -92,3 +103,4 @@ const OrderByGroup = ({ params: { group } }: { params: { group: string } }) => {
   )
 }
 export default OrderByGroup
+

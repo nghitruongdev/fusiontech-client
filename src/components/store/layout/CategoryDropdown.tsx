@@ -14,8 +14,15 @@ import {
 import { Laptop } from 'lucide-react'
 import Image from 'next/image'
 import { ICategory } from 'types'
+import { useRouter } from 'next/router'
 
 export function CategoryDropDown({ categories }: { categories: ICategory[] }) {
+  // const router = useRouter()
+  const categoryClick = (category: number) => {
+    console.log(category)
+    // router.push(`/search?category=${category}`);
+    window.location.href = `/search?cid=${category}`
+  };
   return (
     <>
       <Popover isLazy>
@@ -57,7 +64,7 @@ export function CategoryDropDown({ categories }: { categories: ICategory[] }) {
                     }}>
                     {categories.map((item) => (
                       <>
-                        <MenuItem key={`${Math.random()}`}>
+                        <MenuItem key={`${Math.random()}`} onClick={() => categoryClick(item.id??0)} >
                           <Image
                             src={item.image ?? ''}
                             width={100}

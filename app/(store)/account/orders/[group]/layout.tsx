@@ -1,5 +1,5 @@
 import { API_URL } from "types/constants";
-import StatusTabs from "./StatusTabs";
+import StatusTabs from "../StatusTabs";
 import { IOrderStatusGroup } from "types";
 
 const getStatusGroups = async () => {

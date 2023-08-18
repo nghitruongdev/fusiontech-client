@@ -1,7 +1,8 @@
 /** @format */
 
 'use client'
-
+import { CategoryDropDown, CategoryDropDownButton } from './CategoryDropdown'
+import { getCategoriesList } from '@/providers/server-data-provider/data/categories'
 import useCart, { useCartItems } from '@components/store/cart/useCart'
 import { ShoppingBag, UserCircle } from 'lucide-react'
 import React, { useState, useEffect, use, Suspense } from 'react'
@@ -205,6 +206,7 @@ const UserInfoLoading = () => {
     </div>
   )
 }
+
 
 export const SearchInput = () => {
   const [searchTerm, setSearchTerm] = useState<string>('')

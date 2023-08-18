@@ -47,7 +47,7 @@ const Product = async ({ params: { id } }: Props) => {
             <div className='col-span-1 flex flex-col gap-2 '>
               <div className='p-4 pt-0 rounded-lg flex flex-col gap-6 shadow-lg border'>
                 <ProductFavoriteDetails />
-                <Product.Info />
+                <Product.Info />  
               </div>
             </div>
           </div>
@@ -69,7 +69,7 @@ const Product = async ({ params: { id } }: Props) => {
   )
 }
 Product.Id = ''
-Product.Info = async () => {
+Product.  Info = async () => {
   const { name } = await getOneProduct(Product.Id)
   return (
     <>

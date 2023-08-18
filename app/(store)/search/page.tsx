@@ -9,9 +9,11 @@ import InputSlider from 'react-input-slider'
 import NextLinkContainer from '@components/ui/NextLinkContainer'
 import { v4 as uuidv4 } from 'uuid'
 import Image from 'next/image'
+import { formatPrice } from '@/lib/utils'
 const SearchResultPage = () => {
   const param = useSearchParams() // Lấy keyword từ URL
   const keyword = param.get('keyword')
+  const cid = param.get('cid')
   const [searchResults, setSearchResults] = useState<IProduct[]>([])
   const [filterOptions, setFilterOptions] = useState({
     price: 0,
@@ -20,6 +22,8 @@ const SearchResultPage = () => {
     brand: '',
     // Add more filter options here as needed
   })
+
+
 
   const colorOptions = [
     { name: 'White', value: 'blue', color: '#FFFFFF' },
@@ -34,9 +38,8 @@ const SearchResultPage = () => {
   useEffect(() => {
     const fetchSearchResults = async () => {
       try {
-        const response = await productAPI.searchByKeyword(keyword)
-        setSearchResults(response.data._embedded.products)
-        console.log(keyword)
+        const responseByKeyword = await productAPI.searchByKeyword(keyword)
+        setSearchResults(responseByKeyword.data._embedded.products)
       } catch (error) {
         console.error('Error fetching search results:', error)
       }
@@ -44,6 +47,19 @@ const SearchResultPage = () => {
 
     fetchSearchResults()
   }, [keyword])
+
+  useEffect(() => {
+    const fetchSearchResults = async () => {
+      try {
+        const responseByCid = await productAPI.searchByCategoryId(cid)
+        setSearchResults(responseByCid.data._embedded.products)
+      } catch (error) {
+        console.error('Error fetching search results:', error)
+      }
+    }
+
+    fetchSearchResults()
+  }, [cid])
 
   const handleFilter = (values: any) => {
     setFilterOptions({
@@ -197,10 +213,10 @@ const SearchResultPage = () => {
                       alt={product.name}
                       className='w-full h-48 object-cover mt-2 transition-transform transform scale-100 hover:scale-105'
                     />
-                    <h3 className='text-base font-semibold mb-2 mt-2'>
+                    <h3 className='text-base text-center font-semibold mb-2 mt-2'>
                       {product.name}
                     </h3>
-                    <p className='text-blue-700 font-semibold'>$2000</p>
+                    <p className='text-blue-700 text-sm text-center font-semibold'>{formatPrice(product.minPrice)} - {formatPrice(product.maxPrice)}</p>
                   </div>
                 </NextLinkContainer>
               ))
