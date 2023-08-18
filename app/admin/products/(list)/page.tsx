@@ -5,7 +5,7 @@
 import React, { useState } from 'react'
 import { IResourceComponentsProps, useUpdate } from '@refinedev/core'
 import { useTable } from '@refinedev/react-table'
-import { ColumnDef, flexRender } from '@tanstack/react-table'
+import { ColumnDef } from '@tanstack/react-table'
 import {
   TableContainer,
   Table,
@@ -21,7 +21,7 @@ import { EditButton, ShowButton } from '@components/buttons'
 import { Images, API } from 'types/constants'
 import { AppError } from 'types/error'
 import { onDefaultSuccess, onError } from '@/hooks/useCrudNotification'
-import { Star, StarHalf, StarOff, Stars } from 'lucide-react'
+import { Stars } from 'lucide-react'
 
 export default function ListPage() {
   return <ProductList />
@@ -46,18 +46,18 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
           )
         },
       },
-      {
-        id: 'summary',
-        accessorKey: 'summary',
-        header: 'Mô tả',
-        cell: function render({ getValue }) {
-          return (
-            <div className='line-clamp-3'>
-              <p>{(getValue() as any) ?? ''}</p>
-            </div>
-          )
-        },
-      },
+      //   {
+      //     id: 'summary',
+      //     accessorKey: 'summary',
+      //     header: 'Mô tả',
+      //     cell: function render({ getValue }) {
+      //       return (
+      //         <div className='line-clamp-3'>
+      //           <p>{(getValue() as any) ?? ''}</p>
+      //         </div>
+      //       )
+      //     },
+      //   },
       {
         id: 'images',
         accessorKey: 'images',

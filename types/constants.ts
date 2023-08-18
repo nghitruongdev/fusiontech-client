@@ -7,15 +7,16 @@ import { Action } from '@refinedev/core'
 import { Gender, IUser, PaymentMethod, ResourceName } from 'types'
 const throwIfMissing = (name: string) => {
   throw new Error(`${name} is missing from .env.local`)
-  return ''
+  return
 }
 
 export const API_URL =
-  process.env.NEXT_PUBLIC_RESOURCE_SERVER_URL ??
+  process.env['NEXT_PUBLIC_RESOURCE_SERVER_URL'] ??
   throwIfMissing('NEXT_PUBLIC_RESOURCE_SERVER_URL')
 
-// export const NEXT_API_URL = 'http://localhost:3000/api'
-export const NEXT_API_URL = 'http://100.107.221.79:3000/api'
+export const NEXT_API_URL =
+  process.env['NEXT_PUBLIC_RESOURCE_SERVER_URL'] ??
+  throwIfMissing('NEXT_PUBLIC_API_URL')
 
 export const API = {
   orders: () => {
@@ -79,6 +80,8 @@ export const API = {
         withProduct: 'product',
         withProductBasic: 'product-name',
       },
+      hasImportInventory: (id: string | number | undefined) =>
+        `${resource}/search/has-import-inventory?id=${id}`,
       existsBySku: (sku: string) => `${resource}/search/existsBySku?sku=${sku}`,
       findBySku: (sku: string) => `${resource}/search/findBySku?sku=${sku}`,
       getAvailableQuantity: (id: string | number | undefined) =>
@@ -96,6 +99,8 @@ export const API = {
         nameAndVariantCount: 'name-and-variant-count',
         nameWithVariants: 'name-with-variants',
       },
+      hasImportInventory: (id: string | number | undefined) =>
+        `${resource}/search/has-import-inventory?id=${id}`,
       getAllProducts: () => `${resource}`,
       getProductsDiscount: () => `${resource}/search/discount-products`,
       getHotProducts: (size: number) =>

@@ -4,6 +4,8 @@
 
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
 import { withStorageDOMEvents } from '@/hooks/withStorageEvent'
+import { firebaseAuth } from '@/providers/firebaseAuthProvider'
+import { Button } from '@chakra-ui/react'
 import { CheckoutForm } from '@components/store/cart/checkout/(form)'
 import { AddressFormProvider } from '@components/store/cart/checkout/(form)/(address)/(modal)/AddressForm'
 import AddressSection from '@components/store/cart/checkout/(form)/(address)/AddressSection'
@@ -19,7 +21,7 @@ const AdminPage = () => {
       countStart: 5,
       intervalMs: intervalValue,
     })
-
+  const { user } = useAuthUser()
   const handleChangeIntervalValue = (event: ChangeEvent<HTMLInputElement>) => {
     setIntervalValue(Number(event.target.value))
   }
@@ -27,6 +29,16 @@ const AdminPage = () => {
     <div>
       <p>Count: {count}</p>
       {count === 0 && <SuccessPage />}
+      {/* <Button
+        onClick={() => {
+          console.log('new Date().getTime()', new Date().getTime())
+          setInterval(() => {
+            console.log('Interval running now', new Date().getTime())
+          }, 5000)
+        }}>
+        Log user
+      </Button> */}
+
       <input
         type='number'
         value={intervalValue}

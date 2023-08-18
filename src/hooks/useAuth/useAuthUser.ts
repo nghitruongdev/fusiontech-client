@@ -15,12 +15,14 @@ type State = {
         id?: number
         roles?: string[]
       }
+  token: string | null
   userProfile: IUser | undefined
 }
 
 const store = create<State>()(() => ({
   user: null,
   userProfile: undefined,
+  token: null,
 }))
 
 export const useAuthUser = () => {
@@ -28,12 +30,13 @@ export const useAuthUser = () => {
   const claims = store((state) => state.claims)
   const userProfile = store((state) => state.userProfile)
   const metadata = store((state) => state.metadata)
-
+  const token = store((state) => state.token)
   return {
     user,
     claims,
     userProfile,
     metadata,
+    token,
   }
 }
 export const setAuthUser = (user: State['user']) => {
@@ -46,6 +49,10 @@ export const setUserProfile = (userProfile: State['userProfile']) => {
 
 export const setIsNewUser = (isNew: boolean) => {
   store.setState(({ metadata }) => ({ metadata: { ...metadata, isNew } }))
+}
+
+export const setUserToken = (token: State['token']) => {
+  store.setState(() => ({ token }))
 }
 
 export { store as authStore }

@@ -17,15 +17,16 @@ import { useRef, useState } from 'react'
 import { FirebaseImage, IProduct, IVariant } from 'types'
 import { API } from 'types/constants'
 import { AppError } from 'types/error'
+import { DeleteVariantButton } from '../(form)/DeleteVariantButton'
 
 const { resource } = API['variants']()
 
 const variantColumns: ColumnDef<IVariant>[] = [
-  // {
-  //   id: 'id',
-  //   accessorKey: 'id',
-  //   header: 'Id',
-  // },
+  {
+    id: 'id',
+    accessorKey: 'id',
+    //   header: 'Id',
+  },
   {
     id: 'sku',
     accessorKey: 'sku',
@@ -88,7 +89,7 @@ const variantColumns: ColumnDef<IVariant>[] = [
   },
   {
     id: 'actions',
-    accessorKey: 'actions',
+    accessorKey: 'id',
     header(props) {
       return <p className='text-center'>Menu</p>
     },
@@ -105,13 +106,12 @@ const variantColumns: ColumnDef<IVariant>[] = [
             hideText
             recordItemId={getValue() as string}
           />
-          <Tooltip label={'Chỉ có thể xoá những bán thể chưa được bán'}>
-            <DeleteButton
-              resource={resource}
-              hideText
-              recordItemId={getValue() as string}
-            />
-          </Tooltip>
+          <DeleteVariantButton
+            resource={resource}
+            hideText
+            recordItemId={getValue() as string}
+            variantId={getValue() as string}
+          />
         </HStack>
       )
     },

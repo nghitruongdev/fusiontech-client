@@ -104,7 +104,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               edit: '/admin/products/edit/:id',
               show: '/admin/products/show/:id',
               meta: {
-                canDelete: false,
                 label: 'Sản phẩm',
                 icon: <Cpu size={18} />,
               },
@@ -112,11 +111,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {
               name: 'variants',
               list: '/admin/variants',
-              create: '/admin/products/show/:id/variants/create',
+              create: '/admin/variants/create',
               edit: '/admin/variants/edit/:id',
               show: '/admin/variants/show/:id',
               meta: {
-                canDelete: false,
                 label: 'Biến thể sản phẩm',
                 icon: <Monitor size={18} />,
               },

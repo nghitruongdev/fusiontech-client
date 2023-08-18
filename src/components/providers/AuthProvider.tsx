@@ -9,7 +9,7 @@ import {
 } from '@/hooks/useAuth/useAuthUser'
 import { firebaseAuth } from '@/providers/firebaseAuthProvider'
 import { springDataProvider } from '@/providers/rest-data-provider'
-import { useCustom, useOne } from '@refinedev/core'
+import { User } from 'firebase/auth'
 import { useEffect } from 'react'
 import { IUser } from 'types'
 import { API } from 'types/constants'
@@ -19,18 +19,26 @@ const unsub = firebaseAuth.auth.onIdTokenChanged(async (user) => {
   setAuthUser(user)
 })
 
+const updateToken = (user: User | null, refresh: boolean = false) => {
+  if (user) {
+    user.getIdTokenResult(refresh).then(({ token, claims }) => {
+      authStore.setState(({}) => ({ claims, token }))
+    })
+    return
+  }
+  authStore.setState(() => ({ claims: undefined, token: null }))
+}
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { user, claims: { id: userId } = {} } = useAuthUser()
 
   useEffect(() => {
-    if (user) {
-      user.getIdTokenResult().then((token) => {
-        console.log('token.token', token.token)
-        authStore.setState(({}) => ({ claims: token.claims }))
-      })
-      return
+    updateToken(user, true)
+    const interval = setInterval(() => {
+      updateToken(user)
+    }, 1000 * 60 * 15)
+    return () => {
+      clearInterval(interval)
     }
-    authStore.setState(() => ({ claims: undefined }))
   }, [user])
 
   useEffect(() => {

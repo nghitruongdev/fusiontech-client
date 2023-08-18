@@ -14,11 +14,6 @@ import {
   AuthError,
   signInWithCustomToken,
   getAdditionalUserInfo,
-  checkActionCode,
-  parseActionCodeURL,
-  applyActionCode,
-  reauthenticateWithCredential,
-  reauthenticateWithPopup,
 } from 'firebase/auth'
 import {
   AuthActionResponse,
@@ -34,7 +29,6 @@ import { firebaseApp } from '@/lib/firebase'
 import { API_URL } from 'types/constants'
 import { springDataProvider } from './rest-data-provider'
 import { AppError } from 'types/error'
-import { AxiosError } from 'axios'
 import { setIsNewUser } from '@/hooks/useAuth/useAuthUser'
 
 const auth = getAuth(firebaseApp)
@@ -139,9 +133,9 @@ const onError = async (error: AppError): Promise<OnErrorResponse> => {
   console.log('error', error)
   if (error && error.statusCode === 401) {
     return {
-      error: new Error('Unauthorized'),
-      logout: true,
-      redirectTo: '/login',
+      error: new Error('You do not have rights to access the page.'),
+      logout: false,
+      redirectTo: '/unauthorized',
     }
   }
   return {

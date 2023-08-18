@@ -35,6 +35,7 @@ import {
   Th,
   Thead,
   Tr,
+  ButtonGroup,
 } from '@chakra-ui/react'
 import React, {
   ReactNode,
@@ -57,8 +58,14 @@ import { Rating } from '@smastrom/react-rating'
 import { BiChevronDownCircle } from 'react-icons/bi'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { Show } from '@components/crud'
-import { CreateButton } from '@components/buttons'
+import {
+  CreateButton,
+  EditButton,
+  ListButton,
+  RefreshButton,
+} from '@components/buttons'
 import { variantTableColumns as columns } from 'app/admin/variants/(list)/columns'
+import { DeleteProductButton } from '../../(form)/DeleteProductButton'
 
 const ProductShowPage = () => {
   return (
@@ -81,7 +88,29 @@ const ProductShow: React.FC<IResourceComponentsProps> = () => {
   return (
     <Show
       isLoading={isLoading}
-      canEdit={tabIndex === 0}>
+      headerButtons={({
+        editButtonProps,
+        listButtonProps,
+        refreshButtonProps,
+        deleteButtonProps,
+      }) => {
+        return (
+          <ButtonGroup>
+            <ListButton {...listButtonProps} />
+            {tabIndex === 0 && (
+              <>
+                <EditButton {...editButtonProps} />
+                <DeleteProductButton
+                  {...deleteButtonProps}
+                  productId={record?.id}
+                />
+              </>
+            )}
+
+            <RefreshButton {...refreshButtonProps} />
+          </ButtonGroup>
+        )
+      }}>
       <Tabs
         variant={'solid-rounded'}
         index={tabIndex}
@@ -103,15 +132,16 @@ const ProductShow: React.FC<IResourceComponentsProps> = () => {
             </CreateButton>
           )}
         </div>
-
-        <TabPanels>
-          <TabPanel>
-            <ProductInfo />
-          </TabPanel>
-          <TabPanel>
-            <VariantListByProduct />
-          </TabPanel>
-        </TabPanels>
+        <div>
+          <TabPanels>
+            <TabPanel>
+              <ProductInfo />
+            </TabPanel>
+            <TabPanel>
+              <VariantListByProduct />
+            </TabPanel>
+          </TabPanels>
+        </div>
       </Tabs>
     </Show>
   )
@@ -426,7 +456,12 @@ const VariantListByProduct: React.FC<IResourceComponentsProps> = () => {
   } = useContextProvider()
 
   return (
-    <TableContainer whiteSpace='pre-line'>
+    <TableContainer
+      whiteSpace='pre-line'
+      w={'100%'}
+      overflowWrap='break-word'
+      objectFit='contain'
+      overflowX='hidden'>
       <Table variant='simple'>
         {headers}
         {body}

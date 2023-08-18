@@ -41,7 +41,7 @@ import {
   IVariant,
   Option,
 } from 'types'
-import { API } from 'types/constants'
+import { ActionText, API } from 'types/constants'
 import AsyncSelect from 'react-select/async'
 import { springDataProvider } from '@/providers/rest-data-provider'
 import useDebounceFn from '@/hooks/useDebounceFn'
@@ -49,7 +49,7 @@ import { GroupBase } from 'react-select'
 import { cn } from 'components/lib/utils'
 import CollapseAlert from '@components/alert/CollapseAlert'
 import { waitPromise } from '@/lib/promise'
-import { onError } from '@/hooks/useCrudNotification'
+import { onError, onSuccess } from '@/hooks/useCrudNotification'
 import LoadingOverlay from '@components/ui/LoadingOverlay'
 import { findProductLikeNoOption, toVariantsWithProduct } from './utils'
 
@@ -88,6 +88,7 @@ Form.Provider = function Provider({ action }: ProviderProps) {
     reValidateMode: 'onSubmit',
     refineCoreProps: {
       errorNotification: onError,
+      successNotification: onSuccess.bind(null, action),
       //   redirect: false,
       mutationMode: 'pessimistic',
     },
@@ -97,7 +98,17 @@ Form.Provider = function Provider({ action }: ProviderProps) {
     IInventoryDetail,
     HttpError,
     IInventoryDetail
-  >()
+  >({
+    refineCoreProps: {
+      errorNotification: onError,
+      //   successNotification: onSuccess.bind(null, 'edit'),
+      successNotification: {
+        type: 'success',
+        message: 'Cập nhật thành công rồi nhé bạn!',
+      },
+      resource: 'inventory-details',
+    },
+  })
 
   const {
     control,

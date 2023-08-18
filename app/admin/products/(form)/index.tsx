@@ -41,6 +41,8 @@ import {
   FormErrorIcon,
   InputLeftElement,
   InputGroup,
+  useBoolean,
+  ButtonGroup,
 } from '@chakra-ui/react'
 import {
   FirebaseImage,
@@ -96,6 +98,8 @@ import useCrudNotification, {
 import { EditableMultiValueLabel } from '@components/ui/EditableMultivalueTable'
 import { SLUG_PATTERN } from '@/lib/validate-utils'
 import { ChakraCurrencyInput } from '@components/ui/ChakraCurrencyInput'
+import { DeleteButton, SaveButton } from '@components/buttons'
+import { DeleteProductButton } from './DeleteProductButton'
 
 type ContextProps = {
   action: 'create' | 'edit'
@@ -146,7 +150,7 @@ const ProductFormProvider = ({
       queryResult: { data: { data: product } = { data: undefined } } = {},
     },
     reset,
-    formState: { dirtyFields },
+    formState: { dirtyFields, isSubmitting },
   } = formMethods
 
   useEffect(() => {
@@ -172,6 +176,8 @@ const ProductFormProvider = ({
 
   const saveProps = {
     ...saveButtonProps,
+    disabled: isSubmitting,
+    isLoading: isSubmitting,
     onClick: (e: BaseSyntheticEvent) => {
       handleSubmit(
         async ({
@@ -190,8 +196,8 @@ const ProductFormProvider = ({
             !features || !features.length
               ? undefined
               : features.filter((item) => !!item).map(({ value }) => value)
+
           const handleSpecifications = () => {
-            // console.log('specifications', specifications)
             const result =
               specifications &&
               specifications.map((item) => {
@@ -243,7 +249,6 @@ const ProductFormProvider = ({
                 [key in keyof typeof value]?: string | number | boolean
               },
             )
-
             const submitValues = {
               ...formValues,
               ...(brandId && { brand: { id: brandId } }),
@@ -278,7 +283,6 @@ const ProductFormProvider = ({
     </FormContext.Provider>
   )
 }
-const { countProductSold } = API['products']()
 
 export const ProductForm = ({ action }: { action: ContextProps['action'] }) => {
   console.log('product form rerendered')
@@ -293,23 +297,31 @@ ProductForm.Container = function Container({ children }: PropsWithChildren) {
   const {
     action,
     product,
-    refineCore: { formLoading },
+    refineCore: { formLoading, id },
     saveButtonProps,
   } = useProductFormContext()
-  const { data: soldData } = useCustom({
-    method: 'get',
-    url: countProductSold(product?.id ?? ''),
-    queryOptions: {
-      enabled: !!product,
-    },
-  })
+
   const isEdit = action === 'edit'
+
   if (isEdit)
     return (
       <Edit
         isLoading={formLoading}
         saveButtonProps={saveButtonProps}
-        canDelete={soldData && (soldData.data as unknown as number) == 0}>
+        canDelete={true}
+        footerButtons={({ saveButtonProps, deleteButtonProps }) => {
+          return (
+            <ButtonGroup>
+              <DeleteProductButton
+                {...deleteButtonProps}
+                isDisabled={saveButtonProps?.isDisabled}
+                disabled={saveButtonProps?.disabled}
+                productId={id}
+              />
+              <SaveButton {...saveButtonProps} />
+            </ButtonGroup>
+          )
+        }}>
         {children}
       </Edit>
     )
@@ -773,7 +785,6 @@ ProductForm.Specifications = function Specifications({}) {
     useProductFormContext()
 
   const buttonRef = useRef(null)
-  console.count('specGroup rerendere')
   const { fields, append, remove } = useFieldArray({
     name: 'specifications',
     control: control,
@@ -981,8 +992,8 @@ ProductForm.Specifications = function Specifications({}) {
             </>
           )}
           {!!fields.length && (
-            <>
-              <div className='header flex'>
+            <div>
+              <div className='header flex m-2'>
                 <p className='flex-grow'>Tên thông số</p>
                 <p className='flex-grow'>Chi tiết</p>
               </div>
@@ -996,7 +1007,7 @@ ProductForm.Specifications = function Specifications({}) {
                   />
                 ))}
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>
@@ -1010,8 +1021,6 @@ ProductForm.Specifications = function Specifications({}) {
   }>
 }
 
-type SpecOption = Option<ISpecification>
-
 ProductForm.Specifications.Row = function SpecificationRow({
   index,
   onRemove: onRemoveRow,
@@ -1023,9 +1032,10 @@ ProductForm.Specifications.Row = function SpecificationRow({
     control,
     getValues,
     setValue,
-    formState: { errors },
+    formState: { errors, dirtyFields },
     watch,
   } = useProductFormContext()
+  const [shouldFetch, { on: shouldFetchOn }] = useBoolean()
   //   const isDisabled = action === 'edit'
   const isFixed = watch(`specificationGroup.${index}`)?.__isFixed__
   const isReadOnly =
@@ -1036,7 +1046,7 @@ ProductForm.Specifications.Row = function SpecificationRow({
     url: findDistinctByName(rowField?.label ?? ''),
     method: 'get',
     queryOptions: {
-      enabled: !isFixed,
+      enabled: !isFixed && shouldFetch,
     },
     meta: {
       resource,
@@ -1049,8 +1059,7 @@ ProductForm.Specifications.Row = function SpecificationRow({
   )
 
   const groupNames = watch(`specificationGroup`)
-  const specifications = watch(`specifications.${index}.options`)
-  console.log('specifications', specifications)
+
   const handleSelectChange = (
     onChange: (...event: any[]) => void,
     newValue: MultiValue<Option<ISpecification>>,
@@ -1063,7 +1072,10 @@ ProductForm.Specifications.Row = function SpecificationRow({
       case 'create-option':
         updateValue = updateValue.map((item) =>
           typeof item.value === 'string'
-            ? { ...item, value: { name: item.value, value: item.value } }
+            ? {
+                ...item,
+                value: { name: rowField?.label ?? '', value: item.value },
+              }
             : item,
         )
       case 'select-option':
@@ -1072,6 +1084,11 @@ ProductForm.Specifications.Row = function SpecificationRow({
       case 'remove-value':
     }
     onChange(updateValue, meta)
+    if (!dirtyFields.specifications) {
+      setValue(`specifications`, getValues(`specifications`), {
+        shouldDirty: true,
+      })
+    }
   }
 
   const { resource: specResource } = API['specifications']()
@@ -1125,13 +1142,13 @@ ProductForm.Specifications.Row = function SpecificationRow({
   useEffect(() => {
     const name = groupNames?.[index]?.label
     if (name && rowField?.label !== name) {
-      setValue(
-        `specifications.${index}.options`,
-        getValues(`specifications.${index}.options`).map((item) => ({
+      const updateValues = getValues(`specifications.${index}.options`)?.map(
+        (item) => ({
           ...item,
           value: { ...item.value, name },
-        })),
+        }),
       )
+      setValue(`specifications.${index}.options`, updateValues)
     }
   }, [groupNames, getValues, setValue, index, rowField?.label])
   return (
@@ -1149,16 +1166,19 @@ ProductForm.Specifications.Row = function SpecificationRow({
             render={({ field }) => {
               return (
                 <CreatableSelect
-                  {...field}
+                  //   {...field}
                   ref={field.ref}
+                  value={field.value}
+                  onBlur={field.onBlur}
+                  onChange={handleSelectChange.bind(null, field.onChange)}
                   isMulti
                   isClearable={false}
                   backspaceRemovesValue={false}
+                  onFocus={() => !shouldFetch && shouldFetchOn()}
                   //   {...(isReadOnly && { menuIsOpen: false })}
                   options={isReadOnly ? [] : options}
                   closeMenuOnSelect
                   //   menuPosition='fixed'
-                  onChange={handleSelectChange.bind(null, field.onChange)}
                   // onCreateOption={append}
                   isOptionSelected={(option, selected) => {
                     return selected.some((item) => item.label === option.label)
@@ -1199,7 +1219,7 @@ ProductForm.Specifications.Row = function SpecificationRow({
               )
             }}
             rules={{
-              required: true,
+              required: 'Vui lòng chọn một giá trị',
               validate: (value) => {
                 return !!value.length
               },

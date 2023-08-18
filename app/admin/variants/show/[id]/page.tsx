@@ -5,6 +5,7 @@
 import { useShow, IResourceComponentsProps, useOne } from '@refinedev/core'
 import { NumberField, TagField, TextField } from '@refinedev/chakra-ui'
 import {
+  ButtonGroup,
   Heading,
   HStack,
   Image,
@@ -20,6 +21,9 @@ import { IProduct, ISpecification, IVariant } from 'types'
 import { PropsWithChildren, createContext, useContext, useEffect } from 'react'
 import { API } from 'types/constants'
 import { Show } from '@components/crud'
+import { Badge } from '@components/ui/shadcn/badge'
+import { ListButton, RefreshButton, EditButton } from '@components/buttons'
+import { DeleteVariantButton } from '../../(form)/DeleteVariantButton'
 
 const page = () => {
   return (
@@ -29,7 +33,7 @@ const page = () => {
   )
 }
 
-export const VariantShow: React.FC<IResourceComponentsProps> = () => {
+const VariantShow: React.FC<IResourceComponentsProps> = () => {
   const {
     queryResult: { isLoading },
     record,
@@ -40,9 +44,29 @@ export const VariantShow: React.FC<IResourceComponentsProps> = () => {
       console.log('product', product)
     }
   }, [product])
+
   const firstImage = record?.images?.[0]
   return (
-    <Show isLoading={isLoading}>
+    <Show
+      isLoading={isLoading}
+      headerButtons={({
+        editButtonProps,
+        listButtonProps,
+        refreshButtonProps,
+        deleteButtonProps,
+      }) => {
+        return (
+          <ButtonGroup>
+            <ListButton {...listButtonProps} />
+            <EditButton {...editButtonProps} />
+            <DeleteVariantButton
+              {...deleteButtonProps}
+              variantId={record?.id}
+            />
+            <RefreshButton {...refreshButtonProps} />
+          </ButtonGroup>
+        )
+      }}>
       <div className='grid grid-cols-2'>
         <div className=''>
           <Heading
@@ -85,16 +109,31 @@ export const VariantShow: React.FC<IResourceComponentsProps> = () => {
             as='h5'
             size='sm'
             mt={4}>
-            Sku
+            Mã SKU
           </Heading>
           <TextField value={record?.sku} />
           <Heading
             as='h5'
             size='sm'
             mt={4}>
-            Price
+            Giá bán
           </Heading>
-          <NumberField value={formatPrice(record?.price)} />
+          <TextField value={formatPrice(record?.price)} />
+          <div>
+            {!!product?.discount && !!record?.price && (
+              <div>
+                Giá sau giảm:
+                <Badge
+                  variant={'secondary'}
+                  className={'ml-2 text-green-500 font-bold'}>
+                  {formatPrice(
+                    ((100 - (product?.discount ?? 0)) / 100) * record.price,
+                  )}{' '}
+                  | -{product?.discount ?? 0}%
+                </Badge>
+              </div>
+            )}
+          </div>
           <Heading
             as='h5'
             size='sm'
