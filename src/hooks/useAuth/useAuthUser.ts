@@ -18,6 +18,7 @@ type State = {
   token: string | null
   userProfile: IUser | undefined
   _hasHydrated?: boolean
+  _hasPermissionHydrated?: boolean
 }
 
 const store = create<State>()(() => ({

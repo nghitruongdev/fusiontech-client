@@ -1,6 +1,7 @@
 /** @format */
 
 'use client'
+import { useHeaders } from '@/hooks/useHeaders'
 import { formatPrice, toRecord } from '@/lib/utils'
 import {
   HStack,
@@ -11,6 +12,7 @@ import {
   Tfoot,
   Th,
   Thead,
+  Skeleton,
   Table,
   Tr,
   Container,
@@ -38,53 +40,54 @@ export interface DoanhThuResult {
   totalRevenue: number
   averagePrice: number
 }
+export interface Inventory {
+  variant_id: number
+  quantity: number
+}
 
 export default function StaticPage() {
-  const [doanhThuData, setDoanhThuData] = useState<DoanhThuResult[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { getAuthHeader } = useHeaders()
 
-  const { bestCustomer, resource } = API.statistical()
+  const { bestCustomer, resource, revenue } = API.statistical()
 
   const { data: { data } = {} } = useCustom<
     { id: number; totalOrder: number }[]
   >({
     url: bestCustomer(),
     method: 'get',
-    meta: { resource },
+    meta: {
+      resource,
+    },
+    config: {
+      headers: {
+        ...getAuthHeader(),
+      },
+    },
+  })
+
+  const { data: { data: doanhThuData = [] } = {} } = useCustom<
+    DoanhThuResult[]
+  >({
+    url: revenue(),
+    method: 'get',
+  })
+
+  const { data: { data: inventoryData = [] } = {} } = useCustom<Inventory[]>({
+    url: 'statistical/inventories',
+    method: 'get',
   })
 
   const record = toRecord(data ?? [], 'id')
-
   const ids = Object.keys(record)
-  const drop = useMany<IUser>({
+  const { data: { data: users = [] } = {} } = useMany<IUser>({
     resource: 'users',
     ids: ids,
     queryOptions: {
       enabled: !!ids.length,
     },
   })
-  const { data: { data: users = [] } = {}, isFetching } = drop
-
-  useEffect(() => {
-    fetch('http://100.82.6.136:8080/api/statistical/revenue')
-      .then((response) => response.json())
-      .then((doanhThuData) => {
-        setDoanhThuData(doanhThuData)
-        setIsLoading(false)
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error)
-        setIsLoading(false)
-      })
-  }, [])
-
-  if (isLoading) {
-    return <div>Loading...</div>
-  }
-
-  if (!doanhThuData || doanhThuData.length === 0) {
-    return <div>Invalid data</div>
-  }
+  const getTotalOrder = (userId: number) =>
+    record[userId as unknown as keyof typeof record]?.totalOrder
 
   return (
     <div>
@@ -94,6 +97,7 @@ export default function StaticPage() {
         <TabList mt={10}>
           <Tab>Doanh thu theo năm</Tab>
           <Tab>Người dùng mua hàng nhiều nhất</Tab>
+          <Tab>Kho hàng</Tab>
         </TabList>
         <TabPanels>
           <TabPanel>
@@ -121,16 +125,30 @@ export default function StaticPage() {
                       <Td>{user.fullName}</Td>
                       <Td>{user.email}</Td>
                       <Td>{user.phoneNumber}</Td>
-                      {!!user.id && (
-                        <Td>
-                          {record[user.id as keyof typeof record]?.totalOrder}
-                        </Td>
-                      )}
+                      {!!user.id && <Td>{getTotalOrder(user.id)}</Td>}
                     </Tr>
                   ))}
                 </Tbody>
               </Table>
             </TableContainer>
+          </TabPanel>
+          <TabPanel>
+            <Table className='w-full '>
+              <Thead>
+                <Tr>
+                  <Th>Id</Th>
+                  <Th>Số lượng</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {inventoryData.map((item) => (
+                  <Inventory
+                    key={uuidv4()}
+                    {...item}
+                  />
+                ))}
+              </Tbody>
+            </Table>
           </TabPanel>
         </TabPanels>
       </Tabs>
@@ -158,5 +176,14 @@ const Revenue = (props: DoanhThuResult) => {
         </Tr>
       </Tbody>
     </Table>
+  )
+}
+
+const Inventory = (props: Inventory) => {
+  return (
+    <Tr>
+      <Td>{props.variant_id}</Td>
+      <Td>{props.quantity}</Td>
+    </Tr>
   )
 }

@@ -139,11 +139,8 @@ const ProductList = () => {
   )
 }
 
-const Product = ({
-  item: { id, name, slug, images, discount, brand },
-}: {
-  item: IProduct
-}) => {
+const Product = ({ item }: { item: IProduct }) => {
+  const { id, name, slug, images, discount, brand } = item
   return (
     <div
       aria-label={`Product Item:${name}`}
@@ -157,7 +154,7 @@ const Product = ({
           </div>
           <Product.Brand brand={brand} />
           <Product.Name name={name} />
-          <Product.Price />
+          <Product.Price item={item} />
         </div>
       </NextLinkContainer>
 
@@ -211,6 +208,7 @@ Product.Image = function ProductImage({
     </div>
   )
 }
+// eslint-disable-next-line react/display-name
 Product.Brand = ({ brand }: { brand: IProduct['brand'] }) => {
   return (
     <p className='text-base  font-roboto font-semibold uppercase leading-normal text-zinc-600 line-clamp-1 pt-2'>
@@ -229,15 +227,24 @@ Product.Name = function Name({ name }: { name: IProduct['name'] }) {
   )
 }
 
-Product.Price = function Price() {
+Product.Price = function Price({
+  item: { maxPrice, minPrice, discount = 0 },
+}: {
+  item: IProduct
+}) {
+  const discountPrice = (price: number | undefined) =>
+    ((100 - discount) / 100) * (price ?? 0)
   return (
-    <div className='grid my-3'>
-      <p className='font-titleFont text-md font-bold text-red-600 '>
-        {formatPrice(25_000_000)}
+    <div className='flex justify-start items-center py-2'>
+      <p className='font-titleFont text-sm font-bold text-red-600 mr-1 '>
+        {formatPrice(discountPrice(minPrice))}
       </p>
-      <p className='text-gray-500 text-sm leading-tight line-through decoration-[1px]'>
-        {formatPrice(29_000_000)}
-      </p>
+      <p className='font-titleFont text-sm font-bold text-red-600 mr-1'>-</p>
+      {maxPrice !== minPrice && (
+        <p className='font-titleFont text-sm font-bold text-red-600'>
+          {formatPrice(discountPrice(maxPrice))}
+        </p>
+      )}
     </div>
   )
 }

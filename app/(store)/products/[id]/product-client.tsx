@@ -173,30 +173,31 @@ export const ProductImages = () => {
 }
 export const ProductPrice = () => {
   const {
-    variants: { data: variants, status },
-    product: { minPrice, maxPrice },
+    product: { minPrice = 0, maxPrice = 0, discount = 0 },
   } = useProductContext()
-  const isDiscount = false
+  const isDiscount = !!discount
 
   if (status === 'loading') {
     return <Skeleton className='w-full h-10' />
   }
-  if (!variants?.length) {
-    return <>Không có dữ liệu</>
-  }
 
+  const discountPrice = (price: number | undefined) =>
+    ((100 - discount) / 100) * (price ?? 0)
   return (
     <>
       {isDiscount && (
         <div className='flex items-end gap-2 my-2'>
           <p className='text-3xl text-green-700 font-bold leading-none'>
+            {formatPrice(discountPrice(minPrice))}
+          </p>
+          <p className='text-zinc-700 text-md font-normal line-through decoration-[1px] flex gap-1 items-center'>
+            {formatPrice(discountPrice(maxPrice))}
+          </p>
+          <p className='text-3xl text-green-700 font-bold leading-none'>
             {formatPrice(minPrice)}
           </p>
           <p className='text-zinc-700 text-md font-normal line-through decoration-[1px] flex gap-1 items-center'>
             {formatPrice(maxPrice)}
-            {/* <span> */}
-            {/* <Info /> */}
-            {/* </span> */}
           </p>
         </div>
       )}

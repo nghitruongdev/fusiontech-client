@@ -25,6 +25,7 @@ module.exports = {
       'i.pinimg.com',
       'cdn.freebiesupply.com',
       'example.com',
+      'cdn2.cellphones.com.vn',
     ],
     formats: ['image/webp'],
   },

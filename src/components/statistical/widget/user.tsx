@@ -7,14 +7,23 @@ import { API } from 'types/constants'
 import { useCustom } from '@refinedev/core'
 import { FiUsers } from 'react-icons/fi'
 import { User } from 'lucide-react'
+import { useHeaders } from '@/hooks/useHeaders'
 
 const UserWidget = () => {
   const { countUser, resource } = API.users()
+  const { getAuthHeader } = useHeaders()
 
   const { data: { data } = {} } = useCustom({
     url: countUser(),
     method: 'get',
-    meta: { resource },
+    meta: {
+      resource,
+    },
+    config: {
+      headers: {
+        ...getAuthHeader(),
+      },
+    },
   })
   const usersCount = (data as unknown as number) ?? 0
   return (

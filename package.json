@@ -31,6 +31,7 @@
     "@tanstack/react-query": "^4.29.14",
     "@tanstack/react-table": "^8.9.2",
     "axios": "^0.26.1",
+    "casbin": "^5.26.2",
     "class-variance-authority": "^0.6.0",
     "clsx": "^1.2.1",
     "date-fns": "^2.30.0",

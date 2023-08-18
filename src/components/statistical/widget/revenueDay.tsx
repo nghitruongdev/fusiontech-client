@@ -9,6 +9,7 @@ import { DollarSign } from 'lucide-react'
 import { IUser } from 'types'
 import { useCustom } from '@refinedev/core'
 import { formatPrice } from '@/lib/utils'
+import { useHeaders } from '@/hooks/useHeaders'
 
 export interface RevenueDay {
   totalRevenue: number
@@ -16,16 +17,24 @@ export interface RevenueDay {
   averagePrice: number
   currentDay: Date
 }
+
 const RevenueDayWidget = () => {
   const { revenueDay, resource } = API.statistical()
-
+  const { getAuthHeader } = useHeaders()
   const { data: { data } = {} } = useCustom<RevenueDay[]>({
     url: revenueDay(),
     method: 'get',
-    meta: { resource },
+    meta: {
+      resource,
+    },
+    config: {
+      headers: {
+        ...getAuthHeader(),
+      },
+    },
   })
 
-  const totalRevenue = data && data.length > 0 ? data[0].totalRevenue : 0
+  const totalRevenue = data?.[0]?.totalRevenue ?? 0
   return (
     <div className='p-2 shadow-md rounded-lg bg-white w-[280px] '>
       <Text className='font-bold text-slate-500 text-base uppercase'>

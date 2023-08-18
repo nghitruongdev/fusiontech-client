@@ -111,7 +111,7 @@ export const CheckoutProvider = ({ children }: ProviderProps) => {
             amount,
           },
         })
-        console.warn('Have not cleared items in cart')
+        // console.warn('Have not cleared items in cart')
         cartItems.forEach((item) => !!item.id && removeItem(item.id))
         setTimeout(() => {
           router.replace(`/cart/checkout/success?oid=${result?.data}`)

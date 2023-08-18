@@ -419,7 +419,36 @@ Form.ProductInfo = function ProductInfo() {
   } = Form.useContext()
   const variant = watch(`variant`)
 
-  return <>{JSON.stringify(variant)}</>
+  return (
+    <>
+      {/* {JSON.stringify(variant)} */}
+      <div>
+        {variant && (
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>SKU</th>
+                <th>giá tiền</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{variant.id}</td>
+              </tr>
+              <tr>
+                <td>{variant.sku}</td>
+              </tr>
+              <tr>
+                <td>{variant.price}</td>
+              </tr>
+              {/* Thêm các dòng khác cho các thuộc tính khác */}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </>
+  )
 }
 const DetailTable = () => {
   const {

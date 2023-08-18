@@ -56,22 +56,22 @@ const InventoryList: React.FC<IResourceComponentsProps> = () => {
           return formatDateTime(getValue<string>())
         },
       },
-      {
-        id: 'lastModifiedBy',
-        accessorKey: 'lastModifiedBy',
-        header: 'Cập nhật bởi',
-        cell: function render({ getValue, row }) {
-          return getValue<IBasicUser>()?.name
-        },
-      },
-      {
-        id: 'lastModifiedDate',
-        accessorKey: 'lastModifiedDate',
-        header: 'Thời gian',
-        cell: function render({ getValue }) {
-          return formatDateTime(getValue<string>())
-        },
-      },
+      // {
+      //   id: 'lastModifiedBy',
+      //   accessorKey: 'lastModifiedBy',
+      //   header: 'Cập nhật bởi',
+      //   cell: function render({ getValue, row }) {
+      //     return getValue<IBasicUser>()?.name
+      //   },
+      // },
+      // {
+      //   id: 'lastModifiedDate',
+      //   accessorKey: 'lastModifiedDate',
+      //   header: 'Thời gian',
+      //   cell: function render({ getValue }) {
+      //     return formatDateTime(getValue<string>())
+      //   },
+      // },
       {
         id: 'actions',
         accessorKey: 'id',

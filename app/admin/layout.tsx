@@ -22,6 +22,7 @@ import { Warehouse } from 'lucide-react'
 import { Monitor, Ticket } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
+import { ROLES } from 'types'
 
 const DynamicDialogProvider = dynamic(
   () => import('@components/ui/DialogProvider'),
@@ -33,7 +34,9 @@ export default function LayoutPage({
   children: React.ReactNode
 }) {
   return (
-    <AuthenticatedPage>
+    <AuthenticatedPage
+      redirect={`/auth/login?callbackUrl=/admin`}
+      permissions={[ROLES.STAFF]}>
       <Layout>{children}</Layout>
     </AuthenticatedPage>
   )

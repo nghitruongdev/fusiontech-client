@@ -308,6 +308,7 @@ export interface IVoucher {
   maxDiscountAmount?: number | null
   startDate: string
   expirationDate: string
+  usage?: number | null
   limitUsage?: number | null
   userLimitUsage?: number | null
 }

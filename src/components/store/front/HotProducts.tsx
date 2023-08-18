@@ -1,4 +1,12 @@
 /** @format */
+
+// const Banner = () => {
+//   return (
+
+//   )
+// }
+// export default Banner
+/** @format */
 'use client'
 import SectionTitle from '@components/ui/SectionTitle'
 import { getProductsWithDetails } from '@/providers/server-data-provider/data/products'
@@ -14,18 +22,23 @@ import { FavoriteButtonWithCardProvider } from './product/FavoriteButton'
 import { ProductCardProvider } from './product/ProductCardProvider'
 import { API } from 'types/constants'
 import { useCustom } from '@refinedev/core'
+import { bannerImg, newProduct } from 'public/assets/images'
+import CaptionCarousel from '@components/ui/Carousel'
+import SliderButton from '@components/ui/SliderButton'
+import Slider from 'react-slick'
+import { useRef } from 'react'
 // import { Flex } from "@chakra-ui/react";
 // import { useWindowDimensions } from "@/hooks/useWindowDimensions";
 
-const AllProducts = () => {
+const HotProduct = () => {
   // const { width } = useWindowDimensions();
   // let numProductToShow = 10
   // const products = await getProductsWithDetails()
 
-  const { getAllProducts, resource } = API.products()
+  const { getHotProducts, resource } = API.products()
 
   const { data: { data: products = [] } = {} } = useCustom<IProduct[]>({
-    url: getAllProducts(),
+    url: getHotProducts(5),
     method: 'get',
     meta: { resource },
   })
@@ -33,10 +46,8 @@ const AllProducts = () => {
   return (
     <div className='bg-white rounded-lg '>
       <div className='flex  justify-between items-center px-3 pt-3 md:my-4 lg:mt-10  '>
-        <h5 className='font-bold  text-xl uppercase '>
-          Sản phẩm của FusionTech
-        </h5>
-        <Link href={'http://localhost:3000/search?keyword='}>
+        <h5 className='font-bold  text-xl uppercase '>Sản phẩm 🔥</h5>
+        <Link href={'http://localhost:3000'}>
           <div className=' flex flex-row items-center '>
             <p className='text-base font-semibold text-zinc-500'>Xem tất cả </p>
             <ChevronRight
@@ -134,31 +145,34 @@ Product.sale = ({ sale }: { sale: IProduct['discount'] }) => {
     </>
   )
 }
-
-Product.Image = function ProductImage({
-  images,
-}: {
-  images: IProduct['images']
-}) {
+// eslint-disable-next-line react/display-name
+Product.Image = ({ images }: { images: IProduct['images'] }) => {
   return (
     <div
       className='
-        w-full h-auto overflow-y-hidden
-        ease-in-out duration-300 scale-90 hover:scale-95'>
-      <Image
-        src={
-          images?.[0] ??
-          'https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fvariants%2FlogostuImage.png?alt=media&token=90709f04-0996-4779-ab80-f82e99c62041'
-        }
-        alt='Product image'
-        // fill
-        width={200}
-        height={200}
-        loading='lazy'
-        placeholder='blur'
-        blurDataURL='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMz4irBwAEGQGuUtJ+VQAAAABJRU5ErkJggg=='
-        className='w-full  aspect-square rounded-md max-w-[200px] mx-auto object-contain'
-      />
+          w-full h-auto overflow-y-hidden
+          ease-in-out duration-300 scale-90 hover:scale-95'>
+      {images?.[0] ?? '' ? (
+        <Image
+          src={images?.[0] ?? ''}
+          alt='Product image'
+          // fill
+          width={400}
+          height={600}
+          loading='lazy'
+          placeholder='blur'
+          blurDataURL='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMz4irBwAEGQGuUtJ+VQAAAABJRU5ErkJggg=='
+          className='w-full h-full  aspect-square rounded-md max-w-[200px] mx-auto object-cover'
+        />
+      ) : (
+        <Image
+          alt='/'
+          width={200}
+          height={100}
+          className='w-full  aspect-square rounded-md max-w-[200px] mx-auto object-cover'
+          src='https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fvariants%2FlogostuImage.png?alt=media&token=90709f04-0996-4779-ab80-f82e99c62041'
+        />
+      )}
       <Product.FavoriteButton />
     </div>
   )
@@ -171,12 +185,13 @@ Product.Brand = ({ brand }: { brand: IProduct['brand'] }) => {
     </p>
   )
 }
-Product.Name = function Name({ name }: { name: IProduct['name'] }) {
+// eslint-disable-next-line react/display-name
+Product.Name = ({ name }: { name: IProduct['name'] }) => {
   return (
-    <p className='text-sm leading-normal text-zinc-500 line-clamp-1 uppercase font-bold '>
+    <p className=' text-base leading-normal text-zinc-500 line-clamp-1 uppercase font-bold '>
       {/* {
-                "Laptop ACER Nitro 5 Eagle AN515-57-54MV (i5-11400H/RAM 8GB/RTX 3050/512GB SSD/ Windows 11)"
-            } */}
+                  "Laptop ACER Nitro 5 Eagle AN515-57-54MV (i5-11400H/RAM 8GB/RTX 3050/512GB SSD/ Windows 11)"
+              } */}
       {name}
     </p>
   )
@@ -217,7 +232,7 @@ Product.Review = ({ avgRating }: { avgRating: IProduct['avgRating'] }) => {
   const starCount = 5
 
   const filledStars = Math.floor(avgRating ?? 0)
-  const roundedAvgRating = (avgRating ?? 0).toFixed(1)
+
   const remainingStars = starCount - filledStars
 
   const filledStarsArray = Array.from({ length: filledStars }, (_, index) => (
@@ -240,7 +255,7 @@ Product.Review = ({ avgRating }: { avgRating: IProduct['avgRating'] }) => {
       {filledStarsArray}
       {remainingStarsArray}
       <p className='line font-bold text-muted-foreground leading-tight'>
-        {roundedAvgRating}/5
+        {avgRating}/5
       </p>
     </div>
   )
@@ -255,10 +270,10 @@ Product.DetailButton = ({
 }) => {
   return (
     <Link href={`/products/${id}`}>
-      <button className='w-16 h-7 my-2 bg-white border-[1px] border-secondaryBlue text-zinc-700 font-semibold text-sm rounded-full flex items-center justify-center hover:bg-sky-700 hover:text-white duration-150'>
-        {/* <span>
-          <Plus />
-        </span> */}
+      <button className='w-[100px] h-10  bg-white border-[1px] border-secondaryBlue text-zinc-700 font-semibold text-sm rounded-full flex items-center justify-center hover:bg-sky-700 hover:text-white duration-150'>
+        <span className='my-10'>
+          <Plus size={16} />
+        </span>
         Chi tiết
       </button>
     </Link>
@@ -267,4 +282,4 @@ Product.DetailButton = ({
 
 Product.FavoriteButton = FavoriteButtonWithCardProvider
 
-export default AllProducts
+export default HotProduct

@@ -11,7 +11,6 @@ import { getCategoriesList } from '@/providers/server-data-provider/data/categor
 
 const Category = async () => {
   const categories = await getCategoriesList()
-  console.log('categories', categories)
   return (
     <div className='bg-white rounded-lg mt-6'>
       <h2 className='px-3 py-3 font-bold  text-xl uppercase '>

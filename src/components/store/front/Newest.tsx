@@ -35,7 +35,6 @@ const Newest = () => {
     method: 'get',
     meta: { resource },
   })
-  console.log('newest', products)
 
   return (
     <div className='bg-white rounded-lg '>
@@ -123,25 +122,23 @@ const Product = ({
 
 Product.sale = ({ sale }: { sale: IProduct['discount'] }) => {
   if (!sale) {
-    return null
+    return null // Ẩn đi nếu không có dữ liệu giảm giá
   }
-  return (
-    <>
-      <div className='relative'>
-        <div
-          className='absolute text-xs top-0 left-[-3px] m-0 bg-gradient-to-br from-[#b02d2d] to-[#ff5555] text-white font-bold px-2 py-1 rounded-tl-md rounded-tr-md rounded-br-md shadow'
-          style={{
-            zIndex: 2,
-          }}>
-          {sale}% OFF
-        </div>
 
-        <div className='relative top-[21.5px] left-[-2.2px] w-0 h-0 border-t-[5px] border-l-[5px] border-[#b02d2d] transform rotate-45 '></div>
+  return (
+    <div className='relative'>
+      <div
+        className='absolute text-xs top-0 left-[-3px] m-0 bg-gradient-to-br from-[#b02d2d] to-[#ff5555] text-white font-bold px-2 py-1 rounded-tl-md rounded-tr-md rounded-br-md shadow'
+        style={{
+          zIndex: 2,
+        }}>
+        {sale}% OFF
       </div>
-    </>
+
+      <div className='relative top-[21.5px] left-[-2.2px] w-0 h-0 border-t-[5px] border-l-[5px] border-[#b02d2d] transform rotate-45 '></div>
+    </div>
   )
 }
-
 // eslint-disable-next-line react/display-name
 Product.Image = ({ images }: { images: IProduct['images'] }) => {
   return (
@@ -229,9 +226,9 @@ Product.Review = ({ avgRating }: { avgRating: IProduct['avgRating'] }) => {
   const starCount = 5
 
   const filledStars = Math.floor(avgRating ?? 0)
-
-  const remainingStars = starCount - filledStars
   const roundedAvgRating = (avgRating ?? 0).toFixed(1)
+  const remainingStars = starCount - filledStars
+
   const filledStarsArray = Array.from({ length: filledStars }, (_, index) => (
     <BsStarFill key={index} />
   ))

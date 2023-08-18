@@ -6,14 +6,23 @@ import { Box, Link, Text, Tooltip, Icon } from '@chakra-ui/react'
 import { API } from 'types/constants'
 import { useCustom } from '@refinedev/core'
 import { ShoppingCart } from 'lucide-react'
+import { useHeaders } from '@/hooks/useHeaders'
 
 const OrderWidget = () => {
   const { countOrder, resource } = API.orders()
+  const { getAuthHeader } = useHeaders()
 
   const { data: { data } = {} } = useCustom({
     url: countOrder(),
     method: 'get',
-    meta: { resource },
+    meta: {
+      resource,
+    },
+    config: {
+      headers: {
+        ...getAuthHeader(),
+      },
+    },
   })
   const orderCount = (data as unknown as number) ?? 0
 

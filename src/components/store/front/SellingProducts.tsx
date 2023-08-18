@@ -1,4 +1,5 @@
 /** @format */
+
 'use client'
 import SectionTitle from '@components/ui/SectionTitle'
 import { getProductsWithDetails } from '@/providers/server-data-provider/data/products'
@@ -63,8 +64,6 @@ const SellingProducts = () => {
 
   //   fetchProducts()
   // }, [])
-
-  console.log('seller', ids)
 
   return (
     <div className='bg-white rounded-lg '>
@@ -169,6 +168,7 @@ Product.sale = ({ sale }: { sale: IProduct['discount'] }) => {
     </div>
   )
 }
+// eslint-disable-next-line react/display-name
 Product.Image = ({ images }: { images: IProduct['images'] }) => {
   return (
     <div
@@ -200,6 +200,7 @@ Product.Image = ({ images }: { images: IProduct['images'] }) => {
     </div>
   )
 }
+// eslint-disable-next-line react/display-name
 Product.Brand = ({ brand }: { brand: IProduct['brand'] }) => {
   return (
     <p className='text-base  font-roboto font-semibold uppercase leading-normal text-zinc-600 line-clamp-1 pt-2'>
@@ -207,6 +208,7 @@ Product.Brand = ({ brand }: { brand: IProduct['brand'] }) => {
     </p>
   )
 }
+// eslint-disable-next-line react/display-name
 Product.Name = ({ name }: { name: IProduct['name'] }) => {
   return (
     <p className=' text-xs leading-normal text-zinc-500 line-clamp-1 uppercase font-bold '>
@@ -217,6 +219,7 @@ Product.Name = ({ name }: { name: IProduct['name'] }) => {
     </p>
   )
 }
+// eslint-disable-next-line react/display-name
 Product.Summary = ({ summary }: { summary: IProduct['summary'] }) => {
   return (
     <div className='bg-slate-100 rounded-md p-2 mb-2 h-14 max-h-14'>
@@ -247,7 +250,7 @@ Product.Price = ({
     </div>
   )
 }
-
+// eslint-disable-next-line react/display-name
 Product.Review = ({ avgRating }: { avgRating: IProduct['avgRating'] }) => {
   const starCount = 5
 
@@ -280,7 +283,7 @@ Product.Review = ({ avgRating }: { avgRating: IProduct['avgRating'] }) => {
     </div>
   )
 }
-
+// eslint-disable-next-line react/display-name
 Product.DetailButton = ({
   id,
   slug,

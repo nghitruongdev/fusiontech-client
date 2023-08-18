@@ -19,33 +19,38 @@ import { API } from 'types/constants'
 
 const unsub = firebaseAuth.auth.onIdTokenChanged(async (user) => {
   console.debug('onAuthStateChanged', new Date().toLocaleTimeString())
-  await waitPromise(5000)
-  console.log('Done sleeping after 5s')
   setAuthHydrated()
+  console.debug('auth has hydrated')
+
   setAuthUser(user)
 })
 
 const updateToken = (user: User | null, refresh: boolean = false) => {
   if (user) {
     user.getIdTokenResult(refresh).then(({ token, claims }) => {
-      authStore.setState(({}) => ({ claims, token }))
+      authStore.setState(({}) => ({
+        claims,
+        token,
+        _hasPermissionHydrated: true,
+      }))
     })
     return
   }
   authStore.setState(() => ({ claims: undefined, token: null }))
 }
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const { user, claims: { id: userId } = {} } = useAuthUser()
+  const { user, claims: { id: userId } = {}, token } = useAuthUser()
 
   useEffect(() => {
     updateToken(user, true)
+    console.log('user?.token', token)
     const interval = setInterval(() => {
       updateToken(user)
     }, 1000 * 60 * 15)
     return () => {
       clearInterval(interval)
     }
-  }, [user])
+  }, [user, token])
 
   useEffect(() => {
     if (!userId) return

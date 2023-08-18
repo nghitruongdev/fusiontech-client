@@ -16,7 +16,6 @@ const Brands = () => {
   const { data, status } = useList<IBrand>({
     resource: 'brands',
   })
-  console.log('brands', data)
 
   const settings = {
     infinite: true,

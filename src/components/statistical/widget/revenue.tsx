@@ -7,6 +7,7 @@ import { API } from 'types/constants'
 import { useCustom } from '@refinedev/core'
 import { CircleDollarSign, ShoppingCart } from 'lucide-react'
 import { formatPrice } from '@/lib/utils'
+import { useHeaders } from '@/hooks/useHeaders'
 
 interface RevenueData {
   totalSales: number
@@ -15,12 +16,20 @@ interface RevenueData {
 }
 
 const RevenueWidget = () => {
-  const { revenue, resource } = API.statistical()
+  const { revenueAll, resource } = API.statistical()
+  const { getAuthHeader } = useHeaders()
 
   const { data } = useCustom<RevenueData[]>({
-    url: revenue(),
+    url: revenueAll(),
     method: 'get',
-    meta: { resource },
+    meta: {
+      resource,
+    },
+    config: {
+      headers: {
+        ...getAuthHeader(),
+      },
+    },
   })
 
   const revenueData = data?.data?.[0] ?? null // Access the first element or null if data is empty

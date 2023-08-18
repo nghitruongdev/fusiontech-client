@@ -4,6 +4,7 @@
 
 import { formatDate } from '@/lib/utils'
 import { Action } from '@refinedev/core'
+import { stringify } from 'query-string'
 import { Gender, IUser, PaymentMethod, ResourceName } from 'types'
 const throwIfMissing = (name: string) => {
   throw new Error(`${name} is missing from .env.local`)
@@ -197,10 +198,12 @@ export const API = {
     const resource: ResourceName = 'statistical'
     return {
       resource: resource,
-      revenue: () => `${resource}/revenue/all`,
+      revenueAll: () => `${resource}/revenue/all`,
+      revenue: () => `${resource}/revenue`,
       bestCustomer: (size: number = 10) =>
         `${resource}/best-customer?size=${size}`,
       revenueDay: () => `${resource}/revenue/day`,
+      inventory: () => `${resource}/inventories`,
     }
   },
   address: {
@@ -226,6 +229,8 @@ export const API = {
           : `${resource}/search/user-usage?code=${code}&userId=${userId}`,
       countUsage: (code: string | null | undefined) =>
         !code ? '' : `${resource}/search/usage?code=${code}`,
+      countUsageIn: (codes: string[]) =>
+        `${resource}/search/usage-many?${stringify({ codes })}`,
     }
   },
   ['inventory-details']: () => {
