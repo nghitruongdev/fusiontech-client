@@ -288,6 +288,7 @@ export interface IOrder {
     id: number
   }
   payment?: IPayment
+  user?: IUser 
   _links?: _links
 }
 

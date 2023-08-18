@@ -1,7 +1,7 @@
 "use client";
 import ChangePasswordPage from "../(form)/ChangePasswordForm";
 
-const LoginPage = () => {
+const ChangePage = () => {
     return <ChangePasswordPage />;
 };
-export default LoginPage;
+export default ChangePage;

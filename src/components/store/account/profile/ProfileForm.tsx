@@ -7,7 +7,7 @@ import userApi from '@/api/userAPI'
 import useMyToast from '@/hooks/useToast'
 import { useForm } from 'react-hook-form'
 export const ProfileForm = () => {
-  const { user } = useAuthUser()
+  const { user,claims } = useAuthUser()
   const { resource, findByFirebaseId } = API['users']()
   const { data, status } = useCustom({
     url: `${API_URL}/${findByFirebaseId(user?.uid ?? '')}`,
@@ -67,7 +67,7 @@ export const ProfileForm = () => {
       dateOfBirth: dateOfBirth,
       gender: getValues('gender'),
     }
-    updateUser(user?.uid ?? '', userData)
+    updateUser(user?.uid??'' , userData)
   }
 
   const formatDate = (date: Date) => {
