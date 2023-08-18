@@ -3,10 +3,13 @@
 'use client'
 import {
   authStore,
+  setAuthHydrated,
   setAuthUser,
   setUserProfile,
+  useAuthStore,
   useAuthUser,
 } from '@/hooks/useAuth/useAuthUser'
+import { waitPromise } from '@/lib/promise'
 import { firebaseAuth } from '@/providers/firebaseAuthProvider'
 import { springDataProvider } from '@/providers/rest-data-provider'
 import { User } from 'firebase/auth'
@@ -15,7 +18,10 @@ import { IUser } from 'types'
 import { API } from 'types/constants'
 
 const unsub = firebaseAuth.auth.onIdTokenChanged(async (user) => {
-  console.debug('onAuthStateChanged', new Date().getTime())
+  console.debug('onAuthStateChanged', new Date().toLocaleTimeString())
+  await waitPromise(5000)
+  console.log('Done sleeping after 5s')
+  setAuthHydrated()
   setAuthUser(user)
 })
 

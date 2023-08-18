@@ -373,6 +373,7 @@ export interface IOrderItem {
   }
   _links: _links
 }
+
 enum OrderStatusGroup {
   VERIFY = 'VERIFY',
   PROCESSING = 'PROCESSING',
@@ -476,4 +477,10 @@ export type Option<T> = {
 export type GroupOption<T> = {
   label: string
   options: Option<T>[]
+}
+
+export enum ROLES {
+  ADMIN = 'admin',
+  USER = 'user',
+  STAFF = 'staff',
 }

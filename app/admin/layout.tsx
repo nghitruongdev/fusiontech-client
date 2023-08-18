@@ -13,8 +13,9 @@ import {
   notificationProvider,
   refineTheme,
 } from '@refinedev/chakra-ui'
-import { Refine } from '@refinedev/core'
+import { Refine, useCustom } from '@refinedev/core'
 import routerProvider from '@refinedev/nextjs-router/app'
+import AuthenticatedPage from 'app/(others)/authenticated'
 import { BarChart3, UserCircle, Users } from 'lucide-react'
 import { Cpu, LucideLaptop2, MemoryStick, ShoppingCart } from 'lucide-react'
 import { Warehouse } from 'lucide-react'
@@ -26,7 +27,19 @@ const DynamicDialogProvider = dynamic(
   () => import('@components/ui/DialogProvider'),
   { ssr: false },
 )
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function LayoutPage({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <AuthenticatedPage>
+      <Layout>{children}</Layout>
+    </AuthenticatedPage>
+  )
+}
+
+function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   return (
     <div className='font-roboto'>

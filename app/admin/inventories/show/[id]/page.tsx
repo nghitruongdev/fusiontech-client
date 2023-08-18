@@ -7,7 +7,6 @@ import {
   IResourceComponentsProps,
   useCustom,
   useMany,
-  useInfiniteList,
   useInvalidate,
 } from '@refinedev/core'
 import { TextField, DateField, NumberField } from '@refinedev/chakra-ui'

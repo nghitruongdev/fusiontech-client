@@ -29,7 +29,12 @@ import { firebaseApp } from '@/lib/firebase'
 import { API_URL } from 'types/constants'
 import { springDataProvider } from './rest-data-provider'
 import { AppError } from 'types/error'
-import { setIsNewUser } from '@/hooks/useAuth/useAuthUser'
+import {
+  authStore,
+  setIsNewUser,
+  useAuthStore,
+} from '@/hooks/useAuth/useAuthUser'
+import { ROLES } from 'types'
 
 const auth = getAuth(firebaseApp)
 const googleProvider = new GoogleAuthProvider()
@@ -239,7 +244,13 @@ const updatePassword = async (
   }
   throw new Error('Operation is not supported')
 }
-// getPermissions: async (params: any) => ({} as string[]),
+const getPermissions = () => {
+  const { claims, userProfile } = authStore.getState()
+  const roles = claims?.roles?.map(
+    (role) => ROLES[role.toUpperCase() as keyof typeof ROLES],
+  )
+  return roles ?? null
+}
 const getIdentity = async (params?: any) => {}
 
 const firebaseAuth = {
@@ -252,6 +263,7 @@ const firebaseAuth = {
   register,
   updatePassword,
   getIdentity,
+  getPermissions,
   authProvider: (router?: AppRouterInstance): AuthBindings => ({
     login,
     logout: logout(router),
@@ -261,6 +273,7 @@ const firebaseAuth = {
     forgotPassword,
     updatePassword,
     // getIdentity,
+    getPermissions: async () => getPermissions(),
   }),
 }
 export { firebaseAuth }

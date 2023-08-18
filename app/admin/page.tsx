@@ -9,26 +9,29 @@ import { Button } from '@chakra-ui/react'
 import { CheckoutForm } from '@components/store/cart/checkout/(form)'
 import { AddressFormProvider } from '@components/store/cart/checkout/(form)/(address)/(modal)/AddressForm'
 import AddressSection from '@components/store/cart/checkout/(form)/(address)/AddressSection'
+import { usePermissions } from '@refinedev/core'
 import { ChangeEvent, useEffect, useState } from 'react'
+import { ROLES } from 'types'
 import { useCountdown, useIsFirstRender, useIsMounted } from 'usehooks-ts'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 const AdminPage = () => {
   const [intervalValue, setIntervalValue] = useState<number>(1000)
-  const [count, { startCountdown, stopCountdown, resetCountdown }] =
-    useCountdown({
-      countStart: 5,
-      intervalMs: intervalValue,
-    })
-  const { user } = useAuthUser()
+
+  const { user, claims } = useAuthUser()
   const handleChangeIntervalValue = (event: ChangeEvent<HTMLInputElement>) => {
     setIntervalValue(Number(event.target.value))
   }
+
+  const { data: roles } = usePermissions<ROLES[]>({
+    options: {
+      retry: 4,
+    },
+  })
+  console.log('roles', roles)
   return (
     <div>
-      <p>Count: {count}</p>
-      {count === 0 && <SuccessPage />}
       {/* <Button
         onClick={() => {
           console.log('new Date().getTime()', new Date().getTime())
@@ -38,15 +41,7 @@ const AdminPage = () => {
         }}>
         Log user
       </Button> */}
-
-      <input
-        type='number'
-        value={intervalValue}
-        onChange={handleChangeIntervalValue}
-      />
-      <button onClick={startCountdown}>start</button>
-      <button onClick={stopCountdown}>stop</button>
-      <button onClick={resetCountdown}>reset</button>
+      {JSON.stringify(roles)}
     </div>
   )
 }
