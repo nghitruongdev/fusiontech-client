@@ -132,7 +132,6 @@ const ProductList = () => {
                 </ProductCardProvider>
               ))}
             </Slider>
-                </Slider>
           </div>
         </div>
       </div>
@@ -240,13 +239,15 @@ Product.Price = function Price({
       <p className='font-titleFont text-sm font-bold text-red-600 mr-1 '>
         {formatPrice(discountPrice(minPrice))}
       </p>
-      {maxPrice !== minPrice && (<>
-       <p className='font-titleFont text-sm font-bold text-red-600 mr-1'>-</p>
-        <p className='font-titleFont text-sm font-bold text-red-600'>
-          {formatPrice(discountPrice(maxPrice)}
-      </p>
-      </>)}
-        </p>
+      {maxPrice !== minPrice && (
+        <>
+          <p className='font-titleFont text-sm font-bold text-red-600 mr-1'>
+            -
+          </p>
+          <p className='font-titleFont text-sm font-bold text-red-600'>
+            {formatPrice(discountPrice(maxPrice))}
+          </p>
+        </>
       )}
     </div>
   )
