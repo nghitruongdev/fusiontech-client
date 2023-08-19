@@ -1,44 +1,43 @@
 /** @format */
 
 import useDebounceFn from '@/hooks/useDebounceFn'
-import useCrudNotification from '@/hooks/useCrudNotification'
-import useUploadImage, { uploadUtils } from '@/hooks/useUploadImage'
+import useCrudNotification, {
+  onError,
+  onSuccess,
+} from '@/hooks/useCrudNotification'
 import {
+  Button,
+  ButtonGroup,
   FormControl,
   FormErrorIcon,
   FormErrorMessage,
   FormLabel,
   Input,
   InputGroup,
-  InputRightAddon,
+  InputLeftElement,
   InputRightElement,
   Spinner,
   Textarea,
+  Tooltip,
 } from '@chakra-ui/react'
 import { SaveButton } from '@components/buttons'
 import { Create, Edit } from '@components/crud'
-import ImageUpload, { UploadProviderProps } from '@components/image-upload'
-import { Action, useOnError } from '@refinedev/core'
+import { Action } from '@refinedev/core'
 import { useForm } from '@refinedev/react-hook-form'
-import { HttpError } from 'http-errors'
-import {
-  BaseSyntheticEvent,
-  PropsWithChildren,
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
+import { PropsWithChildren, createContext, useContext } from 'react'
 import { IVoucher } from 'types'
 import { API, API_URL } from 'types/constants'
 import { ERRORS } from 'types/messages'
-import { useBoolean, useDebounce } from 'usehooks-ts'
 import { AppError } from '../../../../types/error'
+import { DeleteVoucherButton } from './delete-button'
+import { useHeaders } from '@/hooks/useHeaders'
+import { Controller } from 'react-hook-form'
+import { ChakraCurrencyInput } from '@components/ui/ChakraCurrencyInput'
+import { handleNumericInput } from '@/lib/utils'
+import { validateVoucherCodeExists } from './utils'
 
 type ContextProps = {
-  action: Action
+  action: 'create' | 'edit'
   voucher: IVoucher | undefined
 } & ReturnType<typeof useForm<IVoucher, AppError, IVoucher>>
 
@@ -66,13 +65,16 @@ Form.Provider = function Provider({
   action,
   children,
 }: PropsWithChildren<{ action: ContextProps['action'] }>) {
-  // const { uploadImages, removeImages } = useUploadImage({
-  //   resource: 'brands',
-  // })
-
+  const { getAuthHeader } = useHeaders()
   const formProps = useForm<IVoucher, AppError, IVoucher>({
     refineCoreProps: {
-      redirect: 'show',
+      meta: {
+        headers: {
+          ...getAuthHeader(),
+        },
+      },
+      errorNotification: onError,
+      successNotification: onSuccess.bind(null, action),
     },
   })
   const {
@@ -83,7 +85,17 @@ Form.Provider = function Provider({
       queryResult: { data: { data: voucher } = { data: undefined } } = {},
     },
     formState: { dirtyFields, isSubmitting, isValidating },
+    saveButtonProps,
   } = formProps
+
+  const saveProps = {
+    ...saveButtonProps,
+    onClick: (e: any) => {
+      handleSubmit(onFinish)(e).catch((err) => {
+        console.log('err during submit', err)
+      })
+    },
+  }
 
   return (
     <Form.Context.Provider
@@ -91,7 +103,7 @@ Form.Provider = function Provider({
         ...formProps,
         action,
         voucher,
-        // saveButtonProps: saveProps,
+        saveButtonProps: saveProps,
       }}>
       <Form.Container>{children}</Form.Container>
     </Form.Context.Provider>
@@ -101,18 +113,35 @@ Form.Provider = function Provider({
 Form.Container = function Container({ children }: PropsWithChildren) {
   const {
     action,
-    refineCore: { formLoading },
+    refineCore: { formLoading, queryResult },
     saveButtonProps,
+    formState: { isSubmitting },
   } = Form.useContext()
 
   const isEdit = action === 'edit'
+  const usage = queryResult?.data?.data?.usage ?? 0
   if (isEdit)
     return (
       <Edit
         isLoading={formLoading}
         saveButtonProps={saveButtonProps}
-        // canDelete={soldData && (soldData.data as unknown as number) == 0}
-      >
+        footerButtons={({ saveButtonProps: saveProps, deleteButtonProps }) => {
+          return (
+            <ButtonGroup>
+              <DeleteVoucherButton
+                {...deleteButtonProps}
+                disabled={saveProps?.disabled}
+                usageCount={usage}
+              />
+
+              <SaveButton
+                {...saveProps}
+                disabled={formLoading || isSubmitting || saveProps?.disabled}
+                isLoading={isSubmitting}
+              />
+            </ButtonGroup>
+          )
+        }}>
         {children}
       </Edit>
     )
@@ -126,72 +155,27 @@ Form.Container = function Container({ children }: PropsWithChildren) {
   )
 }
 
-type onError = ReturnType<typeof useCrudNotification>['onDefaultError']
-const validateName = async (
-  voucher: IVoucher | undefined,
-  onError: onError,
-  code: string,
-) => {
-  const { findByCode } = API['vouchers']()
-  const { exists, required } = ERRORS.vouchers.code
-  if (!code) return required
-  const sendRequest = async () => {
-    const response = await fetch(`${API_URL}/${findByCode(code)}`)
-
-    if (!response.ok) {
-      if (response.status === 404) return true
-      console.error('validate name is not ok')
-      return false
-    }
-    const data = (await response.json()) as IVoucher
-    if (data) {
-      if (!voucher) return exists
-
-      if (data.id !== voucher.id) return exists
-    }
-    return true
-  }
-  try {
-    return await sendRequest()
-  } catch (err) {
-    onError(err as Error)
-    return false
-  }
-}
 Form.Body = function Body() {
   const {
     action,
     register,
+    refineCore: { queryResult },
     formState: { errors },
     voucher,
   } = Form.useContext()
   const isEdit = action === 'edit'
   const { onDefaultError: onError } = useCrudNotification()
 
-  const [checkValue, isChecking] = useDebounceFn(
-    validateName.bind(null, voucher, onError),
+  const usageCount = queryResult?.data?.data?.usage ?? 0
+
+  const [checkCodeExists, isChecking] = useDebounceFn(
+    validateVoucherCodeExists.bind(null, voucher, onError),
     300,
   )
 
   return (
     <div className='grid grid-cols-3 gap-4'>
       <div className='col-span-3 gap-4'>
-        {isEdit && (
-          <FormControl
-            mb='3'
-            isInvalid={!!errors?.id}>
-            <FormLabel>Id</FormLabel>
-            <Input
-              disabled
-              type='number'
-              {...register('id')}
-            />
-            <FormErrorMessage>
-              <FormErrorIcon />
-              {(errors as any)?.id?.message as string}
-            </FormErrorMessage>
-          </FormControl>
-        )}
         <FormControl
           mb='3'
           isInvalid={!!errors?.code}>
@@ -202,7 +186,7 @@ Form.Body = function Body() {
               {...register('code', {
                 required: ERRORS.vouchers.code.required,
                 validate: async (value) =>
-                  !!value && (await checkValue(value?.trim())),
+                  !!value && (await checkCodeExists(value?.trim())),
                 setValueAs: (value) => value && value.trim(),
               })}
             />
@@ -222,9 +206,14 @@ Form.Body = function Body() {
           <FormLabel>Giảm giá</FormLabel>
           <Input
             type='number'
+            readOnly={!!usageCount}
             {...register('discount', {
               required: 'Vui lòng nhập giảm giá.',
+              valueAsNumber: true,
+              validate: (value) =>
+                (value > 0 && value <= 100) || 'Nhập giá trị từ 0 - 100.',
             })}
+            onKeyDown={handleNumericInput}
           />
           <FormErrorMessage>
             <FormErrorIcon />
@@ -232,37 +221,8 @@ Form.Body = function Body() {
           </FormErrorMessage>
         </FormControl>
 
-        <FormControl
-          mb='3'
-          isInvalid={!!errors?.minOrderAmount}>
-          <FormLabel>Giá trị đơn hàng tối thiểu</FormLabel>
-          <Input
-            type='number'
-            {...register('minOrderAmount', {
-              required: 'Vui lòng nhập Giá trị đơn hàng tối thiểu.',
-            })}
-          />
-          <FormErrorMessage>
-            <FormErrorIcon />
-            {errors.minOrderAmount?.message}
-          </FormErrorMessage>
-        </FormControl>
-
-        <FormControl
-          mb='3'
-          isInvalid={!!errors?.maxDiscountAmount}>
-          <FormLabel>Số tiền giảm giá tối đa </FormLabel>
-          <Input
-            type='number'
-            {...register('maxDiscountAmount', {
-              required: 'Vui lòng nhập Số tiền giảm giá tối đa.',
-            })}
-          />
-          <FormErrorMessage>
-            <FormErrorIcon />
-            {errors.maxDiscountAmount?.message as string}
-          </FormErrorMessage>
-        </FormControl>
+        <Form.MinOrderAmount />
+        <Form.MaxDiscountAmount />
 
         <FormControl
           mb='3'
@@ -270,9 +230,7 @@ Form.Body = function Body() {
           <FormLabel>Ngày bắt đầu</FormLabel>
           <Input
             type='datetime-local'
-            {...register('startDate', {
-              required: 'Vui lòng nhập ngày bắt đầu.',
-            })}
+            {...register('startDate')}
           />
           <FormErrorMessage>
             <FormErrorIcon />
@@ -286,9 +244,7 @@ Form.Body = function Body() {
           <FormLabel>Ngày kết thúc</FormLabel>
           <Input
             type='datetime-local'
-            {...register('expirationDate', {
-              required: 'Vui lòng nhập ngày kết thúc.',
-            })}
+            {...register('expirationDate')}
           />
           <FormErrorMessage>
             <FormErrorIcon />
@@ -303,12 +259,13 @@ Form.Body = function Body() {
           <Input
             type='number'
             {...register('limitUsage', {
-              required: 'Vui lòng nhập Số lần sử dụng.',
+              max: Number.MAX_SAFE_INTEGER,
             })}
+            onKeyDown={handleNumericInput}
           />
           <FormErrorMessage>
             <FormErrorIcon />
-            {errors.limitUsage?.message as string}
+            {errors.limitUsage?.message}
           </FormErrorMessage>
         </FormControl>
 
@@ -319,12 +276,16 @@ Form.Body = function Body() {
           <Input
             type='number'
             {...register('userLimitUsage', {
-              required: 'Vui lòng nhập Số lần sử dụng của người dùng.',
+              max: {
+                value: 100,
+                message: 'Số lần tối đa là 100',
+              },
             })}
+            onKeyDown={handleNumericInput}
           />
           <FormErrorMessage>
             <FormErrorIcon />
-            {(errors as any)?.userLimitUsage?.message as number}
+            {(errors as any)?.userLimitUsage?.message}
           </FormErrorMessage>
         </FormControl>
 
@@ -332,7 +293,7 @@ Form.Body = function Body() {
           mb='3'
           isInvalid={!!errors.description}>
           <FormLabel>Mô tả</FormLabel>
-          <Textarea {...register('description', {})} />
+          <Textarea {...register('description')} />
           <FormErrorMessage>
             <FormErrorIcon />
             {(errors as any)?.description?.message as string}
@@ -343,4 +304,101 @@ Form.Body = function Body() {
   )
 }
 
+Form.MinOrderAmount = function MinOrderAmount() {
+  const {
+    formState: { errors },
+    register,
+    setValue,
+    watch,
+    control,
+  } = Form.useContext()
+
+  return (
+    <FormControl
+      mb='3'
+      isInvalid={!!errors?.minOrderAmount}>
+      <FormLabel>Giá trị đơn hàng tối thiểu</FormLabel>
+      <InputGroup>
+        <InputLeftElement
+          pointerEvents='none'
+          color='gray.300'
+          fontSize='1.2em'>
+          $
+        </InputLeftElement>
+        <Controller
+          control={control}
+          name='minOrderAmount'
+          rules={{
+            validate: (value) =>
+              !value || +value >= 0 || 'Số tiền không hợp lệ',
+          }}
+          render={({ field }) => (
+            <>
+              <ChakraCurrencyInput
+                pl='10'
+                ref={field.ref}
+                value={field.value}
+                onValueChange={field.onChange}
+                onBlur={field.onBlur}
+              />
+            </>
+          )}
+        />
+      </InputGroup>
+      <FormErrorMessage>
+        <FormErrorIcon />
+        {errors?.minOrderAmount?.message}
+      </FormErrorMessage>
+    </FormControl>
+  )
+}
+Form.MaxDiscountAmount = function MaxDiscountAmount() {
+  const {
+    formState: { errors },
+    register,
+    setValue,
+    watch,
+    control,
+  } = Form.useContext()
+
+  return (
+    <FormControl
+      mb='3'
+      isInvalid={!!errors?.maxDiscountAmount}>
+      <FormLabel>Số tiền giảm tối đa</FormLabel>
+      <InputGroup>
+        <InputLeftElement
+          pointerEvents='none'
+          color='gray.300'
+          fontSize='1.2em'>
+          $
+        </InputLeftElement>
+        <Controller
+          control={control}
+          name='maxDiscountAmount'
+          rules={{
+            // min: 3 || 'Số tiền không hợp lệ',
+            validate: (value) =>
+              !value || +value >= 0 || 'Số tiền không hợp lệ',
+          }}
+          render={({ field }) => (
+            <>
+              <ChakraCurrencyInput
+                pl='10'
+                ref={field.ref}
+                value={field.value}
+                onValueChange={field.onChange}
+                onBlur={field.onBlur}
+              />
+            </>
+          )}
+        />
+      </InputGroup>
+      <FormErrorMessage>
+        <FormErrorIcon />
+        {errors?.maxDiscountAmount?.message}
+      </FormErrorMessage>
+    </FormControl>
+  )
+}
 export { Form as VoucherForm }

@@ -136,15 +136,27 @@ const logout =
 const onError = async (error: AppError): Promise<OnErrorResponse> => {
   console.count('Handling error inside on error')
   console.log('error', error)
-  if (error && error.statusCode === 401) {
-    return {
-      error: new Error('You do not have rights to access the page.'),
-      logout: false,
-      redirectTo: '/unauthorized',
+  const { statusCode } = error
+  if (error && statusCode) {
+    switch (statusCode) {
+      case 401:
+        return {
+          error: new Error('Bạn không có quyền truy cập vào trang này.'),
+          logout: false,
+          redirectTo: '/unauthorized',
+        }
+      case 403:
+        return {
+          error: {
+            message: 'Không đủ quyền truy cập.',
+            name: 'Forbidden',
+            statusCode: 403,
+          },
+        }
     }
   }
   return {
-    error: error as HttpError,
+    error: error as AppError,
   }
 }
 

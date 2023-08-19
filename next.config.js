@@ -11,10 +11,13 @@ module.exports = {
   images: {
     domains: [
       'i.ibb.co',
+      'images.unsplash.com',
+      'images.macrumors.com',
       'images.pexels.com',
       'lh3.googleusercontent.com',
       'i.pravatar.cc',
       'firebasestorage.googleapis.com',
+      'cdn.mos.cms.futurecdn.net',
       'img.freepik.com',
       'static.wixstatic.com',
       'www.pngmart.com',

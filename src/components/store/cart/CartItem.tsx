@@ -93,6 +93,7 @@ CartItem.SelectedCheckbox = function Checkbox() {
   }
   return (
     <input
+      title='select-product'
       type='checkbox'
       checked={isSelected}
       onChange={changeHandler}
@@ -106,6 +107,7 @@ CartItem.ProductInfo = function ProductInfo() {
     isOutOfStock,
   } = useItemContextProvider()
   const product = variant?.product
+  console.log('product', product)
   const { control } = useForm()
   return (
     <div className='flex flex-grow justify-between gap-2'>
@@ -124,17 +126,20 @@ CartItem.ProductInfo = function ProductInfo() {
             }`}>
             {variant?.product?.name ?? 'Sản phẩm'}
           </h2>
+          <p className='text-sm text-zinc-500'>Mã SKU: {variant?.sku ?? ''}</p>
+          <CartItem.AvailableQuantity />
           <p className='text-sm text-zinc-500'>
             Giá: {formatPrice(variant?.price)}
           </p>
-          <CartItem.AvailableQuantity />
           <p className='text-sm text-zinc-500 flex items-center gap-1'>
             <span className='bg-primaryBlue rounded-full text-white text-xs w-4 h-4 flex items-center justify-center'>
               <TbReload className='rotate-180' />
             </span>
             30 ngày đổi trả miễn phí
           </p>
-          <CartItem.VariantSelect />
+          {!!product?.variantCount && product.variantCount > 1 && (
+            <CartItem.VariantSelect />
+          )}
         </div>
       </div>
       <div className='w-1/4 text-right flex flex-col items-end gap-1 justify-center'>
@@ -147,7 +152,8 @@ CartItem.ProductInfo = function ProductInfo() {
 CartItem.AvailableQuantity = function AvailableQuantity() {
   const { item, isOutOfStock } = useItemContextProvider()
   const { availableQuantity } = item?.variant ?? {}
-  if (isOutOfStock) return <p className='text-sm text-red-500'>Hết hàng</p>
+  if (isOutOfStock)
+    return <p className='text-sm text-red-500'>Sản phẩm hết hàng</p>
   return (
     <p className='text-sm text-zinc-500'>
       Số lượng tồn kho: {availableQuantity}
@@ -159,7 +165,6 @@ CartItem.ProductInfoPrice = function ProductPrice() {
   const { item } = useItemContextProvider()
   const { price } = item?.variant ?? {}
   const { discount } = item?.variant?.product ?? {}
-  //   const original = (price ?? 0) * item.quantity
   const original = getTotalAmount([item])
   const discountTotal = getDiscount([item])
   return (
@@ -174,7 +179,7 @@ CartItem.ProductInfoPrice = function ProductPrice() {
           </p>
           <div className='flex items-center text-xs gap-2'>
             <p className='bg-green-200 text-[8px] uppercase px-2 py-[1px]'>
-              Tiết kiệm được
+              Tiết kiệm được | {`-${discount}%`}
             </p>
             <p className='text-[#2a8703] font-semibold'>
               {formatPrice(discountTotal)}
@@ -194,10 +199,6 @@ CartItem.CartButtonGroup = function ButtonGroup() {
   const { removeItem, updateItem } = useCart()
   const [quantity, setQuantity] = useState<number>(item.quantity)
   const availableQuantity = item.variant?.availableQuantity
-  console.log(
-    'item.variant?.availableQuantity',
-    item.variant?.availableQuantity,
-  )
   const limit =
     availableQuantity && availableQuantity < ALLOW_QUANTITY
       ? availableQuantity
@@ -252,6 +253,18 @@ CartItem.CartButtonGroup = function ButtonGroup() {
     setQuantity((prev) => (item.quantity !== prev ? item.quantity : prev))
   }, [item])
 
+  const { variant: { availableQuantity: availQty } = {} } = item
+  if (!availQty || availQty <= 0)
+    return (
+      <>
+        <button
+          onClick={removeItemHandler}
+          className='text-sm underline underline-offset-2 decoration-[1px] text-zinc-600 hover:no-underline hover:text-primaryBlue duration-300'>
+          Xoá
+        </button>
+        <p className='text-red-500 text-normal font-semibold'>Hết hàng</p>
+      </>
+    )
   return (
     <>
       {isLoading && <LoadingOverlay />}
@@ -263,6 +276,7 @@ CartItem.CartButtonGroup = function ButtonGroup() {
 
       <div className='w-28 h-9 border border-zinc-400 rounded-full text-base font-semibold text-black flex items-center justify-between px-3'>
         <button
+          title='button'
           onClick={updateQuantityHandler.bind(this, false)}
           className={`text-base w-5 h-5 text-zinc-600 hover:-bg[#74767c] hover:text-zinc-400 rounded-full flex items-center justify-center cursor-pointer duration-200`}>
           <HiMinusSm />
@@ -294,13 +308,14 @@ CartItem.CartButtonGroup = function ButtonGroup() {
 type VariantOption = Option<IVariant>
 
 CartItem.VariantSelect = function VariantSelect() {
-  const { control } = useForm<{ variant: VariantOption }>()
   const [shouldFetch, fetchAction] = useBoolean()
-  const {
-    item: { variant: { product } = {} },
-  } = useItemContextProvider()
-  const { getSpecificationsByProduct, getVariants } = API['products']()
+  const { item } = useItemContextProvider()
+  const { product, id: variantId } = item?.variant ?? {}
+  const { updateItem } = useCart()
 
+  const { control, setValue } = useForm<{ variant: VariantOption }>()
+
+  const { getSpecificationsByProduct, getVariants } = API['products']()
   //fetch distinct names
   const { data: { data: productSpecifications } = {} } = useCustom<
     { name: string; values: ISpecification[] }[]
@@ -308,9 +323,14 @@ CartItem.VariantSelect = function VariantSelect() {
     url: `${getSpecificationsByProduct(product?.id ?? '')}`,
     method: 'get',
     queryOptions: {
-      enabled: !!product,
+      enabled: !!product && shouldFetch,
     },
   })
+
+  const {
+    resource: variantResource,
+    projection: { withSpecs },
+  } = API.variants()
 
   //fetch variant list by products
   const { data: { data: variants } = {} } = useCustom<IVariant[]>({
@@ -318,6 +338,14 @@ CartItem.VariantSelect = function VariantSelect() {
     method: 'get',
     queryOptions: {
       enabled: !!product && shouldFetch,
+    },
+    meta: {
+      resource: variantResource,
+    },
+    config: {
+      query: {
+        projection: withSpecs,
+      },
     },
   })
 
@@ -329,21 +357,31 @@ CartItem.VariantSelect = function VariantSelect() {
     [productSpecifications],
   )
 
-  const variantOptions = useMemo(
-    () =>
-      (variants ?? []).map((v) => {
+  const variantOptions = useMemo(() => {
+    const array = (variants ?? [])
+      .map((v) => {
         const label =
           v.specifications
-            ?.filter((spec) => distinctNames.some((name) => name === spec.name))
+            ?.filter((spec) => distinctNames.some((name) => name == spec.name))
             .map(({ name, value }) => `${name} ${value}`)
-            .join('/ ') ?? ''
+            .join(' - ') ?? ''
         return {
           label,
           value: v,
+          __isDisabled__: !v.availableQuantity || v.availableQuantity <= 0,
         }
-      }),
-    [distinctNames, variants],
-  )
+      })
+      .filter((item) => !!item.label && item.value.active)
+    return array
+      .filter((item) => !item.__isDisabled__)
+      .concat(array.filter((item) => item.__isDisabled__))
+  }, [distinctNames, variants])
+
+  useEffect(() => {
+    if (!variantOptions) return
+    const selected = variantOptions.find((item) => item.value.id === variantId)
+    selected && setValue(`variant`, selected)
+  }, [setValue, variantOptions, variantId])
   return (
     <>
       <SelectPopout
@@ -356,15 +394,36 @@ CartItem.VariantSelect = function VariantSelect() {
         }}
         props={{
           onChange(newValue, meta) {
-            console.log('newValue, meta', newValue, meta)
+            const selected = newValue as Option<IVariant>
+            const updated = {
+              ...item,
+              variant: selected.value,
+              variantId: selected.value.id,
+            }
+            updateItem(updated)
+            setValue(`variant`, selected)
           },
           options: variantOptions,
           noOptionsMessage: 'Không có phiên bản.',
-          formatOptionLabel: (data) => {
-            return data.value?.name
+          formatOptionLabel: ({ label, value, __isDisabled__ }) => {
+            return (
+              <div className=''>
+                <p>{label}</p>
+                <div
+                  className={`text-sm ${
+                    __isDisabled__ ? 'text-gray-300' : 'text-zinc-500, '
+                  }`}>
+                  <p className=''>Số lượng: {value?.availableQuantity}</p>
+                  <p className=''>Giá: {formatPrice(value?.price)}</p>
+                </div>
+              </div>
+            )
           },
+          isOptionDisabled(option, value) {
+            return (option as Option<IVariant>).__isDisabled__ ?? false
+          },
+
           onOpen: () => {
-            console.log('onOpen ran')
             !shouldFetch && fetchAction.on()
           },
         }}

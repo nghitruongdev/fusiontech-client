@@ -53,6 +53,7 @@ const HomePage = async () => {
           <Suspense fallback={<ProductLoading />}>
             <div className='mx-20'>
               <ProductList />
+              {/* @ts-expect-error Async Server Component */}
               <Category />
               <CardSaleBody />
               <AllProducts />

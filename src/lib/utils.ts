@@ -6,7 +6,7 @@ import {
   useSearchParams,
 } from 'next/navigation'
 import { stringifyUrl } from 'query-string'
-import { useMemo } from 'react'
+import { KeyboardEvent, useMemo } from 'react'
 import { Option } from 'types'
 export const formatPrice = (amount?: number) => {
   if (!amount) return 0
@@ -172,4 +172,23 @@ export const isValidNewSelectOption = <T extends { label?: string }>(
   )
 }
 
+export function handleNumericInput(event: KeyboardEvent<HTMLInputElement>) {
+  const allowedKeys = [
+    '0',
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    'Backspace',
+    'Enter',
+  ]
+  if (!allowedKeys.includes(event.key)) {
+    event.preventDefault()
+  }
+}
 export * from './slug-utils'

@@ -9,7 +9,6 @@ import {
   useCustom,
   useMany,
 } from '@refinedev/core'
-import { NumberField, TextField, DateField } from '@refinedev/chakra-ui'
 import {
   Badge,
   Heading,
@@ -22,10 +21,19 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react'
-import { IOrderItem, IVariant } from 'types'
+import {
+  IOrder,
+  IOrderItem,
+  IVariant,
+  OrderStatus,
+  OrderStatusText,
+} from 'types'
 import Image from 'next/image'
 import { loginImg } from '@public/assets/images'
 import { Show } from '@components/crud'
+import { useHeaders } from '@/hooks/useHeaders'
+import { onError } from '@/hooks/useCrudNotification'
+import { AppError } from 'types/error'
 
 export default function ShowPage() {
   return <OrderShow />
@@ -83,19 +91,23 @@ const OrderDetailSummary = ({ className }: { className?: string }) => {
             </p>
           </div>
           <div className=''>
-            <p>
-              {' '}
-              <span className='font-semibold mr-2'>Trạng thái:</span>{' '}
-              <Badge
-                variant='outline'
-                px='2'
-                // py="1"
-                lineHeight='taller'
-                rounded='md'
-                colorScheme='whatsapp'>
-                {record?.status ?? 'Loading...'}
-              </Badge>
-            </p>
+            {record?.status && (
+              <p>
+                <span className='font-semibold mr-2'>Trạng thái:</span>{' '}
+                <Badge
+                  variant='outline'
+                  px='2'
+                  // py="1"
+                  lineHeight='taller'
+                  rounded='md'
+                  colorScheme='whatsapp'>
+                  {
+                    OrderStatusText[record?.status as unknown as OrderStatus]
+                      ?.text
+                  }
+                </Badge>
+              </p>
+            )}
           </div>
         </div>
         <div className='col-span-3 md:col-span-1 space-y-4'>
@@ -255,7 +267,7 @@ const OrderItemList = ({ className }: { className?: string }) => {
                         />
                       </div>
                     </Td>
-                    <Td>ABCXYZ-0005</Td>
+                    <Td>{variant?.sku}</Td>
                     <Td>{variant?.product?.name ?? 'Loading...'}</Td>
                     <Td isNumeric>{price}</Td>
                     <Td isNumeric>{quantity}</Td>
@@ -278,35 +290,61 @@ const OrderItemList = ({ className }: { className?: string }) => {
 }
 
 const useData = () => {
-  const { queryResult } = useShow()
-
+  const { getAuthHeader, _isHydrated } = useHeaders()
+  const { queryResult } = useShow<IOrder, AppError>({
+    meta: {
+      headers: {
+        ...getAuthHeader(),
+      },
+    },
+    queryOptions: {
+      enabled: _isHydrated,
+    },
+  })
   const record = queryResult.data?.data
+  const enabled = !!record && _isHydrated
 
   const user = useOne({
     resource: 'users',
     id: record?.userId || '',
     queryOptions: {
-      enabled: !!record,
+      enabled,
     },
+    meta: {
+      headers: {
+        ...getAuthHeader(),
+      },
+    },
+    errorNotification: onError,
   })
 
   const payment = useOne({
     resource: 'payments',
     id: record?.paymentId || '',
     queryOptions: {
-      enabled: !!record,
+      enabled,
     },
+    meta: {
+      headers: {
+        ...getAuthHeader(),
+      },
+    },
+    errorNotification: onError,
   })
 
   const items = useCustom<IOrderItem[]>({
-    url: record?._links?.items.href || '',
+    url: record?._links?.items?.href || '',
     method: 'get',
     meta: {
-      _embeddedResource: 'orderItems',
+      resource: 'orderItems',
     },
-    queryOptions: {
-      enabled: !!record,
+    queryOptions: { enabled },
+    config: {
+      headers: {
+        ...getAuthHeader(),
+      },
     },
+    errorNotification: onError,
   })
 
   const variantsId = items.data?.data.map(({ variant }) => variant.id) || []
@@ -314,13 +352,17 @@ const useData = () => {
     resource: 'variants',
     ids: variantsId,
     queryOptions: {
-      enabled: variantsId.length > 0,
+      enabled: variantsId.length > 0 && enabled,
     },
     meta: {
       query: {
         projection: 'product',
       },
+      headers: {
+        ...getAuthHeader(),
+      },
     },
+    errorNotification: onError,
   })
   return {
     order: queryResult,

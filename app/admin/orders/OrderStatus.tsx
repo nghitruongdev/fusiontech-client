@@ -1,7 +1,12 @@
 /** @format */
 
 'use client'
-import { IOrderStatus, ProblemDetail } from 'types'
+import {
+  IOrderStatus,
+  OrderStatus as OrderStatusType,
+  OrderStatusText,
+  ProblemDetail,
+} from 'types'
 import {
   Badge,
   useEditableControls,
@@ -19,6 +24,8 @@ import { onError, onSuccess } from '@/hooks/useCrudNotification'
 import SelectPopout from '@components/ui/SelectPopout'
 import ReactSelect from 'react-select'
 import { Select } from '@chakra-ui/react'
+import { useHeaders } from '@/hooks/useHeaders'
+import { useForm } from 'react-hook-form'
 export const OrderStatus = ({
   status,
   control,
@@ -28,7 +35,7 @@ export const OrderStatus = ({
 }) => {
   return (
     <Editable
-      value={status.detailName}
+      value={OrderStatusText[status.name as OrderStatusType].text}
       isPreviewFocusable={true}
       selectAllOnFocus={false}>
       <Tooltip
@@ -65,7 +72,7 @@ export const EditableControls = ({
     getEditButtonProps,
   } = useEditableControls()
   const [selectedStatus, setSelectedStatus] = useState<IOrderStatus>()
-
+  const { getAuthHeader } = useHeaders()
   const findStatus = (name: string): IOrderStatus | undefined => {
     return options.find((option) => option.value.name === name)?.value
   }
@@ -90,11 +97,12 @@ export const EditableControls = ({
         values: selectedStatus?.name ?? '',
         meta: {
           headers: {
-            'Content-Type': 'application/json',
+            // 'Content-Type': 'application/json',
+            ...getAuthHeader(),
           },
         },
         errorNotification: onError,
-        successNotification: onSuccess,
+        successNotification: onSuccess.bind(null, 'edit'),
       },
       {
         onSuccess: () => {
@@ -103,75 +111,43 @@ export const EditableControls = ({
       },
     )
   }
-
-  //   if (isEditing)
-  //     return (
-  //       <>
-  //         <ReactSelect
-  //           options={options}
-  //           onChange={() => {}}
-  //           className={`absolute z-50`}
-  //           defaultValue={options.find((item) => item.value.id === status.id)}
-  //         />
-  //         {/* <Select
-  //           as={ReactSelect}
-  //           options={options}
-  //         /> */}
-  //         <ButtonGroup
-  //           justifyContent='end'
-  //           size='sm'
-  //           w='full'
-  //           spacing={2}
-  //           mt={2}>
-  //           <IconButton
-  //             aria-label={''}
-  //             icon={!isLoading ? <Check /> : <Loader />}
-  //             {...submitProps()}
-  //             onClick={(event) => {
-  //               submitHandler(event)
-  //             }}
-  //           />
-  //           <CloseButton {...getCancelButtonProps()} />
-  //         </ButtonGroup>
-  //       </>
-  //     )
-  if (isEditing)
-    return (
-      <>
-        <Select
-          value={selectedStatus?.name ?? 'Đang tải...'}
-          size='sm'
-          variant='outline'
-          rounded={'md'}
-          onChange={onChangeHandler}>
-          {options
-            .filter((item) => item.value.id >= status.id)
-            .map((item) => (
-              <option
-                key={item.label}
-                value={item.value.name}>
-                <Badge>{item.label}</Badge>
-              </option>
-            ))}
-        </Select>
-        <ButtonGroup
-          justifyContent='end'
-          size='sm'
-          w='full'
-          spacing={2}
-          mt={2}>
-          <IconButton
-            aria-label={''}
-            icon={!isLoading ? <Check /> : <Loader />}
-            {...submitProps()}
-            onClick={(event) => {
-              submitHandler(event)
-            }}
-          />
-          <CloseButton {...getCancelButtonProps()} />
-        </ButtonGroup>
-      </>
-    )
+  if (!isEditing) return <></>
+  return (
+    <>
+      <Select
+        value={selectedStatus?.name ?? 'Đang tải...'}
+        size='sm'
+        variant='outline'
+        rounded={'md'}
+        onChange={onChangeHandler}>
+        {options
+          .filter((item) => item.value.id >= status.id)
+          .map((item) => (
+            <option
+              key={item.label}
+              value={item.value.name}>
+              <Badge>{item.label}</Badge>
+            </option>
+          ))}
+      </Select>
+      <ButtonGroup
+        justifyContent='end'
+        size='sm'
+        w='full'
+        spacing={2}
+        mt={2}>
+        <IconButton
+          aria-label={''}
+          icon={!isLoading ? <Check /> : <Loader />}
+          {...submitProps()}
+          onClick={(event) => {
+            submitHandler(event)
+          }}
+        />
+        <CloseButton {...getCancelButtonProps()} />
+      </ButtonGroup>
+    </>
+  )
 }
 
 export const statusColor = (status: IOrderStatus | undefined) => {

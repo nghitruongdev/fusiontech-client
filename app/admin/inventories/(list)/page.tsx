@@ -22,12 +22,14 @@ import { Pagination } from '@components/pagination'
 import { ShowButton } from '@components/buttons'
 import { List } from '@components/crud'
 import { formatDateTime } from '@/lib/utils'
+import { useHeaders } from '@/hooks/useHeaders'
 
 export default function ListPage() {
   return <InventoryList />
 }
 
 const InventoryList: React.FC<IResourceComponentsProps> = () => {
+  const { getAuthHeader } = useHeaders()
   const columns = React.useMemo<ColumnDef<IInventory>[]>(
     () => [
       {
@@ -105,6 +107,13 @@ const InventoryList: React.FC<IResourceComponentsProps> = () => {
     },
   } = useTable({
     columns,
+    refineCoreProps: {
+      meta: {
+        headers: {
+          ...getAuthHeader(),
+        },
+      },
+    },
   })
 
   setOptions((prev) => ({

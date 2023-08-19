@@ -13,6 +13,7 @@ import { springDataProvider } from '@/providers/rest-data-provider'
 import { API } from 'types/constants'
 import { checkCartExists, createCart, deleteCart } from './utils'
 import { produce } from 'immer'
+import { toRecord } from '@/lib/utils'
 type ReturnProps = {
   addItem: (item: ICartItem) => void
   updateItem: (item: ICartItem) => void
@@ -31,7 +32,11 @@ const getResource = (resource: string) => ({
 })
 export const ALLOW_QUANTITY = 10
 const getAllowQuantity = (quantity: number) =>
-  Math.round(quantity) > ALLOW_QUANTITY ? ALLOW_QUANTITY : Math.round(quantity)
+  Math.round(quantity) > ALLOW_QUANTITY
+    ? ALLOW_QUANTITY
+    : Math.round(quantity) > 0
+    ? Math.round(quantity)
+    : 0
 
 const useCart = (): ReturnProps => {
   const { cartId, setCartId } = useCartIdStore(
@@ -79,12 +84,12 @@ const useCart = (): ReturnProps => {
   )
 
   const updateCartItem = useCallback(
-    async ({ id, variantId, quantity }: ICartItem) => {
+    async ({ id, variantId, quantity, variant }: ICartItem) => {
       if (!cartId) {
         console.error('Cart id or item id not found')
         return
       }
-      if (!id || !variantId || !items[variantId]) {
+      if (!id || !variantId) {
         console.error('Update error: Check your input.')
         return
       }
@@ -109,21 +114,31 @@ const useCart = (): ReturnProps => {
           },
         })
       }
-
+      const availQty = variant?.availableQuantity
       const currentCartItemBasedOnVariantId = items[variantId]
+      const validVariantQty =
+        !!availQty && availQty > 0 ? availQty : ALLOW_QUANTITY
+
       if (currentCartItemBasedOnVariantId) {
         const { id: currentId, quantity: currentQuantity } =
           currentCartItemBasedOnVariantId
         if (currentId && currentId !== id) {
           Promise.all([
             deleteCartItem(id),
-            updateItem(currentId, variantId, currentQuantity + quantity),
+            updateItem(
+              currentId,
+              variantId,
+              Math.min(
+                getAllowQuantity(currentQuantity + quantity),
+                validVariantQty,
+              ),
+            ),
           ])
           return
         }
       }
 
-      updateItem(id, variantId, quantity)
+      updateItem(id, variantId, Math.min(quantity, validVariantQty))
     },
     [cartId, deleteCartItem, items],
   )
@@ -235,8 +250,8 @@ const {
 } = API['variants']()
 const useCartStore = create(
   immer<State>((set, get) => {
-    const addItem = async (item: State['items'][number]) => {
-      const response = await springDataProvider.getOne<IVariant>({
+    const getVariant = async (item: ICartItem) => {
+      return await springDataProvider.getOne<IVariant>({
         resource,
         id: item.variantId,
         meta: {
@@ -245,9 +260,12 @@ const useCartStore = create(
           },
         },
       })
+    }
 
+    const addItem = async (item: State['items'][number]) => {
+      const variant = (await getVariant(item)).data
       set(({ items }) => {
-        items[item.variantId] = { ...item, variant: response.data }
+        items[item.variantId] = { ...item, variant }
       })
     }
     const removeItem = (item: State['items'][number]) => {
@@ -255,16 +273,15 @@ const useCartStore = create(
         delete items[item.variantId]
       })
     }
-    const updateItem = (item: State['items'][number]) => {
+    const updateItem = async (item: State['items'][number]) => {
       console.log('update item called')
-      const { variantId, quantity } = item
-      set(({ items }) => {
-        if (items[variantId]) {
-          items[variantId]!.quantity = quantity
-        } else {
-          items[variantId] = item
-        }
-      })
+      const { id, variantId, quantity, variant: variantItem } = item
+      const variant = variantItem ?? (await getVariant(item)).data
+      const updateItem = { ...item, variant, quantity }
+      const array = Object.values(get().items)
+      const idx = array.findIndex((current) => current.id === item.id)
+      array[idx] = updateItem
+      set(() => ({ items: toRecord(array, 'variantId') }))
     }
 
     return {

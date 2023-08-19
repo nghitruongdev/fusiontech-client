@@ -17,6 +17,7 @@ import {
   Text,
   HStack,
   useColorModeValue,
+  Avatar,
 } from '@chakra-ui/react'
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
 import { useRouter } from 'next/navigation'
@@ -354,10 +355,10 @@ const ReviewComponent = ({ productId }: { productId: string }) => {
               key={review.id}>
               <div className='flex justify-between mb-2'>
                 <div className='flex font-medium items-center space-x-2'>
-                  <img
-                    src={review.user.image}
-                    className='w-8 h-8 rounded-full border-2 bg-gray-300'
-                    alt={`${review.user.firstName} avatar`}
+                  <Avatar
+                    size='sm'
+                    src={(review.user?.image as string) ?? ''}
+                    name={review?.user?.firstName}
                   />
                   <span>{review.user.firstName}</span>
                 </div>

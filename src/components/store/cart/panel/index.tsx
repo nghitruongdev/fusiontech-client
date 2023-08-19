@@ -62,6 +62,7 @@ Panel.Login = function Login() {
       open({
         type: 'error',
         title: 'Sản phẩm bạn chọn đã hết hàng.',
+        description: 'Vui lòng bỏ chọn những sản phẩm đã hết hàng.',
       })
     }
   }

@@ -115,11 +115,19 @@ export const onError = (
   console.log('err', err)
   if (err?.isAxiosError) {
     const data = err.response?.data as ProblemDetail
+    const code = data?.status ?? err.statusCode
+    const name = data?.title ?? err.name
+    switch (code) {
+      case 403:
+        return {
+          type: 'error',
+          message: 'Từ chối truy cập - [403]',
+          description: 'Bạn không có quyền để thực hiện hành động này',
+        }
+    }
     return {
       type: 'error',
-      message: `${getErrorTitle(data?.title)} - ${
-        data?.status ?? err?.statusCode
-      }`,
+      message: `${getErrorTitle(name)} - ${code}`,
       description:
         data?.detail ?? 'Đã có lỗi xảy ra, vui lòng liên hệ nhà cung cấp.',
     }
@@ -133,6 +141,7 @@ export const onError = (
 }
 
 const getErrorTitle = (title?: string) => {
+  console.log('title', title)
   if ('Bad Request'.toUpperCase() === title?.toUpperCase())
     return 'Yêu cầu không hợp lệ'
   return title ?? 'Hệ thống đã xảy ra lỗi'

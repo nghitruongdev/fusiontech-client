@@ -163,6 +163,7 @@ const Product = ({ item }: { item: IProduct }) => {
   )
 }
 Product.sale = ({ sale }: { sale: IProduct['discount'] }) => {
+  if (!sale) return <></>
   return (
     <>
       <div className='relative'>
@@ -219,9 +220,6 @@ Product.Brand = ({ brand }: { brand: IProduct['brand'] }) => {
 Product.Name = function Name({ name }: { name: IProduct['name'] }) {
   return (
     <p className='text-sm leading-normal text-zinc-500 line-clamp-1 uppercase font-bold '>
-      {/* {
-                "Laptop ACER Nitro 5 Eagle AN515-57-54MV (i5-11400H/RAM 8GB/RTX 3050/512GB SSD/ Windows 11)"
-            } */}
       {name}
     </p>
   )

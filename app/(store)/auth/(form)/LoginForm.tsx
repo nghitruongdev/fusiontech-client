@@ -1,7 +1,7 @@
 /** @format */
 
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { FcGoogle } from 'react-icons/fc'
 import Link from 'next/link'
 import { FormProvider, useForm, useFormContext } from 'react-hook-form'
@@ -25,6 +25,7 @@ import AuthPage from '../AuthPage'
 import PasswordInput from '@components/ui/PasswordInput'
 import { firebaseAuth } from '@/providers/firebaseAuthProvider'
 import { cn } from 'components/lib/utils'
+import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
 
 const LoginForm = () => {
   const [errorState, setErrorState] = useState('')
@@ -39,16 +40,22 @@ const LoginForm = () => {
   const router = useRouter()
   const params = useSearchParams()
   const callbackParam = params.get('callbackUrl')
-  const callbackUrl = callbackParam ? decodeURIComponent(callbackParam) : '/'
   const isLoading = formSubmitting
-  console.log('callbackParam', callbackParam)
+  const { user } = useAuthUser()
+  const callbackUrl = useMemo(
+    () => (callbackParam ? decodeURIComponent(callbackParam) : '/'),
+    [callbackParam],
+  )
   useEffect(() => {
     console.log('callback url triggered rendered')
-    if (callbackUrl)
-      router.prefetch(callbackUrl, {
-        kind: PrefetchKind.AUTO,
-      })
-  }, [callbackUrl, router])
+    if (user) {
+      router.replace(callbackUrl, { scroll: true })
+    }
+    router.prefetch(callbackUrl, {
+      kind: PrefetchKind.AUTO,
+    })
+    return
+  }, [callbackUrl, router, user])
 
   useEffect(() => {
     console.log('touch field effect ran')

@@ -15,7 +15,7 @@ export const DeleteVoucherButton: FC<
   const isUsed = usageCount != 0
   return (
     <Tooltip
-      label={`Không thể xoá, voucher đã được sử dụng.`}
+      label={`Voucher đã được sử dụng.`}
       hasArrow
       isDisabled={!isUsed}>
       <div>

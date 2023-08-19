@@ -7,6 +7,8 @@ import ReactSelect, {
   ActionMeta,
   StylesConfig,
   FormatOptionLabelMeta,
+  GroupBase,
+  Options,
 } from 'react-select'
 import { Box, Button, useDisclosure } from '@chakra-ui/react'
 import {
@@ -17,6 +19,10 @@ import {
   UseControllerProps,
   useWatch,
 } from 'react-hook-form'
+import {
+  StateManagerAdditionalProps,
+  StateManagerProps,
+} from 'react-select/dist/declarations/src/useStateManager'
 
 const { colors } = defaultTheme
 
@@ -47,6 +53,7 @@ type Props<T extends FieldValues = FieldValues> = {
           >,
         ) => ReactNode)
       | undefined
+    isOptionDisabled?: (option: Option, value: Options<Option>) => boolean
   }
 }
 let count = 0

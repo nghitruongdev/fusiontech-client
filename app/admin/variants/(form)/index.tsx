@@ -488,6 +488,7 @@ VariantForm.Price = function Price() {
         <Controller
           name='price'
           control={control}
+          //todo: update this field,remove register
           render={({ field }) => (
             <div className='grid gap-2 w-full'>
               <ChakraCurrencyInput

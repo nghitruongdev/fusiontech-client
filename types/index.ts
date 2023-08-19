@@ -296,7 +296,7 @@ export interface IOrder {
     id: number
   }
   payment?: IPayment
-  user?: IUser 
+  user?: IUser
   _links?: _links
 }
 
@@ -305,8 +305,8 @@ export interface IVoucher {
   code: string | null
   discount: number
   description?: string | null
-  minOrderAmount?: number | null
-  maxDiscountAmount?: number | null
+  minOrderAmount?: number
+  maxDiscountAmount?: number
   startDate: string
   expirationDate: string
   usage?: number | null
@@ -386,7 +386,7 @@ enum OrderStatusGroup {
 }
 
 export const OrderStatusText = {
-  PLACED: { statusGroup: OrderStatusGroup.VERIFY, text: 'Chờ xác nhận' },
+  PLACED: { statusGroup: OrderStatusGroup.VERIFY, text: 'Chưa xác nhận' },
   VERIFIED: { statusGroup: OrderStatusGroup.PROCESSING, text: 'Đã xác nhận' },
   PREPARED: { statusGroup: OrderStatusGroup.PROCESSING, text: 'Đang chuẩn bị' },
   ON_DELIVERY: { statusGroup: OrderStatusGroup.ON_DELIVERY, text: 'Đang giao' },

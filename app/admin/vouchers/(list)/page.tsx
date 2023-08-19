@@ -67,7 +67,7 @@ const VoucherList: React.FC<IResourceComponentsProps> = () => {
         accessorKey: 'limitUsage',
         header: 'Số lượng',
       },
-      { id: 'usage', accessorKey: 'usage', header: 'Số lượng đã sử dụng' },
+      { id: 'usage', accessorKey: 'usage', header: 'Đã sử dụng' },
       // {
       //   id: 'userLimitUsage',
       //   accessorKey: 'userLimitUsage',

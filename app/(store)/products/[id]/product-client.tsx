@@ -312,9 +312,7 @@ export const ProductCartButton = () => {
         onClick={addToCartHandler}
         disabled={!isAddable}
         className={cn(
-          `
-                mx-auto w-32 h-10 flex items-center justify-center gap-2 text-sm font-medium bg-blue-600 hover:bg-blue-500 active:bg-blue-700 shadow-md text-zinc-50 rounded-full duration-300
-                `,
+          `mx-auto w-32 h-10 flex items-center justify-center gap-2 text-sm font-medium bg-blue-600 hover:bg-blue-500 active:bg-blue-700 shadow-md text-zinc-50 rounded-full duration-300`,
           'disabled:cursor-not-allowed disabled:bg-blue-400',
         )}>
         <span>Thêm</span>{' '}
@@ -342,13 +340,12 @@ export const ProductQuantity = () => {
 
   const [variant] = getSelectedVariant()
   const quantity = variant?.availableQuantity ?? data
-  if (quantity)
-    return (
-      <p className='text-sm font-medium text-gray-500'>
-        Số lượng khả dụng: {quantity + ''}
-      </p>
-    )
-  return <></>
+  if (!quantity) return <></>
+  return (
+    <p className='text-sm font-medium text-gray-500'>
+      Số lượng khả dụng: {quantity + ''}
+    </p>
+  )
 }
 
 export const ProductFrequentBoughtTogether = () => {
@@ -366,31 +363,23 @@ export const ProductFrequentBoughtTogether = () => {
   })
 
   if (status === 'loading') {
-    return <div>Loading...</div>
+    return <div>Đang tải...</div>
   }
 
-  if (!Array.isArray(products)) {
-    return <div>No frequent bought together products found.</div>
-  }
+  if (!products || !products?.length) return <></>
 
   return (
     <div>
-      {products.length === 0 ? (
-        <div>No frequent bought together products found.</div>
-      ) : (
-        <div>
-          <p>Sản phẩm thường được mua cùng</p>
-          <ul>
-            {products.map((product) => (
-              <li key={product.id}>
-                <h3>{product.name}</h3>
-                <p>{product.summary}</p>
-                {/* Render other product information as needed */}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <p>Sản phẩm thường được mua cùng</p>
+      <ul>
+        {products.map((product) => (
+          <li key={product.id}>
+            <h3>{product.name}</h3>
+            <p>{product.summary}</p>
+            {/* Render other product information as needed */}
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

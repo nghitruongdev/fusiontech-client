@@ -12,6 +12,7 @@ import {
   useCustom,
 } from '@refinedev/core'
 import { useTable } from '@refinedev/react-table'
+import { useHeaders } from '@/hooks/useHeaders'
 import { ColumnDef, flexRender } from '@tanstack/react-table'
 import { DateField, NumberField, TextField } from '@refinedev/chakra-ui'
 import {
@@ -33,6 +34,8 @@ import {
   IOrderStatus,
   IPayment,
   IUser,
+  OrderStatus as OrderStatusType,
+  OrderStatusText,
   PaymentStatus,
   PaymentStatusLabel,
 } from 'types'
@@ -41,11 +44,13 @@ import { ShowButton } from '@components/buttons'
 import { List } from '@components/crud'
 import { useDefaultTableRender } from '@/hooks/useRenderTable'
 import { formatPrice } from '@/lib/utils'
+import { onError } from '@/hooks/useCrudNotification'
 export default function ListPage() {
   return <OrderList />
 }
 
-export const OrderList: React.FC<IResourceComponentsProps> = () => {
+const OrderList: React.FC<IResourceComponentsProps> = () => {
+  const { getAuthHeader } = useHeaders()
   const columns = React.useMemo<ColumnDef<IOrder>[]>(
     () => [
       {
@@ -134,6 +139,7 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
           const status = meta.statusData?.data?.find(
             (st) => st.name === statusName,
           )
+
           if (!status) return <></>
 
           if (!status.isChangeable)
@@ -144,7 +150,7 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
                 px='4'
                 py='1'
                 rounded='md'>
-                {status.detailName}
+                {OrderStatusText[statusName as string as OrderStatusType].text}
               </Badge>
             )
           return (
@@ -198,6 +204,13 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
     },
   } = useTable({
     columns,
+    refineCoreProps: {
+      meta: {
+        headers: {
+          ...getAuthHeader(),
+        },
+      },
+    },
   })
 
   const { data: statusData } = useCustom<IOrderStatus[]>({
@@ -206,6 +219,12 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
     queryOptions: {
       enabled: !!tableData?.data,
     },
+    config: {
+      headers: {
+        ...getAuthHeader(),
+      },
+    },
+    errorNotification: onError,
   })
 
   //   const userIds = tableData?.data?.map((item) => item?.userId) ?? []
@@ -215,7 +234,7 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
   //     queryOptions: {
   //       enabled: userIds.length > 0,
   //     },
-  //   })
+  //   }).bind()
 
   const paymentIds = tableData?.data?.map((item) => item?.paymentId) ?? []
   const { data: paymentData } = useMany<IPayment>({
@@ -235,7 +254,7 @@ export const OrderList: React.FC<IResourceComponentsProps> = () => {
       paymentData,
       statusOptions:
         statusData?.data.map((status) => ({
-          label: status.detailName,
+          label: OrderStatusText[status.name as OrderStatusType].text,
           value: status,
         })) ?? [],
     },
