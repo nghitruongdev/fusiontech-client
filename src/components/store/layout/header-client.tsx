@@ -216,20 +216,22 @@ export const SearchInput = () => {
     // Gán giá trị của inputValue vào searchTerm
     setSearchTerm(inputValue)
   }
-  //Filter chữ cái đầu của keyword thành viết hoa
-  const capitalizeFirstLetter = (str: string) => {
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()
-  }
 
   // khi người dùng enter sẽ chuyển trang
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       // Chuyển trang tới trang kết quả tìm kiếm khi nhấn phím "Enter"
-      window.location.href = `/search?keyword=${capitalizeFirstLetter(
-        searchTerm,
-      )}`
+      const formattedSearchTerm =
+        searchTerm.charAt(0).toUpperCase() + searchTerm.slice(1);
+      window.location.href = `/search?keyword=${formattedSearchTerm}`;
     }
   }
+  // format lại keyword khi người dùng click
+  const handleSearchClick = () => {
+    const formattedSearchTerm =
+      searchTerm.charAt(0).toUpperCase() + searchTerm.slice(1);
+    window.location.href = `/search?keyword=${formattedSearchTerm}`;
+  };
   return (
     <div className='h-10 flex flex-1 relative'>
       <input
@@ -240,14 +242,11 @@ export const SearchInput = () => {
         placeholder='Tìm kiếm thứ bạn cần ở FusionTech store'
         className='h-full w-full rounded-full px-4 text-black text-base outline-none border-[1px] border-transparent focus-visible:border-black duration-200'
       />
-      {/* <Link href={`/search?keyword=${searchTerm}`}>
-                <span className="absolute w-8 h-8 rounded-full flex items-center justify-center top-1 right-1 bg-yellow text-black text-xl">
-                    <IoSearchOutline />
-                </span>
-            </Link> */}
-      <Link href={`/search?keyword=${capitalizeFirstLetter(searchTerm)}`}>
-        {/* Truyền searchTerm thông qua encodeURIComponent để đảm bảo chuỗi an toàn cho URL */}
-        <span className='absolute w-8 h-8 rounded-full flex items-center justify-center top-1 right-1 bg-yellow text-black text-xl'>
+      <Link href={`/search?keyword=${encodeURIComponent(searchTerm)}`}>
+        <span
+          className='absolute w-8 h-8 rounded-full flex items-center justify-center top-1 right-1 bg-yellow text-black text-xl cursor-pointer'
+          onClick={handleSearchClick}
+        >
           <IoSearchOutline />
         </span>
       </Link>

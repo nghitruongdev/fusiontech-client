@@ -14,6 +14,7 @@ const FavoriteProducts = () => {
   const { deleteFavoriteProduct } = useFavorite()
   const [favorites] = useFavoriteStore((state) => [state.favoriteProducts])
 
+  console.log(favorites)
   return (
     <div className='mx-auto bg-white rounded'>
       <h1 className='text-xl font-semibold pt-2 pl-4'>

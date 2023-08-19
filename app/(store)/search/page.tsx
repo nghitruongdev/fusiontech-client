@@ -20,10 +20,7 @@ const SearchResultPage = () => {
     category: '',
     color: '',
     brand: '',
-    // Add more filter options here as needed
   })
-
-
 
   const colorOptions = [
     { name: 'White', value: 'blue', color: '#FFFFFF' },
@@ -31,8 +28,6 @@ const SearchResultPage = () => {
     { name: 'Black', value: 'blue', color: '#000000' },
     { name: 'Red', value: 'red', color: '#FF0000' },
     { name: 'Blue', value: 'blue', color: '#0000FF' },
-
-    // Add more color options here
   ]
 
   useEffect(() => {
@@ -54,7 +49,7 @@ const SearchResultPage = () => {
         const responseByCid = await productAPI.searchByCategoryId(cid)
         setSearchResults(responseByCid.data._embedded.products)
       } catch (error) {
-        console.error('Error fetching search results:', error)
+        console.error('Error fetching category results:', error)
       }
     }
 
@@ -67,6 +62,10 @@ const SearchResultPage = () => {
       price: values.x,
     })
   }
+  // Lọc các sản phẩm có active = true
+  const activeProducts = searchResults.filter(
+    (product) => product.active === true,
+  )
 
   return (
     <div className='container mx-auto py-8'>
@@ -88,7 +87,6 @@ const SearchResultPage = () => {
                 <option value='category1'>Laptop gaming</option>
                 <option value='category2'>Laptop</option>
                 <option value='category2'>CPU</option>
-                {/* Add more category options here */}
               </select>
             </div>
 
@@ -198,8 +196,8 @@ const SearchResultPage = () => {
             </button>
           </div>
           <div className='grid grid-cols-4 gap-x-2  gap-y-2 '>
-            {searchResults && searchResults.length > 0 ? (
-              searchResults.map((product) => (
+            {activeProducts && activeProducts.length > 0 ? (
+              activeProducts.map((product) => (
                 <NextLinkContainer
                   key={uuidv4()}
                   href={`/products/${product.id}`}>
@@ -216,7 +214,10 @@ const SearchResultPage = () => {
                     <h3 className='text-base text-center font-semibold mb-2 mt-2'>
                       {product.name}
                     </h3>
-                    <p className='text-blue-700 text-sm text-center font-semibold'>{formatPrice(product.minPrice)} - {formatPrice(product.maxPrice)}</p>
+                    <p className='text-blue-700 text-sm text-center font-semibold'>
+                      {formatPrice(product.minPrice)} -{' '}
+                      {formatPrice(product.maxPrice)}
+                    </p>
                   </div>
                 </NextLinkContainer>
               ))

@@ -2,9 +2,7 @@
 'use client'
 import React from 'react'
 import { BiChevronLeft, BiChevronRight } from 'react-icons/bi'
-import {
-  IVariant,
-} from 'types'
+import { IVariant } from 'types'
 
 import { API, API_URL } from 'types/constants'
 import { useCustom, useOne, useMany } from '@refinedev/core'
@@ -82,6 +80,17 @@ const OrderDetailPage = () => {
       subTotal += item.price * item.quantity
     })
   }
+
+  // tính tổng tiền sau khi discount (total = subtotal - (subtotal * discount%))
+  let total = 0
+  if (orderData && orderData?.data.items) {
+    total = subTotal
+    if (orderData?.data.voucher) {
+      const discountPercent = orderData?.data.voucher?.discount / 100
+      const discountAmount = subTotal * discountPercent
+      total = subTotal - discountAmount
+    }
+  }
   // lấy variant product theo variantId
   const { resource } = API.variants()
 
@@ -103,7 +112,6 @@ const OrderDetailPage = () => {
       },
     },
   })
-
 
   return (
     <div className='mx-auto '>
@@ -158,7 +166,7 @@ const OrderDetailPage = () => {
         <h2 className='text-base font-semibold mb-4'>Sản phẩm</h2>
         {variantData?.data.map((variant: any) => {
           const selectedItem = orderData?.data.items.find(
-            (item: any) =>  item.variant.id === variant.id,
+            (item: any) => item.variant.id === variant.id,
           )
 
           return (
@@ -174,16 +182,16 @@ const OrderDetailPage = () => {
               </div>
               <div className='ml-4 w-3/5 space-y-1'>
                 <p className='text-sm'>{variant.product?.name}</p>
-                <p className='text-xs text-gray-500'>
-                  SKU: {variant.sku}
-                </p>
+                <p className='text-xs text-gray-500'>SKU: {variant.sku}</p>
                 <p className='text-xs text-gray-500'>
                   Cung cấp bởi <span className='text-blue-500'>FusionTech</span>
                 </p>
               </div>
               <div className='w-1/5 text-right mt-4'>
                 <p>{formatPrice(variant.price)}</p>
-                <p className='text-xs text-gray-500'>X{selectedItem.quantity}</p>
+                <p className='text-xs text-gray-500'>
+                  X{selectedItem.quantity}
+                </p>
               </div>
             </div>
           )
@@ -203,13 +211,15 @@ const OrderDetailPage = () => {
         </div>
         <div className='flex justify-between'>
           <p className='text-muted text-sm text-zinc-500'>Mã giảm giá</p>
-          <p className='text-sm'>{orderData?.data.voucher.code}</p>
-          <p className='font-medium text-md text-zinc-600'>{formatPrice(orderData?.data.voucher.discount)}</p>
+          <p className='text-sm'>{orderData?.data.voucher?.code}</p>
+          <p className='font-medium text-md text-zinc-600'>
+            {orderData?.data.voucher?.discount}%
+          </p>
         </div>
         <div className='flex justify-between items-center '>
           <p className='text-muted text-sm text-zinc-500  '>Thành tiền</p>
           <p className='text-end font-bold text-red-600 text-lg'>
-            {formatPrice(orderData?.data?.payment.amount)} <br />
+            {formatPrice(total)} <br />
             <span className='text-sm text-muted text-zinc-500 font-normal leading-tight'>
               (Đã bao gồm VAT)
             </span>
@@ -223,7 +233,7 @@ const OrderDetailPage = () => {
         <div className=' mt-4 mb-4 text-sm flex justify-between'>
           <p>{PAYMENT_METHOD[orderData?.data?.payment.method]}</p>
           <p className='font-semibold'>
-            {formatPrice(orderData?.data?.payment.amount)}
+            {formatPrice(total)}
           </p>
         </div>
       </div>
