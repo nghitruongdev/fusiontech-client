@@ -2,7 +2,6 @@
 
 import { Create } from '@components/crud/create'
 import { Edit } from '@components/crud/edit'
-import { Action } from '@refinedev/core'
 import { useForm } from '@refinedev/react-hook-form'
 import { HttpError } from 'http-errors'
 import {
@@ -21,20 +20,29 @@ import {
   Input,
   FormErrorIcon,
   Select,
+  InputRightElement,
+  Spinner,
+  InputGroup,
 } from '@chakra-ui/react'
 import { ckMerge } from '@/lib/chakra-merge'
 import { API } from 'types/constants'
 import ReactSelect from 'react-select'
 import { ERRORS } from 'types/messages'
-import { getDateFromPast } from '@/lib/utils'
+import { cleanValue, getDateFromPast } from '@/lib/utils'
 import ImageUpload, { UploadProviderProps } from '@components/image-upload'
 import useUploadImage, { uploadUtils } from '@/hooks/useUploadImage'
 import Image from 'next/image'
+import useCrudNotification, {
+  onError,
+  onSuccess,
+} from '@/hooks/useCrudNotification'
+import { BaseType, EMAIL_PATTERN, PHONE_PATTERN } from '@/lib/validate-utils'
+import useDebounceFn from '@/hooks/useDebounceFn'
+import { validateUserEmailExists, validateUserPhoneExists } from './utils'
 
-const { existsByEmail, existsByPhoneNumber } = API['users']()
 const USER_MESSAGE = ERRORS['users']
 type ContextProps = {
-  action: Action
+  action: 'create' | 'edit'
   user: IUser | null | undefined
 } & ReturnType<typeof useForm<IUser, HttpError, IUserForm>>
 
@@ -65,7 +73,12 @@ Form.Provider = function Provider({
   const { uploadImages, removeImages } = useUploadImage({
     resource: 'users',
   })
-  const formProps = useForm<IUser, HttpError, IUserForm>()
+  const formProps = useForm<IUser, HttpError, IUserForm>({
+    refineCoreProps: {
+      errorNotification: onError,
+      successNotification: onSuccess.bind(null, action),
+    },
+  })
   const {
     refineCore: {
       formLoading,
@@ -90,9 +103,9 @@ Form.Provider = function Provider({
           return imageFile && (await uploadImages([imageFile]))[0]
         }
 
-        const image = await handleImage()
-
-        await onFinish({ ...value, image: image?.url ?? '' })
+        const image = (await handleImage())?.url
+        const submitValue = { ...value, ...(image && { image }) }
+        await onFinish(submitValue)
       })(e)
     },
   }
@@ -152,8 +165,8 @@ Form.Body = function Body() {
         <div className='col-span-2'>
           <Form.Id />
           <Form.Email />
-          <Form.FirstName />
           <Form.LastName />
+          <Form.FirstName />
           <Form.Phone />
           <Form.Gender />
           <Form.Birthday />
@@ -200,6 +213,7 @@ Form.FirstName = function FirstName() {
       <Input
         {...register('firstName', {
           required: USER_MESSAGE.firstName.required,
+          setValueAs: cleanValue,
         })}
         type='text'
         placeholder='Nhập tên của bạn'
@@ -230,6 +244,7 @@ Form.LastName = function LastName() {
       <Input
         {...register('lastName', {
           required: USER_MESSAGE.lastName.required,
+          setValueAs: cleanValue,
         })}
         type='text  '
         placeholder='Nhập họ của bạn'
@@ -251,53 +266,42 @@ Form.Phone = function Phone() {
     register,
     setError,
     clearErrors,
-    formState: { errors },
+    user,
+    formState: { errors, isSubmitting },
   } = Form.useContext()
-  const onPhoneChange = async (phone: string) => {
-    // Kiểm tra sự tồn tại của phone number
-    const response = await fetch(existsByPhoneNumber(phone))
-    const result = await response.json()
-    if (result) {
-      setError('phoneNumber', {
-        type: 'manual',
-        message: USER_MESSAGE.phoneNumber.exists,
-      })
-    } else {
-      clearErrors('phoneNumber')
-      return true
-    }
-  }
+  const { required } = ERRORS.users.phoneNumber
+  const { onDefaultError: onError } = useCrudNotification()
+  const [validateExists, isChecking] = useDebounceFn(
+    validateUserPhoneExists.bind(
+      null,
+      (user as BaseType) ?? undefined,
+      onError,
+    ),
+    300,
+  )
   return (
     <FormControl
       mb='3'
       isRequired
       isInvalid={!!errors.phoneNumber}>
       <FormLabel>Số điện thoại</FormLabel>
-      <Input
-        {...register('phoneNumber', {
-          required: 'Vui lòng nhập số điện thoại.',
-          pattern: {
-            value: /^\d+$/,
-            message: 'Số điện thoại không hợp lệ.',
-          },
-          minLength: {
-            value: 10,
-            message: 'Số điện thoại phải có ít nhất 10 số.',
-          },
-          maxLength: {
-            value: 10,
-            message: 'Số điện thoại không được vượt quá 10 số.',
-          },
-          validate: (value) => {
-            value && onPhoneChange(value)
-            return true
-          },
-        })}
-        type='number'
-        placeholder='Nhập số điện thoại'
-        _placeholder={{ fontSize: 'sm' }}
-        className={ckMerge(`bg-gray-50 placeholder:text-sm`)}
-      />
+      <InputGroup>
+        <Input
+          {...register('phoneNumber', {
+            required,
+            pattern: PHONE_PATTERN,
+            validate: async (value) => await validateExists(value),
+          })}
+          type='number'
+          placeholder='Nhập số điện thoại'
+          _placeholder={{ fontSize: 'sm' }}
+          className={ckMerge(`bg-gray-50 placeholder:text-sm`)}
+        />
+        <InputRightElement>
+          {!isSubmitting && isChecking && <Spinner color='blue.600' />}
+        </InputRightElement>
+      </InputGroup>
+
       {errors.phoneNumber?.message && (
         <FormErrorMessage>
           <FormErrorIcon />
@@ -313,50 +317,44 @@ Form.Email = function Email() {
     register,
     setError,
     clearErrors,
-    formState: { errors },
+    formState: { errors, isSubmitting },
+    user,
   } = Form.useContext()
-
-  const onEmailChange = async (email: string) => {
-    // Kiểm tra sự tồn tại của email
-    const response = await fetch(existsByEmail(email))
-    if (!response.ok) {
-      console.warn('have not handle repsonse not ok')
-    }
-    const result = (await response.json()) as boolean
-    if (result) {
-      setError('email', {
-        type: 'manual',
-        message: 'Email đã tồn tại.',
-      })
-    } else {
-      clearErrors('email')
-      return true
-    }
-  }
-
+  const { required } = ERRORS.users.email
+  const { onDefaultError: onError } = useCrudNotification()
+  const [validateExists, isChecking] = useDebounceFn(
+    validateUserEmailExists.bind(
+      null,
+      (user as BaseType) ?? undefined,
+      onError,
+    ),
+    300,
+  )
   return (
     <FormControl
       mb='3'
       isRequired
       isInvalid={!!errors.email}>
       <FormLabel>Địa chỉ E-mail</FormLabel>
-      <Input
-        {...register('email', {
-          required: 'Vui lòng nhập địa chỉ email.',
-          pattern: {
-            value: /^\S+@\S+$/i,
-            message: 'Email không hợp lệ.',
-          },
-          validate: (value) => {
-            value && onEmailChange(value)
-            return true
-          },
-        })}
-        type='email'
-        placeholder='Nhập địa chỉ email'
-        _placeholder={{ fontSize: 'sm' }}
-        className={ckMerge(`bg-gray-50 placeholder:text-sm`)}
-      />
+      <InputGroup>
+        <Input
+          {...register('email', {
+            required,
+            pattern: EMAIL_PATTERN,
+            validate: async (value) => await validateExists(value),
+            setValueAs: (value) =>
+              !!value ? cleanValue(value).toLowerCase() : undefined,
+          })}
+          type='email'
+          placeholder='Nhập địa chỉ email'
+          _placeholder={{ fontSize: 'sm' }}
+          className={ckMerge(`bg-gray-50 placeholder:text-sm`)}
+        />
+        <InputRightElement>
+          {!isSubmitting && isChecking && <Spinner color='blue.600' />}
+        </InputRightElement>
+      </InputGroup>
+
       {errors.email?.message && (
         <FormErrorMessage>
           <FormErrorIcon />
@@ -444,8 +442,8 @@ Form.Roles = function Roles() {
   } = Form.useContext()
   const roleOptions = useMemo(() => {
     return [
-      { label: 'Người dùng', value: 'user' },
-      { label: 'Quản trị viên', value: 'admin' },
+      // { label: 'Người dùng', value: 'user' },
+      //   { label: 'Quản trị viên', value: 'admin' },
     ]
   }, [])
   return (

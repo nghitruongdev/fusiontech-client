@@ -71,7 +71,9 @@ const dataProvider = (
       headers: headersFromMeta,
     })
     const fetchData =
-      data?._embedded?.[meta?._embeddedResource ?? resource] ?? data
+      data?._embedded?.[
+        meta?.resource ?? meta?._embeddedResource ?? resource
+      ] ?? data
     const page = data?.page
 
     const total = page?.totalElements ?? headers['x-total-count']

@@ -1,25 +1,28 @@
-import axiosClient from "./axiosClient";
+/** @format */
+
+import { API_URL } from 'types/constants'
+import axiosClient from './axiosClient'
 
 const favoriteApi = {
-    get: (uid) => {
-        const url = `http://localhost:8080/api/products/search/favorites?uid=${uid}`;
-        return axiosClient.get(url);
-    },
+  get: (uid) => {
+    const url = `${API_URL}/products/search/favorites?uid=${uid}`
+    return axiosClient.get(url)
+  },
 
-    delete: (productId, uid) => {
-        const url = `http://localhost:8080/api/products/${productId}/favorites?uid=${uid}`;
-        return axiosClient.delete(url);
-    },
+  delete: (productId, uid) => {
+    const url = `${API_URL}/products/${productId}/favorites?uid=${uid}`
+    return axiosClient.delete(url)
+  },
 
-    getProductId: (pid) => {
-        const url = `http://localhost:8080/api/products/${pid}`;
-        return axiosClient.get(url);
-    },
+  getProductId: (pid) => {
+    const url = `${API_URL}/products/${pid}`
+    return axiosClient.get(url)
+  },
 
-    create: (productId, uid) => {
-      const url = `http://localhost:8080/api/products/${productId}/favorites?uid=${uid}`;
-      return axiosClient.post(url);
-    },
-};
+  create: (productId, uid) => {
+    const url = `${API_URL}/products/${productId}/favorites?uid=${uid}`
+    return axiosClient.post(url)
+  },
+}
 
-export default favoriteApi;
+export default favoriteApi

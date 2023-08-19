@@ -1,16 +1,16 @@
-import axiosClient from "./axiosClient";
+/** @format */
+
+import { API_URL } from 'types/constants'
 
 const productApi = {
-
   searchByKeyword: (keyword) => {
-    const url = `http://localhost:8080/api/products/search/byKeyWord?keyword=${keyword}`;
-    return axiosClient.get(url);
+    const url = `${API_URL}/products/search/byKeyWord?keyword=${keyword}`
+    return axiosClient.get(url)
   },
   searchByCategoryId: (cid) => {
-    const url = `http://localhost:8080/api/products/search/byCategoryId?cid=${cid}`;
-    return axiosClient.get(url);
+    const url = `${API_URL}/products/search/byCategoryId?cid=${cid}`
+    return axiosClient.get(url)
   },
-  
-};
+}
 
-export default productApi;
+export default productApi

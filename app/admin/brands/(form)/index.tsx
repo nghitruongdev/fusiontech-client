@@ -1,43 +1,50 @@
 /** @format */
 
 import useDebounceFn from '@/hooks/useDebounceFn'
-import useCrudNotification from '@/hooks/useCrudNotification'
+import useCrudNotification, {
+  onError,
+  onSuccess,
+} from '@/hooks/useCrudNotification'
 import useUploadImage, { uploadUtils } from '@/hooks/useUploadImage'
 import {
+  Button,
   FormControl,
+  FormErrorIcon,
   FormErrorMessage,
   FormLabel,
+  Icon,
   Input,
   InputGroup,
-  InputRightAddon,
   InputRightElement,
   Spinner,
+  Tooltip,
 } from '@chakra-ui/react'
-import { SaveButton } from '@components/buttons'
 import { Create, Edit } from '@components/crud'
 import ImageUpload, { UploadProviderProps } from '@components/image-upload'
-import { Action, useOnError } from '@refinedev/core'
+import { Action } from '@refinedev/core'
 import { useForm } from '@refinedev/react-hook-form'
-import { HttpError } from 'http-errors'
 import {
   BaseSyntheticEvent,
   PropsWithChildren,
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useState,
 } from 'react'
 import { IBrand, IBrandField } from 'types'
-import { API, API_URL } from 'types/constants'
 import { ERRORS } from 'types/messages'
-import { useBoolean, useDebounce } from 'usehooks-ts'
+import { slugifyName } from '@/lib/slug-utils'
+import { cleanValue } from '@/lib/utils'
+import { validateBrandNameExists, validateBrandSlugExists } from './utils'
+import { SLUG_PATTERN } from '@/lib/validate-utils'
+import { Info } from 'lucide-react'
+import { AppError } from 'types/error'
+import { ActionText } from 'types/constants'
 
 type ContextProps = {
-  action: Action
+  action: 'create' | 'edit'
   brand: IBrand | undefined
-} & ReturnType<typeof useForm<IBrand, HttpError, IBrandField>>
+} & ReturnType<typeof useForm<IBrand, AppError, IBrandField>>
 
 export const Form = ({ action }: { action: ContextProps['action'] }) => {
   return (
@@ -67,9 +74,11 @@ Form.Provider = function Provider({
     resource: 'brands',
   })
 
-  const formProps = useForm<IBrand, HttpError, IBrandField>({
+  const formProps = useForm<IBrand, AppError, IBrandField>({
     refineCoreProps: {
-      redirect: 'show',
+      redirect: 'list',
+      errorNotification: onError,
+      successNotification: onSuccess.bind(null, action),
     },
   })
   const {
@@ -86,7 +95,7 @@ Form.Provider = function Provider({
     isLoading: isSubmitting,
     disabled: formLoading || isSubmitting || isValidating,
     onClick: (e: BaseSyntheticEvent) => {
-      handleSubmit(async ({ id, file, ...value }) => {
+      handleSubmit(async ({ file, ...value }) => {
         const handleImage = async () => {
           if (action === 'edit' && dirtyFields.image) {
             const removedImage = brand?.image
@@ -146,50 +155,19 @@ Form.Container = function Container({ children }: PropsWithChildren) {
   )
 }
 
-type onError = ReturnType<typeof useCrudNotification>['onDefaultError']
-const validateName = async (
-  brand: IBrand | undefined,
-  onError: onError,
-  name: string,
-) => {
-  const { findByName } = API['brands']()
-  const { exists, required } = ERRORS.brands.name
-  if (!name) return required
-  const sendRequest = async () => {
-    const response = await fetch(`${API_URL}/${findByName(name)}`)
-
-    if (!response.ok) {
-      if (response.status === 404) return true
-      console.error('validate name is not ok')
-      return false
-    }
-    const data = (await response.json()) as IBrand
-    if (data) {
-      if (!brand) return exists
-
-      if (data.id !== brand.id) return exists
-    }
-    return true
-  }
-  try {
-    return await sendRequest()
-  } catch (err) {
-    onError(err as Error)
-    return false
-  }
-}
 Form.Body = function Body() {
   const {
     action,
     register,
-    formState: { errors },
+    formState: { errors, isSubmitting },
+    refineCore: { id },
     brand,
   } = Form.useContext()
   const isEdit = action === 'edit'
   const { onDefaultError: onError } = useCrudNotification()
 
-  const [checkValue, isChecking] = useDebounceFn(
-    validateName.bind(null, brand, onError),
+  const [checkNameExists, isNameChecking] = useDebounceFn(
+    validateBrandNameExists.bind(null, brand, onError),
     300,
   )
 
@@ -207,11 +185,8 @@ Form.Body = function Body() {
             <Input
               disabled
               type='number'
-              {...register('id')}
+              defaultValue={id}
             />
-            <FormErrorMessage>
-              {(errors as any)?.id?.message as string}
-            </FormErrorMessage>
           </FormControl>
         )}
         <FormControl
@@ -223,42 +198,87 @@ Form.Body = function Body() {
               type='text'
               {...register('name', {
                 required: ERRORS.brands.name.required,
-                validate: async (value) => await checkValue(value.trim()),
-                setValueAs: (value) => value && value.trim(),
+                validate: async (value) => await checkNameExists(value),
+                setValueAs: (value) => value && cleanValue(value),
               })}
             />
             <InputRightElement>
-              {isChecking && <Spinner color='blue.600' />}
+              {!isSubmitting && isNameChecking && <Spinner color='blue.600' />}
             </InputRightElement>
           </InputGroup>
           <FormErrorMessage>
+            <FormErrorIcon />
             {(errors as any)?.name?.message as string}
           </FormErrorMessage>
         </FormControl>
-        {/* <FormControl mb="3" isInvalid={!!(errors as any)?.slug}>
-          <FormLabel>Slug</FormLabel>
-          <Input
-            type="text"
-            {...register('slug', {
-              required: 'Vui lòng nhập slug.',
-            })}
-          />
-          <FormErrorMessage>
-            {(errors as any)?.slug?.message as string}
-          </FormErrorMessage>
-        </FormControl> */}
-        {/* <FormControl mb="3" isInvalid={!!(errors as any)?.description}>
-          <FormLabel>Mô tả danh mục</FormLabel>
-          <Textarea {...register('description', {})} />
-          <FormErrorMessage>
-            {(errors as any)?.description?.message as string}
-          </FormErrorMessage>
-        </FormControl> */}
+        <Form.Slug />
       </div>
     </div>
   )
 }
 
+Form.Slug = function BrandSlug() {
+  const {
+    register,
+    trigger,
+    getValues,
+    setValue,
+    brand,
+    formState: { errors, isSubmitting },
+  } = Form.useContext()
+  const { onDefaultError: onError } = useCrudNotification()
+
+  const [checkSlugExists, isSlugChecking] = useDebounceFn(
+    validateBrandSlugExists.bind(null, brand, onError),
+    300,
+  )
+  return (
+    <FormControl
+      mb='3'
+      isInvalid={!!errors?.slug}>
+      <FormLabel>
+        Đường dẫn (slug)
+        <Button
+          variant={'link'}
+          fontSize={'sm'}
+          ml='1'
+          fontWeight={'normal'}
+          rightIcon={
+            <Tooltip label='Đường dẫn sẽ được tạo tự động từ tên. Cần chỉnh sửa nếu bị trùng lặp.'>
+              <Icon as={Info} />
+            </Tooltip>
+          }
+          onClick={async () => {
+            const nameValid = await trigger(`name`)
+            if (!nameValid) return
+            setValue(`slug`, slugifyName(getValues(`name`)))
+            trigger(`slug`)
+          }}>
+          Tạo tự động
+        </Button>
+      </FormLabel>
+      <InputGroup>
+        <Input
+          type='text'
+          {...register('slug', {
+            required: 'Vui lòng nhập slug.',
+            pattern: SLUG_PATTERN,
+            validate: async (value) => await checkSlugExists(value),
+            setValueAs: (value) => (value as string)?.trim().toLowerCase(),
+            deps: ['name'],
+          })}
+        />
+        <InputRightElement>
+          {!isSubmitting && isSlugChecking && <Spinner color='blue.600' />}
+        </InputRightElement>
+      </InputGroup>
+      <FormErrorMessage>
+        <FormErrorIcon />
+        {errors?.slug?.message}
+      </FormErrorMessage>
+    </FormControl>
+  )
+}
 Form.Image = function Image() {
   const { brand, setValue } = Form.useContext()
   const onFilesChange: UploadProviderProps['onFilesChange'] = useCallback(

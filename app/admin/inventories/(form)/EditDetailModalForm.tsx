@@ -320,7 +320,10 @@ Form.Quantity = function DetailQuantity({
           />
         </NumberInputStepper>
       </NumberInput>
-      <FormErrorMessage>{errors?.quantity?.message}</FormErrorMessage>
+      <FormErrorMessage>
+        <FormErrorIcon />
+        {errors?.quantity?.message}
+      </FormErrorMessage>
     </FormControl>
   )
 }

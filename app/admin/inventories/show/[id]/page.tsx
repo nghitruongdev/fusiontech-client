@@ -7,7 +7,6 @@ import {
   IResourceComponentsProps,
   useCustom,
   useMany,
-  useInfiniteList,
   useInvalidate,
 } from '@refinedev/core'
 import { TextField, DateField, NumberField } from '@refinedev/chakra-ui'
@@ -36,11 +35,12 @@ import { API } from 'types/constants'
 import dynamic from 'next/dynamic'
 import LoadingOverlay from '@components/ui/LoadingOverlay'
 import { onError, onSuccess } from '@/hooks/useCrudNotification'
+import { useHeaders } from '@/hooks/useHeaders'
 export default function ShowPage() {
   return <InventoryShow />
 }
 
-export const InventoryShow: React.FC<IResourceComponentsProps> = () => {
+const InventoryShow: React.FC<IResourceComponentsProps> = () => {
   const { inventory } = useData()
   const { data, isLoading, isError, isFetched } = inventory
   const record = data?.data
@@ -139,6 +139,8 @@ const InventoryItems = ({ className }: { className?: string }) => {
   const { resource: detailResource } = API['inventory-details']()
   const { resource: variantResource } = API['variants']()
   const queryClient = useQueryClient()
+
+  const { getAuthHeader } = useHeaders()
   const modalFormProps = useModalForm<
     IInventoryDetail,
     AppError,
@@ -154,7 +156,12 @@ const InventoryItems = ({ className }: { className?: string }) => {
           invalidates: ['many'],
         })
       },
-      successNotification: onSuccess,
+      meta: {
+        headers: {
+          ...getAuthHeader(),
+        },
+      },
+      successNotification: onSuccess.bind(null, 'edit'),
       errorNotification: onError,
       mutationMode: 'optimistic',
     },

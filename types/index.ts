@@ -12,6 +12,7 @@ export type ResourceName =
   | 'shippingAddresses'
   | 'specifications'
   | 'vouchers'
+  | 'statistical'
   | 'inventory-details'
 
 export type FirebaseImage = string
@@ -23,7 +24,7 @@ export type UploadUrl = {
 }
 
 export type IProduct = {
-  id: string | undefined
+  id: string
   name: string
   slug: string
   summary: string
@@ -38,6 +39,7 @@ export type IProduct = {
   category?: ICategory
   reviewCount?: number
   variants?: IVariant[]
+  variantCount?: number
   avgRating?: number
   //   variants?: IVariant[] | { id: string; price: number }[]
   _links?: {
@@ -75,15 +77,12 @@ export type IProductField = {
   description: string
   discount?: number
   status?: string
+  price?: number
   active?: boolean
   features?: { value: string }[]
 } & {
   files: File[]
   images?: (FirebaseImage | null)[]
-  specGroups?: Option<string>[]
-  /**
-   * @deprecated
-   */
   specificationGroup?: Option<string>[]
   specifications?: (
     | {
@@ -94,6 +93,7 @@ export type IProductField = {
   )[]
   brand?: Option<IBrand>
   category?: Option<ICategory>
+  formStatus?: Option<string>
 }
 
 export type ISpecification = {
@@ -109,6 +109,7 @@ export type IVariant = {
   price: number
   active?: boolean
   availableQuantity?: number
+  soldCount?: number
   product?: IProduct
   specifications?: ISpecification[]
   _links: _links
@@ -119,17 +120,21 @@ export type IVariantField = {
   sku: string
   images?: (FirebaseImage | null)[]
   price: number
-  product: {
-    label: string
-    value: {
-      id: string
-      name: string
-    }
-  }
+  active?: boolean
+  formProduct: Option<{
+    id: string
+    name: string
+    variantCount: number
+  }>
   specificationGroup?: Option<string>[]
-  specifications?: {
+  /**
+   * @deprecated
+   */
+  specifications: Option<ISpecification | undefined>[]
+  // formSpecifications: (Option<ISpecification | undefined> | undefined)[]
+  formSpecifications: {
     label: string
-    options: Option<ISpecification | undefined>[]
+    option: Option<ISpecification> | undefined
   }[]
 } & {
   files: File[]
@@ -165,17 +170,18 @@ type IReview = {
 }
 
 export type IBrand = {
-  id?: number
+  id: number
   name: string
   image?: FirebaseImage | null
+  slug: string
 }
 
-export type IBrandField = IBrand & {
+export type IBrandField = Omit<IBrand, 'id'> & {
   file?: File | null
 }
 
 export interface ICategory {
-  id?: number | undefined
+  id: number
   name: string
   slug: string
   description?: string
@@ -183,7 +189,7 @@ export interface ICategory {
   specifications?: string[]
 }
 
-export interface ICategoryField extends ICategory {
+export interface ICategoryField extends Omit<ICategory, 'id'> {
   formSpecifications?: Option<string>[]
   file?: File | null
 }
@@ -196,6 +202,7 @@ export type IAddress = {
   short_codename: string
 }
 
+export type Gender = 'MALE' | 'FEMALE' | 'OTHER'
 export interface IUser {
   id?: number
   firebaseUid: string
@@ -208,11 +215,12 @@ export interface IUser {
   photoUrl?: string
   image?: FirebaseImage | null
   dateOfBirth?: Date
-  gender?: 'MALE' | 'FEMALE' | 'OTHER'
+  gender?: Gender | undefined
   roles?: string[]
   defaultAddress?: ShippingAddress
-  isDisabled?: boolean
-  isStaff?: boolean
+  disabled?: boolean
+  staff?: boolean
+  totalOrder?: number
   _links?: _links
 }
 
@@ -301,6 +309,7 @@ export interface IVoucher {
   maxDiscountAmount?: number | null
   startDate: string
   expirationDate: string
+  usage?: number | null
   limitUsage?: number | null
   userLimitUsage?: number | null
 }
@@ -366,6 +375,7 @@ export interface IOrderItem {
   }
   _links: _links
 }
+
 enum OrderStatusGroup {
   VERIFY = 'VERIFY',
   PROCESSING = 'PROCESSING',
@@ -463,9 +473,16 @@ export type Option<T> = {
   value: T
   __isNew__?: boolean
   __isFixed__?: boolean
+  __isDisabled__?: boolean
 }
 
 export type GroupOption<T> = {
   label: string
   options: Option<T>[]
+}
+
+export enum ROLES {
+  ADMIN = 'admin',
+  USER = 'user',
+  STAFF = 'staff',
 }

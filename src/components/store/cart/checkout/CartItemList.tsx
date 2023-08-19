@@ -1,12 +1,6 @@
 /** @format */
 
 'use client'
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@components/ui/shadcn/accordion'
 import Image from 'next/image'
 import { ICartItem } from 'types'
 import { useValidSelectedCartItems } from '../useSelectedItemStore'

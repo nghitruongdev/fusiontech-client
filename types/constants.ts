@@ -2,25 +2,27 @@
 
 /** @format */
 
+import { formatDate } from '@/lib/utils'
 import { Action } from '@refinedev/core'
-import { PaymentMethod, ResourceName } from 'types'
-
+import { stringify } from 'query-string'
+import { Gender, IUser, PaymentMethod, ResourceName } from 'types'
 const throwIfMissing = (name: string) => {
   throw new Error(`${name} is missing from .env.local`)
-  return ''
+  return
 }
 
 export const API_URL =
-  process.env.NEXT_PUBLIC_RESOURCE_SERVER_URL ??
+  process.env['NEXT_PUBLIC_RESOURCE_SERVER_URL'] ??
   throwIfMissing('NEXT_PUBLIC_RESOURCE_SERVER_URL')
 
-export const REG_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+export const NEXT_API_URL =
+  process.env['NEXT_PUBLIC_RESOURCE_SERVER_URL'] ??
+  throwIfMissing('NEXT_PUBLIC_API_URL')
 
-export const NEXT_API_URL = 'http://localhost:3000/api'
-//todo: const {} =  API['users']()
 export const API = {
   orders: () => {
     const resource: ResourceName = 'orders'
+
     return {
       resource,
       projection: {
@@ -29,6 +31,7 @@ export const API = {
       cart: {
         checkout: `cart/checkout`,
       },
+      countOrder: () => `${resource}/count`,
       findAllStatusByGroup: (group: string | undefined) =>
         !group ? '' : `${resource}/statuses?group=${group}`,
       findOrderByUserAndStatus: (
@@ -46,7 +49,11 @@ export const API = {
       resource: resource,
       findByName: (value?: string) =>
         value
-          ? `${resource}/search/findByName?name=${encodeURIComponent(value)}`
+          ? `${resource}/search/find-by-name?name=${encodeURIComponent(value)}`
+          : '',
+      findBySlug: (slug?: string) =>
+        slug
+          ? `${resource}/search/find-by-slug?slug=${encodeURIComponent(slug)}`
           : '',
     }
   },
@@ -56,7 +63,11 @@ export const API = {
       resource: resource,
       findByName: (value?: string) =>
         value
-          ? `${resource}/search/findByName?name=${encodeURIComponent(value)}`
+          ? `${resource}/search/find-by-name?name=${encodeURIComponent(value)}`
+          : '',
+      findBySlug: (slug?: string) =>
+        slug
+          ? `${resource}/search/find-by-slug?slug=${encodeURIComponent(slug)}`
           : '',
     }
   },
@@ -70,6 +81,8 @@ export const API = {
         withProduct: 'product',
         withProductBasic: 'product-name',
       },
+      hasImportInventory: (id: string | number | undefined) =>
+        `${resource}/search/has-import-inventory?id=${id}`,
       existsBySku: (sku: string) => `${resource}/search/existsBySku?sku=${sku}`,
       findBySku: (sku: string) => `${resource}/search/findBySku?sku=${sku}`,
       getAvailableQuantity: (id: string | number | undefined) =>
@@ -84,9 +97,21 @@ export const API = {
       projection: {
         full: 'full',
         specifications: 'specifications',
-        // onlyName: 'only-name',
+        nameAndVariantCount: 'name-and-variant-count',
         nameWithVariants: 'name-with-variants',
       },
+      hasImportInventory: (id: string | number | undefined) =>
+        `${resource}/search/has-import-inventory?id=${id}`,
+      getAllProducts: () => `${resource}`,
+      getProductsDiscount: () => `${resource}/search/discount-products`,
+      getHotProducts: (size: number) =>
+        `${resource}/search/hot-products?size=${size}`,
+      getProductsLastest: (size: number) =>
+        `${resource}/search/latest-products?size=${size}`,
+      getSellingProducts: (startDate: Date, endDate: Date, size: number = 10) =>
+        `statistical/best-seller?startDate=${formatDate(
+          startDate,
+        )}&endDate=${formatDate(endDate)}&size=${size}`,
       getVariants: (productId: string | number | undefined) =>
         productId ? `${resource}/${productId}/${variants}` : '',
       getSpecificationsByProduct: (productId: string) =>
@@ -151,6 +176,12 @@ export const API = {
         `${resource}/search/existsByEmail?email=${email}`,
       existsByPhoneNumber: (phone: string) =>
         `${resource}/search/existsByPhoneNumber?phoneNumber=${phone}`,
+      findByEmail: (email: string) =>
+        `${resource}/search/find-by-email?email=${email}`,
+      findByPhone: (phone: string) =>
+        `${resource}/search/find-by-phone?phoneNumber=${phone}`,
+      findStaff: `${resource}/search/staffs`,
+      countUser: () => `${resource}/count`,
     }
   },
   shippingAddresses: () => {
@@ -163,6 +194,18 @@ export const API = {
         `${resource}/search/findDefaultShippingAddressByUserId?uid=${uid}`,
     }
   },
+  statistical: () => {
+    const resource: ResourceName = 'statistical'
+    return {
+      resource: resource,
+      revenueAll: () => `${resource}/revenue/all`,
+      revenue: () => `${resource}/revenue`,
+      bestCustomer: (size: number = 10) =>
+        `${resource}/best-customer?size=${size}`,
+      revenueDay: () => `${resource}/revenue/day`,
+      inventory: () => `${resource}/inventories`,
+    }
+  },
   address: {
     provinces: `address/provinces`,
     districts: (provinceCode: number | string | undefined) =>
@@ -170,6 +213,7 @@ export const API = {
     wards: (districtCode: number | string | undefined) =>
       districtCode ? `address/wards?query=${districtCode}` : '',
   },
+
   vouchers: () => {
     const resource: ResourceName = 'vouchers'
     return {
@@ -185,6 +229,8 @@ export const API = {
           : `${resource}/search/user-usage?code=${code}&userId=${userId}`,
       countUsage: (code: string | null | undefined) =>
         !code ? '' : `${resource}/search/usage?code=${code}`,
+      countUsageIn: (codes: string[]) =>
+        `${resource}/search/usage-many?${stringify({ codes })}`,
     }
   },
   ['inventory-details']: () => {
@@ -195,9 +241,28 @@ export const API = {
   },
 }
 
+export const RESOURCE_LABEL: { [key in ResourceName]: string } = {
+  'inventory-details': 'Chi tiết kho',
+  categories: 'Danh mục',
+  brands: 'Thương hiệu',
+  products: 'Sản phẩm',
+  variants: 'Biến thể sản phẩm',
+  orders: 'Đơn hàng',
+  users: 'Người dùng',
+  shippingAddresses: 'Địa chỉ',
+  specifications: 'Thông số',
+  vouchers: 'Voucher',
+  statistical: 'Thống kê',
+}
 export const ROLES = {
   user: 'người dùng',
   admin: 'quản trị viên',
+}
+
+export const GenderLabel: { [key in Gender]: string } = {
+  MALE: 'Nam',
+  FEMALE: 'Nữ',
+  OTHER: 'Khác',
 }
 
 export const PaymentMethodLabel: { [key in PaymentMethod]: string } = {
@@ -229,6 +294,11 @@ const ButtonTextVi: { [key in ButtonType]: string } = {
   cancel: 'Quay lại',
 }
 
+export const ActionText = {
+  create: 'Thêm mới',
+  edit: 'Cập nhật',
+  delete: 'Xoá',
+}
 export const NEXT_PATH = {
   login: '/auth/login',
 }
@@ -252,4 +322,6 @@ export const Images: { [key in ResourceName]: string } = {
     'https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fvariants%2FlogostuImage.png?alt=media&token=90709f04-0996-4779-ab80-f82e99c62041',
   vouchers: '',
   'inventory-details': '',
+  statistical:
+    'https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fvariants%2FlogostuImage.png?alt=media&token=90709f04-0996-4779-ab80-f82e99c62041',
 }

@@ -13,12 +13,13 @@ import { DeleteButton, EditButton, ShowButton } from '@components/buttons'
 import { FirebaseImage, IVoucher } from 'types'
 import Image from 'next/image'
 import { Images } from 'types/constants'
+import { DeleteVoucherButton } from '../(form)/delete-button'
 
 export default function ListPage() {
   return <VoucherList />
 }
 
-export const VoucherList: React.FC<IResourceComponentsProps> = () => {
+const VoucherList: React.FC<IResourceComponentsProps> = () => {
   const columns = React.useMemo<ColumnDef<IVoucher>[]>(
     () => [
       {
@@ -29,53 +30,54 @@ export const VoucherList: React.FC<IResourceComponentsProps> = () => {
       {
         id: 'code',
         accessorKey: 'code',
-        header: 'code',
+        header: 'Code',
       },
       {
         id: 'discount',
         accessorKey: 'discount',
-        header: 'discount',
+        header: 'Giảm giá',
       },
       {
         id: 'description',
         accessorKey: 'description',
-        header: 'description',
+        header: 'Mô tả',
       },
       // {
       //   id: 'minOrderAmount',
       //   accessorKey: 'minOrderAmount',
       //   header: 'minOrderAmountu',
       // },
-      // {
-      //   id: 'maxDiscountAmount',
-      //   accessorKey: 'maxDiscountAmount',
-      //   header: 'maxDiscountAmount',
-      // },
-      // {
-      //   id: 'startDate',
-      //   accessorKey: 'startDate',
-      //   header: 'startDate',
-      // },
-      // {
-      //   id: 'expirationDate',
-      //   accessorKey: 'maxDiscountAmount',
-      //   header: 'maxDiscountAmount',
-      // },
+      {
+        id: 'maxDiscountAmount',
+        accessorKey: 'maxDiscountAmount',
+        header: 'Mức giảm tối đa',
+      },
+      {
+        id: 'startDate',
+        accessorKey: 'startDate',
+        header: 'Bắt đầu',
+      },
+      {
+        id: 'expirationDate',
+        accessorKey: 'expirationDate',
+        header: 'Kết thúc',
+      },
       {
         id: 'limitUsage',
         accessorKey: 'limitUsage',
-        header: 'limitUsage',
+        header: 'Số lượng',
       },
-      {
-        id: 'userLimitUsage',
-        accessorKey: 'userLimitUsage',
-        header: 'userLimitUsage',
-      },
+      { id: 'usage', accessorKey: 'usage', header: 'Số lượng đã sử dụng' },
+      // {
+      //   id: 'userLimitUsage',
+      //   accessorKey: 'userLimitUsage',
+      //   header: 'Số lượ',
+      // },
       {
         id: 'actions',
         accessorKey: 'id',
         header: 'Hành động',
-        cell: function render({ getValue }) {
+        cell: function render({ getValue, row }) {
           return (
             <HStack>
               <ShowButton
@@ -86,9 +88,10 @@ export const VoucherList: React.FC<IResourceComponentsProps> = () => {
                 hideText
                 recordItemId={getValue() as string}
               />
-              <DeleteButton
+              <DeleteVoucherButton
                 hideText
                 recordItemId={getValue() as string}
+                usageCount={row.getValue<number>('usage') ?? 0}
               />
             </HStack>
           )

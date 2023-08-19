@@ -5,6 +5,7 @@ const { i18n } = require('./next-i18next.config')
 module.exports = {
   experimental: {
     newNextLinkBehavior: true,
+    appDir: true,
   },
   reactStrictMode: true,
   images: {
@@ -23,6 +24,8 @@ module.exports = {
       'cdn-icons-png.flaticon.com',
       'i.pinimg.com',
       'cdn.freebiesupply.com',
+      'example.com',
+      'cdn2.cellphones.com.vn',
     ],
     formats: ['image/webp'],
   },

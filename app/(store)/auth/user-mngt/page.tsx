@@ -75,6 +75,7 @@ const UpdatePasswordPage = () => {
           name: 'Đường dẫn không hợp lệ.',
           message:
             'Đường dẫn không hợp lệ hoặc đã hết hạn. Vui lòng tạo một yêu cầu mới.',
+          statusCode: 400,
         })
       }
     }

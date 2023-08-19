@@ -2,18 +2,14 @@
 
 'use client'
 
-import { HttpError, useCustom, useOne } from '@refinedev/core'
+import { HttpError, useCustom, useList, useOne } from '@refinedev/core'
 import {
   FormControl,
   FormLabel,
   FormErrorMessage,
   Input,
-  Button,
-  Heading,
   InputGroup,
   InputLeftElement,
-  InputRightElement,
-  Spinner,
   useConst,
   Table,
   Thead,
@@ -21,7 +17,12 @@ import {
   Th,
   Tbody,
   Td,
+  Tooltip,
+  Switch,
+  FormErrorIcon,
+  Button,
   useBoolean,
+  ButtonGroup,
 } from '@chakra-ui/react'
 import { useForm } from '@refinedev/react-hook-form'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -30,12 +31,10 @@ import React, {
   useCallback,
   useContext,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
-  useState,
 } from 'react'
-import Select, { ActionMeta, MultiValue } from 'react-select'
+import Select from 'react-select'
 import {
   FirebaseImage,
   IProduct,
@@ -45,25 +44,27 @@ import {
   Option,
 } from 'types'
 import { PropsWithChildren } from 'react'
-import { Controller, UseFieldArrayReturn, useFieldArray } from 'react-hook-form'
-import { Inbox, MinusCircle } from 'lucide-react'
+import { Controller, FieldArrayWithId, useFieldArray } from 'react-hook-form'
 import { API, API_URL } from 'types/constants'
-import useListOption, { ListOptionProps } from '@/hooks/useListOption'
-import { useDebounce } from 'usehooks-ts'
-import { waitPromise } from '@/lib/promise'
-import useCancellable from '@/hooks/useCancellable'
 import {
-  isValidNewOption,
+  cleanValue,
+  formatPrice,
+  isValidNewSelectOption,
   toArrayOptionString,
   toObjectOption,
+  toRecord,
 } from '@/lib/utils'
 import CreatableSelect from 'react-select/creatable'
-import { produce } from 'immer'
 import ImageUpload, { UploadProviderProps } from '@components/image-upload'
 import useUploadImage, { uploadUtils } from '@/hooks/useUploadImage'
 import { Create, Edit } from '@components/crud'
 import { ChakraCurrencyInput } from '@components/ui/ChakraCurrencyInput'
-import useDebounceFn from '@/hooks/useDebounceFn'
+import { QuestionIcon } from '@chakra-ui/icons'
+import { waitPromise } from '@/lib/promise'
+import CurrencyInput from 'react-currency-input-field'
+import { Badge } from '@components/ui/shadcn/badge'
+import { DeleteVariantButton } from './DeleteVariantButton'
+import { SaveButton } from '@components/buttons'
 const productResource = API.products()
 const variantResource = API.variants()
 const ENABLE_FETCHED = true
@@ -74,37 +75,14 @@ type FormProps = {
 export const VariantForm = ({ action }: FormProps) => {
   return (
     <VariantForm.Provider action={action}>
-      <div className='grid grid-cols-3 gap-4'>
-        <div className=' col-span-1  '>
-          <div className='flex justify-center mb-5'>
-            <VariantForm.Images />
-          </div>
-        </div>
-        <div className=' col-span-2'>
-          <VariantForm.Product />
-          <VariantForm.SKU />
-          <VariantForm.Price />
-          {/* <VariantForm.Options /> */}
-          <VariantForm.Specification />
-          <VariantForm.SpecDefault />
-        </div>
-      </div>
+      <VariantForm.Body />
     </VariantForm.Provider>
   )
 }
 
 type ContextProps = {
-  productResponse: ReturnType<typeof useOne<IProduct>>
   variant: IVariant | undefined
   handleFormSubmit: () => void
-  paramProductId: string | null
-  productId: string | undefined
-  product: {
-    response: ReturnType<typeof useOne<IProduct>>
-    param: string | null
-    id: string | undefined
-    data: IProduct | undefined
-  }
 } & FormProps &
   ReturnType<typeof useForm<IVariant, HttpError, IVariantField>>
 
@@ -145,7 +123,6 @@ VariantForm.Provider = function Provider({
   })
   const {
     handleSubmit,
-    watch,
     formState: { dirtyFields },
     saveButtonProps: saveProps,
     refineCore: {
@@ -154,57 +131,24 @@ VariantForm.Provider = function Provider({
     },
   } = formMethods
 
-  const paramProductId = useConst(searchParams.get('productId'))
-  const watchId = watch(`product`)?.value?.id
-  const productId = useMemo(() => {
-    console.count('product id memo ran')
-    return variant?.product?.id ?? paramProductId ?? watchId
-  }, [variant?.product?.id, paramProductId, watchId])
-
-  const productResponse = useOne<IProduct>({
-    resource: productResource.resource,
-    id: +productId,
-    queryOptions: {
-      enabled: !!productId && ENABLE_FETCHED,
-    },
-    meta: {
-      query: {
-        projection: productResource.projection.specifications,
-      },
-    },
-  })
-
-  //done: check if sku is not exists
-  //TODO: convert images to images attribute
-  //FIXME: check if save button props redirect correctly
-  //IGNORE: check if there are other variants that are the same
   const handleFormSubmit = handleSubmit(async (formValues: IVariantField) => {
     const {
       id,
       images,
       files,
       specifications,
+      formSpecifications,
       specificationGroup,
-      product: { value: product },
+      formProduct: { value: product },
       ...values
     } = formValues
 
-    // const value = {
-    //     sku,
-    //     price,
-    //     product: {
-    //         id: product.id,
-    //     },
-    // };
-
     const handleSpecifications = () =>
-      specifications &&
-      specifications.map((item) => {
-        const values = item?.options.map(({ value }) => ({
-          ...value,
-        }))
-        return { name: item?.label, values }
-      })
+      formSpecifications &&
+      formSpecifications
+        //todo: check again what is proper request for create variants
+        .map(({ option }) => option?.value)
+        .filter((item) => !!item)
 
     const handleImages = async () => {
       const variantImages = [...(variant?.images ?? [])]
@@ -224,7 +168,7 @@ VariantForm.Provider = function Provider({
       return [...variantImages, ...uploadedUrls]
     }
     const onSubmit = async () => {
-      const formSpecs = dirtyFields.specifications && handleSpecifications()
+      const formSpecs = dirtyFields.formSpecifications && handleSpecifications()
       const formImages = dirtyFields.files && (await handleImages())
 
       const formValues = Object.entries(values).reduce((acc, [key, val]) => {
@@ -259,17 +203,7 @@ VariantForm.Provider = function Provider({
     ...formMethods,
     handleFormSubmit,
     saveButtonProps,
-    productResponse,
-    // imagesField,
-    paramProductId,
-    productId,
     variant,
-    product: {
-      response: productResponse,
-      param: paramProductId,
-      id: productId,
-      data: productResponse.data?.data,
-    },
   }
 
   return (
@@ -284,6 +218,7 @@ VariantForm.Container = function Container({ children }: PropsWithChildren) {
     action,
     formState: { isLoading },
     saveButtonProps,
+    refineCore: { id },
   } = useFormProvider()
   const isCreate = action === 'create'
   const isEdit = action === 'edit'
@@ -296,34 +231,62 @@ VariantForm.Container = function Container({ children }: PropsWithChildren) {
         {children}
       </Create>
     )
-  if (isEdit)
-    return (
-      <Edit
-        isLoading={isLoading}
-        saveButtonProps={saveButtonProps}>
-        {children}
-      </Edit>
-    )
+  return (
+    <Edit
+      isLoading={isLoading}
+      saveButtonProps={saveButtonProps}
+      footerButtons={({ deleteButtonProps, saveButtonProps }) => {
+        return (
+          <ButtonGroup>
+            <DeleteVariantButton
+              {...deleteButtonProps}
+              isDisabled={saveButtonProps?.isDisabled}
+              disabled={saveButtonProps?.disabled}
+              variantId={id}
+            />
+            <SaveButton {...saveButtonProps} />
+          </ButtonGroup>
+        )
+      }}>
+      {children}
+    </Edit>
+  )
+}
+
+VariantForm.Body = function Body() {
+  return (
+    <div className='grid grid-cols-3 gap-4'>
+      <div className=' col-span-1  '>
+        <div className='flex justify-center mb-5'>
+          <VariantForm.Images />
+        </div>
+      </div>
+      <div className=' col-span-2 flex flex-col gap-2'>
+        <VariantForm.Product />
+        <VariantForm.SKU />
+        <VariantForm.Price />
+        <VariantForm.Active />
+        <VariantForm.Specification />
+        <VariantForm.SpecDefault />
+      </div>
+    </div>
+  )
 }
 
 VariantForm.Product = function Product() {
   const {
-    paramProductId,
     control,
     resetField,
-    refineCore: { id },
+    refineCore: { id: variantId },
     formState: { errors },
-    productResponse: { data: { data: product } = {} },
+    variant,
+    setValue,
   } = useFormProvider()
-
-  const inputDisabled = !!paramProductId || !!id
-  const toOption: ListOptionProps<IProduct>['toOption'] = useCallback(
-    (item) => ({ label: item.name, value: item }),
-    [],
-  )
-  toOption.isCallback = true
-  const { options } = useListOption<IProduct>({
-    toOption,
+  const searchParams = useSearchParams()
+  const paramProductId = searchParams.get('productId')
+  const inputDisabled = !!paramProductId || !!variantId
+  type IProductWithVariantCount = IProduct & { variantCount: number }
+  const { data: { data: products } = {} } = useList<IProductWithVariantCount>({
     resource: productResource.resource,
     pagination: {
       mode: 'off',
@@ -331,46 +294,88 @@ VariantForm.Product = function Product() {
     queryOptions: {
       enabled: !inputDisabled && ENABLE_FETCHED,
     },
+    meta: {
+      query: {
+        projection: productResource.projection.nameAndVariantCount,
+      },
+    },
   })
 
+  const { data: { data: product } = {} } = useOne<IProductWithVariantCount>({
+    resource: productResource.resource,
+    id: variant?.product?.id ?? paramProductId ?? '',
+    queryOptions: {
+      enabled: !!variant?.product?.id || !!paramProductId,
+    },
+    meta: {
+      query: {
+        projection: productResource.projection.nameAndVariantCount,
+      },
+    },
+  })
+
+  const options: Option<{ id: string; name: string; variantCount: number }>[] =
+    useMemo(() => {
+      return (products ?? (!!product ? [product] : []))
+        .map(({ id, name, variantCount }) =>
+          toObjectOption(name, { id: id ?? '', name, variantCount }),
+        )
+        .map((item) => ({
+          ...item,
+          ...(item.value.variantCount === 1 && { __isDisabled__: true }),
+        }))
+    }, [products, product])
+
   useEffect(() => {
-    console.count('product triggered changed')
-  }, [product])
-  useEffect(() => {
-    console.count('use effect product ran')
-    if (product) {
-      resetField('product', {
-        defaultValue: {
-          label: product.name,
-          value: product,
-        } as any,
-      })
-    }
-  }, [product, resetField])
+    const selectProductId = variant?.product?.id ?? paramProductId
+    if (!selectProductId) return
+    const option = options.find((item) => item.value.id == selectProductId)
+    console.log('option', option)
+    !!option && setValue('formProduct', option)
+  }, [setValue, options, paramProductId, variant])
+
   return (
     <>
-      <FormControl isInvalid={!!errors.product}>
-        <FormLabel>Tên sản phẩm</FormLabel>
-
+      <FormControl
+        isRequired
+        isInvalid={!!errors.formProduct}>
+        <FormLabel>Chọn sản phẩm</FormLabel>
         <Controller
           render={({ field }) => (
             <Select
-              options={options as any}
+              options={options}
               {...field}
               isDisabled={inputDisabled}
+              isOptionDisabled={(option) => !!option.__isDisabled__}
+              formatOptionLabel={({ value }) =>
+                !value ? (
+                  <>Không có dữ liệu</>
+                ) : (
+                  <p className='flex items-center gap-2'>
+                    <span>{value?.name}</span>
+                    <span className=' text-xs text-center text-zinc-500 bg-gray-100 rounded-full w-4 h-4'>
+                      {value?.variantCount}
+                    </span>
+                  </p>
+                )
+              }
             />
           )}
           control={control}
-          name={`product`}
+          name={`formProduct`}
           rules={{
             required: 'Chọn một sản phẩm để thêm biến thể.',
           }}
         />
-        <FormErrorMessage>{errors.product?.message as string}</FormErrorMessage>
+        <FormErrorMessage>
+          <FormErrorIcon />
+          {errors.formProduct?.message as string}
+        </FormErrorMessage>
       </FormControl>
     </>
   )
 }
+
 const validateSKUExists = async (
   variant: IVariant | undefined,
   sku: string,
@@ -404,15 +409,32 @@ VariantForm.SKU = function SKU() {
     register,
     variant,
     setError,
+    action,
   } = useFormProvider()
-  const [checkSKU, isValidatingSKU] = useDebounceFn(validateSKUExists, 300)
+  if (action === 'create') return <></>
+  // const [checkSKU, isValidatingSKU] = useDebounceFn(validateSKUExists, 300)
   return (
     <FormControl
       mb='3'
       mt='3'
       isInvalid={!!(errors as any)?.sku}>
-      <FormLabel>Mã SKU</FormLabel>
-      <InputGroup>
+      <FormLabel
+        display='flex'
+        alignItems='center'>
+        Mã SKU
+        <span className='text-gray-300 text-sm ml-2'>
+          <Tooltip label={`Tự động tạo bởi hệ thống`}>
+            <QuestionIcon />
+          </Tooltip>
+        </span>
+      </FormLabel>
+      <Input
+        readOnly
+        {...register(`sku`)}
+        placeholder={'1-BRA-CAT-PRO-SPEC'}
+      />
+      {/* <FormLabel>Mã SKU</FormLabel> */}
+      {/* <InputGroup>
         <Input
           type='text'
           {...register('sku', {
@@ -431,8 +453,9 @@ VariantForm.SKU = function SKU() {
             />
           )}
         </InputRightElement>
-      </InputGroup>
+      </InputGroup> */}
       <FormErrorMessage>
+        <FormErrorIcon />
         {(errors as any)?.sku?.message as string}
       </FormErrorMessage>
     </FormControl>
@@ -444,11 +467,16 @@ VariantForm.Price = function Price() {
     formState: { errors },
     register,
     setValue,
+    watch,
+    control,
   } = useFormProvider()
+  const productId = watch(`formProduct`)?.value?.id
+  const { product } = useOneProductSpecs(productId)
+
   return (
     <FormControl
       mb='3'
-      isInvalid={!!(errors as any)?.price}>
+      isInvalid={!!errors?.price}>
       <FormLabel>Giá tiền</FormLabel>
       <InputGroup>
         <InputLeftElement
@@ -457,20 +485,45 @@ VariantForm.Price = function Price() {
           fontSize='1.2em'>
           $
         </InputLeftElement>
-        <ChakraCurrencyInput
-          pl='10'
-          {...register(`price`, {
-            required: 'Yêu cầu nhập giá tiền',
-            validate: (v) => v > 0 || 'Giá tiền không hợp lệ',
-            valueAsNumber: true,
-          })}
-          onValueChange={(value) => {
-            if (value) setValue(`price`, +value)
-          }}
+        <Controller
+          name='price'
+          control={control}
+          render={({ field }) => (
+            <div className='grid gap-2 w-full'>
+              <ChakraCurrencyInput
+                pl='10'
+                {...field}
+                {...register(`price`, {
+                  required: 'Yêu cầu nhập giá tiền',
+                  validate: (v) => (v && v > 0) || 'Giá tiền không hợp lệ',
+                  valueAsNumber: true,
+                })}
+                onValueChange={(value) => {
+                  setValue(`price`, value ? +value : 0)
+                }}
+              />
+              {!errors?.price?.message &&
+                !!product?.discount &&
+                !!field.value && (
+                  <div>
+                    Giá sau giảm:
+                    <Badge
+                      variant={'secondary'}
+                      className={'ml-2 text-green-500 font-bold'}>
+                      {formatPrice(
+                        ((100 - (product?.discount ?? 0)) / 100) * field.value,
+                      )}{' '}
+                      | -{product?.discount ?? 0}%
+                    </Badge>
+                  </div>
+                )}
+            </div>
+          )}
         />
       </InputGroup>
       <FormErrorMessage>
-        {(errors as any)?.price?.message as string}
+        <FormErrorIcon />
+        {errors?.price?.message}
       </FormErrorMessage>
     </FormControl>
   )
@@ -500,13 +553,18 @@ VariantForm.Images = function Images() {
 
   const formImages = useMemo(() => {
     console.count('useMemo image ran')
-    setValue(`images`, images)
+    // setValue(`images`, images)
+    console.log(images)
     return (
       images?.map((url) => ({
         url,
         name: uploadUtils.getName('variants', url) ?? '',
       })) ?? []
     )
+  }, [images])
+
+  useEffect(() => {
+    setValue(`images`, images)
   }, [images, setValue])
   return (
     <div className='w-[300px] h-[258px] mt-[20px]'>
@@ -519,32 +577,27 @@ VariantForm.Images = function Images() {
   )
 }
 
-VariantForm.SpecDefault = function Specification({}) {
+VariantForm.SpecDefault = function SpecificationDefault({}) {
   const { findDistinctNames } = API['specifications']()
-  const {
-    action,
-    resetField,
-    product: { data: product },
-  } = useFormProvider()
+  const { action, resetField, watch } = useFormProvider()
+
+  const productId = watch(`formProduct`)?.value?.id
+  const { product } = useOneProductSpecs(productId)
 
   const productSpecs = product?.specifications ?? []
   useEffect(() => {
-    console.log('useEffect ran')
     if (action === 'edit') return
 
     const specifications = product?.specifications ?? []
-    const formSpecs = specifications
-      .filter((item) => item.values.length > 1)
-      .flatMap((item) => ({
-        label: item.name,
-        options: [],
-      }))
+    const formSpecs = specifications.filter((item) => item.values.length > 1)
     setTimeout(() => {
       resetField(`specificationGroup`, {
-        defaultValue: toArrayOptionString(formSpecs.map((item) => item.label)),
+        defaultValue: toArrayOptionString(formSpecs.map((item) => item.name)),
       })
       resetField(`specifications`, {
-        defaultValue: formSpecs,
+        defaultValue: formSpecs
+          .flatMap(({ values }) => values)
+          .map((item) => toObjectOption(item.name, item)),
       })
     }, 0)
   }, [product?.specifications, action, resetField])
@@ -554,12 +607,6 @@ VariantForm.SpecDefault = function Specification({}) {
       {!!productSpecs.length && (
         <div className=' mt-4'>
           <FormLabel>Thông số mặc định</FormLabel>
-          {/* {productSpecs.map(({ name, values }) => (
-            <div key={name} className="flex gap-2">
-              <p>{name}</p>
-              <p>{values.map((val) => val.value).join('/ ')}</p>
-            </div>
-          ))} */}
           <Table
             variant='simple'
             colorScheme='blackAlpha'
@@ -594,177 +641,196 @@ VariantForm.Specification = function Specification({}) {
     getValues,
     resetField,
     control,
-    product: { data: product },
+    watch,
     variant,
+    formState: { errors },
   } = useFormProvider()
 
   const buttonRef = useRef(null)
 
   const { fields, append, remove } = useFieldArray({
-    name: 'specifications',
+    name: 'formSpecifications',
     control: control,
   })
-
   const isDisabled = true
-  const { data: { data: namesData } = {} } = useCustom<string[]>({
-    url: findDistinctNames,
-    method: 'get',
-    queryOptions: {
-      enabled: !isDisabled && ENABLE_FETCHED,
-    },
-  })
 
-  const onAppend = useCallback(
-    (value: string, shouldFocus: boolean = true) => {
-      setValue(
-        `specificationGroup`,
-        produce(getValues(`specificationGroup`) ?? [], (draft) => {
-          draft.push({
-            label: value,
-            value: value,
-          })
-        }),
-      )
-      append(
-        {
-          label: value,
-          options: [],
-        },
-        { shouldFocus },
-      )
-    },
-    [append, getValues, setValue],
-  )
-  const onRemove = (index: number) => {
-    console.log('index', index)
-    setValue(
-      `specificationGroup`,
-      produce(getValues(`specificationGroup`) ?? [], (draft) => {
-        draft.splice(index, 1)
-      }),
-    )
-    remove(index)
-    console.log('fields.length', fields.length)
-  }
-
+  const productId = watch(`formProduct`)?.value?.id
+  const { product } = useOneProductSpecs(productId)
   const productSpecs = useMemo(
-    () => product?.specifications ?? [],
+    () =>
+      product?.specifications
+        ?.filter((item) => item.values.length > 1)
+        .map((item) => item.name) ?? [],
     [product?.specifications],
   )
+  //reset and update spec item row when create new
   useEffect(() => {
-    console.count('use layout effect specification product ran')
-    if (action === 'edit') return
     const formSpecs = productSpecs
-      ?.filter((item) => item.values.length > 1)
-      .map((item) => item.name)
-    const reset = () => {
-      console.log('reset ran')
-      //   resetField(`specificationGroup`, { defaultValue: [] })
-      resetField(`specifications`, { defaultValue: [] })
-      formSpecs.forEach((item) => onAppend(item, false))
-    }
-    reset()
-  }, [productSpecs, action, resetField, onAppend])
+    resetField(`formSpecifications`, { defaultValue: [] })
+    const variantSpecs = toRecord(
+      variant?.specifications ?? [],
+      'name' as keyof ISpecification,
+    )
 
-  useEffect(() => {
-    console.count('productSpecs triggered changed')
-  }, [productSpecs])
-
-  useEffect(() => {
-    console.log('product triggered changed')
-  }, [product])
-
-  const variantSpecs = variant?.specifications
-  useEffect(() => {
-    if (action === 'create' || !variantSpecs) return
-    console.log('useEffect variant spec ran')
-    const formSpecs = variantSpecs
-      .filter((item) =>
-        productSpecs.some(
-          (spec) => spec.name === item.name && spec.values.length > 1,
-        ),
+    formSpecs.forEach(async (name) => {
+      const value = variantSpecs[name as keyof ISpecification]
+      append(
+        {
+          label: name,
+          option: value ? toObjectOption(value.value, value) : undefined,
+        },
+        { shouldFocus: false },
       )
-      .map((item) => ({
-        label: item.name,
-        options: [toObjectOption(item.value, item)],
-      }))
-    console.log('formSpecs', formSpecs)
-    setTimeout(() => {
-      //   resetField(`specificationGroup`, {
-      //     defaultValue: toArrayOptionString(formSpecs.map((item) => item.label)),
-      //   })
-      resetField(`specifications`, {
-        defaultValue: formSpecs,
-      })
-    }, 0)
-  }, [productSpecs, variantSpecs, action, resetField])
+    })
+  }, [productSpecs, action, resetField, append, variant?.specifications])
+
+  if (!fields.length) return <></>
   return (
     <>
-      <div>
-        <FormLabel>Thông số tuỳ chọn</FormLabel>
+      <FormControl isInvalid={!!errors.formSpecifications}>
+        <FormLabel>Thông số kỹ thuật</FormLabel>
+        <FormErrorMessage>
+          {errors?.formSpecifications?.message}
+        </FormErrorMessage>
         <div className='border rounded-lg p-4'>
           <div className=''>
-            {!fields.length && (
-              <>
-                <div className='h-[312px] border flex items-center justify-center'>
-                  <div
-                    className='flex flex-col gap-2 items-center justify-center'
-                    ref={buttonRef}>
-                    <Inbox className=' w-28 h-28 text-gray-500' />
-                    <p className=' text-muted-foreground text-sm'>
-                      Không có dữ liệu
-                    </p>
-                  </div>
-                </div>
-              </>
-            )}
-            {!!fields.length && (
-              <>
-                <div className='header flex'>
-                  <p className='flex-grow'>Tên thông số</p>
-                  <p className='flex-grow'>Chi tiết</p>
-                </div>
-                <div className='body flex flex-col'>
-                  {fields.map((field, idx) => (
-                    <VariantForm.Specification.Row
-                      key={field.id}
-                      index={idx}
-                      name={field.label}
-                      //   onRemove={onRemove.bind(null, idx)}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
+            {/* <div className='header flex'>
+              <p className='flex-grow'>Tên thông số</p>
+              <p className='flex-grow'>Chi tiết</p>
+            </div> */}
+            <div className='body flex flex-col'>
+              {fields.map((field, idx) => (
+                <VariantForm.Specification.Row
+                  key={field.id}
+                  index={idx}
+                  field={field}
+                />
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+        <VariantForm.OtherVariant />
+      </FormControl>
     </>
   )
 } as React.FC & {
   Row: React.FC<{
-    name: string | undefined
+    field: FieldArrayWithId<IVariantField, 'formSpecifications', 'id'>
     index: number
     onRemove?: () => void
   }>
 }
 
-VariantForm.Specification.Row = function Row({ index, onRemove, name = '' }) {
+VariantForm.OtherVariant = function OtherVariants() {
+  const {
+    trigger,
+    getValues,
+    variant,
+    setError,
+    watch,
+    clearErrors,
+    getFieldState,
+    formState: { errors },
+  } = useFormProvider()
+  const productId = watch(`formProduct`)?.value?.id
+  const { data: { data: variants } = {} } = useCustom<IVariant[]>({
+    url: productResource.getVariants(productId),
+    method: 'get',
+    queryOptions: {
+      enabled: !!productId,
+    },
+    config: {
+      query: {
+        projection: variantResource.projection.withSpecs,
+      },
+    },
+    meta: {
+      resource: variantResource.resource,
+    },
+  })
+  const specsChange = watch(`formSpecifications`)
+
+  //todo: update this using trigger without rerendering the form
+  const otherVariant = useMemo(() => {
+    const isInvalid = specsChange.some((spec) => !spec.option?.value)
+    console.log('isInvalid', isInvalid)
+    if (isInvalid) return
+    const specs = specsChange
+      .filter((item) => !!item.option)
+      .map((item) => item?.option?.value as ISpecification)
+    const containsAllSpecs = (v: IVariant) =>
+      !specs.some(
+        ({ name, value }) =>
+          !v.specifications?.find(
+            (spec) => spec.name === name && spec.value === value,
+          ),
+      )
+    const other = variants?.find(containsAllSpecs)
+    if (!other || other.id === variant?.id) {
+      getFieldState(`formSpecifications`).error &&
+        clearErrors(`formSpecifications`)
+      return
+    }
+    setError(`formSpecifications`, {
+      message: 'Phiên bản sản phẩm đã tồn tại',
+    })
+    return other
+  }, [specsChange, variants, variant?.id, setError, clearErrors, getFieldState])
+  return (
+    <>
+      {otherVariant && (
+        <div>
+          <h2>Thông tin biến thể khác</h2>
+          <p>ID: {otherVariant.id}</p>
+          <p>SKU: {otherVariant.sku}</p>
+          <p>Giá: {otherVariant.price}</p>
+          <p>Tên sản phẩm: {otherVariant.product?.name}</p>
+          <p>Số lượt bán: {otherVariant.soldCount}</p>
+        </div>
+      )}
+    </>
+  )
+}
+
+VariantForm.Active = function VariantActive() {
+  const { register } = useFormProvider()
+  return (
+    <FormControl
+      display='flex'
+      alignItems='center'>
+      <FormLabel
+        htmlFor='show-hide-product'
+        mb='0'>
+        Hiển thị sản phẩm
+      </FormLabel>
+      <Switch
+        {...register(`active`)}
+        id='show-hide-product'
+      />
+    </FormControl>
+  )
+}
+
+VariantForm.Specification.Row = function Row({
+  index,
+  onRemove,
+  field: rowField,
+}) {
   const { resource, findDistinctByName } = API['specifications']()
   const {
     control,
     setValue,
+    watch,
+    getValues,
     formState: { errors },
   } = useFormProvider()
-  // const isDisabled = action === "edit";
-
+  const [shouldFetch, { on: shouldFetchOn }] = useBoolean()
   const isDisabled = false
-  const {} = useBoolean()
   const { data: { data: specsData = [] } = {} } = useCustom<ISpecification[]>({
-    url: findDistinctByName(name ?? ''),
+    url: findDistinctByName(rowField.label ?? ''),
     method: 'get',
     queryOptions: {
-      enabled: !isDisabled && ENABLE_FETCHED,
+      enabled: !isDisabled && ENABLE_FETCHED && shouldFetch,
     },
     meta: {
       resource,
@@ -775,62 +841,82 @@ VariantForm.Specification.Row = function Row({ index, onRemove, name = '' }) {
     return specsData.map((item) => toObjectOption(item.value, item))
   }, [specsData])
 
-  const append = (input: string) => {
-    setValue(`specifications.${index}.options`, [
-      {
-        label: input,
-        value: {
-          name: name,
-          value: input,
-        },
-      },
-    ])
-  }
-
   return (
-    <div className='flex border p-4 gap-2'>
-      <div className='flex-grow grid grid-cols-4 gap-2'>
-        <FormLabel>{name ?? ''}</FormLabel>
-        <FormControl
-          isInvalid={true}
-          className='col-span-3'>
-          <Controller
-            render={({ field }) => (
-              <CreatableSelect
-                {...field}
-                isDisabled={isDisabled}
-                options={options}
-                menuPosition='fixed'
-                onCreateOption={append}
-              />
-            )}
-            name={
-              `specifications.${index}.options` as `specifications.0.options`
-            }
-            control={control}
-            rules={{
-              required: true,
-              // validate: (value) => {
-              //     return !!value.length;
-              // },
-            }}
-          />
-          <FormErrorMessage>
-            {errors.specifications?.[index]?.message}
-          </FormErrorMessage>
-        </FormControl>
-      </div>
-      {!!onRemove && (
-        <div className='min-w-[50px]'>
-          <Button
-            className=''
-            onClick={onRemove}
-            colorScheme='red'
-            isDisabled={isDisabled}>
-            <MinusCircle />
-          </Button>
-        </div>
-      )}
-    </div>
+    <FormControl>
+      <FormLabel>{rowField.label}</FormLabel>
+      <Controller
+        name={`formSpecifications.${index}.option`}
+        control={control}
+        rules={{
+          required: true,
+        }}
+        render={({ field }) => {
+          return (
+            <CreatableSelect
+              {...field}
+              options={options}
+              onFocus={() => {
+                !shouldFetch && shouldFetchOn()
+              }}
+              menuPosition={'fixed'}
+              formatCreateLabel={(input) => `Tạo ${cleanValue(input)}`}
+              isValidNewOption={isValidNewSelectOption}
+              onChange={(newValue, meta) => {
+                console.log('newValue', newValue)
+                const { action } = meta
+                let updateOption = newValue
+                switch (action) {
+                  case 'create-option': {
+                    updateOption =
+                      typeof updateOption?.value === 'string'
+                        ? {
+                            ...updateOption,
+                            label: cleanValue(updateOption.value),
+                            value: {
+                              name: rowField.label,
+                              value: cleanValue(updateOption.value),
+                            },
+                          }
+                        : updateOption
+                  }
+                }
+                const formSpecs = [...getValues(`formSpecifications`)]
+                const index = formSpecs.findIndex(
+                  (item) => item.label === rowField.label,
+                )
+                if (index === -1) return
+                formSpecs[index] = {
+                  label: rowField.label,
+                  option: updateOption ?? undefined,
+                }
+                setValue(`formSpecifications`, formSpecs)
+              }}
+            />
+          )
+        }}
+      />
+      <FormErrorMessage>
+        <FormErrorIcon />
+        {errors.specifications?.[index]?.message}
+      </FormErrorMessage>
+    </FormControl>
   )
+}
+
+const useOneProductSpecs = (productId: string | number | undefined) => {
+  const { data: { data } = {} } = useOne<IProduct>({
+    resource: productResource.resource,
+    id: productId ?? '',
+    queryOptions: {
+      enabled: !!productId && ENABLE_FETCHED,
+    },
+    meta: {
+      query: {
+        projection: productResource.projection.specifications,
+      },
+    },
+  })
+  return {
+    product: data,
+  }
 }

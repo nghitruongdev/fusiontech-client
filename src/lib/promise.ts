@@ -12,6 +12,7 @@ export const suspensePromise = (
 
   options?: { timeout?: number; stop?: boolean },
 ) => {
+  console.count('suspense promise fn called')
   return new Promise((res) => {
     const interval = setInterval(() => {
       console.log('condition inside interval', condition)
@@ -26,6 +27,35 @@ export const suspensePromise = (
       res(undefined)
     }
   })
+}
+
+export const suspensePromiseWithCleanup = (
+  condition?: boolean,
+  options?: {
+    overtime?: number
+    timeout?: number
+  },
+) => {
+  console.count('suspense promise fn called')
+
+  let cleanup: (() => void) | undefined
+  const promise = new Promise((res) => {
+    if (condition) {
+      res(undefined)
+      return
+    }
+    const interval = setInterval(() => {
+      if (condition) {
+        cleanup?.()
+      }
+    }, options?.timeout ?? 500)
+
+    cleanup = () => {
+      clearInterval(interval)
+      res(undefined)
+    }
+  })
+  return [promise, cleanup] as const
 }
 
 export const waitPromise = (time: number) => {

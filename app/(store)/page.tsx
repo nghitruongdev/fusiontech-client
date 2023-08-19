@@ -10,10 +10,13 @@ import Category from '@components/store/front/Category'
 import BannerSale from '@components/store/front/BannerSale'
 import Benefits from '@components/store/front/Benefits'
 import Newest from '@components/store/front/Newest'
+import SellingProducts from '@components/store/front/SellingProducts'
 import Brands from '@components/store/front/Brands'
 import CardSaleBody from '@components/store/front/CardSaleBody'
 import FusionNews from '@components/store/front/FusionNews'
 import RecentProductView from '@components/store/front/section/RecentProductView'
+import AllProducts from '@components/store/front/AllProducts'
+import HotProduct from '@components/store/front/HotProducts'
 
 const metadata: Metadata = {
   title: 'FushionTech - Official Store',
@@ -52,7 +55,10 @@ const HomePage = async () => {
               <ProductList />
               <Category />
               <CardSaleBody />
+              <AllProducts />
               <Newest />
+              <HotProduct />
+              <SellingProducts />
               <BannerSale />
               {/* <Benefits /> */}
               <Brands />

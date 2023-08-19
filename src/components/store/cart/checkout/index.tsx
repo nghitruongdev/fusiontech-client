@@ -40,6 +40,9 @@ const Checkout = () => {
       }
     }, 500)
   }, [user, router])
+  useEffect(() => {
+    router.prefetch(`cart/checkout/success`)
+  }, [router])
   const render = () => {
     return (
       <>

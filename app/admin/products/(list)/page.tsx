@@ -2,16 +2,26 @@
 
 'use client'
 
-import React from 'react'
-import { IResourceComponentsProps } from '@refinedev/core'
+import React, { useState } from 'react'
+import { IResourceComponentsProps, useUpdate } from '@refinedev/core'
 import { useTable } from '@refinedev/react-table'
-import { ColumnDef, flexRender } from '@tanstack/react-table'
-import { TableContainer, Table, Image, HStack } from '@chakra-ui/react'
+import { ColumnDef } from '@tanstack/react-table'
+import {
+  TableContainer,
+  Table,
+  Image,
+  HStack,
+  FormControl,
+  Switch,
+} from '@chakra-ui/react'
 import { FirebaseImage, IProduct } from 'types'
 import { useDefaultTableRender } from '@/hooks/useRenderTable'
 import { List } from '@components/crud'
 import { EditButton, ShowButton } from '@components/buttons'
-import { Images } from 'types/constants'
+import { Images, API } from 'types/constants'
+import { AppError } from 'types/error'
+import { onDefaultSuccess, onError } from '@/hooks/useCrudNotification'
+import { Stars } from 'lucide-react'
 
 export default function ListPage() {
   return <ProductList />
@@ -30,36 +40,24 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
         header: 'Tên sản phẩm',
         cell: function render({ getValue }) {
           return (
-            <div className='line-clamp-3'>
-              <p>{(getValue() as any) ?? ''}</p>
+            <div className=''>
+              <p>{getValue<string>() ?? ''}</p>
             </div>
           )
         },
       },
-      {
-        id: 'summary',
-        accessorKey: 'summary',
-        header: 'Mô tả',
-        cell: function render({ getValue }) {
-          return (
-            <div className='line-clamp-3'>
-              <p>{(getValue() as any) ?? ''}</p>
-            </div>
-          )
-        },
-      },
-      {
-        id: 'description',
-        accessorKey: 'description',
-        header: 'Giới thiệu',
-        cell: function render({ getValue }) {
-          return (
-            <div className='line-clamp-3'>
-              <p>{(getValue() as any) ?? ''}</p>
-            </div>
-          )
-        },
-      },
+      //   {
+      //     id: 'summary',
+      //     accessorKey: 'summary',
+      //     header: 'Mô tả',
+      //     cell: function render({ getValue }) {
+      //       return (
+      //         <div className='line-clamp-3'>
+      //           <p>{(getValue() as any) ?? ''}</p>
+      //         </div>
+      //       )
+      //     },
+      //   },
       {
         id: 'images',
         accessorKey: 'images',
@@ -85,11 +83,30 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
         id: 'avgRating',
         accessorKey: 'avgRating',
         header: 'Đánh giá',
+        cell: ({ getValue }) => (
+          <p className='flex items-center gap-1'>
+            {getValue<number>()?.toFixed(1)}
+            <Stars className='text-xs text-yellow w-4 h-4 no-wrap' />
+          </p>
+        ),
+      },
+      {
+        id: 'active',
+        accessorKey: 'active',
+        header: 'Hiển thị',
+        cell: function render({ getValue, row }) {
+          return (
+            <ActiveToggle
+              defaultValue={getValue<boolean>()}
+              id={row.getValue<number>('id')}
+            />
+          )
+        },
       },
       {
         id: 'actions',
         accessorKey: 'id',
-        header: 'Hành động',
+        header: 'Menu',
         cell: function render({ getValue }) {
           return (
             <HStack>
@@ -152,5 +169,46 @@ const ProductList: React.FC<IResourceComponentsProps> = () => {
       </TableContainer>
       {pagination}
     </List>
+  )
+}
+
+const ActiveToggle = ({
+  defaultValue,
+  id,
+}: {
+  defaultValue: boolean
+  id: number
+}) => {
+  const { resource } = API.products()
+  const { mutateAsync, isLoading } = useUpdate<IProduct, AppError>()
+  const [active, setActive] = useState<boolean>(defaultValue)
+  return (
+    <FormControl
+      display='flex'
+      alignItems='center'>
+      <Switch
+        id='show-hide-product'
+        checked={active}
+        isChecked={active}
+        isDisabled={isLoading}
+        onChange={() => {
+          mutateAsync(
+            {
+              resource,
+              id,
+              values: { active: !active },
+              invalidates: false as unknown as any,
+              errorNotification: onError,
+              successNotification: onDefaultSuccess('Cập nhật thành công'),
+            },
+            {
+              onSuccess() {
+                setActive((prev) => !prev)
+              },
+            },
+          )
+        }}
+      />
+    </FormControl>
   )
 }

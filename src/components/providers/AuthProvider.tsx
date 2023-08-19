@@ -3,35 +3,54 @@
 'use client'
 import {
   authStore,
+  setAuthHydrated,
   setAuthUser,
   setUserProfile,
+  useAuthStore,
   useAuthUser,
 } from '@/hooks/useAuth/useAuthUser'
+import { waitPromise } from '@/lib/promise'
 import { firebaseAuth } from '@/providers/firebaseAuthProvider'
 import { springDataProvider } from '@/providers/rest-data-provider'
-import { useCustom, useOne } from '@refinedev/core'
+import { User } from 'firebase/auth'
 import { useEffect } from 'react'
 import { IUser } from 'types'
 import { API } from 'types/constants'
 
 const unsub = firebaseAuth.auth.onIdTokenChanged(async (user) => {
-  console.debug('onAuthStateChanged', new Date().getTime())
+  console.debug('onAuthStateChanged', new Date().toLocaleTimeString())
+  setAuthHydrated()
+  console.debug('auth has hydrated')
+
   setAuthUser(user)
 })
 
+const updateToken = (user: User | null, refresh: boolean = false) => {
+  if (user) {
+    user.getIdTokenResult(refresh).then(({ token, claims }) => {
+      authStore.setState(({}) => ({
+        claims,
+        token,
+        _hasPermissionHydrated: true,
+      }))
+    })
+    return
+  }
+  authStore.setState(() => ({ claims: undefined, token: null }))
+}
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const { user, claims: { id: userId } = {} } = useAuthUser()
+  const { user, claims: { id: userId } = {}, token } = useAuthUser()
 
   useEffect(() => {
-    if (user) {
-      user.getIdTokenResult().then((token) => {
-        console.log('token.token', token.token)
-        authStore.setState(({}) => ({ claims: token.claims }))
-      })
-      return
+    updateToken(user, true)
+    console.log('user?.token', token)
+    const interval = setInterval(() => {
+      updateToken(user)
+    }, 1000 * 60 * 15)
+    return () => {
+      clearInterval(interval)
     }
-    authStore.setState(() => ({ claims: undefined }))
-  }, [user])
+  }, [user, token])
 
   useEffect(() => {
     if (!userId) return

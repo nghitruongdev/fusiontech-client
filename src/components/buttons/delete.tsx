@@ -27,7 +27,10 @@ import { IconTrash } from '@tabler/icons'
 import type { DeleteButtonProps } from '@refinedev/chakra-ui'
 import { RefineButtonClassNames } from '@refinedev/ui-types'
 import { ButtonText } from 'types/constants'
-import { onError } from '@/hooks/useCrudNotification'
+import {
+  onError,
+  onSuccess as notificationOnSuccess,
+} from '@/hooks/useCrudNotification'
 
 /**
  * `<DeleteButton>` uses Chakra UI {@link https://chakra-ui.com/docs/components/button `<Button>`} and {@link https://chakra-ui.com/docs/components/popover `<Popover>`} components.
@@ -35,26 +38,28 @@ import { onError } from '@/hooks/useCrudNotification'
  *
  * @see {@link https://refine.dev/docs/api-reference/chakra-ui/components/buttons/delete-button} for more details.
  */
-export const DeleteButton: React.FC<DeleteButtonProps> = ({
-  resource: resourceNameFromProps,
-  resourceNameOrRouteName,
-  recordItemId,
-  onSuccess,
-  mutationMode: mutationModeProp,
-  children,
-  successNotification,
-  errorNotification,
-  hideText = false,
-  accessControl,
-  meta,
-  metaData,
-  dataProviderName,
-  confirmTitle,
-  confirmOkText,
-  confirmCancelText,
-  svgIconProps,
-  ...rest
-}) => {
+
+export const DeleteButton: React.FC<DeleteButtonProps> = (props) => {
+  const {
+    resource: resourceNameFromProps,
+    resourceNameOrRouteName,
+    recordItemId,
+    onSuccess,
+    mutationMode: mutationModeProp,
+    children,
+    successNotification,
+    errorNotification,
+    hideText = false,
+    accessControl,
+    meta,
+    metaData,
+    dataProviderName,
+    confirmTitle,
+    confirmOkText,
+    confirmCancelText,
+    svgIconProps,
+    ...rest
+  } = props
   const accessControlContext = useContext(AccessControlContext)
 
   const accessControlEnabled =
@@ -103,7 +108,8 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
           id: recordItemId ?? id ?? '',
           resource: identifier,
           mutationMode,
-          successNotification,
+          successNotification:
+            successNotification ?? notificationOnSuccess.bind(null, 'delete'),
           errorNotification: errorNotification ?? onError,
           meta: pickNotDeprecated(meta, metaData),
           metaData: pickNotDeprecated(meta, metaData),
@@ -134,7 +140,10 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
             colorScheme='red'
             variant='outline'
             aria-label={translate('buttons.edit', 'Edit')}
-            onClick={() => setOpened((o) => !o)}
+            onClick={() => {
+              console.log('delete button clicked')
+              setOpened((o) => !o)
+            }}
             isDisabled={isLoading || data?.can === false}
             isLoading={(recordItemId ?? id) === variables?.id && isLoading}
             className={RefineButtonClassNames.DeleteButton}
@@ -148,7 +157,10 @@ export const DeleteButton: React.FC<DeleteButtonProps> = ({
           <Button
             colorScheme='red'
             variant='outline'
-            onClick={() => setOpened((o) => !o)}
+            onClick={() => {
+              console.log('Button clicked')
+              setOpened((o) => !o)
+            }}
             isDisabled={isLoading || data?.can === false}
             isLoading={id === variables?.id && isLoading}
             leftIcon={

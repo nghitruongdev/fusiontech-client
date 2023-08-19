@@ -11,14 +11,15 @@ import { useDefaultTableRender } from '@/hooks/useRenderTable'
 import { EditButton, ShowButton } from '@components/buttons'
 import { List } from '@components/crud'
 import Image from 'next/image'
-import { FirebaseImage, IUser } from 'types'
-import { Images } from 'types/constants'
+import { FirebaseImage, Gender, IUser } from 'types'
+import { API, GenderLabel, Images } from 'types/constants'
 
 export default function ListPage() {
   return <UserList />
 }
 
-export const UserList: React.FC<IResourceComponentsProps> = () => {
+const { resource, findStaff } = API['users']()
+const UserList: React.FC<IResourceComponentsProps> = () => {
   const columns = React.useMemo<ColumnDef<IUser>[]>(
     () => [
       {
@@ -26,15 +27,10 @@ export const UserList: React.FC<IResourceComponentsProps> = () => {
         accessorKey: 'id',
         header: 'Id',
       },
-      // {
-      //   id: 'firebaseUid',
-      //   accessorKey: 'firebaseUid',
-      //   header: 'Firebase Uid',
-      // },
       {
         id: 'fullName',
         accessorKey: 'fullName',
-        header: 'Tên đầy đủ',
+        header: 'Họ và tên',
       },
       {
         id: 'email',
@@ -51,6 +47,7 @@ export const UserList: React.FC<IResourceComponentsProps> = () => {
         id: 'gender',
         accessorKey: 'gender',
         header: 'Giới tính',
+        cell: ({ getValue }) => <>{GenderLabel[getValue<Gender>()]}</>,
       },
       {
         id: 'image',
@@ -106,8 +103,15 @@ export const UserList: React.FC<IResourceComponentsProps> = () => {
     },
   } = useTable({
     columns,
+    refineCoreProps: {
+      resource: findStaff,
+      meta: {
+        resource,
+      },
+    },
   })
 
+  console.log('tableData', tableData)
   setOptions((prev) => ({
     ...prev,
     meta: {

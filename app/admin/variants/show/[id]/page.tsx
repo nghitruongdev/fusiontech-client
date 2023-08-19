@@ -5,6 +5,7 @@
 import { useShow, IResourceComponentsProps, useOne } from '@refinedev/core'
 import { NumberField, TagField, TextField } from '@refinedev/chakra-ui'
 import {
+  ButtonGroup,
   Heading,
   HStack,
   Image,
@@ -16,10 +17,13 @@ import {
   Tr,
 } from '@chakra-ui/react'
 import { formatPrice } from '@/lib/utils'
-import { IProduct, IVariant } from 'types'
+import { IProduct, ISpecification, IVariant } from 'types'
 import { PropsWithChildren, createContext, useContext, useEffect } from 'react'
 import { API } from 'types/constants'
 import { Show } from '@components/crud'
+import { Badge } from '@components/ui/shadcn/badge'
+import { ListButton, RefreshButton, EditButton } from '@components/buttons'
+import { DeleteVariantButton } from '../../(form)/DeleteVariantButton'
 
 const page = () => {
   return (
@@ -29,7 +33,7 @@ const page = () => {
   )
 }
 
-export const VariantShow: React.FC<IResourceComponentsProps> = () => {
+const VariantShow: React.FC<IResourceComponentsProps> = () => {
   const {
     queryResult: { isLoading },
     record,
@@ -40,9 +44,29 @@ export const VariantShow: React.FC<IResourceComponentsProps> = () => {
       console.log('product', product)
     }
   }, [product])
+
   const firstImage = record?.images?.[0]
   return (
-    <Show isLoading={isLoading}>
+    <Show
+      isLoading={isLoading}
+      headerButtons={({
+        editButtonProps,
+        listButtonProps,
+        refreshButtonProps,
+        deleteButtonProps,
+      }) => {
+        return (
+          <ButtonGroup>
+            <ListButton {...listButtonProps} />
+            <EditButton {...editButtonProps} />
+            <DeleteVariantButton
+              {...deleteButtonProps}
+              variantId={record?.id}
+            />
+            <RefreshButton {...refreshButtonProps} />
+          </ButtonGroup>
+        )
+      }}>
       <div className='grid grid-cols-2'>
         <div className=''>
           <Heading
@@ -85,16 +109,31 @@ export const VariantShow: React.FC<IResourceComponentsProps> = () => {
             as='h5'
             size='sm'
             mt={4}>
-            Sku
+            Mã SKU
           </Heading>
           <TextField value={record?.sku} />
           <Heading
             as='h5'
             size='sm'
             mt={4}>
-            Price
+            Giá bán
           </Heading>
-          <NumberField value={formatPrice(record?.price)} />
+          <TextField value={formatPrice(record?.price)} />
+          <div>
+            {!!product?.discount && !!record?.price && (
+              <div>
+                Giá sau giảm:
+                <Badge
+                  variant={'secondary'}
+                  className={'ml-2 text-green-500 font-bold'}>
+                  {formatPrice(
+                    ((100 - (product?.discount ?? 0)) / 100) * record.price,
+                  )}{' '}
+                  | -{product?.discount ?? 0}%
+                </Badge>
+              </div>
+            )}
+          </div>
           <Heading
             as='h5'
             size='sm'
@@ -110,10 +149,8 @@ export const VariantShow: React.FC<IResourceComponentsProps> = () => {
               mt={4}>
               Thông số kỹ thuật
             </Heading>
-            {record?.specifications ? (
+            {record?.specifications && (
               <SpecificationsTable specifications={record.specifications} />
-            ) : (
-              <p>No attributes found.</p>
             )}
           </div>
         </div>
@@ -174,7 +211,11 @@ export const VariantShow: React.FC<IResourceComponentsProps> = () => {
     </Show>
   )
 }
-const SpecificationsTable = ({ specifications }) => {
+const SpecificationsTable = ({
+  specifications,
+}: {
+  specifications: ISpecification[]
+}) => {
   return (
     <table className='w-full border-collapse table-auto'>
       <thead>
@@ -184,10 +225,10 @@ const SpecificationsTable = ({ specifications }) => {
         </tr>
       </thead>
       <tbody>
-        {specifications.map((specifications) => (
-          <tr key={specifications.id}>
-            <td className='border px-4 py-2'>{specifications.name}</td>
-            <td className='border px-4 py-2'>{specifications.value}</td>
+        {specifications.map(({ id, name, value }) => (
+          <tr key={id}>
+            <td className='border px-4 py-2'>{name}</td>
+            <td className='border px-4 py-2'>{value}</td>
           </tr>
         ))}
       </tbody>

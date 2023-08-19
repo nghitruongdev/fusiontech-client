@@ -5,6 +5,7 @@ import useCrudNotification from '@/hooks/useCrudNotification'
 import useUploadImage, { uploadUtils } from '@/hooks/useUploadImage'
 import {
   FormControl,
+  FormErrorIcon,
   FormErrorMessage,
   FormLabel,
   Input,
@@ -39,7 +40,7 @@ import { AppError } from '../../../../types/error'
 type ContextProps = {
   action: Action
   voucher: IVoucher | undefined
-} & ReturnType<typeof useForm<IVoucher, HttpError, IVoucher>>
+} & ReturnType<typeof useForm<IVoucher, AppError, IVoucher>>
 
 export const Form = ({ action }: { action: ContextProps['action'] }) => {
   return (
@@ -84,29 +85,6 @@ Form.Provider = function Provider({
     formState: { dirtyFields, isSubmitting, isValidating },
   } = formProps
 
-  // const saveProps = {
-  //   isLoading: isSubmitting,
-  //   disabled: formLoading || isSubmitting || isValidating,
-  //   onClick: (e: BaseSyntheticEvent) => {
-  //     handleSubmit(async ({ id, file, ...value }) => {
-  //       const handleImage = async () => {
-  //         if (action === 'edit' && dirtyFields.image) {
-  //           const removedImage = brand?.image
-  //           removedImage && removeImages([removedImage])
-  //         }
-  //         return file && (await uploadImages([file]))[0]
-  //       }
-
-  //       const image = (await handleImage())?.url
-
-  //       const result = await onFinish({
-  //         ...value,
-  //         ...(image && { image }),
-  //       })
-  //       console.log('result', result)
-  //     })(e)
-  //   },
-  // }
   return (
     <Form.Context.Provider
       value={{
@@ -209,6 +187,7 @@ Form.Body = function Body() {
               {...register('id')}
             />
             <FormErrorMessage>
+              <FormErrorIcon />
               {(errors as any)?.id?.message as string}
             </FormErrorMessage>
           </FormControl>
@@ -231,46 +210,56 @@ Form.Body = function Body() {
               {isChecking && <Spinner color='blue.600' />}
             </InputRightElement>
           </InputGroup>
-          <FormErrorMessage>{errors?.code?.message}</FormErrorMessage>
+          <FormErrorMessage>
+            <FormErrorIcon />
+            {errors?.code?.message}
+          </FormErrorMessage>
         </FormControl>
 
         <FormControl
           mb='3'
           isInvalid={!!errors?.discount}>
-          <FormLabel>discount</FormLabel>
+          <FormLabel>Giảm giá</FormLabel>
           <Input
             type='number'
             {...register('discount', {
-              required: 'Vui lòng nhập discount.',
+              required: 'Vui lòng nhập giảm giá.',
             })}
           />
-          <FormErrorMessage>{errors.discount?.message}</FormErrorMessage>
+          <FormErrorMessage>
+            <FormErrorIcon />
+            {errors.discount?.message}
+          </FormErrorMessage>
         </FormControl>
 
         <FormControl
           mb='3'
           isInvalid={!!errors?.minOrderAmount}>
-          <FormLabel>minOrderAmount</FormLabel>
+          <FormLabel>Giá trị đơn hàng tối thiểu</FormLabel>
           <Input
             type='number'
             {...register('minOrderAmount', {
-              required: 'Vui lòng nhập minOrderAmount.',
+              required: 'Vui lòng nhập Giá trị đơn hàng tối thiểu.',
             })}
           />
-          <FormErrorMessage>{errors.minOrderAmount?.message}</FormErrorMessage>
+          <FormErrorMessage>
+            <FormErrorIcon />
+            {errors.minOrderAmount?.message}
+          </FormErrorMessage>
         </FormControl>
 
         <FormControl
           mb='3'
           isInvalid={!!errors?.maxDiscountAmount}>
-          <FormLabel>maxDiscountAmount</FormLabel>
+          <FormLabel>Số tiền giảm giá tối đa </FormLabel>
           <Input
             type='number'
             {...register('maxDiscountAmount', {
-              required: 'Vui lòng nhập maxDiscountAmount.',
+              required: 'Vui lòng nhập Số tiền giảm giá tối đa.',
             })}
           />
           <FormErrorMessage>
+            <FormErrorIcon />
             {errors.maxDiscountAmount?.message as string}
           </FormErrorMessage>
         </FormControl>
@@ -278,14 +267,15 @@ Form.Body = function Body() {
         <FormControl
           mb='3'
           isInvalid={!!errors?.startDate}>
-          <FormLabel>startDate</FormLabel>
+          <FormLabel>Ngày bắt đầu</FormLabel>
           <Input
             type='datetime-local'
             {...register('startDate', {
-              required: 'Vui lòng nhập startDate.',
+              required: 'Vui lòng nhập ngày bắt đầu.',
             })}
           />
           <FormErrorMessage>
+            <FormErrorIcon />
             {errors.startDate?.message as string}
           </FormErrorMessage>
         </FormControl>
@@ -293,14 +283,15 @@ Form.Body = function Body() {
         <FormControl
           mb='3'
           isInvalid={!!errors?.expirationDate}>
-          <FormLabel>expirationDate</FormLabel>
+          <FormLabel>Ngày kết thúc</FormLabel>
           <Input
             type='datetime-local'
             {...register('expirationDate', {
-              required: 'Vui lòng nhập expirationDate.',
+              required: 'Vui lòng nhập ngày kết thúc.',
             })}
           />
           <FormErrorMessage>
+            <FormErrorIcon />
             {(errors as any)?.expirationDate?.message as number}
           </FormErrorMessage>
         </FormControl>
@@ -308,14 +299,15 @@ Form.Body = function Body() {
         <FormControl
           mb='3'
           isInvalid={!!errors?.limitUsage}>
-          <FormLabel>limitUsage</FormLabel>
+          <FormLabel>Số lần sử dụng</FormLabel>
           <Input
             type='number'
             {...register('limitUsage', {
-              required: 'Vui lòng nhập limitUsage.',
+              required: 'Vui lòng nhập Số lần sử dụng.',
             })}
           />
           <FormErrorMessage>
+            <FormErrorIcon />
             {errors.limitUsage?.message as string}
           </FormErrorMessage>
         </FormControl>
@@ -323,14 +315,15 @@ Form.Body = function Body() {
         <FormControl
           mb='3'
           isInvalid={!!errors?.userLimitUsage}>
-          <FormLabel>userLimitUsage</FormLabel>
+          <FormLabel>Số lần sử dụng của người dùng</FormLabel>
           <Input
             type='number'
             {...register('userLimitUsage', {
-              required: 'Vui lòng nhập discount.',
+              required: 'Vui lòng nhập Số lần sử dụng của người dùng.',
             })}
           />
           <FormErrorMessage>
+            <FormErrorIcon />
             {(errors as any)?.userLimitUsage?.message as number}
           </FormErrorMessage>
         </FormControl>
@@ -338,9 +331,10 @@ Form.Body = function Body() {
         <FormControl
           mb='3'
           isInvalid={!!errors.description}>
-          <FormLabel>Mô tả danh mục</FormLabel>
+          <FormLabel>Mô tả</FormLabel>
           <Textarea {...register('description', {})} />
           <FormErrorMessage>
+            <FormErrorIcon />
             {(errors as any)?.description?.message as string}
           </FormErrorMessage>
         </FormControl>
@@ -348,41 +342,5 @@ Form.Body = function Body() {
     </div>
   )
 }
-
-// Form.Image = function Image() {
-//   const { brand, setValue } = Form.useContext()
-//   const onFilesChange: UploadProviderProps['onFilesChange'] = useCallback(
-//     (files: File[]) => setValue('file', files[0]),
-//     [setValue],
-//   )
-//   onFilesChange.isCallback = true
-
-//   const onRemove: UploadProviderProps['onRemoveUrl'] = useCallback(() => {
-//     setValue(`image`, null, {
-//       shouldDirty: true,
-//     })
-//   }, [setValue])
-//   onRemove.isCallback = true
-
-//   const imageUrl = brand?.image
-//   const initialUrls = useMemo(() => {
-//     console.count('usememo initialUrl ran')
-//     const name = imageUrl ? uploadUtils.getName('brands', imageUrl) : ''
-//     return imageUrl ? [{ name, url: imageUrl }] : []
-//   }, [imageUrl])
-
-//   return (
-//     <FormControl
-//       w='full'
-//       h='full'>
-//       <ImageUpload
-//         onFilesChange={onFilesChange}
-//         onRemoveUrl={onRemove}
-//         isMulti={false}
-//         {...(brand?.image && { initialUrls: initialUrls })}
-//       />
-//     </FormControl>
-//   )
-// }
 
 export { Form as VoucherForm }

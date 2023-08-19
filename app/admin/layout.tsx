@@ -13,20 +13,36 @@ import {
   notificationProvider,
   refineTheme,
 } from '@refinedev/chakra-ui'
-import { Refine } from '@refinedev/core'
+import { Refine, useCustom } from '@refinedev/core'
 import routerProvider from '@refinedev/nextjs-router/app'
-import { UserCircle } from 'lucide-react'
+import AuthenticatedPage from 'app/(others)/authenticated'
+import { BarChart3, UserCircle, Users } from 'lucide-react'
 import { Cpu, LucideLaptop2, MemoryStick, ShoppingCart } from 'lucide-react'
 import { Warehouse } from 'lucide-react'
 import { Monitor, Ticket } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
+import { ROLES } from 'types'
 
 const DynamicDialogProvider = dynamic(
   () => import('@components/ui/DialogProvider'),
   { ssr: false },
 )
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function LayoutPage({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <AuthenticatedPage
+      redirect={`/auth/login?callbackUrl=/admin`}
+      permissions={[ROLES.STAFF]}>
+      <Layout>{children}</Layout>
+    </AuthenticatedPage>
+  )
+}
+
+function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   return (
     <div className='font-roboto'>
@@ -104,7 +120,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               edit: '/admin/products/edit/:id',
               show: '/admin/products/show/:id',
               meta: {
-                canDelete: false,
                 label: 'Sản phẩm',
                 icon: <Cpu size={18} />,
               },
@@ -112,11 +127,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {
               name: 'variants',
               list: '/admin/variants',
-              create: '/admin/products/show/:id/variants/create',
+              create: '/admin/variants/create',
               edit: '/admin/variants/edit/:id',
               show: '/admin/variants/show/:id',
               meta: {
-                canDelete: false,
                 label: 'Biến thể sản phẩm',
                 icon: <Monitor size={18} />,
               },
@@ -157,6 +171,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               },
             },
             {
+              name: 'stat',
+              list: '/admin/stat',
+              // create: '/admin/categories/create',
+              // edit: '/admin/categories/edit/:id',
+              // show: '/admin/categories/show/:id',
+              meta: {
+                canDelete: true,
+                label: 'Thống kê',
+                icon: <BarChart3 size={18} />,
+              },
+            },
+            {
               name: 'users',
               meta: {
                 label: 'Quản lý người dùng',
@@ -166,7 +192,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {
               name: 'users',
               identifier: 'user-staff',
-              list: '/admin/users?staff=true',
+              list: '/admin/users',
               create: '/admin/users/create',
               edit: '/admin/users/edit/:id',
               show: '/admin/users/show/:id',
@@ -174,15 +200,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 label: 'Nhân viên',
                 parent: 'users',
                 canDelete: false,
+                icon: <Users size={18} />,
               },
             },
             {
               name: 'users',
               identifier: 'user-customer',
-              list: '/admin/users',
-              create: '/admin/users/create',
-              edit: '/admin/users/edit/:id',
-              show: '/admin/users/show/:id',
+              list: '/admin/users/customers',
+              show: '/admin/users/customers/show/:id',
               meta: {
                 label: 'Khách hàng',
                 icon: <UserCircle size={18} />,

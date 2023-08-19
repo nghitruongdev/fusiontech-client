@@ -109,6 +109,13 @@ export function toObjectOption<T>(label: string, value: T): Option<T> {
   return { label, value }
 }
 
+/**
+ *
+ * @deprecated
+ * @param input
+ * @param values
+ * @returns
+ */
 export function isValidNewOption(
   input: string | undefined,
   values: (string | undefined)[],
@@ -141,5 +148,28 @@ export const formatDateTime = (time: undefined | string | number) => {
       })
 }
 
+export function formatDate(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0') // Months are 0-based
+  const day = String(date.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
 export const cleanValue = (input: string | undefined) =>
   input?.replace(/\s+/g, ' ').trim() ?? ''
+
+export const isValidNewSelectOption = <T extends { label?: string }>(
+  input: string | undefined,
+  values: readonly T[],
+  options: readonly T[],
+) => {
+  const cleanInput = cleanValue(input).toLowerCase()
+  return (
+    !!cleanInput &&
+    !values.some((item) => item.label?.toLowerCase() === cleanInput) &&
+    !options.some((item) => item.label?.toLowerCase() === cleanInput)
+  )
+}
+
+export * from './slug-utils'

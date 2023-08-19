@@ -4,7 +4,7 @@
 import { Input } from '@components/ui/shadcn/input'
 import CartItemList from './CartItemList'
 import { Button } from '@components/ui/shadcn/button'
-import { Separator } from '@components/ui/shadcn/separator'
+// import { Separator } from '@components/ui/shadcn/separator'
 import { Badge } from '@components/ui/shadcn/badge'
 import {
   useSelectedCartItemStore,
@@ -105,7 +105,7 @@ const OrderOverview = ({}: // isSubmitting,
           )}
         </div>
 
-        <Separator />
+        <hr />
         <div className='flex justify-between mb-3 mt-4 items-center'>
           <p className='text-muted text-sm text-zinc-500'>Thành tiền</p>
           <p className='text-end font-bold text-zinc-600 text-lg'>
@@ -270,7 +270,7 @@ const Voucher = ({ orderAmount }: { orderAmount: number }) => {
       return onError('Voucher đã hết lượt sử dụng')
     if (userUsage >= (userLimitUsage ?? 0))
       return onError('Bạn đã hết lượt sử dụng voucher')
-  }, [current, setError, usageData, userUsageData])
+  }, [current, setError, usageData, userUsageData, getValues, setValue])
   useEffect(() => {
     validateDynamic()
   }, [validateDynamic])

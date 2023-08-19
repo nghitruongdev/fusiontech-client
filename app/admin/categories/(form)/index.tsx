@@ -1,24 +1,30 @@
 /** @format */
 
 import useDebounceFn from '@/hooks/useDebounceFn'
-import useCrudNotification from '@/hooks/useCrudNotification'
+import useCrudNotification, {
+  onError,
+  onSuccess,
+} from '@/hooks/useCrudNotification'
 import useUploadImage, { uploadUtils } from '@/hooks/useUploadImage'
-import { toArrayOptionString } from '@/lib/utils'
+import { cleanValue, slugifyName, toArrayOptionString } from '@/lib/utils'
 import {
+  Button,
   FormControl,
+  FormErrorIcon,
   FormErrorMessage,
   FormLabel,
+  Icon,
   Input,
   InputGroup,
   InputRightElement,
   Spinner,
   Textarea,
+  Tooltip,
 } from '@chakra-ui/react'
 import { Create, Edit } from '@components/crud'
 import ImageUpload, { UploadProviderProps } from '@components/image-upload'
-import { Action, useCustom } from '@refinedev/core'
+import { useCustom } from '@refinedev/core'
 import { useForm } from '@refinedev/react-hook-form'
-import { HttpError } from 'http-errors'
 import {
   BaseSyntheticEvent,
   PropsWithChildren,
@@ -28,16 +34,20 @@ import {
   useEffect,
   useMemo,
 } from 'react'
+import { AppError } from 'types/error'
 import { Controller } from 'react-hook-form'
 import CreatableSelect from 'react-select/creatable'
 import { ICategory, ICategoryField } from 'types'
 import { API, API_URL } from 'types/constants'
 import { ERRORS } from 'types/messages'
+import { validateCategoryNameExists } from './utils'
+import { SLUG_PATTERN } from '@/lib/validate-utils'
+import { Info } from 'lucide-react'
 
 type ContextProps = {
-  action: Action
+  action: 'create' | 'edit'
   category: ICategory | undefined
-} & ReturnType<typeof useForm<ICategory, HttpError, ICategoryField>>
+} & ReturnType<typeof useForm<ICategory, AppError, ICategoryField>>
 
 export const Form = ({ action }: { action: ContextProps['action'] }) => {
   return (
@@ -67,9 +77,11 @@ Form.Provider = function Provider({
     resource: 'categories',
   })
 
-  const formProps = useForm<ICategory, HttpError, ICategoryField>({
+  const formProps = useForm<ICategory, AppError, ICategoryField>({
     refineCoreProps: {
-      redirect: 'show',
+      redirect: 'list',
+      errorNotification: onError,
+      successNotification: onSuccess.bind(null, action),
     },
   })
   const {
@@ -86,7 +98,7 @@ Form.Provider = function Provider({
     disabled: formLoading,
     onClick: (e: BaseSyntheticEvent) => {
       console.log('custom onClick')
-      handleSubmit(async ({ id, formSpecifications, file, ...value }) => {
+      handleSubmit(async ({ formSpecifications, file, ...value }) => {
         const handleImage = async () => {
           if (action === 'edit' && dirtyFields.image) {
             const removedImage = category?.image
@@ -148,49 +160,18 @@ Form.Container = function Container({ children }: PropsWithChildren) {
   )
 }
 
-type onError = ReturnType<typeof useCrudNotification>['onDefaultError']
-const validateName = async (
-  category: ICategory | undefined,
-  onError: onError,
-  name: string,
-) => {
-  const { findByName } = API['categories']()
-  const { exists, required } = ERRORS.categories.name
-  if (!name) return required
-  const sendRequest = async () => {
-    const response = await fetch(`${API_URL}/${findByName(name)}`)
-
-    if (!response.ok) {
-      if (response.status === 404) return true
-      console.error('validate name is not ok')
-      return false
-    }
-    const data = (await response.json()) as ICategory
-    if (data) {
-      if (!category) return exists
-
-      if (data.id !== category.id) return exists
-    }
-    return true
-  }
-  try {
-    return await sendRequest()
-  } catch (err) {
-    onError(err as Error)
-    return false
-  }
-}
 Form.Body = function Body() {
   const {
     action,
     category,
     register,
-    formState: { errors },
+    formState: { errors, isSubmitting },
+    refineCore: { id },
   } = Form.useContext()
   const isEdit = action === 'edit'
   const { onDefaultError: onError } = useCrudNotification()
   const [checkValue, isChecking] = useDebounceFn(
-    validateName.bind(null, category, onError),
+    validateCategoryNameExists.bind(null, category, onError),
     300,
   )
 
@@ -208,7 +189,7 @@ Form.Body = function Body() {
             <Input
               disabled
               type='number'
-              {...register('id')}
+              defaultValue={id}
             />
             <FormErrorMessage>
               {(errors as any)?.id?.message as string}
@@ -224,40 +205,29 @@ Form.Body = function Body() {
             <Input
               type='text'
               {...register('name', {
-                required: ERRORS.brands.name.required,
-                setValueAs: (value) => value && value.trim(),
+                required: ERRORS.categories.name.required,
+                setValueAs: (value) => value && cleanValue(value),
                 validate: async (value) => await checkValue(value.trim()),
               })}
             />
             <InputRightElement>
-              {isChecking && <Spinner color='blue.600' />}
+              {!isSubmitting && isChecking && <Spinner color='blue.600' />}
             </InputRightElement>
           </InputGroup>
           <FormErrorMessage>
+            <FormErrorIcon />
             {(errors as any)?.name?.message as string}
           </FormErrorMessage>
         </FormControl>
-        <FormControl
-          mb='3'
-          isInvalid={!!(errors as any)?.slug}>
-          <FormLabel>Slug</FormLabel>
-          <Input
-            type='text'
-            {...register('slug', {
-              required: 'Vui lòng nhập slug.',
-            })}
-          />
-          <FormErrorMessage>
-            {(errors as any)?.slug?.message as string}
-          </FormErrorMessage>
-        </FormControl>
+        <Form.Slug />
         <Form.Specifications />
         <FormControl
           mb='3'
           isInvalid={!!(errors as any)?.description}>
           <FormLabel>Mô tả danh mục</FormLabel>
-          <Textarea {...register('description', {})} />
+          <Textarea {...register('description')} />
           <FormErrorMessage>
+            <FormErrorIcon />
             {(errors as any)?.description?.message as string}
           </FormErrorMessage>
         </FormControl>
@@ -348,7 +318,72 @@ Form.Specifications = function Specifications() {
         control={control}
       />
       <FormErrorMessage>
+        <FormErrorIcon />
         {errors?.specifications?.message as string}
+      </FormErrorMessage>
+    </FormControl>
+  )
+}
+
+Form.Slug = function CategorySlug() {
+  const {
+    register,
+    trigger,
+    getValues,
+    setValue,
+    category,
+    formState: { errors, isSubmitting },
+  } = Form.useContext()
+  const { onDefaultError: onError } = useCrudNotification()
+
+  const [checkValue, isChecking] = useDebounceFn(
+    validateCategoryNameExists.bind(null, category, onError),
+    300,
+  )
+
+  return (
+    <FormControl
+      mb='3'
+      isInvalid={!!errors?.slug}>
+      <FormLabel>
+        Đường dẫn (slug)
+        <Button
+          variant={'link'}
+          fontSize={'sm'}
+          ml='1'
+          fontWeight={'normal'}
+          rightIcon={
+            <Tooltip label='Đường dẫn sẽ được tạo tự động từ tên. Cần chỉnh sửa nếu bị trùng lặp.'>
+              <Icon as={Info} />
+            </Tooltip>
+          }
+          onClick={async () => {
+            const nameValid = await trigger(`name`)
+            if (!nameValid) return
+            setValue(`slug`, slugifyName(getValues(`name`)))
+            trigger(`slug`)
+          }}>
+          Tạo tự động
+        </Button>
+      </FormLabel>
+      <InputGroup>
+        <Input
+          type='text'
+          {...register('slug', {
+            required: 'Vui lòng nhập slug.',
+            pattern: SLUG_PATTERN,
+            validate: async (value) => await checkValue(value),
+            setValueAs: (value) => (value as string)?.trim().toLowerCase(),
+            deps: ['name'],
+          })}
+        />
+        <InputRightElement>
+          {!isSubmitting && isChecking && <Spinner color='blue.600' />}
+        </InputRightElement>
+      </InputGroup>
+      <FormErrorMessage>
+        <FormErrorIcon />
+        {errors?.slug?.message}
       </FormErrorMessage>
     </FormControl>
   )

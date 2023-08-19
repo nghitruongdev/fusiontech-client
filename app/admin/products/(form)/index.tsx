@@ -10,7 +10,6 @@ import React, {
   useEffect,
   useMemo,
   useRef,
-  useState,
 } from 'react'
 import {
   FormControl,
@@ -22,14 +21,12 @@ import {
   Box,
   Textarea,
   Avatar,
-  useConst,
   Slider,
   SliderMark,
   SliderTrack,
   SliderFilledTrack,
   SliderThumb,
   Popover,
-  ButtonGroup,
   PopoverArrow,
   PopoverBody,
   PopoverCloseButton,
@@ -39,15 +36,13 @@ import {
   PopoverTrigger,
   Switch,
   InputRightElement,
-  InputGroup,
   Spinner,
-  EditableInput,
-  Editable,
-  EditablePreview,
-  useEditableControls,
-  IconButton,
-  forwardRef,
-  EditableProps,
+  Icon,
+  FormErrorIcon,
+  InputLeftElement,
+  InputGroup,
+  useBoolean,
+  ButtonGroup,
 } from '@chakra-ui/react'
 import {
   FirebaseImage,
@@ -64,11 +59,11 @@ import useListOption, { ListOptionProps } from '@/hooks/useListOption'
 import { Controller, FieldArrayWithId, useFieldArray } from 'react-hook-form'
 import {
   HttpError,
-  OpenNotificationParams,
   useCustom,
   useCustomMutation,
+  useUpdate,
 } from '@refinedev/core'
-import { Inbox, MinusCircle } from 'lucide-react'
+import { Inbox, Info, MinusCircle } from 'lucide-react'
 import {
   toObjectOption,
   toArrayOptionString,
@@ -76,24 +71,22 @@ import {
   toOptionString,
   cleanValue,
   toRecord,
+  isValidNewSelectOption,
+  slugifyName,
 } from '@/lib/utils'
 import { useDialog } from '@components/ui/DialogProvider'
 import CreatableSelect from 'react-select/creatable'
-import Select, {
-  GroupBase,
-  MultiValueGenericProps,
-  components,
-} from 'react-select'
+import { SingleValue, components, SelectInstance } from 'react-select'
 import { produce } from 'immer'
 import InlineEditable from '@components/ui/InlineEditable'
 import { ActionMeta, MultiValue } from 'react-select'
 import ImageUpload, { UploadProviderProps } from '@components/image-upload'
 import useUploadImage, { uploadUtils } from '@/hooks/useUploadImage'
-import { API, REG_SLUG_PATTERN } from 'types/constants'
+import { API } from 'types/constants'
 import { Create, Edit } from '@components/crud'
 import { useRouter } from 'next/navigation'
 import { errorNotification } from 'src/lib/notifications'
-import { Tooltip, useColorModeValue } from '@chakra-ui/react'
+import { Tooltip } from '@chakra-ui/react'
 import { QuestionIcon } from '@chakra-ui/icons'
 import { ERRORS } from 'types/messages'
 import useDebounceFn from '@/hooks/useDebounceFn'
@@ -102,7 +95,11 @@ import useCrudNotification, {
   onError,
   onSuccess,
 } from '@/hooks/useCrudNotification'
-import { Badge } from '@components/ui/shadcn/badge'
+import { EditableMultiValueLabel } from '@components/ui/EditableMultivalueTable'
+import { SLUG_PATTERN } from '@/lib/validate-utils'
+import { ChakraCurrencyInput } from '@components/ui/ChakraCurrencyInput'
+import { DeleteButton, SaveButton } from '@components/buttons'
+import { DeleteProductButton } from './DeleteProductButton'
 
 type ContextProps = {
   action: 'create' | 'edit'
@@ -137,6 +134,8 @@ const ProductFormProvider = ({
         },
       },
       redirect: false,
+      errorNotification: onError,
+      successNotification: onSuccess.bind(null, action),
     },
     defaultValues: {
       features: [],
@@ -151,7 +150,7 @@ const ProductFormProvider = ({
       queryResult: { data: { data: product } = { data: undefined } } = {},
     },
     reset,
-    formState: { dirtyFields },
+    formState: { dirtyFields, isSubmitting },
   } = formMethods
 
   useEffect(() => {
@@ -177,6 +176,8 @@ const ProductFormProvider = ({
 
   const saveProps = {
     ...saveButtonProps,
+    disabled: isSubmitting,
+    isLoading: isSubmitting,
     onClick: (e: BaseSyntheticEvent) => {
       handleSubmit(
         async ({
@@ -188,20 +189,28 @@ const ProductFormProvider = ({
           id,
           images,
           files,
+          formStatus,
           ...value
         }) => {
           const handleFeatures = () =>
             !features || !features.length
               ? undefined
               : features.filter((item) => !!item).map(({ value }) => value)
-          const handleSpecifications = () =>
-            specifications &&
-            specifications.map((item) => {
-              const values = item?.options.map(({ value }) => ({
-                ...value,
-              }))
-              return { name: item?.label, values }
-            })
+
+          const handleSpecifications = () => {
+            const result =
+              specifications &&
+              specifications.map((item) => {
+                const values = item?.options.map(({ value }) => value)
+                return { name: item?.label, values }
+              })
+            return action === 'create'
+              ? result
+              : result
+                  ?.filter((item) => item.values?.length === 1)
+                  .flatMap((item) => item.values)
+                  .filter((item) => !!item)
+          }
 
           const handleImages = async () => {
             const productImages = [...(product?.images ?? [])]
@@ -229,15 +238,17 @@ const ProductFormProvider = ({
             const formSpecs =
               dirtyFields.specifications && handleSpecifications()
             const formImages = dirtyFields.files && (await handleImages())
+            const status = dirtyFields.formStatus && formStatus?.value
             const formValues = Object.entries(value).reduce(
               (acc, [key, val]) => {
                 const asKey = key as keyof typeof value
                 if (dirtyFields[asKey]) acc[asKey] = val
                 return acc
               },
-              {} as { [key: string]: any },
+              {} as {
+                [key in keyof typeof value]?: string | number | boolean
+              },
             )
-
             const submitValues = {
               ...formValues,
               ...(brandId && { brand: { id: brandId } }),
@@ -245,9 +256,9 @@ const ProductFormProvider = ({
               ...(formFeatures && { features: formFeatures }),
               ...(formSpecs && { specifications: formSpecs }),
               ...(formImages && { images: formImages }),
+              ...(status && { status }),
             }
             console.log('submitValues', submitValues)
-            return
             try {
               const result = await onFinish(submitValues as any)
               console.log('result', result)
@@ -272,9 +283,9 @@ const ProductFormProvider = ({
     </FormContext.Provider>
   )
 }
-const { countProductSold } = API['products']()
 
 export const ProductForm = ({ action }: { action: ContextProps['action'] }) => {
+  console.log('product form rerendered')
   return (
     <ProductFormProvider action={action}>
       <ProductForm.Body />
@@ -286,23 +297,31 @@ ProductForm.Container = function Container({ children }: PropsWithChildren) {
   const {
     action,
     product,
-    refineCore: { formLoading },
+    refineCore: { formLoading, id },
     saveButtonProps,
   } = useProductFormContext()
-  const { data: soldData } = useCustom({
-    method: 'get',
-    url: countProductSold(product?.id ?? ''),
-    queryOptions: {
-      enabled: !!product,
-    },
-  })
+
   const isEdit = action === 'edit'
+
   if (isEdit)
     return (
       <Edit
         isLoading={formLoading}
         saveButtonProps={saveButtonProps}
-        canDelete={soldData && (soldData.data as unknown as number) == 0}>
+        canDelete={true}
+        footerButtons={({ saveButtonProps, deleteButtonProps }) => {
+          return (
+            <ButtonGroup>
+              <DeleteProductButton
+                {...deleteButtonProps}
+                isDisabled={saveButtonProps?.isDisabled}
+                disabled={saveButtonProps?.disabled}
+                productId={id}
+              />
+              <SaveButton {...saveButtonProps} />
+            </ButtonGroup>
+          )
+        }}>
         {children}
       </Edit>
     )
@@ -320,27 +339,22 @@ ProductForm.Body = function Body() {
   return (
     <>
       <div className='bg-white flex gap-5 min-h-[350px]'>
-        <div className='w-1/3 grid gap-4 '>
+        <div className='w-1/3 grid gap-4 flex-shrink-0'>
           <div className='w-full min-w-1/3 mb-10'>
             <ProductForm.Images />
           </div>
         </div>
-        <div className='flex-grow flex flex-col'>
+        <div className='flex-grow flex flex-col gap-4'>
           <ProductForm.Id />
           <ProductForm.Name />
           <ProductForm.Slug />
-          <div className='flex mb-5 justify-around'>
+          <div className='flex justify-around'>
             <ProductForm.Brand />
             <ProductForm.Category />
             <ProductForm.Discount />
           </div>
-          <div className='flex'>
-            <ProductForm.Status />
-          </div>
-
-          <div className='mt-10'>
-            <ProductForm.Summary />
-          </div>
+          <ProductForm.Status />
+          <ProductForm.Summary />
         </div>
       </div>
       <div className=' space-y-4'>
@@ -369,7 +383,8 @@ ProductForm.Id = function Id() {
         isDisabled
       />
       <FormErrorMessage>
-        {(errors as any)?.id?.message as string}
+        <FormErrorIcon />
+        {errors?.id?.message as string}
       </FormErrorMessage>
     </FormControl>
   )
@@ -380,10 +395,11 @@ ProductForm.Name = function Name() {
     register,
     formState: { errors },
     refineCore: { queryResult },
+    product,
   } = useProductFormContext()
-  const { onDefaultError } = useCrudNotification()
+  const { onDefaultError: onError } = useCrudNotification()
   const [validateDebounce, isChecking] = useDebounceFn(
-    validateProductNameExists,
+    validateProductNameExists.bind(null, product, onError),
     300,
   )
 
@@ -398,12 +414,7 @@ ProductForm.Name = function Name() {
           type='text'
           {...register('name', {
             required,
-            validate: async (value) =>
-              await validateDebounce(
-                value,
-                queryResult?.data?.data,
-                onDefaultError,
-              ),
+            validate: async (value) => await validateDebounce(value),
             setValueAs: (value) => cleanValue(value),
           })}
         />
@@ -411,53 +422,76 @@ ProductForm.Name = function Name() {
           {isChecking && <Spinner color='blue.600' />}
         </InputRightElement>
       </InputGroup>
-      <FormErrorMessage>{errors?.name?.message}</FormErrorMessage>
+      <FormErrorMessage>
+        <FormErrorIcon />
+        {errors?.name?.message}
+      </FormErrorMessage>
     </FormControl>
   )
 }
 
-ProductForm.Slug = function Slug() {
+ProductForm.Slug = function ProductSlug() {
   const {
+    action,
     register,
     formState: { errors },
     refineCore: { queryResult },
+    product,
+    trigger,
+    setValue,
+    getValues,
   } = useProductFormContext()
-  const { onDefaultError } = useCrudNotification()
+  const { onDefaultError: onError } = useCrudNotification()
 
   const [validateDebounce, isChecking] = useDebounceFn(
-    validateProductSlugExists,
+    validateProductSlugExists.bind(null, product, onError),
     300,
   )
   return (
-    <FormControl isInvalid={!!errors?.slug}>
-      <div className='flex items-center'>
-        <FormLabel className='flex-shrink-0'>Đường dẫn (slug)</FormLabel>
-        <QuestionIcon /> Tự động tạo bởi hệ thống nếu để trống
-      </div>
+    <FormControl
+      mb='3'
+      isInvalid={!!errors?.slug}>
+      <FormLabel>
+        Đường dẫn (slug)
+        <Button
+          variant={'link'}
+          fontSize={'sm'}
+          ml='1'
+          fontWeight={'normal'}
+          rightIcon={
+            <Tooltip label='Đường dẫn sẽ được tạo tự động từ tên. Cần chỉnh sửa nếu bị trùng lặp.'>
+              <Icon as={Info} />
+            </Tooltip>
+          }
+          onClick={async () => {
+            const nameValid = await trigger(`name`)
+            if (!nameValid) return
+            setValue(`slug`, slugifyName(getValues(`name`)))
+            trigger(`slug`)
+          }}>
+          Tạo tự động
+        </Button>
+      </FormLabel>
       <InputGroup>
+        {' '}
         <Input
           type='text'
-          placeholder='ten-san-pham-viet-thuong-khong-dau'
           {...register('slug', {
-            pattern: {
-              value: REG_SLUG_PATTERN,
-              message: 'Đường dẫn không hợp lệ',
-            },
-            validate: async (value) =>
-              await validateDebounce(
-                value,
-                queryResult?.data?.data,
-                onDefaultError,
-              ),
-            setValueAs: (value) => value?.trim(),
+            required: 'Vui lòng nhập slug.',
+            pattern: SLUG_PATTERN,
+            validate: async (value) => await validateDebounce(value),
+            setValueAs: (value) => (value as string)?.trim().toLowerCase(),
+            deps: ['name'],
           })}
         />
         <InputRightElement>
           {isChecking && <Spinner color='blue.600' />}
         </InputRightElement>
       </InputGroup>
-
-      <FormErrorMessage>{errors?.slug?.message}</FormErrorMessage>
+      <FormErrorMessage>
+        <FormErrorIcon />
+        {errors?.slug?.message}
+      </FormErrorMessage>
     </FormControl>
   )
 }
@@ -472,11 +506,13 @@ ProductForm.Summary = function Summary() {
       <FormLabel>Mô tả ngắn</FormLabel>
       <Textarea {...register('summary', {})} />
       <FormErrorMessage>
+        <FormErrorIcon />
         {(errors as any)?.summary?.message as string}
       </FormErrorMessage>
     </FormControl>
   )
 }
+
 ProductForm.Brand = function Brand() {
   const { resource } = API['brands']()
   const { action, product, setValue } = useProductFormContext()
@@ -641,6 +677,45 @@ ProductForm.Category = function Category() {
   )
 }
 
+ProductForm.Price = function Price() {
+  const {
+    formState: { errors },
+    register,
+    setValue,
+    action,
+  } = useProductFormContext()
+  if (action === 'edit') return <></>
+  return (
+    <FormControl
+      mb='3'
+      isInvalid={!!(errors as any)?.price}>
+      <FormLabel>Giá mặc định</FormLabel>
+      <InputGroup>
+        <InputLeftElement
+          pointerEvents='none'
+          color='gray.300'
+          fontSize='1.2em'>
+          $
+        </InputLeftElement>
+        <ChakraCurrencyInput
+          pl='10'
+          {...register(`price`, {
+            validate: (v) => (v && v > 0) || 'Giá tiền không hợp lệ',
+            valueAsNumber: true,
+          })}
+          onValueChange={(value) => {
+            if (value) setValue(`price`, +value)
+          }}
+        />
+      </InputGroup>
+      <FormErrorMessage>
+        <FormErrorIcon />
+        {(errors as any)?.price?.message as string}
+      </FormErrorMessage>
+    </FormControl>
+  )
+}
+
 ProductForm.Description = function Description() {
   const {
     register,
@@ -656,6 +731,7 @@ ProductForm.Description = function Description() {
         h='224px'
       />
       <FormErrorMessage>
+        <FormErrorIcon />
         {(errors as any)?.description?.message as string}
       </FormErrorMessage>
     </FormControl>
@@ -703,60 +779,21 @@ ProductForm.Images = function Images() {
   )
 }
 
-const MultiValueLabel = ({
-  data,
-  selectProps,
-  onInputBlur,
-}: MultiValueGenericProps<Option<string>, true, GroupBase<Option<string>>> & {
-  onInputBlur: (
-    newValue: string,
-    currentOption: Option<string>,
-    values: Option<string>[],
-  ) => void
-}) => {
-  const inputRef = useRef(data.value)
-  useEffect(() => {
-    console.log('data.value', data.value)
-    inputRef.current = data.value
-  }, [data.value])
-
-  const handleOnBlur = (nextValue: string) => {
-    const value = inputRef.current
-    Array.isArray(selectProps.value) &&
-      onInputBlur(value, data, selectProps.value)
-  }
-
-  return (
-    <div>
-      <ChakraEditable
-        defaultValue={data.value}
-        onKeyDown={(e) => e.stopPropagation()}
-        onMouseDown={(e) => e.stopPropagation()}
-        onBlur={handleOnBlur}
-        onChange={(e) => (inputRef.current = e)}
-      />
-    </div>
-  )
-}
-
 ProductForm.Specifications = function Specifications({}) {
   const { findDistinctNames } = API['specifications']()
   const { action, setValue, getValues, resetField, control, product, watch } =
     useProductFormContext()
 
   const buttonRef = useRef(null)
-
   const { fields, append, remove } = useFieldArray({
     name: 'specifications',
     control: control,
   })
-  const isDisabled = action === 'edit'
+  //   const isDisabled = action === 'edit'
   const { data: { data: namesData } = {} } = useCustom<string[]>({
     url: findDistinctNames,
     method: 'get',
-    queryOptions: {
-      enabled: !isDisabled,
-    },
+    queryOptions: {},
   })
 
   const nameOptions = useMemo(
@@ -770,10 +807,13 @@ ProductForm.Specifications = function Specifications({}) {
         draft.push(toOptionString(value))
       }),
     )
-    append({
-      label: value,
-      options: [],
-    })
+    append(
+      {
+        label: value,
+        options: [],
+      },
+      { shouldFocus: false },
+    )
   }
   const onRemove = (index: number) => {
     console.log('index', index)
@@ -792,16 +832,17 @@ ProductForm.Specifications = function Specifications({}) {
     newValue: MultiValue<Option<string>>,
     meta: ActionMeta<Option<string>>,
   ) => {
-    console.log('newValue, meta', newValue, meta)
     const { action, option, removedValue } = meta
 
     switch (action) {
       case 'select-option':
       case 'create-option':
-        onAppend((option as Option<string>).label.trim())
+        onAppend(cleanValue((option as Option<string>).label))
         break
       case 'pop-value':
       case 'remove-value':
+        if (removedValue.__isFixed__) return
+
         const index = fields.findIndex(
           (field) => field.label === (removedValue as Option<string>).label,
         )
@@ -813,7 +854,7 @@ ProductForm.Specifications = function Specifications({}) {
   const { updateName } = API['specifications']()
   const { mutateAsync } = useCustomMutation({})
   const onUpdateName = (
-    newValue: string,
+    newValue: string | undefined,
     currentOption: Option<string>,
     values: Option<string>[],
   ) => {
@@ -827,13 +868,17 @@ ProductForm.Specifications = function Specifications({}) {
             method: 'patch',
             values: {},
             errorNotification: onError,
-            successNotification: onSuccess,
+            successNotification: {
+              type: 'success',
+              message: 'Cập nhật thông số thành công',
+            },
           },
           {
-            onSuccess: () => {},
+            onSuccess: () => {
+              setValue(`specificationGroup`, newValues)
+            },
           },
         ))
-      setValue(`specificationGroup`, newValues)
     }
 
     if (value === cleanNewValue) return
@@ -851,7 +896,6 @@ ProductForm.Specifications = function Specifications({}) {
 
   //reset form when product is fetched
   useEffect(() => {
-    console.warn('Change product specification use effect')
     const specs = product?.specifications
     if (!specs) return
     const formSpecs = specs.map((spec) => ({
@@ -859,51 +903,44 @@ ProductForm.Specifications = function Specifications({}) {
       options: spec.values.map((value) => toObjectOption(value.value, value)),
     }))
     console.log('formSpecs', formSpecs)
+    const groupNames = formSpecs.map(({ label, options }) => ({
+      label,
+      value: label,
+      ...(options.length > 1 && { __isFixed__: true }),
+    }))
     setTimeout(() => {
       resetField(`specifications`, {
         defaultValue: formSpecs,
       })
+
       resetField(`specificationGroup`, {
-        defaultValue: toArrayOptionString(formSpecs.map((item) => item.label)),
+        defaultValue: groupNames
+          .filter((item) => !!item.__isFixed__)
+          .concat(groupNames.filter((item) => !item.__isFixed__)),
       })
     }, 300)
   }, [product, resetField])
   return (
     <>
-      <FormLabel>Thông số kỹ thuật</FormLabel>
+      <FormLabel>
+        Thông số kỹ thuật
+        <span className='text-gray-500 text-sm ml-2'>
+          <Tooltip
+            label={`Hệ thống sẽ tự động tạo các phiên bản sản phẩm dựa trên các thông số đa trị`}>
+            <QuestionIcon />
+          </Tooltip>
+        </span>
+      </FormLabel>
       <div className='border rounded-lg p-4'>
         <div className=''>
           <div className=''>
-            {/* <CreatableSelect
-              ref={selectRef}
-              components={{ MultiValueLabel }}
-              value={selectOptions}
-              onChange={(newValues) => {
-                setSelectOptions(newValues)
-              }}
-              isMulti
-              isClearable={false}
-              options={nameOptions}
-              styles={{
-                multiValue(base, props) {
-                  return {
-                    ...base,
-                    backgroundColor: '#f3f4f6',
-                    //   backgroundColor: 'transparent',
-                  }
-                },
-              }}
-              isOptionSelected={(value, options) =>
-                options.some((item) => item.value === value.value)
-              }
-            /> */}
             <Controller
               render={({ field }) => (
                 <>
                   <CreatableSelect
                     components={{
                       MultiValueLabel: (props) => (
-                        <MultiValueLabel
+                        <EditableMultiValueLabel
                           {...props}
                           onInputBlur={onUpdateName}
                         />
@@ -916,18 +953,24 @@ ProductForm.Specifications = function Specifications({}) {
                     options={nameOptions}
                     onChange={handleSelectChange.bind(null, field.onChange)}
                     styles={{
-                      multiValue(base, props) {
+                      multiValue(base) {
                         return {
                           ...base,
                           backgroundColor: '#f3f4f6',
+                        }
+                      },
+                      multiValueRemove(base, props) {
+                        return {
+                          ...base,
+                          ...(props.data.__isFixed__ && { display: 'none' }),
                         }
                       },
                     }}
                     isOptionSelected={(value, options) =>
                       options.some((item) => item.value === value.value)
                     }
+                    isValidNewOption={isValidNewSelectOption}
                   />
-                  {JSON.stringify(field.value)}
                 </>
               )}
               name={`specificationGroup`}
@@ -949,8 +992,8 @@ ProductForm.Specifications = function Specifications({}) {
             </>
           )}
           {!!fields.length && (
-            <>
-              <div className='header flex'>
+            <div>
+              <div className='header flex m-2'>
                 <p className='flex-grow'>Tên thông số</p>
                 <p className='flex-grow'>Chi tiết</p>
               </div>
@@ -964,7 +1007,7 @@ ProductForm.Specifications = function Specifications({}) {
                   />
                 ))}
               </div>
-            </>
+            </div>
           )}
         </div>
       </div>
@@ -978,8 +1021,6 @@ ProductForm.Specifications = function Specifications({}) {
   }>
 }
 
-type SpecOption = Option<ISpecification>
-
 ProductForm.Specifications.Row = function SpecificationRow({
   index,
   onRemove: onRemoveRow,
@@ -991,17 +1032,21 @@ ProductForm.Specifications.Row = function SpecificationRow({
     control,
     getValues,
     setValue,
-    formState: { errors },
+    formState: { errors, dirtyFields },
     watch,
   } = useProductFormContext()
-  const isDisabled = action === 'edit'
-
+  const [shouldFetch, { on: shouldFetchOn }] = useBoolean()
+  //   const isDisabled = action === 'edit'
+  const isFixed = watch(`specificationGroup.${index}`)?.__isFixed__
+  const isReadOnly =
+    action === 'edit' &&
+    (isFixed || !!watch(`specifications.${index}.options`)?.length)
   //fetch spec values by name
   const { data: { data } = {} } = useCustom<ISpecification[]>({
     url: findDistinctByName(rowField?.label ?? ''),
     method: 'get',
     queryOptions: {
-      enabled: !isDisabled,
+      enabled: !isFixed && shouldFetch,
     },
     meta: {
       resource,
@@ -1013,52 +1058,103 @@ ProductForm.Specifications.Row = function SpecificationRow({
     [data],
   )
 
-  const getName = () => {
-    return getValues(`specifications.${index}.label`)
-  }
-
-  const append = (input: string) => {
-    console.log('on create new option')
-    const updated = produce(
-      getValues(`specifications.${index}.options`),
-      (draft) => {
-        draft.push({
-          label: input,
-          value: {
-            name: getName(),
-            value: input,
-          },
-        })
-      },
-    )
-    setValue(`specifications.${index}.options`, updated)
-  }
-
   const groupNames = watch(`specificationGroup`)
 
+  const handleSelectChange = (
+    onChange: (...event: any[]) => void,
+    newValue: MultiValue<Option<ISpecification>>,
+    meta: ActionMeta<Option<ISpecification>>,
+  ) => {
+    const { action, option, removedValue } = meta
+    let updateValue = newValue
+    if (isFixed) return
+    switch (action) {
+      case 'create-option':
+        updateValue = updateValue.map((item) =>
+          typeof item.value === 'string'
+            ? {
+                ...item,
+                value: { name: rowField?.label ?? '', value: item.value },
+              }
+            : item,
+        )
+      case 'select-option':
+        break
+      case 'pop-value':
+      case 'remove-value':
+    }
+    onChange(updateValue, meta)
+    if (!dirtyFields.specifications) {
+      setValue(`specifications`, getValues(`specifications`), {
+        shouldDirty: true,
+      })
+    }
+  }
+
+  const { resource: specResource } = API['specifications']()
+  const { mutateAsync } = useUpdate({})
+
+  const onUpdateSpecification = (
+    newValue: string | undefined,
+    currentOption: Option<ISpecification>,
+    values: Option<ISpecification>[],
+  ) => {
+    const value = cleanValue(currentOption.label)
+    const cleanNewValue = cleanValue(newValue)
+    if (value === cleanNewValue) return
+    const id = currentOption.value.id
+    if (!cleanNewValue)
+      return setValue(`specifications.${index}.options`, values)
+    const updateDB = async (newValues: Option<ISpecification>[]) => {
+      !currentOption.__isNew__ &&
+        id &&
+        (await mutateAsync(
+          {
+            resource: specResource,
+            id,
+            values: {
+              value: cleanNewValue,
+            },
+            errorNotification: onError,
+            successNotification: {
+              type: 'success',
+              message: 'Cập nhật thông số thành công',
+            },
+          },
+          {
+            onSuccess() {
+              setValue(`specifications.${index}.options`, newValues)
+            },
+          },
+        ))
+    }
+
+    const record = toRecord(values, 'label' as keyof Option<unknown>)
+    const key = value as keyof Option<unknown>
+
+    record[key] = toObjectOption(cleanNewValue, {
+      ...currentOption.value,
+      value: cleanNewValue,
+    })
+    updateDB(Object.values(record))
+  }
+
+  useEffect(() => {
+    const name = groupNames?.[index]?.label
+    if (name && rowField?.label !== name) {
+      const updateValues = getValues(`specifications.${index}.options`)?.map(
+        (item) => ({
+          ...item,
+          value: { ...item.value, name },
+        }),
+      )
+      setValue(`specifications.${index}.options`, updateValues)
+    }
+  }, [groupNames, getValues, setValue, index, rowField?.label])
   return (
     <div className='flex border p-4 gap-2'>
       <div className='flex-grow grid grid-cols-3 gap-2'>
-        {/* <Controller
-          name={`specificationGroup.${index}.label`}
-          control={control}
-          render={({ field }) => (
-            <Editable
-              {...field}
-              onChange={(nextValue) => {
-                setValue(`specificationGroup.${index}`, {
-                  label: nextValue,
-                  value: nextValue,
-                })
-              }}>
-              <EditablePreview />
-              <EditableInput />
-            </Editable>
-          )}
-        /> */}
         <p>{groupNames?.[index]?.label}</p>
-
-        {/* <p>{rowField?.label ?? getName()}</p> */}
         <FormControl
           isInvalid={!!errors.specifications?.[index]?.options}
           className='col-span-2'>
@@ -1067,34 +1163,70 @@ ProductForm.Specifications.Row = function SpecificationRow({
               `specifications.${index}.options` as `specifications.0.options`
             }
             control={control}
-            render={({ field }) => (
-              <CreatableSelect
-                {...field}
-                isMulti
-                isDisabled={isDisabled}
-                options={options}
-                menuPosition='fixed'
-                // onChange={handleChange}
-                onCreateOption={append}
-                isOptionSelected={(option, selected) => {
-                  return selected.some((item) => item.label === option.label)
-                }}
-                isValidNewOption={(input, values, options) => {
-                  const array = [...values, ...options].map(
-                    (item) => item.label,
-                  )
-                  return isValidNewOption(input, array)
-                }}
-              />
-            )}
+            render={({ field }) => {
+              return (
+                <CreatableSelect
+                  //   {...field}
+                  ref={field.ref}
+                  value={field.value}
+                  onBlur={field.onBlur}
+                  onChange={handleSelectChange.bind(null, field.onChange)}
+                  isMulti
+                  isClearable={false}
+                  backspaceRemovesValue={false}
+                  onFocus={() => !shouldFetch && shouldFetchOn()}
+                  //   {...(isReadOnly && { menuIsOpen: false })}
+                  options={isReadOnly ? [] : options}
+                  closeMenuOnSelect
+                  //   menuPosition='fixed'
+                  // onCreateOption={append}
+                  isOptionSelected={(option, selected) => {
+                    return selected.some((item) => item.label === option.label)
+                  }}
+                  isValidNewOption={isValidNewSelectOption}
+                  components={{
+                    MultiValueLabel: (props) => {
+                      return (
+                        <EditableMultiValueLabel
+                          {...props}
+                          onInputBlur={onUpdateSpecification}
+                        />
+                      )
+                    },
+                    Input: (props) => (
+                      <components.Input
+                        {...props}
+                        readOnly={isReadOnly}
+                        height={'48px'}
+                      />
+                    ),
+                  }}
+                  styles={{
+                    multiValue(base) {
+                      return {
+                        ...base,
+                        backgroundColor: '#f3f4f6',
+                      }
+                    },
+                    multiValueRemove(base, props) {
+                      return {
+                        ...base,
+                        ...(isFixed && { display: 'none' }),
+                      }
+                    },
+                  }}
+                />
+              )
+            }}
             rules={{
-              required: true,
+              required: 'Vui lòng chọn một giá trị',
               validate: (value) => {
                 return !!value.length
               },
             }}
           />
           <FormErrorMessage>
+            <FormErrorIcon />
             {errors.specifications?.[index]?.options?.message}
           </FormErrorMessage>
         </FormControl>
@@ -1104,7 +1236,7 @@ ProductForm.Specifications.Row = function SpecificationRow({
           className=''
           onClick={onRemoveRow}
           colorScheme='red'
-          isDisabled={isDisabled}>
+          isDisabled={isFixed}>
           <MinusCircle />
         </Button>
       </div>
@@ -1212,18 +1344,50 @@ ProductForm.Active = function ProductActive() {
 }
 
 ProductForm.Status = function ProductStatus() {
-  const { watch, control } = useProductFormContext()
+  const { watch, control, setValue } = useProductFormContext()
   const { findProductStatus } = API['products']()
   const { data: { data: statuses } = {} } = useCustom<string[]>({
     url: findProductStatus,
     method: 'get',
   })
+  const options = useMemo(
+    () => toArrayOptionString((statuses ?? []).filter((item) => !!item)),
+    [statuses],
+  )
+  const handleChange = (
+    onChange: (...event: any[]) => void,
+    newValue: SingleValue<Option<string>>,
+    meta: any,
+  ) => {
+    if (newValue?.__isNew__) {
+      const value = cleanValue(newValue.label)
+      onChange({ ...newValue, label: value, value }, meta)
+      return
+    }
+    onChange(newValue, meta)
+  }
   return (
     <FormControl>
       <FormLabel>Trạng thái</FormLabel>
       <div className='grid grid-cols-3 gap-2'>
-        <div className='w-[90%]'>
-          <Select options={statuses} />
+        <div className='w-[90%] col-span-2'>
+          <Controller
+            name='formStatus'
+            control={control}
+            render={({ field }) => (
+              <CreatableSelect
+                options={options}
+                onChange={handleChange.bind(null, field.onChange)}
+                ref={field.ref}
+                value={field.value}
+                isClearable
+                isValidNewOption={isValidNewSelectOption}
+                placeholder={'Chọn trạng thái sản phẩm'}
+                noOptionsMessage={() => 'Không có dữ liệu'}
+                formatCreateLabel={(input) => `Tạo ${cleanValue(input)}`}
+              />
+            )}
+          />
         </div>
         <ProductForm.Active />
       </div>
@@ -1264,15 +1428,9 @@ function WalkthroughPopover() {
         </PopoverHeader>
         <PopoverArrow bg='blue.800' />
         <PopoverCloseButton />
-        <PopoverBody>
+        <PopoverBody pb='4'>
           <SliderThumbWithTooltip />
         </PopoverBody>
-        <PopoverFooter
-          border='0'
-          display='flex'
-          alignItems='center'
-          justifyContent='flex-end'
-          pb={4}></PopoverFooter>
       </PopoverContent>
     </Popover>
   )
@@ -1324,58 +1482,4 @@ function SliderThumbWithTooltip() {
       )}
     />
   )
-}
-
-const ChakraEditable = forwardRef<EditableProps, 'div'>((props, ref) => (
-  <Editable
-    ref={ref}
-    defaultValue='Rasengan ⚡️'
-    isPreviewFocusable={true}
-    selectAllOnFocus={false}
-    {...props}>
-    <Tooltip
-      label='Click to edit'
-      shouldWrapChildren={true}>
-      <EditablePreview
-        py={2}
-        px={4}
-        _hover={{
-          background: useColorModeValue('gray.100', 'gray.700'),
-        }}
-      />
-    </Tooltip>
-    <Input
-      py={2}
-      px={4}
-      as={EditableInput}
-    />
-    {/* <EditableControls /> */}
-  </Editable>
-))
-
-function EditableControls() {
-  const {
-    isEditing,
-    getSubmitButtonProps,
-    getCancelButtonProps,
-    getEditButtonProps,
-  } = useEditableControls()
-
-  // return isEditing ? (
-  //   <ButtonGroup
-  //     justifyContent='end'
-  //     size='sm'
-  //     w='full'
-  //     spacing={2}
-  //     mt={2}>
-  //     <IconButton
-  //       icon={<CheckIcon />}
-  //       {...getSubmitButtonProps()}
-  //     />
-  //     <IconButton
-  //       icon={<CloseIcon boxSize={3} />}
-  //       {...getCancelButtonProps()}
-  //     />
-  //   </ButtonGroup>
-  // ) : null
 }

@@ -1,5 +1,11 @@
-/** @format */
+/**
+ * eslint-disable react/display-name
+ *
+ * @format
+ */
 
+/** @format */
+'use client'
 import SectionTitle from '@components/ui/SectionTitle'
 import { getProductsWithDetails } from '@/providers/server-data-provider/data/products'
 import { IProduct } from 'types'
@@ -12,25 +18,29 @@ import { ChevronRight, Plus } from 'lucide-react'
 import { Button } from '@components/ui/shadcn/button'
 import { FavoriteButtonWithCardProvider } from './product/FavoriteButton'
 import { ProductCardProvider } from './product/ProductCardProvider'
+import { API } from 'types/constants'
+import { useCustom } from '@refinedev/core'
 // import { Flex } from "@chakra-ui/react";
 // import { useWindowDimensions } from "@/hooks/useWindowDimensions";
 
-const Newest = async () => {
+const Newest = () => {
   // const { width } = useWindowDimensions();
   // let numProductToShow = 10
-  const products = await getProductsWithDetails()
+  // const products = await getProductsWithDetails()
 
-  // const displayedProducts = Object.values(products.data).slice(
-  //   0,
-  //   numProductToShow,
-  // )
-  console.log(products)
+  const { getProductsLastest, resource } = API.products()
+
+  const { data: { data: products = [] } = {} } = useCustom<IProduct[]>({
+    url: getProductsLastest(10),
+    method: 'get',
+    meta: { resource },
+  })
 
   return (
     <div className='bg-white rounded-lg '>
       <div className='flex  justify-between items-center px-3 pt-3 md:my-4 lg:mt-10  '>
         <h5 className='font-bold  text-xl uppercase '>
-          Sản phẩm của FusionTech
+          Sản phẩm mới nhất của FusionTech
         </h5>
         <Link href={'http://localhost:3000/search?keyword='}>
           <div className=' flex flex-row items-center '>
@@ -47,7 +57,7 @@ const Newest = async () => {
         aria-label='product-list'
         className='flex flex-row overflow-auto max-h-[800px] gap-4 pl-2 pt-2 pb-1'>
         {/* <div className='grid grid-cols-5 gap-3'> */}
-        {Object.values(products.data).map((item: IProduct) => (
+        {products.map((item: IProduct) => (
           // eslint-disable-next-line react/jsx-key
           <div className='rounded-lg  shadow border-gray-300 bg-white  '>
             <ProductCardProvider
@@ -63,7 +73,18 @@ const Newest = async () => {
 }
 
 const Product = ({
-  item: { id, name, slug, images, summary, avgRating, brand },
+  item: {
+    id,
+    name,
+    slug,
+    images,
+    summary,
+    avgRating,
+    brand,
+    minPrice,
+    maxPrice,
+    discount,
+  },
 }: {
   item: IProduct
 }) => {
@@ -72,7 +93,7 @@ const Product = ({
       aria-label={`Product Item:${name}`}
       className=' group cursor-pointer lg:min-w-[16.666667%] md:min-w-[25%] sm:min-w-[33.333333%] min-w-[50%]'>
       <NextLinkContainer href={`/products/${id}`}>
-        <Product.sale />
+        <Product.sale sale={discount} />
         <Link href={`/products/${id}`}>
           <Product.Image images={images} />
         </Link>
@@ -85,7 +106,10 @@ const Product = ({
             />
           </div> */}
           <Product.Name name={name} />
-          <Product.Price />
+          <Product.Price
+            minPrice={minPrice}
+            maxPrice={maxPrice}
+          />
           <Product.Summary summary={summary} />
           <Product.Review avgRating={avgRating} />
         </div>
@@ -96,24 +120,26 @@ const Product = ({
   )
 }
 
-Product.sale = () => {
-  return (
-    <>
-      <div className='relative'>
-        <div
-          className='absolute text-xs top-0 left-[-3px] m-0 bg-gradient-to-br from-[#b02d2d] to-[#ff5555] text-white font-bold px-2 py-1 rounded-tl-md rounded-tr-md rounded-br-md shadow'
-          style={{
-            zIndex: 2,
-          }}>
-          50% OFF
-        </div>
+Product.sale = ({ sale }: { sale: IProduct['discount'] }) => {
+  if (!sale) {
+    return null // Ẩn đi nếu không có dữ liệu giảm giá
+  }
 
-        <div className='relative top-[21.5px] left-[-2.2px] w-0 h-0 border-t-[5px] border-l-[5px] border-[#b02d2d] transform rotate-45 '></div>
+  return (
+    <div className='relative'>
+      <div
+        className='absolute text-xs top-0 left-[-3px] m-0 bg-gradient-to-br from-[#b02d2d] to-[#ff5555] text-white font-bold px-2 py-1 rounded-tl-md rounded-tr-md rounded-br-md shadow'
+        style={{
+          zIndex: 2,
+        }}>
+        {sale}% OFF
       </div>
-    </>
+
+      <div className='relative top-[21.5px] left-[-2.2px] w-0 h-0 border-t-[5px] border-l-[5px] border-[#b02d2d] transform rotate-45 '></div>
+    </div>
   )
 }
-
+// eslint-disable-next-line react/display-name
 Product.Image = ({ images }: { images: IProduct['images'] }) => {
   return (
     <div
@@ -145,6 +171,7 @@ Product.Image = ({ images }: { images: IProduct['images'] }) => {
     </div>
   )
 }
+// eslint-disable-next-line react/display-name
 Product.Brand = ({ brand }: { brand: IProduct['brand'] }) => {
   return (
     <p className='text-base  font-roboto font-semibold uppercase leading-normal text-zinc-600 line-clamp-1 pt-2'>
@@ -152,6 +179,7 @@ Product.Brand = ({ brand }: { brand: IProduct['brand'] }) => {
     </p>
   )
 }
+// eslint-disable-next-line react/display-name
 Product.Name = ({ name }: { name: IProduct['name'] }) => {
   return (
     <p className=' text-xs leading-normal text-zinc-500 line-clamp-1 uppercase font-bold '>
@@ -162,6 +190,7 @@ Product.Name = ({ name }: { name: IProduct['name'] }) => {
     </p>
   )
 }
+// eslint-disable-next-line react/display-name
 Product.Summary = ({ summary }: { summary: IProduct['summary'] }) => {
   return (
     <div className='bg-slate-100 rounded-md p-2 mb-2 h-14 max-h-14'>
@@ -172,24 +201,32 @@ Product.Summary = ({ summary }: { summary: IProduct['summary'] }) => {
   )
 }
 
-Product.Price = () => {
+// eslint-disable-next-line react/display-name
+Product.Price = ({
+  minPrice,
+  maxPrice,
+}: {
+  minPrice: IProduct['minPrice']
+  maxPrice: IProduct['maxPrice']
+}) => {
   return (
     <div className='flex justify-start items-center py-2'>
-      <p className='font-titleFont text-md font-bold text-red-600 mr-2'>
-        {formatPrice(25_000_000)}
+      <p className='font-titleFont text-base font-bold text-red-600 mr-1'>
+        {formatPrice(minPrice)}
       </p>
-      <p className='text-gray-500 font-titleFont text-sm leading-tight line-through decoration-[1px] ml-2'>
-        {formatPrice(29_000_000)}
+      <p className='font-titleFont text-base font-bold text-red-600 mr-1'>-</p>
+      <p className='font-titleFont text-base font-bold text-red-600 '>
+        {formatPrice(maxPrice)}
       </p>
     </div>
   )
 }
-
+// eslint-disable-next-line react/display-name
 Product.Review = ({ avgRating }: { avgRating: IProduct['avgRating'] }) => {
   const starCount = 5
 
   const filledStars = Math.floor(avgRating ?? 0)
-
+  const roundedAvgRating = (avgRating ?? 0).toFixed(1)
   const remainingStars = starCount - filledStars
 
   const filledStarsArray = Array.from({ length: filledStars }, (_, index) => (
@@ -212,12 +249,12 @@ Product.Review = ({ avgRating }: { avgRating: IProduct['avgRating'] }) => {
       {filledStarsArray}
       {remainingStarsArray}
       <p className='line font-bold text-muted-foreground leading-tight'>
-        {avgRating}/5
+        {roundedAvgRating}/5
       </p>
     </div>
   )
 }
-
+// eslint-disable-next-line react/display-name
 Product.DetailButton = ({
   id,
   slug,

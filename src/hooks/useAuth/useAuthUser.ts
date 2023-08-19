@@ -15,25 +15,34 @@ type State = {
         id?: number
         roles?: string[]
       }
+  token: string | null
   userProfile: IUser | undefined
+  _hasHydrated?: boolean
+  _hasPermissionHydrated?: boolean
 }
 
 const store = create<State>()(() => ({
   user: null,
   userProfile: undefined,
+  token: null,
 }))
 
 export const useAuthUser = () => {
-  const user = store((state) => state.user)
-  const claims = store((state) => state.claims)
-  const userProfile = store((state) => state.userProfile)
-  const metadata = store((state) => state.metadata)
-
+  const { user, userProfile, claims, token, metadata } = store(
+    ({ user, userProfile, claims, token, metadata }) => ({
+      user,
+      userProfile,
+      claims,
+      token,
+      metadata,
+    }),
+  )
   return {
     user,
     claims,
     userProfile,
     metadata,
+    token,
   }
 }
 export const setAuthUser = (user: State['user']) => {
@@ -48,4 +57,15 @@ export const setIsNewUser = (isNew: boolean) => {
   store.setState(({ metadata }) => ({ metadata: { ...metadata, isNew } }))
 }
 
+export const setUserToken = (token: State['token']) => {
+  store.setState(() => ({ token }))
+}
+
+export const setAuthHydrated = () => {
+  if (!store.getState()._hasHydrated) {
+    store.setState(() => ({ _hasHydrated: true }))
+  }
+}
+
 export { store as authStore }
+export { store as useAuthStore }

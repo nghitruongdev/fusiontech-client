@@ -7,13 +7,12 @@ import {
   CreateResponse,
   BaseRecord,
 } from '@refinedev/core'
-import { AxiosError } from 'axios'
 import { useCallback } from 'react'
-import { messages } from '../../types/messages'
 import { Fields } from '@refinedev/core/dist/interfaces/metaData/fields'
 import { VariableOptions } from '@refinedev/core/dist/interfaces/metaData/variableOptions'
 import { AppError } from 'types/error'
-import { ProblemDetail } from 'types'
+import { ProblemDetail, ResourceName } from 'types'
+import { RESOURCE_LABEL } from 'types/constants'
 
 type ValueProps =
   | {
@@ -54,6 +53,7 @@ const useCrudNotification = () => {
     resource?: string | undefined,
     defaultMessage?: string,
   ): OpenNotificationParams => {
+    console.log('values', values)
     return {
       type: 'success',
       message: '',
@@ -70,16 +70,41 @@ const useCrudNotification = () => {
   }
 }
 
+type Action = 'create' | 'edit' | 'delete'
+const ActionText: { [key in Action]: string } = {
+  create: 'Thêm mới',
+  edit: 'Cập nhật',
+  delete: 'Xoá',
+}
 export const onSuccess = (
+  action: Action,
   data: any,
-  value: any,
+  values: any,
   resource: string | undefined,
+  defaultMessage?: string,
 ): OpenNotificationParams => {
+  if (defaultMessage)
+    return {
+      type: 'success',
+      message: defaultMessage,
+    }
+
   return {
     type: 'success',
-    message: `${resource} thành công`,
+    message: `${ActionText[action]} ${
+      resource && RESOURCE_LABEL[resource as ResourceName]
+    } thành công`,
   }
 }
+
+export const onDefaultSuccess = (
+  message: string,
+  description?: string,
+): OpenNotificationParams => ({
+  type: 'success',
+  message,
+  description,
+})
 
 export const onError = (
   err?: AppError | HttpError | undefined,
@@ -89,11 +114,11 @@ export const onError = (
 ): OpenNotificationParams => {
   console.log('err', err)
   if (err?.isAxiosError) {
-    const data = err.response.data as ProblemDetail
+    const data = err.response?.data as ProblemDetail
     return {
       type: 'error',
       message: `${getErrorTitle(data?.title)} - ${
-        data?.status ?? err.statusCode
+        data?.status ?? err?.statusCode
       }`,
       description:
         data?.detail ?? 'Đã có lỗi xảy ra, vui lòng liên hệ nhà cung cấp.',
@@ -112,4 +137,5 @@ const getErrorTitle = (title?: string) => {
     return 'Yêu cầu không hợp lệ'
   return title ?? 'Hệ thống đã xảy ra lỗi'
 }
+
 export default useCrudNotification
