@@ -24,7 +24,6 @@ const page = ({ params: { search } }: Props) => {
     case 'san-pham-ban-chay-nhat':
       return <SellingProducts />
   }
-  notFound()
-  return <></>
+  return notFound()
 }
 export default page

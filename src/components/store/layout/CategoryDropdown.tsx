@@ -53,7 +53,7 @@ export function CategoryDropDown({ categories }: { categories: ICategory[] }) {
                       <MenuItem key={`${item.id}`}>
                         <NextLinkContainer
                           href={`/search/danh-muc/${item.id}-${item.slug}`}
-                          className={`flex gap-2`}>
+                          className={`flex gap-2 w-full`}>
                           <Image
                             src={item.image ?? ''}
                             width={100}

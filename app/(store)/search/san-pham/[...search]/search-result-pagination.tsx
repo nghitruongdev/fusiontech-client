@@ -1,16 +1,18 @@
 /** @format */
 
 'use client'
+import { waitPromise } from '@/lib/promise'
 import { Pagination } from '@components/pagination'
+import PaginationWithPageable from '@components/pagination/pagination-pageable'
 import { usePageable } from '@components/pagination/usePageable'
 import ProductCard from '@components/store/front/product/ProductCard'
 import { GetListResponse, useList, useMany } from '@refinedev/core'
-import { PropsWithChildren } from 'react'
+import Image from 'next/image'
+import { PropsWithChildren, use, useEffect, useState } from 'react'
 import { IProduct, Page } from 'types'
 import { API } from 'types/constants'
 
 const {
-  getProductsDiscount,
   getAllProducts,
   getHotProducts,
   getProductsLastest,
@@ -25,24 +27,40 @@ const SearchResult = ({
   items,
 }: PropsWithChildren<{ totalPages: number; items?: IProduct[] }>) => {
   const pageable = usePageable()
+
+  const [promise, setPromise] = useState<Promise<unknown>>(waitPromise(300))
+  use(promise)
+
+  if (!items?.length)
+    return (
+      <div className='flex flex-col items-center justify-center gap-4 w-full h-[450px] bg-white'>
+        <Image
+          alt='no-result-found'
+          src='https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fno-result-found.png?alt=media&token=27af6304-ba76-445f-a2b0-59aa52815296'
+          width={'300'}
+          height={'300'}
+        />
+        <p className='text-3xl text-zinc-600 font-semibold'>
+          {'Không có kết quả :('}
+        </p>
+      </div>
+    )
+
   return (
     <div>
       {children}
-      {!!items?.length && (
-        <div className='bg-white'>
-          <div className='flex flex-row flex-wrap'>
-            {items.map((item) => (
-              <ProductCard
-                key={item.id}
-                product={item}
-                className='w-1/6 gap-4'
-              />
-            ))}
-          </div>
+      <div className='bg-white'>
+        <div className='grid grid-cols-5 gap-4'>
+          {items?.map((item) => (
+            <ProductCard
+              key={item.id}
+              product={item}
+              className=''
+            />
+          ))}
         </div>
-      )}
-      <Pagination
-        justifyContent={'center'}
+      </div>
+      <PaginationWithPageable
         {...pageable}
         pageCount={totalPages}
         setPageSize={undefined}
@@ -58,7 +76,7 @@ export const AllProduct = () => {
   const {
     data: { data: products = [], page } = {} as GetListResponse<IProduct>,
   } = useList<IProduct>({
-    resource: `${getAllProducts()}`,
+    resource: getAllProducts(),
     pagination: {
       pageSize,
       current,

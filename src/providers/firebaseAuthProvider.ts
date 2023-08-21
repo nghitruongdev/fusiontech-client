@@ -35,7 +35,8 @@ import {
   useAuthStore,
 } from '@/hooks/useAuth/useAuthUser'
 import { ROLES } from 'types'
-import { suspensePromise } from '@/lib/promise'
+import { suspensePromiseWithCleanup } from '@/lib/promise'
+// import { suspensePromise } from '@/lib/promise'
 
 const auth = getAuth(firebaseApp)
 const googleProvider = new GoogleAuthProvider()
@@ -259,10 +260,12 @@ const updatePassword = async (
 }
 const getPermissions = async () => {
   const { claims, userProfile, _hasPermissionHydrated } = authStore.getState()
-  await suspensePromise(_hasPermissionHydrated)
+  const [promise, cleanup] = suspensePromiseWithCleanup(_hasPermissionHydrated)
+  await promise
   const roles = claims?.roles?.map(
     (role) => ROLES[role.toUpperCase() as keyof typeof ROLES],
   )
+  cleanup?.()
   return roles ?? []
 }
 const getIdentity = async (params?: any) => {}

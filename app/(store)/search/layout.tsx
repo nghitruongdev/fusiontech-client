@@ -1,13 +1,14 @@
 /** @format */
 
 'use client'
-import React, { useState } from 'react'
+import React, { Suspense, useState } from 'react'
 import InputSlider from 'react-input-slider'
 import { PropsWithChildren } from 'react'
+import ProductListLoading from '@components/store/front/product/ProductListLoading'
 const colorOptions = [
-  { name: 'White', value: 'blue', color: '#FFFFFF' },
+  //   { name: 'White', value: 'blue', color: '#FFFFFF' },
   { name: 'Gray', value: 'blue', color: '#808080' },
-  { name: 'Black', value: 'blue', color: '#000000' },
+  //   { name: 'Black', value: 'blue', color: '#000000' },
   { name: 'Red', value: 'red', color: '#FF0000' },
   { name: 'Blue', value: 'blue', color: '#0000FF' },
 ]
@@ -91,9 +92,9 @@ const Layout = ({ children }: PropsWithChildren) => {
             <div className='mb-4'>
               <label className='block mb-2 font-medium'>Màu sắc</label>
               <div className='flex flex-wrap gap-2'>
-                {colorOptions.map((option) => (
+                {colorOptions.map((option, idx) => (
                   <button
-                    key={option.value}
+                    key={idx + option.name}
                     className={`w-6 h-6 rounded-full border border-gray-300 ${
                       filterOptions.color === option.value
                         ? 'border-blue-500'
@@ -155,7 +156,15 @@ const Layout = ({ children }: PropsWithChildren) => {
               Sản phẩm bán chạy nhất
             </button>
           </div>
-          <div className=''>{children}</div>
+          <Suspense
+            fallback={
+              <div className='grid gap-4 mt-4'>
+                <ProductListLoading />
+                <ProductListLoading />
+              </div>
+            }>
+            {children}
+          </Suspense>
         </div>
       </div>
     </div>

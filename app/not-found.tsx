@@ -12,15 +12,11 @@ const NotFound = () => {
       <div className='flex items-center justify-center'>
         <div className='flex items-center justify-center'>
           <div className='mr-8'>
-            <div className='my-10'>
+            <div className=''>
               <h1 className='font-extrabold text-8xl text-red-700'>
                 FusionTech
               </h1>
             </div>
-
-            <p className='text-2xl font-normal mb-10'>
-              <span className='font-bold'>404. </span>
-            </p>
             <p className='text-2xl font-normal '>
               <span className=''>
                 Yêu cầu URL không được tìm thấy trong hệ thống.

@@ -59,7 +59,10 @@ export const useCurrentUrl = () => {
 export const useUrl = () => {
   const searchParams = useSearchParams()
   const pathName = usePathname()
-  const updateParam = useCallback(
+  /**
+   * @deprecated
+   */
+  const updateOldParam = useCallback(
     (params: Record<string, any>) => {
       const query = Array.from(searchParams)
         .concat(Object.entries(params))
@@ -71,8 +74,22 @@ export const useUrl = () => {
     },
     [searchParams, pathName],
   )
+
+  const updateParams = useCallback(
+    (params: Record<string, any>) => {
+      const newParams = Object.entries(params)
+        .reduce((acc, [key, value]) => {
+          acc.set(key, value)
+          return acc
+        }, new URLSearchParams(searchParams))
+        .toString()
+      return `${pathName}?${newParams}`
+    },
+    [searchParams, pathName],
+  )
   return {
-    updateParam,
+    updateOldParam: updateOldParam,
+    updateParams,
   }
 }
 export const cleanUrl = (dirtyUrl: string) => {

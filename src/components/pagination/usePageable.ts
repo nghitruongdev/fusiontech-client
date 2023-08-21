@@ -11,20 +11,8 @@ type ReturnProps = {
   setPageSize: (pageSize: number) => void
 }
 export function usePageable() {
-  const { get } = useSearchParams()
-  const router = useRouter()
-  const { updateParam } = useUrl()
-  const [current, setCurrent] = useState<number>(
-    Number.parseInt(get(`current`) ?? '1'),
-  )
-  const [pageSize, setPageSize] = useState<number>(
-    Number.parseInt(get('size') ?? '10'),
-  )
-
-  useEffect(() => {
-    const url = updateParam({ current, size: pageSize })
-    router.push(url)
-  }, [current, pageSize, router, updateParam])
+  const [current, setCurrent] = useState<number>(1)
+  const [pageSize, setPageSize] = useState<number>(5)
 
   return {
     current,

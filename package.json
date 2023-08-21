@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "cross-env refine dev --port 3001 -H 127.0.0.1",
+    "dev": "cross-env refine dev",
     "build": "next build && rm -rf .next/cache",
     "start": "next start",
     "test": "",
