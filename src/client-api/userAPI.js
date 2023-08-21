@@ -13,13 +13,17 @@ const userApi = {
     const url = `${API_URL}/users/search/existsByPhoneNumber?phoneNumber=${phone}`
     return axiosClient.get(url)
   },
-  updateUser: (id, userData) => {
+  updateUser: (id, userData, headers) => {
     const url = `${API_URL}/api/users/updateUser/${id}`
-    return axiosClient.put(url, userData)
+    return axiosClient.put(url, userData, {
+      headers,
+    })
   },
-  createShippingAddress: (uid, shippingAdressData) => {
+  createShippingAddress: (uid, shippingAdressData, headers) => {
     const url = `${API_URL}/shippingAddresses/create/${uid}`
-    return axiosClient.post(url, shippingAdressData)
+    return axiosClient.post(url, shippingAdressData, {
+      headers,
+    })
   },
 }
 

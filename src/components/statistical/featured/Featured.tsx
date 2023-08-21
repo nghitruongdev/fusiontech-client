@@ -30,7 +30,7 @@ import {
 } from '@chakra-ui/react'
 import { useCustom, useMany } from '@refinedev/core'
 import React, { useState, useEffect } from 'react'
-import { IUser } from 'types'
+import { IUser, IProduct } from 'types'
 import { API } from 'types/constants'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -49,6 +49,11 @@ export default function StaticPage() {
   const { getAuthHeader } = useHeaders()
 
   const { bestCustomer, resource, revenue } = API.statistical()
+  const {
+    getSellingProducts,
+    resource: productResource,
+    projection: { full },
+  } = API.products()
 
   const { data: { data } = {} } = useCustom<
     { id: number; totalOrder: number }[]
@@ -65,6 +70,39 @@ export default function StaticPage() {
     },
   })
 
+  const startDate = new Date('2022-08-30')
+  const endDate = new Date('2024-08-30')
+  const { data: { data: sellingProduct } = {} } = useCustom<
+    { id: number; sold: number }[]
+  >({
+    // url: `http://100.82.6.136:8080/api/statistical/best-seller?startDate=${startDate}&endDate=${endDate}&size=${size}`,
+    url: `${getSellingProducts(startDate, endDate)}`,
+    method: 'get',
+    meta: { productResource },
+    config: {
+      headers: {
+        ...getAuthHeader(),
+      },
+    },
+  })
+  const productRecord = toRecord(sellingProduct ?? [], 'id')
+  const idss = Object.keys(productRecord)
+  // const idss = sellingProduct?.map((item) => item.id) ?? []
+  const { data: { data: products = [] } = {}, isFetching } = useMany<IProduct>({
+    resource: 'products',
+    ids: idss,
+    meta: {
+      query: {
+        projection: full,
+      },
+      headers: {
+        ...getAuthHeader(),
+      },
+    },
+    queryOptions: {
+      enabled: !!idss.length,
+    },
+  })
   const { data: { data: doanhThuData = [] } = {} } = useCustom<
     DoanhThuResult[]
   >({
@@ -77,8 +115,8 @@ export default function StaticPage() {
     method: 'get',
   })
 
-  const record = toRecord(data ?? [], 'id')
-  const ids = Object.keys(record)
+  const userRecord = toRecord(data ?? [], 'id')
+  const ids = Object.keys(userRecord)
   const { data: { data: users = [] } = {} } = useMany<IUser>({
     resource: 'users',
     ids: ids,
@@ -87,7 +125,9 @@ export default function StaticPage() {
     },
   })
   const getTotalOrder = (userId: number) =>
-    record[userId as unknown as keyof typeof record]?.totalOrder
+    userRecord[userId as unknown as keyof typeof userRecord]?.totalOrder
+  const getTotalSellingProduct = (productId: number) =>
+    productRecord[productId as unknown as keyof typeof productRecord]?.sold
 
   return (
     <div>
@@ -97,6 +137,7 @@ export default function StaticPage() {
         <TabList mt={10}>
           <Tab>Doanh thu theo năm</Tab>
           <Tab>Người dùng mua hàng nhiều nhất</Tab>
+          <Tab>Sản phẩm bán chạy nhất</Tab>
           <Tab>Kho hàng</Tab>
         </TabList>
         <TabPanels>
@@ -126,6 +167,32 @@ export default function StaticPage() {
                       <Td>{user.email}</Td>
                       <Td>{user.phoneNumber}</Td>
                       {!!user.id && <Td>{getTotalOrder(user.id)}</Td>}
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            </TableContainer>
+          </TabPanel>
+          <TabPanel>
+            <TableContainer>
+              <Table>
+                <Thead>
+                  <Tr>
+                    <Th>Id</Th>
+                    <Th>Tên</Th>
+                    <Th>Sản phẩm đã bán</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {products.map((product) => (
+                    <Tr key={product.id}>
+                      <Td>{product.id}</Td>
+
+                      <Td>{product.name}</Td>
+
+                      {!!product.id && (
+                        <Td>{getTotalSellingProduct(+product?.id)}</Td>
+                      )}
                     </Tr>
                   ))}
                 </Tbody>

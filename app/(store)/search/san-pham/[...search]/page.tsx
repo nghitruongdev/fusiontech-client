@@ -5,6 +5,7 @@ import {
   AllProduct,
   HotProduct,
   ProductLastest,
+  SellingProducts,
 } from './search-result-pagination'
 
 type Props = {
@@ -20,6 +21,8 @@ const page = ({ params: { search } }: Props) => {
       return <HotProduct />
     case 'san-pham-moi-nhat':
       return <ProductLastest />
+    case 'san-pham-ban-chay-nhat':
+      return <SellingProducts />
   }
   notFound()
   return <></>

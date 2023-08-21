@@ -35,6 +35,7 @@ const AuthenticatedPage = ({
     setPromise(suspense)
     return cleanup
   }, [])
+
   useEffect(() => {
     if (!hydrated) return setSuspensePromise(hydrated)
     if (hydrated && permissions && !permissionHydrated)
@@ -95,7 +96,7 @@ const AuthSuspense = ({
   promise: Promise<unknown>
   permissions?: ROLES[]
 }) => {
-  use(promise)
+  //   use(promise)
   return <></>
 }
 export default AuthenticatedPage

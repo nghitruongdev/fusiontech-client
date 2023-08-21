@@ -20,13 +20,15 @@ type ProviderProps = ContextState & DivPropsType
 const ProductCard = (props: ProviderProps) => {
   return (
     <ProductCard.Provider {...props}>
-      <ProductCard.Image />
-      <ProductCard.Brand />
-      <ProductCard.Name />
-      <ProductCard.Price />
-      <ProductCard.AvgRating />
-      <ProductCard.Summary />
       <ProductCard.Discount />
+      <ProductCard.Image />
+      <div className='px-2 flex flex-col'>
+        <ProductCard.Brand />
+        <ProductCard.Name />
+        <ProductCard.Price />
+        <ProductCard.Summary />
+        <ProductCard.AvgRating />
+      </div>
     </ProductCard.Provider>
   )
 }
@@ -61,7 +63,7 @@ ProductCard.LinkContainer = function ProductLinkContainer({
         <div
           aria-label={`Product Item:${name}`}
           className='group cursor-pointer lg:min-w-[16.666667%] md:min-w-[25%] sm:min-w-[33.333333%] min-w-[50%]'>
-          <NextLinkContainer href={`/san-pham/${id}-${slug}`}>
+          <NextLinkContainer href={`/products/${id}-${slug}`}>
             {children}
           </NextLinkContainer>
         </div>

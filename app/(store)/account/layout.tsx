@@ -3,36 +3,27 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
-import {
-  FaRegUserCircle,
-  FaClipboardList,
-  FaRegListAlt,
-  FaMapMarkedAlt,
-  FaRegBell,
-  FaRegEnvelope,
-  FaSearchLocation,
-} from 'react-icons/fa'
-import { useCustom } from '@refinedev/core'
-import { API } from 'types/constants'
-import { API_URL } from 'types/constants'
+import { FaRegUserCircle, FaRegListAlt, FaSearchLocation } from 'react-icons/fa'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { waitPromise } from '@/lib/promise'
 import RecentProductView from '@components/store/front/section/RecentProductView'
+import AuthenticatedPage from 'app/(others)/authenticated'
 
 const AccountLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className='bg-gray-100'>
-      <div className='min-h-screen flex w-4/5 mx-auto max-w-7xl'>
-        <div className=' w-1/4 p-4 '>
-          <AccountMenu />
+    <AuthenticatedPage>
+      <div className='bg-gray-100'>
+        <div className='min-h-screen flex w-4/5 mx-auto max-w-7xl'>
+          <div className=' w-1/4 p-4 '>
+            <AccountMenu />
+          </div>
+          <div className='w-3/4  p-4'>{children}</div>
         </div>
-        <div className='w-3/4  p-4'>{children}</div>
+        <div className='px-8'>
+          <RecentProductView />
+        </div>
       </div>
-      <div className='px-8'>
-        <RecentProductView />
-      </div>
-    </div>
+    </AuthenticatedPage>
   )
 }
 export default AccountLayout
@@ -46,11 +37,6 @@ const AccountMenu = () => {
   const imageUrl = userProfile?.image ?? ''
 
   const [currentPath, setCurrentPath] = useState('')
-  useEffect(() => {
-    waitPromise(500).then(() => {
-      !user && router.replace('/')
-    })
-  }, [router, user])
 
   useEffect(() => {
     // Lấy đường dẫn URL hiện tại và cập nhật vào state

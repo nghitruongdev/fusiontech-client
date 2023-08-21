@@ -27,7 +27,7 @@ const dataProvider = (
     } = meta
     const requestMethod = (method as MethodTypes) ?? 'get'
 
-    const url = customUrl
+    const url: string = customUrl
       ? customUrl
       : `${apiUrl}/${resource}${mode === 'off' ? '/search/all' : ''}`
 
@@ -65,7 +65,9 @@ const dataProvider = (
     //   query.sort = 'id'
     //   query.order = 'desc'
     // }
-    const requestUrl = `${url}?${stringify(query)}&${stringify(queryFilters)}`
+    const requestUrl = `${url}${url.includes('?') ? '&' : '?'}${stringify(
+      query,
+    )}&${stringify(queryFilters)}`
     console.log('getList requestUrl', requestUrl)
     const { data, headers } = await httpClient[requestMethod](requestUrl, {
       headers: headersFromMeta,

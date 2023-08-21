@@ -43,6 +43,7 @@ import { ERRORS } from 'types/messages'
 import { validateCategoryNameExists } from './utils'
 import { SLUG_PATTERN } from '@/lib/validate-utils'
 import { Info } from 'lucide-react'
+import { useHeaders } from '@/hooks/useHeaders'
 
 type ContextProps = {
   action: 'create' | 'edit'
@@ -280,10 +281,16 @@ Form.Specifications = function Specifications() {
     control,
     resetField,
   } = Form.useContext()
+  const { getAuthHeader } = useHeaders()
   const { data: { data: specsData } = {} } = useCustom<string[]>({
     url: findDistinctNames,
     method: 'get',
     errorNotification: false,
+    config: {
+      headers: {
+        ...getAuthHeader(),
+      },
+    },
   })
   const specOptions = useMemo(
     () => [

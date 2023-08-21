@@ -1,7 +1,7 @@
 /** @format */
 
 'use client'
-import { ChakraProvider } from '@chakra-ui/react'
+import { ChakraProvider, ColorModeScript } from '@chakra-ui/react'
 import { Refine } from '@refinedev/core'
 import routerProvider from '@refinedev/nextjs-router/app'
 import {
@@ -49,15 +49,24 @@ const DynamicRecentProductProvider = dynamic(
   },
 )
 
+export const ColorScriptProvider = () => {
+  return (
+    <ColorModeScript initialColorMode={refineTheme.config.initialColorMode} />
+  )
+}
+
+const DynamicColorMode = dynamic(
+  () => import('./RefineProvider').then((mod) => mod.ColorScriptProvider),
+  { ssr: false },
+)
+
 const RefineProvider = ({ children }: { children: React.ReactNode }) => {
   // const { data: session, status, update } = useSession();
   const router = useRouter()
   console.count('Refine Provider rendered')
   return (
     <ChakraProvider theme={RefineThemes.Blue}>
-      <DynamicColorScript
-        initialColorMode={refineTheme.config.initialColorMode}
-      />
+      <DynamicColorMode />
       <Refine
         dataProvider={{
           default: springDataProvider,

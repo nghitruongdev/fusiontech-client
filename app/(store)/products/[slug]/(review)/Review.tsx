@@ -2,7 +2,7 @@
 
 'use client'
 import React, { useEffect, useState, useRef } from 'react'
-import reviewApi from 'src/api/reviewAPI'
+import reviewApi from '@/client-api/reviewAPI'
 import { FcBusinessman } from 'react-icons/fc'
 import { AiFillStar } from 'react-icons/ai'
 import Image from 'next/image'

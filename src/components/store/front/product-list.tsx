@@ -182,7 +182,7 @@ const Newest = () => {
     <div className='bg-white rounded-lg '>
       <div className='flex  justify-between items-center px-3 pt-3 md:my-4 lg:mt-10  '>
         <h5 className='font-bold  text-xl uppercase '>Sản phẩm mới nhất</h5>
-        <Link href={'http://localhost:3000/search?keyword='}>
+        <Link href={'/search/san-pham/san-pham-moi-nhat'}>
           <div className=' flex flex-row items-center '>
             <p className='text-base font-semibold text-zinc-500'>Xem tất cả </p>
             <ChevronRight
@@ -239,7 +239,7 @@ const HotProduct = () => {
     <div className='bg-white rounded-lg '>
       <div className='flex  justify-between items-center px-3 pt-3 md:my-4 lg:mt-10  '>
         <h5 className='font-bold  text-xl uppercase '>Sản phẩm 🔥</h5>
-        <Link href={'http://localhost:3000/search?keyword='}>
+        <Link href={'/search/san-pham/san-pham-hot'}>
           <div className=' flex flex-row items-center '>
             <p className='text-base font-semibold text-zinc-500'>Xem tất cả </p>
             <ChevronRight
@@ -294,7 +294,7 @@ const SellingProducts = () => {
   })
 
   const ids = data?.map((item) => item.id) ?? []
-  const drop = useMany<IProduct>({
+  const { data: { data: products = [] } = {}, isFetching } = useMany<IProduct>({
     resource: 'products',
     ids: ids,
     meta: {
@@ -307,12 +307,12 @@ const SellingProducts = () => {
     },
   })
 
-  const { data: { data: products = [] } = {}, isFetching } = drop
+  // const { data: { data: products = [] } = {}, isFetching } = drop
   return (
     <div className='bg-white rounded-lg '>
       <div className='flex  justify-between items-center px-3 pt-3 md:my-4 lg:mt-10  '>
         <h5 className='font-bold  text-xl uppercase '>top sản phẩm bán chạy</h5>
-        <Link href={'http://localhost:3000'}>
+        <Link href={'/search/san-pham/san-pham-ban-chay-nhat'}>
           <div className=' flex flex-row items-center '>
             <p className='text-base font-semibold text-zinc-500'>Xem tất cả </p>
             <ChevronRight

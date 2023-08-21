@@ -1,3 +1,5 @@
+/** @format */
+
 import { useBoolean } from '@chakra-ui/react'
 import { Edit } from 'lucide-react'
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
@@ -6,8 +8,9 @@ import { API } from 'types/constants'
 import { API_URL } from 'types/constants'
 import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import userApi from '@/api/userAPI'
 import useMyToast from '@/hooks/useToast'
+import { useHeaders } from '@/hooks/useHeaders'
+import userApi from '@/client-api/userAPI'
 
 export const AddressPanel = () => {
   const [isShow, { on: show, off: close, toggle }] = useBoolean()
@@ -15,10 +18,10 @@ export const AddressPanel = () => {
   return (
     <div className={`min-w-[230px]`}>
       <div className={`flex justify-between items-center mb-2`}>
-        <h2 className="text-xl font-bold">Địa chỉ mặc định</h2>
+        <h2 className='text-xl font-bold'>Địa chỉ mặc định</h2>
         {isDefaultExists && (
           <Edit
-            className="w-5 h-5 text-gray-400 cursor-pointer"
+            className='w-5 h-5 text-gray-400 cursor-pointer'
             onClick={toggle}
           />
         )}
@@ -29,16 +32,23 @@ export const AddressPanel = () => {
 }
 
 const AddressContent = ({ showModal }: { showModal: boolean }) => {
-  const { user,claims } = useAuthUser()
+  const { getAuthHeader, _isHydrated } = useHeaders()
+  const { user, userProfile, claims } = useAuthUser()
+  console.log('claims?.id', claims)
   const { resource, defaultAddressByUserId } = API['shippingAddresses']()
   const { data, status } = useCustom({
-    url: `${API_URL}/${defaultAddressByUserId(claims?.id?? 0)}`,
+    url: `${API_URL}/${defaultAddressByUserId(claims?.id ?? userProfile?.id)}`,
     method: 'get',
+    meta: {
+      headers: {
+        ...getAuthHeader(),
+      },
+    },
     queryOptions: {
-      enabled: !!user,
+      enabled: !!claims?.id || !!userProfile?.id,
     },
   })
-  console.log(data);
+  console.log('userProfile?.id, claims?.id', userProfile?.id, claims?.id)
   const {
     register,
     handleSubmit,
@@ -47,9 +57,16 @@ const AddressContent = ({ showModal }: { showModal: boolean }) => {
   } = useForm()
 
   const toast = useMyToast()
-  const createShippingAddress = async (uid: number, shippingAddressData: Object) => {
+  const createShippingAddress = async (
+    uid: number,
+    shippingAddressData: Object,
+  ) => {
     try {
-      const response = await userApi.createShippingAddress(uid, shippingAddressData)
+      const response = await userApi.createShippingAddress(
+        uid,
+        shippingAddressData,
+        { ...getAuthHeader() },
+      )
       toast
         .ok({
           title: 'Thành công',
@@ -77,62 +94,68 @@ const AddressContent = ({ showModal }: { showModal: boolean }) => {
       ward: getValues('ward'),
       address: getValues('address'),
     }
-    createShippingAddress(claims?.id?? 0,shippingAddressData);
-    !showModal;
+    createShippingAddress(claims?.id ?? 0, shippingAddressData)
+    !showModal
   }
 
   if (!showModal) {
     return (
-      <form className="mt-2">
-        <div className="mb-4 ">
-          <label htmlFor="fullName" className="block mb-1 text-sm ">
+      <form className='mt-2'>
+        <div className='mb-4 '>
+          <label
+            htmlFor='fullName'
+            className='block mb-1 text-sm '>
             Tỉnh/Thành phố
           </label>
           <input
-            type="text"
-            id="province"
+            type='text'
+            id='province'
             value={data?.data.province}
             readOnly
-            className="w-full bg-gray-100 border border-gray-300 rounded-md px-3 py-2"
-
+            className='w-full bg-gray-100 border border-gray-300 rounded-md px-3 py-2'
           />
         </div>
-        <div className="mb-4">
-          <label htmlFor="fullName" className="block mb-1 text-sm ">
+        <div className='mb-4'>
+          <label
+            htmlFor='fullName'
+            className='block mb-1 text-sm '>
             Quận/Huyện
           </label>
           <input
-            type="text"
-            id="district"
+            type='text'
+            id='district'
             value={data?.data.district}
             readOnly
-            className="w-full bg-gray-100 border border-gray-300 rounded-md px-3 py-2"
-
+            className='w-full bg-gray-100 border border-gray-300 rounded-md px-3 py-2'
           />
         </div>
-        <div className="mb-4">
-          <label htmlFor="fullName" className="block mb-1 text-sm ">
+        <div className='mb-4'>
+          <label
+            htmlFor='fullName'
+            className='block mb-1 text-sm '>
             Phường xã
           </label>
           <input
-            type="text"
-            id="ward"
+            type='text'
+            id='ward'
             value={data?.data.ward}
             readOnly
-            className="w-full bg-gray-100 border border-gray-300 rounded-md px-3 py-2"
+            className='w-full bg-gray-100 border border-gray-300 rounded-md px-3 py-2'
             // {...register('Full name', { required: true })}
           />
         </div>
-        <div className="mb-4">
-          <label htmlFor="fullName" className="block mb-1 text-sm ">
+        <div className='mb-4'>
+          <label
+            htmlFor='fullName'
+            className='block mb-1 text-sm '>
             Địa chỉ cụ thể
           </label>
           <input
-            type="text"
-            id="address"
+            type='text'
+            id='address'
             value={data?.data.address}
             readOnly
-            className="w-full bg-gray-100 border border-gray-300 rounded-md px-3 py-2"
+            className='w-full bg-gray-100 border border-gray-300 rounded-md px-3 py-2'
             // {...register('Full name', { required: true })}
           />
         </div>
@@ -141,95 +164,106 @@ const AddressContent = ({ showModal }: { showModal: boolean }) => {
   } else
     return (
       <>
-        <div className="fixed inset-0 flex items-center justify-center  bg-black bg-opacity-50 z-50">
-          <form className="flex flex-col w-1/3 p-4 bg-white rounded-lg ">
-            <h2 className="text-xl font-bold mb-4">
+        <div className='fixed inset-0 flex items-center justify-center  bg-black bg-opacity-50 z-50'>
+          <form className='flex flex-col w-1/3 p-4 bg-white rounded-lg '>
+            <h2 className='text-xl font-bold mb-4'>
               Thông tin người nhận hàng
             </h2>
-            <div className="mb-4 ">
-              <label htmlFor="fullName" className="block mb-1 text-sm ">
+            <div className='mb-4 '>
+              <label
+                htmlFor='fullName'
+                className='block mb-1 text-sm '>
                 Họ và tên
               </label>
               <input
-                type="text"
-                id="name"
-                className="w-full  border border-gray-300 rounded-md px-3 py-2"
+                type='text'
+                id='name'
+                className='w-full  border border-gray-300 rounded-md px-3 py-2'
                 {...register('name', { required: true })}
               />
             </div>
-            <div className="mb-4 ">
-              <label htmlFor="phone" className="block mb-1 text-sm ">
+            <div className='mb-4 '>
+              <label
+                htmlFor='phone'
+                className='block mb-1 text-sm '>
                 Số điện thoại
               </label>
               <input
-                type="text"
-                id="phone"
-                className="w-full  border border-gray-300 rounded-md px-3 py-2"
+                type='text'
+                id='phone'
+                className='w-full  border border-gray-300 rounded-md px-3 py-2'
                 {...register('phone', { required: true })}
               />
             </div>
-            <h2 className="text-xl font-bold mb-4">Địa chỉ nhận hàng</h2>
-            <div className="flex space-x-2">
-              <div className="mb-4 ">
-                <label htmlFor="province" className="block mb-1 text-sm ">
+            <h2 className='text-xl font-bold mb-4'>Địa chỉ nhận hàng</h2>
+            <div className='flex space-x-2'>
+              <div className='mb-4 '>
+                <label
+                  htmlFor='province'
+                  className='block mb-1 text-sm '>
                   Tỉnh/Thành phố
                 </label>
                 <input
-                  type="text"
-                  id="province"
-                  className="w-full  border border-gray-300 rounded-md px-3 py-2"
+                  type='text'
+                  id='province'
+                  className='w-full  border border-gray-300 rounded-md px-3 py-2'
                   {...register('province', { required: true })}
                 />
               </div>
-              <div className="mb-4 ">
-                <label htmlFor="district" className="block mb-1 text-sm ">
+              <div className='mb-4 '>
+                <label
+                  htmlFor='district'
+                  className='block mb-1 text-sm '>
                   Quận/Huyện
                 </label>
                 <input
-                  type="text"
-                  id="district"
-                  className="w-full  border border-gray-300 rounded-md px-3 py-2"
+                  type='text'
+                  id='district'
+                  className='w-full  border border-gray-300 rounded-md px-3 py-2'
                   {...register('district', { required: true })}
                 />
               </div>
             </div>
-            <div className="flex space-x-2">
-              <div className="mb-4 ">
-                <label htmlFor="ward" className="block mb-1 text-sm ">
+            <div className='flex space-x-2'>
+              <div className='mb-4 '>
+                <label
+                  htmlFor='ward'
+                  className='block mb-1 text-sm '>
                   Phường/Xã
                 </label>
                 <input
-                  type="text"
-                  id="ward"
-                  className="w-full  border border-gray-300 rounded-md px-3 py-2"
+                  type='text'
+                  id='ward'
+                  className='w-full  border border-gray-300 rounded-md px-3 py-2'
                   {...register('ward', { required: true })}
                 />
               </div>
-              <div className="mb-4 ">
-                <label htmlFor="address" className="block mb-1 text-sm ">
+              <div className='mb-4 '>
+                <label
+                  htmlFor='address'
+                  className='block mb-1 text-sm '>
                   Địa chỉ cụ thể
                 </label>
                 <input
-                  type="text"
-                  id="address"
-                  className="w-full  border border-gray-300 rounded-md px-3 py-2"
+                  type='text'
+                  id='address'
+                  className='w-full  border border-gray-300 rounded-md px-3 py-2'
                   {...register('address', { required: true })}
                 />
               </div>
             </div>
-            <div className="flex space-x-2 justify-end mt-4">
+            <div className='flex space-x-2 justify-end mt-4'>
               <button
-                className="bg-blue-500 text-white px-4 py-2 rounded-md"
-                type="submit"
+                className='bg-blue-500 text-white px-4 py-2 rounded-md'
+                type='submit'
                 // onClick={(!showModal)
               >
                 Hủy bỏ
               </button>
               <button
-                className="bg-blue-500 text-white px-4 py-2 rounded-md"
-                type="submit"
-                onClick={handleUpdateShippingAddress}
-              >
+                className='bg-blue-500 text-white px-4 py-2 rounded-md'
+                type='submit'
+                onClick={handleUpdateShippingAddress}>
                 Lưu địa chỉ
               </button>
             </div>

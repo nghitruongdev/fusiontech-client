@@ -61,10 +61,10 @@ const HomePage = async () => {
               {/* @ts-expect-error Async Server Component */}
               <Category />
               <CardSaleBody />
-              <AllProducts />
-              <Newest />
-              <HotProduct />
               <SellingProducts />
+              <HotProduct />
+              <Newest />
+              <AllProducts />
               <BannerSale />
               {/* <Benefits /> */}
               <Brands />

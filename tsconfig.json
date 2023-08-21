@@ -38,7 +38,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/API/productAPI.ts"
+    "src/client-api/productAPI.ts"
   ],
   "exclude": ["node_modules"]
 }

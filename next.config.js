@@ -17,6 +17,7 @@ module.exports = {
       'lh3.googleusercontent.com',
       'i.pravatar.cc',
       'firebasestorage.googleapis.com',
+      'storage.googleapis.com',
       'cdn.mos.cms.futurecdn.net',
       'iphoneros.com',
       'img.freepik.com',

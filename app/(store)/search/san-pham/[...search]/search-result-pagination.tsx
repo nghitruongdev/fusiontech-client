@@ -4,7 +4,7 @@
 import { Pagination } from '@components/pagination'
 import { usePageable } from '@components/pagination/usePageable'
 import ProductCard from '@components/store/front/product/ProductCard'
-import { GetListResponse, useList } from '@refinedev/core'
+import { GetListResponse, useList, useMany } from '@refinedev/core'
 import { PropsWithChildren } from 'react'
 import { IProduct, Page } from 'types'
 import { API } from 'types/constants'
@@ -29,12 +29,13 @@ const SearchResult = ({
     <div>
       {children}
       {!!items?.length && (
-        <div className='flex flex-row'>
-          <div className=' grid grid-col 6'>
+        <div className='bg-white'>
+          <div className='flex flex-row flex-wrap'>
             {items.map((item) => (
               <ProductCard
                 key={item.id}
                 product={item}
+                className='w-1/6 gap-4'
               />
             ))}
           </div>
@@ -131,29 +132,54 @@ export const ProductLastest = () => {
   )
 }
 
-// export const SellingProducts = () => {
-//   const pageable = usePageable()
-//   const { current, pageSize } = pageable
+export const SellingProducts = () => {
+  const pageable = usePageable()
+  const { current, pageSize } = pageable
 
-//   const {
-//     data: { data: products = [], page } = {} as GetListResponse<IProduct>,
-//   } = useList<IProduct>({
-//     resource: `${getSellingProducts(pageSize)}`,
-//     pagination: {
-//       current,
-//     },
-//     meta: {
-//       resource,
-//       query: {
-//         projection: full,
-//       },
-//     },
-//   })
+  const now = new Date()
+  // Get the current year from the 'now' date
+  const currentYear = now.getFullYear()
 
-//   return (
-//     <SearchResult
-//       totalPages={(page as Page)?.totalPages}
-//       items={products}
-//     />
-//   )
-// }
+  // Create a new Date object for the start of the year
+  const startDateOfYear = new Date(currentYear, 0, 1)
+
+  // Create a new Date object for the last day of the year
+  const lastDateOfYear = new Date(currentYear, 11, 31)
+  const { data: { data, page } = {} as GetListResponse<{ id: number }> } =
+    useList<{ id: number }>({
+      resource: `${getSellingProducts(
+        startDateOfYear,
+        lastDateOfYear,
+        pageSize,
+      )}`,
+      pagination: {
+        current,
+      },
+      meta: {
+        resource,
+        query: {
+          projection: full,
+        },
+      },
+    })
+  const ids = data?.map((item) => item.id) ?? []
+  const { data: { data: products = [] } = {}, isFetching } = useMany<IProduct>({
+    resource: 'products',
+    ids: ids,
+    meta: {
+      query: {
+        projection: full,
+      },
+    },
+    queryOptions: {
+      enabled: !!ids.length,
+    },
+  })
+
+  return (
+    <SearchResult
+      totalPages={(page as Page)?.totalPages}
+      items={products}
+    />
+  )
+}

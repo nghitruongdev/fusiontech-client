@@ -45,6 +45,7 @@ export const useAuthUser = () => {
     token,
   }
 }
+
 export const setAuthUser = (user: State['user']) => {
   store.setState(() => ({ user }))
 }

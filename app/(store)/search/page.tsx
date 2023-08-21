@@ -1,7 +1,7 @@
 /** @format */
 
 'use client'
-import productAPI from '@/API/productAPI'
+import productAPI from '@/client-api/productAPI'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { IProduct } from 'types'

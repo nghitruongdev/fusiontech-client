@@ -1,11 +1,11 @@
 /** @format */
 
 'use client'
-import productAPI from '@/API/productAPI'
 import { usePathname, useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { IProduct } from 'types'
 import SearchResult from '../../search-result'
+import productAPI from 'src/client-api/productAPI'
 
 const Page = () => {
   const [searchResults, setSearchResults] = useState<IProduct[]>([])

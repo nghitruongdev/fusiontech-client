@@ -2,7 +2,6 @@
 
 'use client'
 import React, { useEffect, useState } from 'react'
-import favoriteApi from 'src/api/favoriteAPI'
 import useMyToast from '@/hooks/useToast'
 import { IProduct } from 'types'
 import { API } from 'types/constants'
@@ -11,6 +10,7 @@ import { immer } from 'zustand/middleware/immer'
 import { useAuthUser } from './useAuth/useAuthUser'
 import { springDataProvider } from '@/providers/rest-data-provider'
 import { toRecord } from '@/lib/utils'
+import favoriteApi from 'src/client-api/favoriteAPI'
 
 const useFavorite = () => {
   const { claims } = useAuthUser() // Lấy thông tin user từ hook useAuthUser

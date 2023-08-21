@@ -3,10 +3,7 @@
 'use client'
 import { FaHeart, FaStar } from 'react-icons/fa'
 import React, { useEffect, useState } from 'react'
-import favoriteApi from 'src/api/favoriteAPI'
-import { GoPlus } from 'react-icons/go'
 import { BsStarFill } from 'react-icons/bs'
-import useMyToast from '@/hooks/useToast'
 import useFavorite, { useFavoriteStore } from '@/hooks/useFavorite'
 import Image from 'next/image'
 
