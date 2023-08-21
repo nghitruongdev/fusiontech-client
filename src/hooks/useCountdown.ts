@@ -3,6 +3,8 @@
 import { useState } from 'react'
 
 export function useCountdown() {
+  const [currentInterval, setCurrentInterval] =
+    useState<ReturnType<typeof setInterval>>()
   const [timer, setTimer] = useState<{
     hours: number
     minutes: number
@@ -10,6 +12,7 @@ export function useCountdown() {
   }>()
 
   const countDown = (currentDate: number, targetDate: number) => {
+    clearInterval(currentInterval)
     let timeDifference = targetDate - currentDate
     const calculateTimer = (timeDifference: number) => {
       const hours = Math.floor(timeDifference / (1000 * 60 * 60))
@@ -28,6 +31,7 @@ export function useCountdown() {
         clearInterval(interval)
       }
     }, 1000)
+    setCurrentInterval(interval)
   }
 
   return [timer, countDown] as const

@@ -12,7 +12,6 @@ import {
 } from '@components/store/cart/useSelectedItemStore'
 import { useCheckoutContext } from './CheckoutProvider'
 import { Spinner, useBoolean } from '@chakra-ui/react'
-import { getDiscount, getTotalAmount } from '../utils'
 import { formatPrice } from '../../../../lib/utils'
 import {
   BaseSyntheticEvent,
@@ -65,7 +64,7 @@ const OrderOverview = ({}: // isSubmitting,
         {/* <p className="text-2xl font-semibold">Đơn hàng</p> */}
         <a
           className='text-blue-500 text-sm font-medium text-end mr-4'
-          href='/'>
+          href='/cart'>
           Chỉnh sửa
         </a>
       </div>
@@ -200,13 +199,13 @@ const Voucher = ({ orderAmount }: { orderAmount: number }) => {
 
   const errorMessage = 'Mã giảm giá không hợp lệ hoặc đã hết hạn.'
 
-  const clearVoucher = () => {
+  const clearVoucher = useCallback(() => {
     console.log('clear voucher ran')
     setValue(`voucher`, null)
     setCurrent(null)
     clearErrors(`voucher`)
     toggle()
-  }
+  }, [clearErrors, setValue, toggle])
 
   const validateVoucher = async (voucher: IVoucher) => {
     const {
@@ -230,6 +229,7 @@ const Voucher = ({ orderAmount }: { orderAmount: number }) => {
         message: 'Đơn hàng chưa đạt giá trị tối thiểu để áp dụng',
       })
     setValue(`voucher`, voucher)
+    getFieldState(`voucher`).error && clearErrors(`voucher`)
   }
 
   const fetchVoucher = async () => {
@@ -239,6 +239,7 @@ const Voucher = ({ orderAmount }: { orderAmount: number }) => {
       cache: 'no-store',
     })
     if (!response.ok) {
+      current && clearVoucher()
       return setError(`voucher`, { message: errorMessage })
     }
     const data = (await response.json()) as IVoucher
@@ -271,12 +272,13 @@ const Voucher = ({ orderAmount }: { orderAmount: number }) => {
     if (userUsage >= (userLimitUsage ?? 0))
       return onError('Bạn đã hết lượt sử dụng voucher')
   }, [current, setError, usageData, userUsageData, getValues, setValue])
+
   useEffect(() => {
     validateDynamic()
   }, [validateDynamic])
 
   const fieldError = getFieldState(`voucher`).error?.message
-
+  const daysLeft = Math.floor((timer?.hours ?? 0) / 24)
   const usageCount = usage
     ? current?.limitUsage
       ? ((usage / current.limitUsage) * 100).toFixed(1) + '%'
@@ -307,7 +309,9 @@ const Voucher = ({ orderAmount }: { orderAmount: number }) => {
               {timer && (
                 <span>
                   Hết hạn trong{' '}
-                  {`${timer.hours}:${timer.minutes}:${timer.seconds}`}
+                  {!!daysLeft
+                    ? `${daysLeft} ngày.`
+                    : `${timer.hours}:${timer.minutes}:${timer.seconds}`}
                 </span>
               )}
             </p>

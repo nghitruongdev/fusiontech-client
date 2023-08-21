@@ -1,12 +1,12 @@
 /** @format */
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useAuthStore, useAuthUser } from './useAuth/useAuthUser'
 
 export const useHeaders = () => {
   const { token } = useAuthUser()
   const [_isHydrated, setIsHydrated] = useState<boolean>(false)
-
+  const [authHeader, setAuthHeader] = useState<{ Authorization: string }>()
   const { _hasHydrated, _hasPermissionHydrated } = useAuthStore(
     ({ _hasHydrated, _hasPermissionHydrated }) => ({
       _hasHydrated,
@@ -20,13 +20,19 @@ export const useHeaders = () => {
       !_isHydrated &&
       setIsHydrated(true)
   }, [_hasHydrated, _hasPermissionHydrated, _isHydrated])
-  const getAuthHeader = () => {
+
+  useEffect(() => {
+    if (token) setAuthHeader({ Authorization: `Bearer ${token}` })
+  }, [token])
+
+  const getAuthHeader = useCallback(() => {
     return {
       Authorization: `Bearer ${token}`,
     }
-  }
+  }, [token])
   return {
     getAuthHeader,
     _isHydrated,
+    authHeader,
   }
 }

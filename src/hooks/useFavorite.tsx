@@ -11,10 +11,17 @@ import { useAuthUser } from './useAuth/useAuthUser'
 import { springDataProvider } from '@/providers/rest-data-provider'
 import { toRecord } from '@/lib/utils'
 import favoriteApi from 'src/client-api/favoriteAPI'
+import { useRouter } from 'next/navigation'
+import { useCurrentUrl } from '../lib/utils'
+import { useHeaders } from '@/hooks/useHeaders'
+import { onError } from './useCrudNotification'
 
 const useFavorite = () => {
-  const { claims } = useAuthUser() // Lấy thông tin user từ hook useAuthUser
-  const uid = claims?.id
+  const router = useRouter()
+  const { user, claims, userProfile } = useAuthUser() // Lấy thông tin user từ hook useAuthUser
+  const { getAuthHeader } = useHeaders()
+
+  const uid = claims?.id ?? userProfile?.id
   const toast = useMyToast()
   const [addFavorite, removeFavorite, isFavorite] = useFavoriteStore(
     ({ addFavorite, removeFavorite, isFavorite }) => [
@@ -23,12 +30,16 @@ const useFavorite = () => {
       isFavorite,
     ],
   )
+  const url = useCurrentUrl()
   // chức năng thêm sản phẩm yêu thích
   const addFavoriteProduct = async (product: IProduct) => {
+    if (!user) {
+      router.push(`/auth/login?callbackUrl=${url}`)
+      return
+    }
     try {
       // Gọi API để thêm sản phẩm yêu thích
-      await favoriteApi.create(product.id, uid)
-
+      await favoriteApi.create(product.id, uid, getAuthHeader())
       addFavorite(product)
       // thể hiện thông báo nhỏ khi thực thi
       toast
@@ -55,7 +66,7 @@ const useFavorite = () => {
   ) => {
     try {
       // Gọi API để xóa sản phẩm yêu thích
-      await favoriteApi.delete(productId, uid)
+      await favoriteApi.delete(productId, uid, getAuthHeader())
       removeFavorite(productId)
       // Cập nhật danh sách sản phẩm yêu thích
       toast
@@ -119,16 +130,24 @@ export const useIsFavoriteProduct = () =>
 
 const { getFavoriteProductsByUser, resource } = API['products']()
 
-const updateUserFavoriteProduct = async (userId?: number) => {
+const updateUserFavoriteProduct = async (
+  userId?: number,
+  authHeader?: { Authorization: string },
+) => {
   if (!userId) {
     useFavoriteStore.setState(() => ({ favoriteProducts: {} }))
     return
   }
+  if (!authHeader)
+    return console.warn('AuthHeader not found while fetching favorite products')
   const data = await springDataProvider.custom<IProduct[]>({
     url: getFavoriteProductsByUser(userId),
     method: 'get',
     meta: {
       resource,
+    },
+    headers: {
+      ...authHeader,
     },
   })
   const products = data.data ?? []
@@ -137,11 +156,11 @@ const updateUserFavoriteProduct = async (userId?: number) => {
 }
 
 export const FavoriteProvider = () => {
-  const { claims } = useAuthUser()
-
+  const { userProfile: { id } = {} } = useAuthUser()
+  const { getAuthHeader } = useHeaders()
   useEffect(() => {
-    updateUserFavoriteProduct(claims?.id)
-  }, [claims?.id])
+    updateUserFavoriteProduct(id, getAuthHeader())
+  }, [id, getAuthHeader])
 
   return <></>
 }

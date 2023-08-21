@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2015",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "noUncheckedIndexedAccess": true,
@@ -21,24 +25,30 @@
       }
     ],
     "paths": {
-      "@components/*": ["src/components/*"],
-      "@components": ["src/components"],
-      "@contexts/*": ["src/contexts/*"],
-      "@contexts": ["src/contexts"],
-      "@styles/*": ["src/styles/*"],
-      "@styles": ["src/styles"],
-      "@public/*": ["public/*"],
-      "@public": ["public"],
-      "@/*": ["./src/*"]
+      "@components/*": [
+        "src/components/*"
+      ],
+      "@components": [
+        "src/components"
+      ],
+      "@public/*": [
+        "public/*"
+      ],
+      "@public": [
+        "public"
+      ],
+      "@/*": [
+        "./src/*"
+      ]
     },
     "incremental": true
   },
   "include": [
-    "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    "src/client-api/productAPI.ts"
+    ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

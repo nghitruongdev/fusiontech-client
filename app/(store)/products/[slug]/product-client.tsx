@@ -3,7 +3,7 @@
 'use client'
 
 import { Rating } from '@smastrom/react-rating'
-import { CarrotIcon } from 'lucide-react'
+import { ShoppingCart } from 'lucide-react'
 import {
   PropsWithChildren,
   createContext,
@@ -22,7 +22,6 @@ import useCart, {
 } from '@components/store/cart/useCart'
 import { cn } from 'components/lib/utils'
 import useNotification from '@/hooks/useNotification'
-import { Skeleton } from '@components/ui/Skeleton'
 import Image from 'next/image'
 import {
   Table,
@@ -140,14 +139,14 @@ export const ProductImages = () => {
 
   return (
     <div className='grid grid-rows-1 gap-4 mb-10'>
-      <div className='h-[90%] bg-white row-span-1 flex items-center justify-center border shadow rounded-lg'>
+      <div className='h-[90%]  bg-white row-span-1 flex items-center justify-center border shadow rounded-lg'>
         <div className=' p-10 flex items-center'>
           <Image
             src={images?.[selectedImageIndex] ?? ''}
             width={500}
             height={500}
             alt='product image'
-            className=' object-cover cursor-move duration-500 '
+            className='h-[500px] w-auto object-center cursor-move duration-500 '
           />
         </div>
       </div>
@@ -171,39 +170,55 @@ export const ProductImages = () => {
     </div>
   )
 }
-export const ProductPrice = () => {
+export const ProductPrice = function ProductPrice() {
   const {
     product: { minPrice = 0, maxPrice = 0, discount = 0 },
   } = useProductContext()
-  const isDiscount = !!discount
 
-  if (status === 'loading') {
-    return <Skeleton className='w-full h-10' />
-  }
+  const { getSelectedVariant, selected } = useOptionStore()
+
+  const [variant] = getSelectedVariant()
 
   const discountPrice = (price: number | undefined) =>
     ((100 - discount) / 100) * (price ?? 0)
+
+  if (!!variant)
+    return (
+      <>
+        <div className=' my-2'>
+          <div className='flex flex-row mb-2'>
+            <p className='text-2xl text-red-600 font-bold leading-none mr-2'>
+              {formatPrice(discountPrice(variant.price))}
+            </p>
+          </div>
+          {!!discount && (
+            <p className='text-zinc-700 text-md font-normal line-through decoration-[1px] flex gap-1 items-center mr-2'>
+              {formatPrice(variant.price)}
+            </p>
+          )}
+        </div>
+      </>
+    )
   return (
     <>
-      {isDiscount && (
-        <div className='flex items-end gap-2 my-2'>
-          <p className='text-3xl text-green-700 font-bold leading-none'>
-            {formatPrice(discountPrice(minPrice))}
-          </p>
-          <p className='text-zinc-700 text-md font-normal line-through decoration-[1px] flex gap-1 items-center'>
-            {formatPrice(discountPrice(maxPrice))}
-          </p>
-          <p className='text-3xl text-green-700 font-bold leading-none'>
-            {formatPrice(minPrice)}
-          </p>
-          <p className='text-zinc-700 text-md font-normal line-through decoration-[1px] flex gap-1 items-center'>
-            {formatPrice(maxPrice)}
-          </p>
+      {!!discount && (
+        <div className=' my-2'>
+          <div className='flex flex-row mb-2'>
+            <p className='text-2xl text-zinc-600 font-bold leading-none mr-2'>
+              {formatPrice(discountPrice(minPrice))}
+              {minPrice !== maxPrice && (
+                <>
+                  <span> - </span>
+                  <span>{formatPrice(discountPrice(maxPrice))}</span>
+                </>
+              )}
+            </p>
+          </div>
         </div>
       )}
-      {!isDiscount && (
+      {!discount && (
         <div className='my-2'>
-          <p className='text-2xl text-zinc-700 font-bold leading-none'>
+          <p className='text-2xl text-zinc-600 font-bold leading-none'>
             <span>{formatPrice(minPrice)}</span>
             {!!maxPrice && maxPrice !== minPrice && (
               <>
@@ -214,6 +229,28 @@ export const ProductPrice = () => {
           </p>
         </div>
       )}
+    </>
+  )
+}
+
+export const Discount = function ProductDiscount() {
+  const {
+    product: { discount },
+  } = useProductContext()
+  if (!discount) return <></>
+  return (
+    <>
+      <div className='relative mb-4'>
+        <div
+          className=' text-xs top-0 left-[-3px] m-0  text-black font-bold px-2 py-1 '
+          style={{
+            zIndex: 2,
+          }}>
+          {discount}% SALE
+        </div>
+
+        {/* <div className='relative top-[21.5px] left-[-2.2px] w-0 h-0 border-t-[5px] border-l-[5px] border-[#b02d2d] transform rotate-45 '></div> */}
+      </div>
     </>
   )
 }
@@ -317,7 +354,7 @@ export const ProductCartButton = () => {
         )}>
         <span>Thêm</span>{' '}
         <span>
-          <CarrotIcon />
+          <ShoppingCart />
         </span>
       </button>
     </div>

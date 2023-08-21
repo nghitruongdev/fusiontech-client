@@ -4,7 +4,7 @@
 import { CategoryDropDown, CategoryDropDownButton } from './CategoryDropdown'
 import { getCategoriesList } from '@/providers/server-data-provider/data/categories'
 import useCart, { useCartItems } from '@components/store/cart/useCart'
-import { ShoppingBag, UserCircle } from 'lucide-react'
+import { Shield, ShieldAlert, ShoppingBag, UserCircle } from 'lucide-react'
 import React, { useState, useEffect, use, Suspense } from 'react'
 import Link from 'next/link'
 import {
@@ -22,11 +22,21 @@ import dynamic from 'next/dynamic'
 import { Skeleton } from '@components/ui/Skeleton'
 import { User } from '@firebase/auth'
 // import useModals, { ModalProvider } from "@components/ui/AlertModals";
-import { useLogout, useNotification } from '@refinedev/core'
+import { useLogout, useNotification, usePermissions } from '@refinedev/core'
 import useCallbackUrl from '@/hooks/useCallbackUrl'
 import { useDialog } from '@components/ui/DialogProvider'
 import { useRouter } from 'next/navigation'
 import { suspensePromise, waitPromise } from '@/lib/promise'
+import {
+  FaInfoCircle,
+  FaBox,
+  FaHeart,
+  FaUserEdit,
+  FaSignOutAlt,
+  FaUserTie,
+} from 'react-icons/fa'
+import { ROLES } from 'types'
+
 export const HeaderClient = () => {}
 
 export const VerifyMailBanner = () => {
@@ -78,7 +88,7 @@ export const UserInfo = () => {
     }
   }, [user, router])
 
-  if (user) return <DynamicUserMenu user={user} />
+  if (user) return <DynamicUserMenu />
   return (
     <Suspense fallback={<UserInfoLoading />}>
       <Link
@@ -115,13 +125,19 @@ const DynamicUserMenu = dynamic(
   },
 )
 
-export const UserInfoMenu = ({ user }: { user: User }) => {
-  const { displayName, email, phoneNumber, photoURL } = user
-  const display = displayName ?? email ?? phoneNumber
+export const UserInfoMenu = () => {
+  const { user, userProfile: { staff } = {} } = useAuthUser()
   const { mutateAsync: logout } = useLogout()
   const { confirm } = useDialog()
   const { open } = useNotification()
-  const [promise, setPromise] = useState<any>(waitPromise(0))
+  const [promise, setPromise] = useState<Promise<any>>(Promise.resolve())
+  const { data } = usePermissions<ROLES[]>()
+  const isStaff = [ROLES.ADMIN, ROLES.STAFF].some(
+    (item) => data?.some((role) => role === item) ?? staff,
+  )
+  if (!user) return <></>
+  const { displayName, email, phoneNumber, photoURL } = user
+  const display = displayName ?? email ?? phoneNumber
   use(promise)
   return (
     <>
@@ -150,20 +166,38 @@ export const UserInfoMenu = ({ user }: { user: User }) => {
         <MenuList
           color='blackAlpha.700'
           className='text-zinc-700 text-sm'>
-          <MenuItem>
-            <Link href='/account/profile'>Thông tin tài khoản</Link>
+          <MenuItem className='flex'>
+            <FaInfoCircle className='text-base text-gray-400 mr-2' />
+            <Link href='/account/profile'>Thông tin tài khoản </Link>
           </MenuItem>
           <MenuItem>
+            <FaBox className='text-base text-gray-400 mr-2' />
             <Link href='/account/orders'>Quản lý đơn hàng</Link>
           </MenuItem>
           <MenuItem>
+            <FaHeart className='text-base text-gray-400 mr-2' />
             <Link href='/account/favorites'>Sản phẩm yêu thích</Link>
           </MenuItem>
 
           <MenuDivider />
           <MenuItem>
+            <FaUserEdit className='text-base text-gray-400 mr-2' />
             <Link href='/auth/change-password'>Đổi mật khẩu</Link>
           </MenuItem>
+          {!!isStaff && (
+            <>
+              <MenuDivider />
+              <MenuItem>
+                <FaUserTie className='text-base text-gray-400 mr-2' />
+                <Link
+                  href='/admin'
+                  className='flex gap-2 text-sm'>
+                  Quản lý hệ thống
+                </Link>
+              </MenuItem>
+            </>
+          )}
+          <MenuDivider />
           <MenuItem
             onClick={async () => {
               const result = await confirm({
@@ -187,6 +221,7 @@ export const UserInfoMenu = ({ user }: { user: User }) => {
               })
               setPromise(promise)
             }}>
+            <FaSignOutAlt className='text-base text-gray-400 mr-2' />
             Đăng xuất
           </MenuItem>
         </MenuList>
@@ -207,9 +242,9 @@ const UserInfoLoading = () => {
   )
 }
 
-
 export const SearchInput = () => {
   const [searchTerm, setSearchTerm] = useState<string>('')
+  const router = useRouter()
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Lấy giá trị nhập vào từ người dùng
     const inputValue: string = e.target.value // Kiểu dữ liệu của inputValue cũng là string
@@ -225,9 +260,11 @@ export const SearchInput = () => {
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       // Chuyển trang tới trang kết quả tìm kiếm khi nhấn phím "Enter"
-      window.location.href = `/search?keyword=${capitalizeFirstLetter(
-        searchTerm,
-      )}`
+      router.push(
+        `/search?keyword=${encodeURIComponent(
+          capitalizeFirstLetter(searchTerm),
+        )}`,
+      )
     }
   }
   return (
@@ -245,7 +282,10 @@ export const SearchInput = () => {
                     <IoSearchOutline />
                 </span>
             </Link> */}
-      <Link href={`/search?keyword=${capitalizeFirstLetter(searchTerm)}`}>
+      <Link
+        href={`/search?keyword=${encodeURIComponent(
+          capitalizeFirstLetter(searchTerm),
+        )}`}>
         {/* Truyền searchTerm thông qua encodeURIComponent để đảm bảo chuỗi an toàn cho URL */}
         <span className='absolute w-8 h-8 rounded-full flex items-center justify-center top-1 right-1 bg-yellow text-black text-xl'>
           <IoSearchOutline />

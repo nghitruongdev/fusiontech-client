@@ -5,7 +5,14 @@
 import { formatDate } from '@/lib/utils'
 import { Action } from '@refinedev/core'
 import { stringify } from 'query-string'
-import { Gender, IUser, PaymentMethod, ResourceName } from 'types'
+import {
+  Gender,
+  IOrderStatus,
+  IUser,
+  PaymentMethod,
+  ResourceName,
+  ROLES as ROLE_TYPE,
+} from 'types'
 const throwIfMissing = (name: string) => {
   throw new Error(`${name} is missing from .env.local`)
   return
@@ -258,6 +265,17 @@ export const ROLES = {
   user: 'người dùng',
   admin: 'quản trị viên',
 }
+export const ROLE_LABEL: { [key in ROLE_TYPE]: { text: string } } = {
+  user: {
+    text: 'Người dùng',
+  },
+  admin: {
+    text: 'Quản trị viên',
+  },
+  staff: {
+    text: 'Nhân viên',
+  },
+}
 
 export const GenderLabel: { [key in Gender]: string } = {
   MALE: 'Nam',
@@ -324,4 +342,21 @@ export const Images: { [key in ResourceName]: string } = {
   'inventory-details': '',
   statistical:
     'https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fvariants%2FlogostuImage.png?alt=media&token=90709f04-0996-4779-ab80-f82e99c62041',
+}
+
+export const statusColor = (status: IOrderStatus | undefined) => {
+  switch (status?.group) {
+    case 'CANCELLED':
+      return 'red'
+    case 'VERIFY':
+      return 'gray'
+    case 'PROCESSING':
+      return 'orange'
+    case 'ON_DELIVERY':
+      return 'linkedin'
+    case 'COMPLETED':
+      return 'green'
+    case 'FAILED':
+      return 'purple'
+  }
 }

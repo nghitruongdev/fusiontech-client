@@ -5,6 +5,7 @@ import '@smastrom/react-rating/style.css'
 
 import { Inter, Open_Sans } from 'next/font/google'
 import dynamic from 'next/dynamic'
+import Script from 'next/script'
 
 const inter = Inter({ subsets: ['latin'] })
 const open_sans = Open_Sans({

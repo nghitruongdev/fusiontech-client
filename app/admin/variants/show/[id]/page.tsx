@@ -24,6 +24,7 @@ import { Show } from '@components/crud'
 import { Badge } from '@components/ui/shadcn/badge'
 import { ListButton, RefreshButton, EditButton } from '@components/buttons'
 import { DeleteVariantButton } from '../../(form)/DeleteVariantButton'
+import { useHeaders } from '@/hooks/useHeaders'
 
 const page = () => {
   return (
@@ -253,10 +254,14 @@ type State = {
 const productResource = API['products']()
 const variantResource = API['variants']()
 const ContextProvider = ({ children }: PropsWithChildren) => {
+  const { getAuthHeader } = useHeaders()
   const showProps = useShow<IVariant>({
     meta: {
       query: {
         projection: variantResource.projection.withSpecs,
+      },
+      headers: {
+        ...getAuthHeader(),
       },
     },
   })
@@ -268,6 +273,11 @@ const ContextProvider = ({ children }: PropsWithChildren) => {
       id: record?.product?.id,
       queryOptions: {
         enabled: !!record?.product,
+      },
+      meta: {
+        headers: {
+          ...getAuthHeader(),
+        },
       },
     })
   return (

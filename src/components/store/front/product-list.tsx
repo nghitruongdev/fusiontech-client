@@ -71,10 +71,11 @@ const DiscountList = () => {
   return (
     <>
       <div
+        id='discount'
         className={`grid grid-cols-6 rounded-lg bg-cover bg-bottom`}
         style={{ backgroundImage: `url(${backgroundImageURL})` }}>
         <div className='col-span-6'>
-          <p className='text-uppercase '>Giảm giá sốc</p>
+          {/* <p className='text-white font-semibold uppercase'>Giảm giá sốc</p> */}
           <div className='relative p-1 my-2 md:my-4'>
             <SliderButton sliderRef={sliderRef} />
             <Slider
@@ -122,7 +123,9 @@ const AllProducts = () => {
   })
 
   return (
-    <div className='bg-white rounded-lg '>
+    <div
+      className='bg-white rounded-lg '
+      id='others'>
       <div className='flex  justify-between items-center px-3 pt-3 md:my-4 lg:mt-10  '>
         <h5 className='font-bold  text-xl uppercase '>FusionTech</h5>
         <Link href={'/search/san-pham/tat-ca'}>
@@ -179,7 +182,9 @@ const Newest = () => {
     meta: { resource },
   })
   return (
-    <div className='bg-white rounded-lg '>
+    <div
+      className='bg-white rounded-lg '
+      id='newest'>
       <div className='flex  justify-between items-center px-3 pt-3 md:my-4 lg:mt-10  '>
         <h5 className='font-bold  text-xl uppercase '>Sản phẩm mới nhất</h5>
         <Link href={'/search/san-pham/san-pham-moi-nhat'}>
@@ -236,7 +241,9 @@ const HotProduct = () => {
     meta: { resource },
   })
   return (
-    <div className='bg-white rounded-lg '>
+    <div
+      className='bg-white rounded-lg '
+      id='top-hot'>
       <div className='flex  justify-between items-center px-3 pt-3 md:my-4 lg:mt-10  '>
         <h5 className='font-bold  text-xl uppercase '>Sản phẩm 🔥</h5>
         <Link href={'/search/san-pham/san-pham-hot'}>
@@ -309,7 +316,9 @@ const SellingProducts = () => {
 
   // const { data: { data: products = [] } = {}, isFetching } = drop
   return (
-    <div className='bg-white rounded-lg '>
+    <div
+      className='bg-white rounded-lg '
+      id='top-sell'>
       <div className='flex  justify-between items-center px-3 pt-3 md:my-4 lg:mt-10  '>
         <h5 className='font-bold  text-xl uppercase '>top sản phẩm bán chạy</h5>
         <Link href={'/search/san-pham/san-pham-ban-chay-nhat'}>

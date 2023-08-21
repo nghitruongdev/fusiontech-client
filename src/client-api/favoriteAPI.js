@@ -9,9 +9,13 @@ const favoriteApi = {
     return axiosClient.get(url)
   },
 
-  delete: (productId, uid) => {
+  delete: (productId, uid, authHeader) => {
     const url = `${API_URL}/products/${productId}/favorites?uid=${uid}`
-    return axiosClient.delete(url)
+    return axiosClient.delete(url, {
+      headers: {
+        ...authHeader,
+      },
+    })
   },
 
   getProductId: (pid) => {
@@ -19,9 +23,13 @@ const favoriteApi = {
     return axiosClient.get(url)
   },
 
-  create: (productId, uid) => {
+  create: (productId, uid, authHeader) => {
     const url = `${API_URL}/products/${productId}/favorites?uid=${uid}`
-    return axiosClient.post(url)
+    return axiosClient.post(url, undefined, {
+      headers: {
+        ...authHeader,
+      },
+    })
   },
 }
 

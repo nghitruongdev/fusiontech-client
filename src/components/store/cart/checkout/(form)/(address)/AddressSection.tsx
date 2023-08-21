@@ -25,6 +25,7 @@ import useCrudNotification from '@/hooks/useCrudNotification'
 import dynamic from 'next/dynamic'
 import { useCheckoutContext } from '../../CheckoutProvider'
 import { cn } from 'components/lib/utils'
+import { useHeaders } from '@/hooks/useHeaders'
 
 type RefetchFunction = (
   options?: RefetchOptions & RefetchQueryFilters<unknown>,
@@ -105,6 +106,7 @@ export const AddressSectionProvider = ({
     warnWhenUnsavedChanges: false,
   })
 
+  const { authHeader } = useHeaders()
   //find default address
   const {
     data: { data: defaultAddress } = {},
@@ -112,9 +114,12 @@ export const AddressSectionProvider = ({
   } = useCustom<ShippingAddress>({
     url: `${API_URL}/${defaultAddressByUserId(user?.id)}`,
     method: 'get',
+    config: {
+      headers: { ...authHeader },
+    },
     queryOptions: {
       retry: 3,
-      enabled: !!user?.id,
+      enabled: !!user?.id && !!authHeader,
     },
     errorNotification: false,
   })

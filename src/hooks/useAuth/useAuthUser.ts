@@ -12,6 +12,9 @@ type State = {
   }
   claims?:
     | Partial<IdTokenResult['claims']> & {
+        /**
+         * @deprecated
+         */
         id?: number
         roles?: string[]
       }

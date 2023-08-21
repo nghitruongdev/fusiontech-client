@@ -1,24 +1,25 @@
 /** @format */
 
 'use client'
-import { API, API_URL } from 'types/constants'
+import { API, statusColor } from 'types/constants'
 import {
   IOrderStatus,
   IOrder,
-  OrderStatusText,
-  OrderStatus,
+  OrderStatus as OrderStatusType,
   PaymentStatusLabel,
   PaymentStatus,
+  OrderStatusText,
 } from 'types'
-import { springDataProvider } from '@/providers/rest-data-provider'
 import { useCustom } from '@refinedev/core'
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
 import { formatDateTime, formatPrice } from '@/lib/utils'
 import { useHeaders } from '@/hooks/useHeaders'
 import Link from 'next/link'
-import React, { useState } from 'react'
-const getOrderByGroup = (group: string) => {
-  const { getAuthHeader } = useHeaders()
+import React from 'react'
+import { Badge } from '@chakra-ui/react'
+import { onError } from '@/hooks/useCrudNotification'
+const useGetOrderByGroup = (group: string) => {
+  const { authHeader } = useHeaders()
   const {
     resource,
     findAllStatusByGroup,
@@ -30,43 +31,40 @@ const getOrderByGroup = (group: string) => {
     url: findAllStatusByGroup(group),
     method: 'get',
     queryOptions: {
-      enabled: !!group,
+      enabled: !!group && !!authHeader,
     },
-    meta: {
+    config: {
       headers: {
-        ...getAuthHeader(),
+        ...authHeader,
       },
     },
   })
   const statusParam = statusList?.map((item) => item.name).join(',')
 
-  const { claims: { id } = {} } = useAuthUser()
+  const { claims: { id } = {}, userProfile } = useAuthUser()
   const { data: { data } = {} } = useCustom<IOrder[]>({
-    url: findOrderByUserAndStatus(id, statusParam),
+    url: findOrderByUserAndStatus(id ?? userProfile?.id, statusParam),
     method: 'get',
     meta: {
       resource: 'orders',
-      headers: {
-        ...getAuthHeader(),
-      },
     },
     config: {
       query: {
         projection: withPayment,
       },
+      headers: {
+        ...authHeader,
+      },
     },
     queryOptions: {
-      enabled: !!id && !!statusParam,
+      enabled: (!!id || !!userProfile?.id) && !!statusParam && !!authHeader,
     },
   })
-  console.log(data)
   return data
 }
 
 const OrderByGroup = ({ params: { group } }: { params: { group: string } }) => {
-  //   const orders = ((await getOrderByGroup(group)) ?? []) as IOrder[]
-  const orders = getOrderByGroup(group)
-  console.log(orders)
+  const orders = useGetOrderByGroup(group)
   return (
     <div>
       <div className='bg-white rounded-lg overflow-y-auto'>
@@ -83,27 +81,76 @@ const OrderByGroup = ({ params: { group } }: { params: { group: string } }) => {
           <tbody>
             {orders
               ?.sort((a, b) => +b.id - +a.id)
-              .map(({ id, purchasedAt, total, status, payment }) => (
-                <tr
-                  key={id}
-                  className='border-t'>
-                  <Link href={`/account/orders/order-detail/${id}`}>
-                    <td className='px-4 py-4 text-blue-500'>{id}</td>
-                  </Link>
-                  <td className='px-4 py-4'>{formatDateTime(purchasedAt)}</td>
-                  <td className='px-4 py-4'>{formatPrice(payment?.amount)}</td>
-                  <td className={`px-4 py-4 text-blue-500`}>
-                    {OrderStatusText[status as OrderStatus].text}
-                  </td>
-                  <td className='px-4 py-4 text-blue-500'>
-                    {PaymentStatusLabel[payment?.status as PaymentStatus].text}
-                  </td>
-                </tr>
+              .map((item) => (
+                <OrderRow
+                  key={item.id}
+                  item={item}
+                />
               ))}
           </tbody>
         </table>
       </div>
     </div>
+  )
+}
+
+const OrderRow = ({
+  item: { id, purchasedAt, total, status: orderStatus, payment },
+}: {
+  item: IOrder
+}) => {
+  const { getAuthHeader } = useHeaders()
+  const paymentStatus =
+    payment?.status && PaymentStatusLabel[payment.status as PaymentStatus]
+
+  const { data: statusData } = useCustom<IOrderStatus[]>({
+    url: 'orders/statuses',
+    method: 'get',
+    config: {
+      headers: {
+        ...getAuthHeader(),
+      },
+    },
+    errorNotification: onError,
+  })
+
+  const status = statusData?.data?.find((st) => st.name === orderStatus)
+
+  return (
+    <tr className='border-t'>
+      <td className='px-4 py-4'>
+        <Link
+          href={`/account/orders/order-detail/${id}`}
+          className='hover:underline text-zinc-600'>
+          {id}
+        </Link>
+      </td>
+
+      <td className='px-4 py-4'>{formatPrice(payment?.amount)}</td>
+      <td className={`px-4 py-4 `}>
+        <Badge
+          variant='outline'
+          colorScheme={statusColor(status)}
+          px='4'
+          py='1'
+          rounded='md'>
+          {OrderStatusText[orderStatus as unknown as OrderStatusType]?.text}
+        </Badge>
+      </td>
+      <td className='px-4 py-4'>
+        <Badge
+          variant='outline'
+          px='4'
+          py='1'
+          rounded='md'
+          colorScheme={`${
+            paymentStatus?.color ? paymentStatus.color : 'facebook'
+          }`}>
+          {paymentStatus?.text}
+        </Badge>
+      </td>
+      <td className='px-4 py-4'>{formatDateTime(purchasedAt)}</td>
+    </tr>
   )
 }
 export default OrderByGroup

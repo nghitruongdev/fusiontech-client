@@ -83,7 +83,7 @@ ProductCard.ProductContainer = function ProductContainer({
         <div
           aria-label={`Product Item:${name}`}
           className='group cursor-pointer '>
-          <NextLinkContainer href={`/san-pham/${id}-${slug}`}>
+          <NextLinkContainer href={`/products/${id}-${slug}`}>
             {children}
           </NextLinkContainer>
         </div>

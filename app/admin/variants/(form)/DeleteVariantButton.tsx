@@ -7,6 +7,7 @@ import { DeleteButton } from '@components/buttons'
 import { useCustom } from '@refinedev/core'
 import { API } from 'types/constants'
 import React from 'react'
+import { useHeaders } from '@/hooks/useHeaders'
 
 export const DeleteVariantButton: FC<
   DeleteButtonProps & { variantId: string | number | undefined }
@@ -29,15 +30,20 @@ export const DeleteVariantButton: FC<
 }
 
 const { hasImportInventory } = API['variants']()
-
 export const useHasImportInventory = (
   variantId: string | number | undefined,
 ) => {
+  const { getAuthHeader } = useHeaders()
   const { data: { data } = {} } = useCustom({
     method: 'get',
     url: hasImportInventory(`${variantId}`),
     queryOptions: {
       enabled: !!variantId,
+    },
+    config: {
+      headers: {
+        ...getAuthHeader(),
+      },
     },
   })
   return {

@@ -1,3 +1,5 @@
+/** @format */
+
 import { useCallback, useState } from 'react'
 import useAxios, { AxiosOptions } from './useAxios'
 import { getFetcher } from './useFetcher'
@@ -21,10 +23,13 @@ const useShippingAddress = ({ mutate }: { mutate: () => void }) => {
   const swr = useSWR(fetcher)
   const { handleSubmit, ...form } = useShippingAddressForm({ current })
 
-  const showInfo = useCallback((current?: ShippingAddress) => {
-    setCurrent(current)
-    onOpen()
-  }, [])
+  const showInfo = useCallback(
+    (current?: ShippingAddress) => {
+      setCurrent(current)
+      onOpen()
+    },
+    [onOpen],
+  )
   const handleError = useCallback(() => {}, [])
 
   const axiosOptions: AxiosOptions = { throwOnError: true }

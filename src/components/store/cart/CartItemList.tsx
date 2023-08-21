@@ -118,7 +118,7 @@ CartItemList.Body = function Body() {
     setTimeout(() => {
       showOn()
     }, 1000)
-  }, [])
+  }, [showOn])
   if (!shouldShow) return <CartItemList.Loading />
   return (
     <>
@@ -143,6 +143,7 @@ CartItemList.Body = function Body() {
             {!items.length && (
               <div className='flex flex-col gap-2 items-center'>
                 <Image
+                  alt='Product Image'
                   src='https://media.istockphoto.com/id/1139666909/vector/shopping-cart-shop-trolley-or-basket-in-the-supermarket.jpg?s=612x612&w=0&k=20&c=_HajO7ifYKxuwzKFf-Fx9lsLKBa_1Rq9vuzGiPq8Q5Q='
                   className='h-[300px]'
                 />
@@ -178,8 +179,10 @@ CartItemList.Loading = function CartItemLoading({
     <>
       <p className='h-[32px]'></p>
       <div className='grid gap-4'>
-        {Array.from({ length: 3 }).map((item) => (
-          <div className='grid grid-cols-3'>
+        {Array.from({ length: 3 }).map((item, idx) => (
+          <div
+            key={idx}
+            className='grid grid-cols-3'>
             <Skeleton
               w='90%'
               h='150px'

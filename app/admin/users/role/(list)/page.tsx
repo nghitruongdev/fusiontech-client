@@ -5,19 +5,22 @@ import React from 'react'
 import { IResourceComponentsProps } from '@refinedev/core'
 import { useTable } from '@refinedev/react-table'
 import { ColumnDef } from '@tanstack/react-table'
-import { TableContainer, Table, HStack } from '@chakra-ui/react'
+import { TableContainer, Table } from '@chakra-ui/react'
 import { useDefaultTableRender } from '@/hooks/useRenderTable'
-import { EditButton, ShowButton } from '@components/buttons'
 import { List } from '@components/crud'
 import Image from 'next/image'
-import { FirebaseImage, Gender, IUser } from 'types'
-import { API, Images } from 'types/constants'
+import { FirebaseImage, Gender, IUser, ROLES } from 'types'
+import { Images, ROLE_LABEL } from 'types/constants'
 import { GenderLabel } from 'types/constants'
-
-const Page = () => {
-  return <UserList />
+import { useHeaders } from '@/hooks/useHeaders'
+import Select from 'react-select'
+import { toOptionString } from '@/lib/utils'
+const pageRole = () => {
+  return <UserListRole />
 }
-const UserList: React.FC<IResourceComponentsProps> = () => {
+
+const UserListRole: React.FC<IResourceComponentsProps> = () => {
+  const { getAuthHeader } = useHeaders()
   const columns = React.useMemo<ColumnDef<IUser>[]>(
     () => [
       {
@@ -35,54 +38,15 @@ const UserList: React.FC<IResourceComponentsProps> = () => {
         accessorKey: 'email',
         header: 'Email',
       },
-      {
-        id: 'phoneNumber',
-        accessorKey: 'phoneNumber',
-        header: 'Số điện thoại',
-      },
 
       {
-        id: 'gender',
-        accessorKey: 'gender',
-        header: 'Giới tính',
-        cell: ({ getValue }) => <>{GenderLabel[getValue<Gender>()]}</>,
+        id: 'actions',
+        accessorKey: 'roles',
+        header: 'Hành động',
+        cell: function render({ getValue }) {
+          return <RoleSelect roles={getValue<string[]>() ?? []} />
+        },
       },
-      // {
-      //   id: 'image',
-      //   accessorKey: 'image',
-      //   header: 'Hình ảnh',
-      //   cell: function render({ getValue }) {
-      //     return (
-      //       // <Image
-      //       //   alt='/'
-      //       //   width={50}
-      //       //   height={50}
-      //       //   src={getValue<FirebaseImage>() ?? Images.users}
-      //       //   className='rounded-full'
-      //       // />
-      //     )
-      //   },
-      // },
-
-      //   {
-      //     id: 'actions',
-      //     accessorKey: 'id',
-      //     header: 'Hành động',
-      //     cell: function render({ getValue }) {
-      //       return (
-      //         <HStack>
-      //           <ShowButton
-      //             hideText
-      //             recordItemId={getValue() as string}
-      //           />
-      //           <EditButton
-      //             hideText
-      //             recordItemId={getValue() as string}
-      //           />
-      //         </HStack>
-      //       )
-      //     },
-      //   },
     ],
     [],
   )
@@ -101,8 +65,19 @@ const UserList: React.FC<IResourceComponentsProps> = () => {
     },
   } = useTable({
     columns,
+    refineCoreProps: {
+      resource: 'users',
+      meta: {
+        query: {
+          projection: 'user-roles',
+        },
+        headers: {
+          ...getAuthHeader(),
+        },
+      },
+    },
   })
-
+  console.log('table data', tableData)
   setOptions((prev) => ({
     ...prev,
     meta: {
@@ -133,4 +108,28 @@ const UserList: React.FC<IResourceComponentsProps> = () => {
     </List>
   )
 }
-export default Page
+
+const roleOptions = Object.entries(ROLES).map(([value, label]) => ({
+  label: ROLE_LABEL[label].text,
+  value: value,
+}))
+
+const RoleSelect = ({ roles }: { roles: string[] }) => {
+  console.log(roles)
+  const selected = roles.map((item) => ({
+    label: ROLE_LABEL[item as ROLES].text,
+    value: item,
+  }))
+  return (
+    <>
+      {JSON.stringify(selected)}
+      <Select
+        isMulti
+        defaultValue={selected}
+        options={roleOptions}
+      />
+    </>
+  )
+}
+
+export default pageRole

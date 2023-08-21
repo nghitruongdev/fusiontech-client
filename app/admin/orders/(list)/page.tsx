@@ -39,12 +39,13 @@ import {
   PaymentStatus,
   PaymentStatusLabel,
 } from 'types'
-import { EditableControls, OrderStatus, statusColor } from '../OrderStatus'
+import { EditableControls, OrderStatus } from '../OrderStatus'
 import { ShowButton } from '@components/buttons'
 import { List } from '@components/crud'
 import { useDefaultTableRender } from '@/hooks/useRenderTable'
 import { formatPrice } from '@/lib/utils'
 import { onError } from '@/hooks/useCrudNotification'
+import { statusColor } from 'types/constants'
 export default function ListPage() {
   return <OrderList />
 }
@@ -108,19 +109,10 @@ const OrderList: React.FC<IResourceComponentsProps> = () => {
           return (
             <Badge
               variant='outline'
-              //   colorScheme={statusColor(status)}
               px='4'
               py='1'
               rounded='md'
-              //   variant='outline'
-              //   px='2'
-              //   // py="1"
-              //   lineHeight='taller'
-              //   rounded='md'
-              // colorScheme=''
-              colorScheme={`${status?.color ? status.color : 'facebook'}`}
-              //   colorScheme={`${status?.color ? status.color : 'whatsapp'}`}
-            >
+              colorScheme={`${status?.color ? status.color : 'facebook'}`}>
               {status?.text}
             </Badge>
           )

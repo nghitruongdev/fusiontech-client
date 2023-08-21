@@ -6,14 +6,13 @@ import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
 import { useCustom, useUpdate } from '@refinedev/core'
 import { API } from 'types/constants'
 import { API_URL } from 'types/constants'
-import { useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import useMyToast from '@/hooks/useToast'
 import { useHeaders } from '@/hooks/useHeaders'
-import userApi from '@/client-api/userAPI'
+import { ShippingAddress } from 'types'
 
 export const AddressPanel = () => {
-  const [isShow, { on: show, off: close, toggle }] = useBoolean()
+  const [isShow, { toggle }] = useBoolean()
   const isDefaultExists = true
   return (
     <div className={`min-w-[230px]`}>
@@ -32,29 +31,24 @@ export const AddressPanel = () => {
 }
 
 const AddressContent = ({ showModal }: { showModal: boolean }) => {
-  const { getAuthHeader, _isHydrated } = useHeaders()
-  const { user, userProfile, claims } = useAuthUser()
+  const { getAuthHeader, _isHydrated, authHeader } = useHeaders()
+  const { userProfile, claims } = useAuthUser()
   console.log('claims?.id', claims)
-  const { resource, defaultAddressByUserId } = API['shippingAddresses']()
-  const { data, status } = useCustom({
-    url: `${API_URL}/${defaultAddressByUserId(claims?.id ?? userProfile?.id)}`,
+  const { defaultAddressByUserId } = API['shippingAddresses']()
+  const { data } = useCustom<ShippingAddress>({
+    url: `${defaultAddressByUserId(claims?.id ?? userProfile?.id)}`,
     method: 'get',
-    meta: {
+    config: {
       headers: {
-        ...getAuthHeader(),
+        ...authHeader,
       },
     },
     queryOptions: {
-      enabled: !!claims?.id || !!userProfile?.id,
+      enabled: !!authHeader && (!!claims?.id || !!userProfile?.id),
     },
   })
-  console.log('userProfile?.id, claims?.id', userProfile?.id, claims?.id)
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    getValues,
-  } = useForm()
+  console.log('getAuthHeader()', getAuthHeader())
+  const { register, getValues } = useForm()
 
   const toast = useMyToast()
   const createShippingAddress = async (
@@ -62,11 +56,6 @@ const AddressContent = ({ showModal }: { showModal: boolean }) => {
     shippingAddressData: Object,
   ) => {
     try {
-      const response = await userApi.createShippingAddress(
-        uid,
-        shippingAddressData,
-        { ...getAuthHeader() },
-      )
       toast
         .ok({
           title: 'Thành công',

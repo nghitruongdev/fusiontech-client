@@ -16,6 +16,7 @@ import {
   ProductPrice,
   ProductQuantity,
   ProductRating,
+  Discount,
   ProductSpecification,
 } from './product-client'
 import { getOneBrand } from '@/providers/server-data-provider/data/brands'
@@ -81,8 +82,12 @@ Product.Info = async () => {
     <>
       <div className='flex flex-col gap-1'>
         {/* @ts-expect-error Async Server Component */}
+
         <Product.Brand />
-        <p className='text-2xl font-bold text-zinc-700'>{name}</p>
+        <div className='flex flex-row item-center gap-4'>
+          <p className='text-2xl font-bold text-zinc-700'>{name}</p>
+          {/* <Discount /> */}
+        </div>
         <ProductRating />
         <ProductPrice />
         <Product.StoreInfo />
@@ -119,7 +124,7 @@ Product.Brand = async () => {
   }
   return (
     <>
-      <p className='text-sm underline underline-offset-4 '>{name}</p>
+      <p className='text-base underline underline-offset-4 '>{name}</p>
     </>
   )
 }

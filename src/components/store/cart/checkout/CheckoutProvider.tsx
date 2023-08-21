@@ -2,28 +2,18 @@
 
 'use client'
 import useCrudNotification from '@/hooks/useCrudNotification'
-import { useCustomMutation, HttpError } from '@refinedev/core'
+import { HttpError } from '@refinedev/core'
 import { UseFormReturnType, useForm } from '@refinedev/react-hook-form'
 import { useRouter } from 'next/navigation'
-import {
-  Suspense,
-  createContext,
-  use,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
-import { ICartItem, ICheckout, IOrder, IVoucher } from 'types'
+import { createContext, useContext, useEffect, useState } from 'react'
+import { ICheckout, IOrder } from 'types'
 import { API } from 'types/constants'
-import { API_URL } from 'types/constants'
-import { createStore, useStore } from 'zustand'
-import { immer } from 'zustand/middleware/immer'
 import { calculateTotalPayment } from './utils'
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
-import { suspensePromise, waitPromise } from '@/lib/promise'
+import { waitPromise } from '@/lib/promise'
 import LoadingOverlay from '@components/ui/LoadingOverlay'
-import useCart, { useCartStore } from '../useCart'
+import useCart from '../useCart'
+import { useHeaders } from '@/hooks/useHeaders'
 
 type State = {
   onCheckout: () => Promise<void>
@@ -35,6 +25,7 @@ const Context = createContext<StoreState | null>(null)
 type ProviderProps = React.PropsWithChildren<{}>
 export const CheckoutProvider = ({ children }: ProviderProps) => {
   const router = useRouter()
+  const { getAuthHeader } = useHeaders()
   const {
     onError,
     action: { open },
@@ -46,30 +37,32 @@ export const CheckoutProvider = ({ children }: ProviderProps) => {
       errorNotification: onError,
       successNotification: false,
       resource: 'cart/checkout',
+      meta: {
+        headers: {
+          ...getAuthHeader(),
+        },
+      },
     },
   })
   const {
     handleSubmit,
     setValue,
-    getFieldState,
-    getValues,
     refineCore: { onFinish },
-    clearErrors,
-    formState: { isSubmitting, isSubmitted, errors },
+    formState: { isSubmitting, errors },
   } = formProps
 
-  const { claims: { id } = {} } = useAuthUser()
+  const { claims, userProfile } = useAuthUser()
   useEffect(() => {
     console.log('isSubmitting', isSubmitting)
   }, [isSubmitting])
   useEffect(() => {
-    id && setValue(`userId`, id + '')
-  }, [id, setValue])
+    const id = claims?.id ?? userProfile?.id
+    !!id && setValue(`userId`, id + '')
+  }, [claims?.id, setValue, userProfile?.id])
   const [promise, setPromise] = useState<Promise<any>>(Promise.resolve())
 
   const checkoutHandler = async () => {
     const { cart } = API['orders']()
-    const url = `${API_URL}/${cart.checkout}`
 
     if (errors?.voucher) {
       open?.({
@@ -101,7 +94,7 @@ export const CheckoutProvider = ({ children }: ProviderProps) => {
           price: ((100 - (product?.discount ?? 0)) / 100) * (price ?? 0),
         }),
       )
-      await waitPromise(2000)
+      await waitPromise(500)
       try {
         const result = await onFinish({
           ...data,

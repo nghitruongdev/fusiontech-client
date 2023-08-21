@@ -83,7 +83,7 @@ export const DeleteButton: React.FC<DeleteButtonProps> = (props) => {
 
   const { mutate, isLoading, variables } = useDelete()
   const onDeleteSuccess = resource?.meta?.onDeleteSuccess
-
+  const { getAuthHeader } = useHeaders()
   const { data } = useCan({
     resource: resource?.name,
     action: 'delete',
@@ -100,7 +100,6 @@ export const DeleteButton: React.FC<DeleteButtonProps> = (props) => {
     else return translate('buttons.notAccessTitle', 'Bạn không có quyền để xoá')
   }
 
-  const { getAuthHeader } = useHeaders()
   const onConfirm = () => {
     if (identifier && (recordItemId ?? id)) {
       setWarnWhen(false)

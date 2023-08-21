@@ -13,12 +13,14 @@ import Image from 'next/image'
 import { FirebaseImage, Gender, IUser } from 'types'
 import { API, Images } from 'types/constants'
 import { GenderLabel } from 'types/constants'
+import { useHeaders } from '@/hooks/useHeaders'
 
 const page = () => {
   return <UserList />
 }
 
 const UserList: React.FC<IResourceComponentsProps> = () => {
+  const { getAuthHeader } = useHeaders()
   const columns = React.useMemo<ColumnDef<IUser>[]>(
     () => [
       {
@@ -102,6 +104,14 @@ const UserList: React.FC<IResourceComponentsProps> = () => {
     },
   } = useTable({
     columns,
+    refineCoreProps: {
+      resource: 'get',
+      meta: {
+        headers: {
+          ...getAuthHeader(),
+        },
+      },
+    },
   })
 
   setOptions((prev) => ({

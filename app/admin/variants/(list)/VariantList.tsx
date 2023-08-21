@@ -11,6 +11,7 @@ import { API } from 'types/constants'
 import { List } from '@components/crud'
 import { variantTableColumns } from './columns'
 import { AppError } from 'types/error'
+import { useHeaders } from '@/hooks/useHeaders'
 
 const { resource, projection } = API['variants']()
 
@@ -28,6 +29,7 @@ export const VariantList: React.FC<IResourceComponentsProps> = () => {
     columnsWithProduct.splice(1, 0, productColumn)
     return columnsWithProduct
   }, [])
+  const { getAuthHeader } = useHeaders()
   const {
     getHeaderGroups,
     getRowModel,
@@ -46,6 +48,9 @@ export const VariantList: React.FC<IResourceComponentsProps> = () => {
       meta: {
         query: {
           projection: projection.withProductBasic,
+        },
+        headers: {
+          ...getAuthHeader(),
         },
       },
     },

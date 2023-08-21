@@ -29,7 +29,6 @@ export const FavoriteButton = ({
       setFavorited(false)
       return
     }
-    console.log('isFavorited', isFavorited)
     setFavorited(checkFavorite(+product.id))
   }, [product, favorites, checkFavorite, isFavorited])
 

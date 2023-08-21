@@ -8,6 +8,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import RecentProductView from '@components/store/front/section/RecentProductView'
 import AuthenticatedPage from 'app/(others)/authenticated'
+import { Avatar, Image } from '@chakra-ui/react'
+import { Button } from '@components/ui/shadcn/button'
 
 const AccountLayout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -33,8 +35,9 @@ const AccountMenu = () => {
   const router = useRouter()
   const { user, userProfile } = useAuthUser()
 
-  const username = userProfile?.firstName ?? ''
-  const imageUrl = userProfile?.image ?? ''
+  const username =
+    user?.displayName ?? userProfile?.firstName ?? userProfile?.fullName
+  const imageUrl = user?.photoURL ?? userProfile?.image ?? ''
 
   const [currentPath, setCurrentPath] = useState('')
 
@@ -51,15 +54,19 @@ const AccountMenu = () => {
     <div className='items-center'>
       <div className='flex items-center'>
         <div className='w-12 h-12 rounded-full overflow-hidden'>
-          <img
+          <Image
             src={imageUrl}
             alt='User'
             className='w-full h-full object-cover'
           />
+          <Avatar
+            src={imageUrl}
+            name={username}
+          />
         </div>
         <div className='flex-col items-start ml-2'>
           <h4>Tài khoản của:</h4>
-          <h3 className='text-lg font-semibold'>{username}</h3>
+          <h3 className='text-md font-semibold'>{username}</h3>
         </div>
       </div>
       <div className=''>
@@ -70,9 +77,9 @@ const AccountMenu = () => {
             }}
             className=''>
             <li
-              className={`flex items-center mt-2 hover:bg-gray-200 hover:text-blue-700 hover:font-semibold hover:rounded-lg ${
+              className={`flex items-center mt-2 hover:bg-gray-200 hover:text-blue-600 hover:font-semibold hover:rounded-lg ${
                 currentPath === '/account/profile'
-                  ? 'text-blue-700 font-semibold'
+                  ? 'text-blue-600 font-semibold'
                   : ''
               }`}
               onClick={() => handleMenuClick('/account/profile')}>

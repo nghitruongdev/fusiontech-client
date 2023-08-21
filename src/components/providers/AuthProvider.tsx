@@ -38,6 +38,7 @@ const updateToken = (user: User | null, refresh: boolean = false) => {
   }
   authStore.setState(() => ({ claims: undefined, token: null }))
 }
+const { resource, findByFirebaseId } = API['users']()
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { user, claims: { id: userId } = {}, token } = useAuthUser()
 
@@ -53,16 +54,26 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [user, token])
 
   useEffect(() => {
-    if (!userId) return
-    const fetchUser = async () => {
-      const userProfile = await springDataProvider.getOne<IUser>({
-        resource: API['users']().resource,
-        id: userId ?? '',
+    if (!user) return
+    const fetchUserFirebaseId = async () => {
+      const userProfile = await springDataProvider.custom<IUser>({
+        url: `${findByFirebaseId(user.uid)}`,
+        method: 'get',
       })
+      console.log('userProfile', userProfile)
       setUserProfile(userProfile.data)
     }
-    fetchUser()
-  }, [userId])
+
+    // const fetchUser = async () => {
+    //   const userProfile = await springDataProvider.getOne<IUser>({
+    //     resource,
+    //     id: userId ?? '',
+    //   })
+    //   setUserProfile(userProfile.data)
+    // }
+    // fetchUser()
+    fetchUserFirebaseId()
+  }, [user])
 
   useEffect(() => {
     console.debug('Auth Provider rendered')

@@ -65,6 +65,7 @@ import CurrencyInput from 'react-currency-input-field'
 import { Badge } from '@components/ui/shadcn/badge'
 import { DeleteVariantButton } from './DeleteVariantButton'
 import { SaveButton } from '@components/buttons'
+import { useHeaders } from '@/hooks/useHeaders'
 const productResource = API.products()
 const variantResource = API.variants()
 const ENABLE_FETCHED = true
@@ -100,11 +101,13 @@ VariantForm.Provider = function Provider({
   children,
   ...props
 }: PropsWithChildren<FormProps>) {
+  const { getAuthHeader } = useHeaders()
   const searchParams = useSearchParams()
   const router = useRouter()
   const { uploadImages, removeImages } = useUploadImage({
     resource: 'variants',
   })
+
   const { action } = props
   const formMethods = useForm<IVariant, HttpError, IVariantField>({
     refineCoreProps: {
@@ -113,6 +116,11 @@ VariantForm.Provider = function Provider({
       meta: {
         query: {
           projection: variantResource.projection.withSpecs,
+        },
+        meta: {
+          headers: {
+            ...getAuthHeader(),
+          },
         },
       },
       onMutationSuccess() {
@@ -283,9 +291,11 @@ VariantForm.Product = function Product() {
     setValue,
   } = useFormProvider()
   const searchParams = useSearchParams()
+
   const paramProductId = searchParams.get('productId')
   const inputDisabled = !!paramProductId || !!variantId
   type IProductWithVariantCount = IProduct & { variantCount: number }
+  const { getAuthHeader } = useHeaders()
   const { data: { data: products } = {} } = useList<IProductWithVariantCount>({
     resource: productResource.resource,
     pagination: {
@@ -297,6 +307,9 @@ VariantForm.Product = function Product() {
     meta: {
       query: {
         projection: productResource.projection.nameAndVariantCount,
+      },
+      headers: {
+        ...getAuthHeader(),
       },
     },
   })
@@ -310,6 +323,9 @@ VariantForm.Product = function Product() {
     meta: {
       query: {
         projection: productResource.projection.nameAndVariantCount,
+      },
+      headers: {
+        ...getAuthHeader(),
       },
     },
   })
@@ -733,6 +749,7 @@ VariantForm.OtherVariant = function OtherVariants() {
     getFieldState,
     formState: { errors },
   } = useFormProvider()
+  const { getAuthHeader } = useHeaders()
   const productId = watch(`formProduct`)?.value?.id
   const { data: { data: variants } = {} } = useCustom<IVariant[]>({
     url: productResource.getVariants(productId),
@@ -743,6 +760,9 @@ VariantForm.OtherVariant = function OtherVariants() {
     config: {
       query: {
         projection: variantResource.projection.withSpecs,
+      },
+      headers: {
+        ...getAuthHeader(),
       },
     },
     meta: {
@@ -827,11 +847,17 @@ VariantForm.Specification.Row = function Row({
   } = useFormProvider()
   const [shouldFetch, { on: shouldFetchOn }] = useBoolean()
   const isDisabled = false
+  const { getAuthHeader } = useHeaders()
   const { data: { data: specsData = [] } = {} } = useCustom<ISpecification[]>({
     url: findDistinctByName(rowField.label ?? ''),
     method: 'get',
     queryOptions: {
       enabled: !isDisabled && ENABLE_FETCHED && shouldFetch,
+    },
+    config: {
+      headers: {
+        ...getAuthHeader(),
+      },
     },
     meta: {
       resource,
@@ -905,6 +931,7 @@ VariantForm.Specification.Row = function Row({
 }
 
 const useOneProductSpecs = (productId: string | number | undefined) => {
+  const { getAuthHeader } = useHeaders()
   const { data: { data } = {} } = useOne<IProduct>({
     resource: productResource.resource,
     id: productId ?? '',
@@ -914,6 +941,9 @@ const useOneProductSpecs = (productId: string | number | undefined) => {
     meta: {
       query: {
         projection: productResource.projection.specifications,
+      },
+      headers: {
+        ...getAuthHeader(),
       },
     },
   })

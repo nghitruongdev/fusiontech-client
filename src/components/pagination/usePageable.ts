@@ -24,7 +24,7 @@ export function usePageable() {
   useEffect(() => {
     const url = updateParam({ current, size: pageSize })
     router.push(url)
-  }, [current, pageSize, router])
+  }, [current, pageSize, router, updateParam])
 
   return {
     current,

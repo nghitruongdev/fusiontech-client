@@ -35,6 +35,7 @@ import {
   useAuthStore,
 } from '@/hooks/useAuth/useAuthUser'
 import { ROLES } from 'types'
+import { suspensePromise } from '@/lib/promise'
 
 const auth = getAuth(firebaseApp)
 const googleProvider = new GoogleAuthProvider()
@@ -256,12 +257,13 @@ const updatePassword = async (
   }
   throw new Error('Operation is not supported')
 }
-const getPermissions = () => {
-  const { claims, userProfile } = authStore.getState()
+const getPermissions = async () => {
+  const { claims, userProfile, _hasPermissionHydrated } = authStore.getState()
+  await suspensePromise(_hasPermissionHydrated)
   const roles = claims?.roles?.map(
     (role) => ROLES[role.toUpperCase() as keyof typeof ROLES],
   )
-  return roles ?? null
+  return roles ?? []
 }
 const getIdentity = async (params?: any) => {}
 

@@ -5,7 +5,6 @@ import {
   IOrderStatus,
   OrderStatus as OrderStatusType,
   OrderStatusText,
-  ProblemDetail,
 } from 'types'
 import {
   Badge,
@@ -21,11 +20,9 @@ import { useUpdate } from '@refinedev/core'
 import { Check, Loader } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { onError, onSuccess } from '@/hooks/useCrudNotification'
-import SelectPopout from '@components/ui/SelectPopout'
-import ReactSelect from 'react-select'
 import { Select } from '@chakra-ui/react'
 import { useHeaders } from '@/hooks/useHeaders'
-import { useForm } from 'react-hook-form'
+import { statusColor } from 'types/constants'
 export const OrderStatus = ({
   status,
   control,
@@ -148,21 +145,4 @@ export const EditableControls = ({
       </ButtonGroup>
     </>
   )
-}
-
-export const statusColor = (status: IOrderStatus | undefined) => {
-  switch (status?.group) {
-    case 'CANCELLED':
-      return 'red'
-    case 'VERIFY':
-      return 'gray'
-    case 'PROCESSING':
-      return 'orange'
-    case 'ON_DELIVERY':
-      return 'linkedin'
-    case 'COMPLETED':
-      return 'green'
-    case 'FAILED':
-      return 'purple'
-  }
 }
