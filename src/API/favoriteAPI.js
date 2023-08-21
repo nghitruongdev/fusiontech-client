@@ -1,7 +1,7 @@
 /** @format */
 
 import { API_URL } from 'types/constants'
-import axiosClient from './axiosClient'
+import axiosClient from './axios-client'
 
 const favoriteApi = {
   get: (uid) => {

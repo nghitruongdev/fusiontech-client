@@ -18,6 +18,7 @@ module.exports = {
       'i.pravatar.cc',
       'firebasestorage.googleapis.com',
       'cdn.mos.cms.futurecdn.net',
+      'iphoneros.com',
       'img.freepik.com',
       'static.wixstatic.com',
       'www.pngmart.com',

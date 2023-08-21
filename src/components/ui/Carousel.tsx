@@ -6,6 +6,7 @@ import {
   Box,
   IconButton,
   useBreakpointValue,
+  Image,
   Stack,
   Heading,
   Text,
@@ -15,7 +16,7 @@ import {
 import { BiLeftArrowAlt, BiRightArrowAlt } from 'react-icons/bi'
 // And react-slick as our Carousel Lib
 import Slider from 'react-slick'
-import Image from 'next/image'
+// import Image from 'next/image'
 import { cn } from 'components/lib/utils'
 
 // Settings for the slider
@@ -116,10 +117,19 @@ export default function CaptionCarousel() {
       title: '',
       text: '',
       image:
-        'https://images.macrumors.com/t/jFpMAW3JISRXIFK4P8SsffxTxoQ=/2000x/article-new/2022/09/samsung-anti-apple-ad.jpg',
+        'https://lowpi.com/wp-content/uploads/2022/01/asus-laptops-2022.webp',
+      // 'https://images.macrumors.com/t/jFpMAW3JISRXIFK4P8SsffxTxoQ=/2000x/article-new/2022/09/samsung-anti-apple-ad.jpg',
     },
     {
-      image: 'https://cdn.mos.cms.futurecdn.net/YadkjYkdWbt53C7nE5cbJ5.jpg',
+      //   image: 'https://cdn.mos.cms.futurecdn.net/YadkjYkdWbt53C7nE5cbJ5.jpg',
+      image:
+        'https://dlcdnwebimgs.asus.com/gain/21AE219C-6E24-4FD8-B83D-EFC9E131B315/fwebp',
+      title: '',
+      text: '',
+    },
+    {
+      image:
+        'https://thanhlymaytinh.net/wp-content/uploads/2023/03/banner-thanhlymaytinhnet.jpg',
       title: '',
       text: '',
     },
@@ -190,7 +200,7 @@ export default function CaptionCarousel() {
             src={card.image}
             alt={card.text}
             key={index}
-            className={cn(`aspect-video h-[350px]`)}
+            className={cn(`aspect-video w-full`)}
             width='1000'
             height='500'
           />

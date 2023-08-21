@@ -52,6 +52,8 @@ import { waitPromise } from '@/lib/promise'
 import { onError, onSuccess } from '@/hooks/useCrudNotification'
 import LoadingOverlay from '@components/ui/LoadingOverlay'
 import { findProductLikeNoOption, toVariantsWithProduct } from './utils'
+import { useHeaders } from '@/hooks/useHeaders'
+import Image from 'next/image'
 
 type InventoryForm = {
   items: IInventoryDetail[]
@@ -84,9 +86,15 @@ Form.useContext = () => {
   return ctx
 }
 Form.Provider = function Provider({ action }: ProviderProps) {
+  const { getAuthHeader } = useHeaders()
   const formProps = useForm<IInventory, HttpError, InventoryForm>({
     reValidateMode: 'onSubmit',
     refineCoreProps: {
+      meta: {
+        headers: {
+          ...getAuthHeader(),
+        },
+      },
       errorNotification: onError,
       successNotification: onSuccess.bind(null, action),
       //   redirect: false,
@@ -100,11 +108,16 @@ Form.Provider = function Provider({ action }: ProviderProps) {
     IInventoryDetail
   >({
     refineCoreProps: {
+      meta: {
+        headers: {
+          ...getAuthHeader(),
+        },
+      },
       errorNotification: onError,
       //   successNotification: onSuccess.bind(null, 'edit'),
       successNotification: {
         type: 'success',
-        message: 'Cập nhật thành công rồi nhé bạn!',
+        message: 'Cập nhật thành cônng!',
       },
       resource: 'inventory-details',
     },
@@ -134,9 +147,9 @@ Form.Provider = function Provider({ action }: ProviderProps) {
       behavior: 'smooth',
     })
     await handleSubmit(async (data) => {
-      await waitPromise(5000)
+      //   await waitPromise(5000)
+      console.log('data', data)
       onFinish({ items: data.items })
-      console.log('after on Finish')
     })()
   }
   const saveButtonProps = {
@@ -270,6 +283,7 @@ const {
 } = API['products']()
 
 Form.ProductSelect = function ProductSelect() {
+  const { getAuthHeader } = useHeaders()
   const {
     detailFormProps: {
       register,
@@ -284,6 +298,9 @@ Form.ProductSelect = function ProductSelect() {
     meta: {
       query: {
         projection: nameWithVariants,
+      },
+      headers: {
+        ...getAuthHeader(),
       },
     },
   })
@@ -420,34 +437,28 @@ Form.ProductInfo = function ProductInfo() {
   const variant = watch(`variant`)
 
   return (
-    <>
+    <div>
       {/* {JSON.stringify(variant)} */}
-      <div>
-        {variant && (
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>SKU</th>
-                <th>giá tiền</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>{variant.id}</td>
-              </tr>
-              <tr>
-                <td>{variant.sku}</td>
-              </tr>
-              <tr>
-                <td>{variant.price}</td>
-              </tr>
-              {/* Thêm các dòng khác cho các thuộc tính khác */}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </>
+      {variant && (
+        <div className=''>
+          <h2>Tên sản phẩm: {variant.product?.name}</h2>
+          {/* <h2>Tên sản phẩm: {variant.images}</h2> */}
+
+          <Image
+            src={variant?.images?.[0] ?? ''}
+            alt={variant?.images?.[0] ?? ''}
+            width={200}
+            height={200}
+            style={{
+              width: '100px',
+              height: '100px',
+              objectFit: 'contain',
+            }}
+            className='shadow-lg rounded-lg'
+          />
+        </div>
+      )}
+    </div>
   )
 }
 const DetailTable = () => {

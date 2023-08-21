@@ -27,19 +27,22 @@ export async function GET(req: NextRequest) {
     case '/wards':
       return getWards(req)
   }
-  return NextResponse.json({
-    url,
-    basePath,
-    password,
-    pathname,
-    port,
-    protocol,
-    search,
-    searchParams,
-    host,
-    hostname,
-    q: searchParams.get('q'),
-    path: pathname.substring(pathname.lastIndexOf('/') + 1),
+  //   return NextResponse.json({
+  //     url,
+  //     basePath,
+  //     password,
+  //     pathname,
+  //     port,
+  //     protocol,
+  //     search,
+  //     searchParams,
+  //     host,
+  //     hostname,
+  //     q: searchParams.get('q'),
+  //     path: pathname.substring(pathname.lastIndexOf('/') + 1),
+  //   })
+  return NextResponse.json('Not found request', {
+    status: 404,
   })
 }
 

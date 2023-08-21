@@ -11,18 +11,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@chakra-ui/react'
-import { Laptop } from 'lucide-react'
+import NextLinkContainer from '@components/ui/NextLinkContainer'
 import Image from 'next/image'
 import { ICategory } from 'types'
-import { useRouter } from 'next/router'
 
 export function CategoryDropDown({ categories }: { categories: ICategory[] }) {
-  // const router = useRouter()
-  const categoryClick = (category: number) => {
-    console.log(category)
-    // router.push(`/search?category=${category}`);
-    window.location.href = `/search?cid=${category}`
-  };
   return (
     <>
       <Popover isLazy>
@@ -55,16 +48,12 @@ export function CategoryDropDown({ categories }: { categories: ICategory[] }) {
               pos='relative'>
               <PopoverBody>
                 <Menu isOpen>
-                  <MenuList
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(3, 1fr)',
-                      gap: '10px',
-                      overflow: 'auto',
-                    }}>
+                  <MenuList className='grid gap-[10px] overflow-auto'>
                     {categories.map((item) => (
-                      <>
-                        <MenuItem key={`${Math.random()}`} onClick={() => categoryClick(item.id??0)} >
+                      <MenuItem key={`${item.id}`}>
+                        <NextLinkContainer
+                          href={`/search/danh-muc/${item.id}-${item.slug}`}
+                          className={`flex gap-2`}>
                           <Image
                             src={item.image ?? ''}
                             width={100}
@@ -73,12 +62,8 @@ export function CategoryDropDown({ categories }: { categories: ICategory[] }) {
                             className='max-h-[30px] max-w-[30px]  aspect-square mr-2 rounded-3xl object-cover '
                           />
                           {item.name}
-                          <hr
-                            className='border-spacing-5'
-                            style={{ marginTop: '10px' }}
-                          />
-                        </MenuItem>
-                      </>
+                        </NextLinkContainer>
+                      </MenuItem>
                     ))}
                   </MenuList>
                 </Menu>

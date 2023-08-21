@@ -61,6 +61,7 @@ import { GroupBase, OptionsOrGroups } from 'react-select'
 import { useQueryClient } from '@tanstack/react-query'
 import { toObjectOption } from '@/lib/utils'
 import { Controller } from 'react-hook-form'
+import { useHeaders } from '@/hooks/useHeaders'
 
 type Props = UseModalFormReturnType<
   IInventoryDetail,
@@ -181,6 +182,7 @@ Form.ProductSelect = function ProductSelect() {
       watch,
     },
   } = Form.useContext()
+  const { getAuthHeader } = useHeaders()
   const { resource: variantResource } = API['variants']()
   const variantId = queryResult?.data?.data.variantId
   const { data: { data: product } = {} } = useCustom<IProduct>({
@@ -189,6 +191,11 @@ Form.ProductSelect = function ProductSelect() {
     config: {
       query: {
         projection: nameWithVariants,
+      },
+    },
+    meta: {
+      headers: {
+        ...getAuthHeader(),
       },
     },
     queryOptions: {

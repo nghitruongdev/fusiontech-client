@@ -1,4 +1,5 @@
 /** @format */
+import Image from 'next/image'
 
 const Description = () => {
   return (
@@ -17,10 +18,12 @@ const Description = () => {
               cong tạo cảm giác mềm mại. Đánh giá tổng thể thì chiếc máy này sẽ
               thích hợp với những bạn thích sự đơn giản và nhẹ nhàng.
             </p>
-            <img
+            <Image
               src='https://storage.googleapis.com/teko-gae.appspot.com/media/image/2023/3/31/20230331_41513c79-8123-4e20-b49b-26d013f0146a.png' // Đường dẫn của hình ảnh từ mạng
               alt='Product Image' // Text mô tả hình ảnh (không bắt buộc)
               className='w-full h-auto rounded-lg shadow-md' // Các lớp CSS của Tailwind CSS
+              width={500}
+              height={500}
             />
           </div>
         </div>
@@ -37,10 +40,12 @@ const Description = () => {
               tự tin sử dụng mượt mà các ứng dụng học tập như Word, PowerPoint,…
               đến những ứng dụng sáng tạo hình ảnh, video như Canva, ProShow,…
             </p>
-            <img
+            <Image
               src='https://storage.googleapis.com/teko-gae.appspot.com/media/image/2023/3/31/20230331_5dfd781a-ae5c-4845-bdd1-8e2270973fe3.png' // Đường dẫn của hình ảnh từ mạng
               alt='Product Image' // Text mô tả hình ảnh (không bắt buộc)
               className='w-full h-auto rounded-lg shadow-md' // Các lớp CSS của Tailwind CSS
+              width={500}
+              height={500}
             />
           </div>
         </div>
@@ -59,10 +64,12 @@ const Description = () => {
               điều kiện ánh sáng phức tạp vì chất lượng hiển thị hình ảnh của
               màn hình không được tốt.
             </p>
-            <img
+            <Image
               src='https://storage.googleapis.com/teko-gae.appspot.com/media/image/2023/3/31/20230331_997bb1da-87eb-482c-872d-7ac8ee6a75b4.png' // Đường dẫn của hình ảnh từ mạng
               alt='Product Image' // Text mô tả hình ảnh (không bắt buộc)
               className='w-full h-auto rounded-lg shadow-md' // Các lớp CSS của Tailwind CSS
+              width={500}
+              height={500}
             />
           </div>
         </div>

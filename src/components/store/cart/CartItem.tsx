@@ -179,7 +179,7 @@ CartItem.ProductInfoPrice = function ProductPrice() {
           </p>
           <div className='flex items-center text-xs gap-2'>
             <p className='bg-green-200 text-[8px] uppercase px-2 py-[1px]'>
-              Tiết kiệm được | {`-${discount}%`}
+              Tiết kiệm | {`-${discount}%`}
             </p>
             <p className='text-[#2a8703] font-semibold'>
               {formatPrice(discountTotal)}

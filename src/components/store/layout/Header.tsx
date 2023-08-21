@@ -16,6 +16,7 @@ import {
   UserInfo,
   VerifyMailBanner,
 } from './header-client'
+import { Phone, Cpu, Laptop, Tv, BadgePercent } from 'lucide-react'
 
 const Header = async () => {
   return (
@@ -24,6 +25,7 @@ const Header = async () => {
       <div className='w-full bg-blue-600 text-white sticky top-0 z-40'>
         <div className='w-full h-full border-b-[1px] border-b-white'>
           <VerifyMailBanner />
+          {/* @ts-expect-error Server Component */}
           <Header.Navbar />
         </div>
         <Header.Bottom />
@@ -79,25 +81,43 @@ Header.Bottom = () => {
             src={phoneImg}
             alt='phoneImg'
           />
-          <p className='text-sm font-semibold'>How do you want your items?</p>
+          <p className='text-sm font-semibold'>Hướng dẫn đặt hàng?</p>
           <FiChevronDown />
           <span className='w-[1px] h-4 bg-white inline-flex ml-2'></span>
         </div>
         <div className='flex items-center gap-2'>
+          <Phone size={16} />
+          <p className='text-sm text-zinc-100'>098366622</p>
+
           <MdOutlineLocationOn />
-          <p className='text-sm text-zinc-100'>Sacramento, 95829</p>
+          <p className='text-sm text-zinc-100'>Tòa nhà QTSC9 (toà T)</p>
           <FaPlaceOfWorship />
-          <p className='text-sm text-zinc-100'>Sacramento Supercenter</p>
+          <p className='text-sm text-zinc-100'>
+            Tân Chánh Hiệp, quận 12, TP HCM
+          </p>
         </div>
       </div>
       <ul className='flex gap-6 text-sm font-semibold'>
-        <li className='bottomNavLi'>Deals</li>
-        <li className='bottomNavLi'>Deals</li>
-        <li className='bottomNavLi'>Deals</li>
-        <li className='bottomNavLi'>Deals</li>
-        <li className='bottomNavLi'>Deals</li>
-        <li className='bottomNavLi'>Deals</li>
-        <li className='bottomNavLi'>Deals</li>
+        <li className='bottomNavLi gap-2 flex'>
+          {/* <Cpu size={16} /> */}
+          <p className='text-sm text-zinc-100'>Phụ kiện</p>
+        </li>
+        <li className='bottomNavLi gap-2 flex'>
+          {/* <Laptop size={16} /> */}
+          <p className='text-sm text-zinc-100'>Laptop</p>
+        </li>
+        <li className='bottomNavLi gap-2 flex'>
+          {/* <Phone size={16} /> */}
+          <p className='text-sm text-zinc-100'>Điện thoại</p>
+        </li>
+        <li className='bottomNavLi gap-2 flex'>
+          {/* <Tv size={16} /> */}
+          <p className='text-sm text-zinc-100'>Hàng cũ</p>
+        </li>
+        <li className='bottomNavLi gap-2 flex'>
+          {/* <BadgePercent size={16} /> */}
+          <p className='text-sm text-zinc-100'>Giảm giá</p>
+        </li>
       </ul>
     </div>
   )

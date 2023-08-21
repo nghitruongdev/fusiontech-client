@@ -6,7 +6,7 @@ import {
   useSearchParams,
 } from 'next/navigation'
 import { stringifyUrl } from 'query-string'
-import { KeyboardEvent, useMemo } from 'react'
+import { KeyboardEvent, useCallback, useMemo } from 'react'
 import { Option } from 'types'
 export const formatPrice = (amount?: number) => {
   if (!amount) return 0
@@ -54,10 +54,27 @@ export const useCurrentUrl = () => {
     searchParams.forEach((value, key) => (query[key] = value))
     return stringifyUrl({ url: pathName, query })
   }, [pathName, searchParams])
-
-  return
 }
 
+export const useUrl = () => {
+  const searchParams = useSearchParams()
+  const pathName = usePathname()
+  const updateParam = useCallback(
+    (params: Record<string, any>) => {
+      const query = Array.from(searchParams)
+        .concat(Object.entries(params))
+        .reduce((acc, [key, value]) => {
+          acc[key] = value
+          return acc
+        }, {} as typeof params)
+      return stringifyUrl({ url: pathName, query })
+    },
+    [searchParams, pathName],
+  )
+  return {
+    updateParam,
+  }
+}
 export const cleanUrl = (dirtyUrl: string) => {
   return dirtyUrl.replace(/{.*}/, '')
 }

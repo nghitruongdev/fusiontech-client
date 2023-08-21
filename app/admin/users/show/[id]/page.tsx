@@ -12,8 +12,7 @@ import { IUser } from 'types'
 export default function ShowPage() {
   return <UserShow />
 }
-
-export const UserShow: React.FC<IResourceComponentsProps> = () => {
+const UserShow: React.FC<IResourceComponentsProps> = () => {
   const { queryResult } = useShow<IUser>()
   const { data, isLoading } = queryResult
 

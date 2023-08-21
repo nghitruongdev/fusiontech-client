@@ -1,4 +1,8 @@
-/** @format */
+/**
+ * @ts-expect-error Async Server Component
+ * eslint-disable react/display-name
+ *  @format
+/*  */
 
 import ReviewComponent from './(review)/Review'
 import Description from './Description'
@@ -25,14 +29,15 @@ import { API, API_URL } from 'types/constants'
 
 type Props = {
   params: {
-    id: string
+    slug: string
   }
 }
 const DynamicContextProvider = dynamic(() => import('./product-client'), {
   ssr: false,
 })
 
-const Product = async ({ params: { id } }: Props) => {
+const Product = async ({ params: { slug } }: Props) => {
+  const id = slug.substring(0, slug.indexOf('-'))
   Product.Id = id
   const product = await getOneProduct(id)
   return (
@@ -47,7 +52,8 @@ const Product = async ({ params: { id } }: Props) => {
             <div className='col-span-1 flex flex-col gap-2 '>
               <div className='p-4 pt-0 rounded-lg flex flex-col gap-6 shadow-lg border'>
                 <ProductFavoriteDetails />
-                <Product.Info />  
+                {/* @ts-expect-error Async Server Component */}
+                <Product.Info />
               </div>
             </div>
           </div>
@@ -69,11 +75,12 @@ const Product = async ({ params: { id } }: Props) => {
   )
 }
 Product.Id = ''
-Product.  Info = async () => {
+Product.Info = async () => {
   const { name } = await getOneProduct(Product.Id)
   return (
     <>
       <div className='flex flex-col gap-1'>
+        {/* @ts-expect-error Async Server Component */}
         <Product.Brand />
         <p className='text-2xl font-bold text-zinc-700'>{name}</p>
         <ProductRating />
@@ -96,6 +103,7 @@ Product.  Info = async () => {
           <ProductCartButton />
         </Suspense>
         {/* Add to cart  */}
+        {/* @ts-expect-error Async Server Component */}
         <Product.KeyFeatures />
       </div>
     </>

@@ -3,13 +3,30 @@
 'use client'
 import { ICartItem, IVariant } from 'types'
 import { useFetch, useUpdateEffect } from 'usehooks-ts'
-import { Suspense, createContext, useContext, useRef } from 'react'
+import {
+  Suspense,
+  createContext,
+  useContext,
+  useRef,
+  useEffect,
+  PropsWithChildren,
+} from 'react'
 import CartItem from './CartItem'
 import { useSelectedCartItemStore } from './useSelectedItemStore'
 import useCart, { useCartItems } from './useCart'
-import { Button } from '@chakra-ui/react'
+import {
+  Button,
+  HStack,
+  Image,
+  Skeleton,
+  SkeletonText,
+  useBoolean,
+} from '@chakra-ui/react'
 import { useDialog } from '@components/ui/DialogProvider'
-import { Inbox } from 'lucide-react'
+import { ShoppingBag } from 'lucide-react'
+import Link from 'next/link'
+import { v4 as uuidv4 } from 'uuid'
+import dynamic from 'next/dynamic'
 
 const CartItemList = () => {
   const data = useFetch<IVariant[]>('/api/products', {})
@@ -17,7 +34,6 @@ const CartItemList = () => {
     <div about='Cart Item List'>
       <div className='flex flex-col gap-2'>
         <CartItemList.Provider>
-          <CartItemList.Header />
           <Suspense fallback='Loading items in cart....'>
             <CartItemList.Body />
           </Suspense>
@@ -61,11 +77,6 @@ CartItemList.Header = function Header() {
           ({Object.keys(items).length ?? 0} sản phẩm)
         </span>
       </h1>
-      {/* <div className="text-xl font-bold flex items-center gap-2 mb-2">
-                <Image className="w-10" src={phoneImg} alt="phoneImage" />
-                <p>Pickup and delivery options</p>
-            </div> */}
-
       <CartItemList.ClearAllButton />
     </div>
   )
@@ -101,19 +112,18 @@ CartItemList.ClearAllButton = function ClearAllButton() {
 }
 
 CartItemList.Body = function Body() {
-  const { items } = useListContext()
-  // use(
-  //     new Promise((res) => {
-  //         if (ctx.status === "success") {
-  //             res(undefined);
-  //         }
-  //     }),
-  // );
-  // if i use like this, will cause hydration failed
-  // if (status === "loading") return <>Loading items in your cart...</>;
+  const { items, status } = useListContext()
+  const [shouldShow, { on: showOn }] = useBoolean()
+  useEffect(() => {
+    setTimeout(() => {
+      showOn()
+    }, 1000)
+  }, [])
+  if (!shouldShow) return <CartItemList.Loading />
   return (
     <>
-      <div className='w-full p-5 border-[1px] border-zinc-400 rounded-md flex flex-col gap-4'>
+      <CartItemList.Header />
+      <div className='w-full p-5 border-[1px] border-zinc-400 rounded-md flex flex-col gap-2'>
         <div className='flex justify-between'>
           <CartItemList.SelectAllCheckbox />
           <div className='flex'>
@@ -129,19 +139,29 @@ CartItemList.Body = function Body() {
           </div>
         </div>
         <div className=''>
-          <div className='grid grid-cols-1 gap-2 border-b-[1px] border-b-zinc-200 pb-2'>
+          <div className='grid grid-cols-1 gap-2  border-b-zinc-200 pb-2'>
             {!items.length && (
-              <div className='flex flex-col items-center justify-center'>
-                <Inbox className='w-28 h-28 text-gray-500' />
-                <p className='text-muted-foreground text-sm'>
-                  Không có dữ liệu
+              <div className='flex flex-col gap-2 items-center'>
+                <Image
+                  src='https://media.istockphoto.com/id/1139666909/vector/shopping-cart-shop-trolley-or-basket-in-the-supermarket.jpg?s=612x612&w=0&k=20&c=_HajO7ifYKxuwzKFf-Fx9lsLKBa_1Rq9vuzGiPq8Q5Q='
+                  className='h-[300px]'
+                />
+                <p className='font-sans text-2xl font-bold text-zinc-500 mb-2'>
+                  Giỏ hàng của bạn trống
                 </p>
+                <Button className=' bg-primaryBlue'>
+                  <Link
+                    href='/'
+                    className='flex gap-2 items-center text-zinc-500'>
+                    Quay trở lại mua sắm <ShoppingBag />
+                  </Link>
+                </Button>
               </div>
             )}
             {items.map((item) => (
               <CartItem
                 item={item}
-                key={item.id ?? Math.random()}
+                key={item.id ?? uuidv4()}
               />
             ))}
           </div>
@@ -151,6 +171,33 @@ CartItemList.Body = function Body() {
   )
 }
 
+CartItemList.Loading = function CartItemLoading({
+  children,
+}: PropsWithChildren) {
+  return (
+    <>
+      <p className='h-[32px]'></p>
+      <div className='grid gap-4'>
+        {Array.from({ length: 3 }).map((item) => (
+          <div className='grid grid-cols-3'>
+            <Skeleton
+              w='90%'
+              h='150px'
+              textColor={'gray.500'}
+              mx='auto'
+            />
+            <SkeletonText
+              noOfLines={5}
+              spacing='2'
+              skeletonHeight='6'
+              className=' !col-span-2'
+            />
+          </div>
+        ))}
+      </div>
+    </>
+  )
+}
 CartItemList.SelectAllCheckbox = function AllCheckbox() {
   const allRef = useRef<HTMLInputElement>(null)
   const { items } = useListContext()

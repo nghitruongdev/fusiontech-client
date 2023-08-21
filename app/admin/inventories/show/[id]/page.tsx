@@ -238,6 +238,7 @@ const DynamicModalForm = dynamic(
 )
 const useData = () => {
   const { queryResult } = useShow<IInventory>()
+  const { getAuthHeader } = useHeaders()
   const record = queryResult.data?.data
   const itemsQueryKey = [record?._links?.items?.href]
 
@@ -247,6 +248,9 @@ const useData = () => {
     method: 'get',
     meta: {
       resource,
+      headers: {
+        ...getAuthHeader(),
+      },
     },
     queryOptions: {
       enabled: !!record,
@@ -266,6 +270,9 @@ const useData = () => {
     meta: {
       query: {
         projection: withProductBasic,
+      },
+      headers: {
+        ...getAuthHeader(),
       },
     },
     queryOptions: {

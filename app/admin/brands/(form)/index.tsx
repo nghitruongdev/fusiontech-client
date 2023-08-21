@@ -40,6 +40,7 @@ import { SLUG_PATTERN } from '@/lib/validate-utils'
 import { Info } from 'lucide-react'
 import { AppError } from 'types/error'
 import { ActionText } from 'types/constants'
+import { useHeaders } from '@/hooks/useHeaders'
 
 type ContextProps = {
   action: 'create' | 'edit'
@@ -74,9 +75,18 @@ Form.Provider = function Provider({
     resource: 'brands',
   })
 
+  const { getAuthHeader, _isHydrated } = useHeaders()
   const formProps = useForm<IBrand, AppError, IBrandField>({
     refineCoreProps: {
       redirect: 'list',
+      //   queryOptions: {
+      //     enabled: _isHydrated,
+      //   },
+      meta: {
+        headers: {
+          ...getAuthHeader(),
+        },
+      },
       errorNotification: onError,
       successNotification: onSuccess.bind(null, action),
     },
@@ -112,6 +122,11 @@ Form.Provider = function Provider({
         })
         console.log('result', result)
       })(e)
+    },
+    meta: {
+      headers: {
+        ...getAuthHeader(),
+      },
     },
   }
   return (

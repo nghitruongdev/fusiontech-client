@@ -17,8 +17,8 @@ export default function StoreLayout({
   return (
     <div>
       <RefineProvider>
+        {/* @ts-expect-error Async Server Component */}
         <Header />
-        {/* <Link href="/test">Go to test</Link> */}
         <main>{children}</main>
         <Footer />
       </RefineProvider>

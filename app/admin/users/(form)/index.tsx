@@ -1,6 +1,6 @@
 /** @format */
 
-import { Create } from '@components/crud/create'
+import * as create from '@components/crud/create'
 import { Edit } from '@components/crud/edit'
 import { useForm } from '@refinedev/react-hook-form'
 import { HttpError } from 'http-errors'
@@ -39,6 +39,7 @@ import useCrudNotification, {
 import { BaseType, EMAIL_PATTERN, PHONE_PATTERN } from '@/lib/validate-utils'
 import useDebounceFn from '@/hooks/useDebounceFn'
 import { validateUserEmailExists, validateUserPhoneExists } from './utils'
+import { useHeaders } from '@/hooks/useHeaders'
 
 const USER_MESSAGE = ERRORS['users']
 type ContextProps = {
@@ -73,8 +74,14 @@ Form.Provider = function Provider({
   const { uploadImages, removeImages } = useUploadImage({
     resource: 'users',
   })
+  const { getAuthHeader, _isHydrated } = useHeaders()
   const formProps = useForm<IUser, HttpError, IUserForm>({
     refineCoreProps: {
+      meta: {
+        headers: {
+          ...getAuthHeader(),
+        },
+      },
       errorNotification: onError,
       successNotification: onSuccess.bind(null, action),
     },
@@ -142,11 +149,11 @@ Form.Container = function Container({ children }: PropsWithChildren) {
     )
 
   return (
-    <Create
+    <create.Create
       isLoading={formLoading}
       saveButtonProps={saveButtonProps}>
       {children}
-    </Create>
+    </create.Create>
   )
 }
 
@@ -378,6 +385,7 @@ Form.Gender = function Gender() {
       isRequired>
       <FormLabel>Giới tính</FormLabel>
       <Select
+        title='gender'
         defaultValue={'MALE'}
         {...register(`gender`)}>
         <option

@@ -5,15 +5,9 @@ import { Heart } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useBoolean } from '@chakra-ui/react'
 import useFavorite, { useFavoriteStore } from '@/hooks/useFavorite'
-import { useProductCardContext } from './ProductCardProvider'
 import { IProduct } from 'types'
 import { cn } from 'components/lib/utils'
 import { BaseSyntheticEvent } from 'react'
-
-export const FavoriteButtonWithCardProvider = () => {
-  const { product } = useProductCardContext()
-  return <FavoriteButton product={product} />
-}
 
 export const FavoriteButton = ({
   product,

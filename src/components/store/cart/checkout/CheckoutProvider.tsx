@@ -98,7 +98,7 @@ export const CheckoutProvider = ({ children }: ProviderProps) => {
         ({ variantId, variant: { price, product } = {}, quantity }) => ({
           variantId,
           quantity,
-          price: ((100 - (product?.discount ?? 0)) / 100) * price,
+          price: ((100 - (product?.discount ?? 0)) / 100) * (price ?? 0),
         }),
       )
       await waitPromise(2000)

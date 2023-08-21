@@ -2,9 +2,7 @@
 'use client'
 import React from 'react'
 import { BiChevronLeft, BiChevronRight } from 'react-icons/bi'
-import {
-  IVariant,
-} from 'types'
+import { IOrder, IVariant } from 'types'
 
 import { API, API_URL } from 'types/constants'
 import { useCustom, useOne, useMany } from '@refinedev/core'
@@ -22,8 +20,8 @@ const OrderDetailPage = () => {
   const { user } = useAuthUser()
   console.log(id)
   // Đoạn code để lấy thông tin đơn hàng dựa vào orderId
-  const orderFull = `http://localhost:8080/api/orders/${id}?projection=full`
-  const { data: orderData } = useCustom({
+  const orderFull = `orders/${id}?projection=full`
+  const { data: orderData } = useCustom<IOrder>({
     url: orderFull,
     method: 'get',
     queryOptions: {
@@ -104,7 +102,6 @@ const OrderDetailPage = () => {
     },
   })
 
-
   return (
     <div className='mx-auto '>
       <div className='flex items-center'>
@@ -158,7 +155,7 @@ const OrderDetailPage = () => {
         <h2 className='text-base font-semibold mb-4'>Sản phẩm</h2>
         {variantData?.data.map((variant: any) => {
           const selectedItem = orderData?.data.items.find(
-            (item: any) =>  item.variant.id === variant.id,
+            (item: any) => item.variant.id === variant.id,
           )
 
           return (
@@ -174,16 +171,16 @@ const OrderDetailPage = () => {
               </div>
               <div className='ml-4 w-3/5 space-y-1'>
                 <p className='text-sm'>{variant.product?.name}</p>
-                <p className='text-xs text-gray-500'>
-                  SKU: {variant.sku}
-                </p>
+                <p className='text-xs text-gray-500'>SKU: {variant.sku}</p>
                 <p className='text-xs text-gray-500'>
                   Cung cấp bởi <span className='text-blue-500'>FusionTech</span>
                 </p>
               </div>
               <div className='w-1/5 text-right mt-4'>
                 <p>{formatPrice(variant.price)}</p>
-                <p className='text-xs text-gray-500'>X{selectedItem.quantity}</p>
+                <p className='text-xs text-gray-500'>
+                  X{selectedItem.quantity}
+                </p>
               </div>
             </div>
           )
@@ -204,7 +201,9 @@ const OrderDetailPage = () => {
         <div className='flex justify-between'>
           <p className='text-muted text-sm text-zinc-500'>Mã giảm giá</p>
           <p className='text-sm'>{orderData?.data.voucher.code}</p>
-          <p className='font-medium text-md text-zinc-600'>{formatPrice(orderData?.data.voucher.discount)}</p>
+          <p className='font-medium text-md text-zinc-600'>
+            {formatPrice(orderData?.data.voucher.discount)}
+          </p>
         </div>
         <div className='flex justify-between items-center '>
           <p className='text-muted text-sm text-zinc-500  '>Thành tiền</p>

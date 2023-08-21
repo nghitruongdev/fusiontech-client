@@ -7,6 +7,7 @@ import { DeleteButton } from '@components/buttons'
 import { useCustom } from '@refinedev/core'
 import { API } from 'types/constants'
 import React from 'react'
+import { useHeaders } from '@/hooks/useHeaders'
 
 export const DeleteProductButton: FC<
   DeleteButtonProps & { productId: string | number | undefined }
@@ -39,6 +40,11 @@ export const useHasImportInventory = (
     queryOptions: {
       enabled: !!productId,
     },
+    // meta: {
+    //   headers: {
+    //     ...getAuthHeader(),
+    //   },
+    // },
   })
   return {
     data: data as unknown as boolean | undefined,

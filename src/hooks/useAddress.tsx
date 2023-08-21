@@ -1,3 +1,5 @@
+/** @format */
+
 // import { Address } from "@/domain/Address";
 // import { Input } from "@chakra-ui/react";
 // import { useEffect } from "react";
@@ -74,3 +76,4 @@
 //     };
 // };
 // export default useAddressForm;
+export function useDeprecatedAddress() {}

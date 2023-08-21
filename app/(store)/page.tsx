@@ -1,7 +1,6 @@
 /** @format */
 
 import Banner from '@components/store/front/Banner'
-import ProductList from '@components/store/front/ProductList'
 import { Skeleton } from '@components/ui/Skeleton'
 import { Metadata } from 'next'
 import { Suspense } from 'react'
@@ -9,14 +8,22 @@ import Banner1 from '@components/store/front/BannerSale'
 import Category from '@components/store/front/Category'
 import BannerSale from '@components/store/front/BannerSale'
 import Benefits from '@components/store/front/Benefits'
-import Newest from '@components/store/front/Newest'
-import SellingProducts from '@components/store/front/SellingProducts'
+
 import Brands from '@components/store/front/Brands'
 import CardSaleBody from '@components/store/front/CardSaleBody'
 import FusionNews from '@components/store/front/FusionNews'
 import RecentProductView from '@components/store/front/section/RecentProductView'
-import AllProducts from '@components/store/front/AllProducts'
-import HotProduct from '@components/store/front/HotProducts'
+
+import {
+  DiscountList,
+  Newest,
+  HotProduct,
+  SellingProducts,
+  AllProducts,
+} from '@components/store/front/product-list'
+
+import 'slick-carousel/slick/slick.css'
+import 'slick-carousel/slick/slick-theme.css'
 
 const metadata: Metadata = {
   title: 'FushionTech - Official Store',
@@ -46,13 +53,11 @@ const HomePage = async () => {
       <main>
         <div className='max-w-contentContainer mx-auto '>
           <Suspense>
-            <div className=''>
-              <Banner />
-            </div>
+            <Banner className='p-8' />
           </Suspense>
           <Suspense fallback={<ProductLoading />}>
             <div className='mx-20'>
-              <ProductList />
+              <DiscountList />
               {/* @ts-expect-error Async Server Component */}
               <Category />
               <CardSaleBody />

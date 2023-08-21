@@ -140,18 +140,18 @@ export const ProductImages = () => {
 
   return (
     <div className='grid grid-rows-1 gap-4 mb-10'>
-      <div className='row-span-1 bg-white flex items-center justify-center border shadow rounded-lg'>
-        <div className='h-[400px] p-10 flex items-center'>
+      <div className='h-[90%] bg-white row-span-1 flex items-center justify-center border shadow rounded-lg'>
+        <div className=' p-10 flex items-center'>
           <Image
             src={images?.[selectedImageIndex] ?? ''}
             width={500}
             height={500}
             alt='product image'
-            className='max-h-[350px] object-cover cursor-move duration-500 '
+            className=' object-cover cursor-move duration-500 '
           />
         </div>
       </div>
-      <div className='flex flex-row items-center '>
+      <div className='h-[10%] flex flex-row items-center '>
         {images?.map((item, idx) => (
           <div
             key={`${idx}-${item}`}

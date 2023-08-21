@@ -41,8 +41,7 @@ export default function CreatePage() {
   //   return <InventoryCreate />
   return <InventoryForm action='create' />
 }
-
-export const InventoryCreate: React.FC<IResourceComponentsProps> = () => {
+const InventoryCreate: React.FC<IResourceComponentsProps> = () => {
   const {
     refineCore: { formLoading, onFinish },
     register,

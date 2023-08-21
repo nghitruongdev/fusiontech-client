@@ -1,6 +1,6 @@
 /** @format */
 
-import axiosClient from './axiosClient'
+import axiosClient from './axios-client'
 import { API_URL } from 'types/constants'
 
 const userApi = {

@@ -100,6 +100,7 @@ import { SLUG_PATTERN } from '@/lib/validate-utils'
 import { ChakraCurrencyInput } from '@components/ui/ChakraCurrencyInput'
 import { DeleteButton, SaveButton } from '@components/buttons'
 import { DeleteProductButton } from './DeleteProductButton'
+import { useHeaders } from '@/hooks/useHeaders'
 
 type ContextProps = {
   action: 'create' | 'edit'
@@ -123,6 +124,7 @@ const ProductFormProvider = ({
     projection: { specifications: attributes },
   } = API['products']()
   const { push } = useRouter()
+  const { getAuthHeader, _isHydrated } = useHeaders()
   const { uploadImages, removeImages } = useUploadImage({
     resource: 'products',
   })
@@ -131,6 +133,9 @@ const ProductFormProvider = ({
       meta: {
         query: {
           projection: attributes,
+        },
+        headers: {
+          ...getAuthHeader(),
         },
       },
       redirect: false,

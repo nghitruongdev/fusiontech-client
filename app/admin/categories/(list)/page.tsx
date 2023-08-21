@@ -16,8 +16,7 @@ import { Images } from 'types/constants'
 export default function ListPage() {
   return <CategoriesList />
 }
-
-export const CategoriesList: React.FC<IResourceComponentsProps> = () => {
+const CategoriesList: React.FC<IResourceComponentsProps> = () => {
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
       {

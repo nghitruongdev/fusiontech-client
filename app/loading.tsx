@@ -1,7 +1,6 @@
 /** @format */
 
 import React from 'react'
-import LoadingCart from './(store)/cart/loading'
 import Image from 'next/image'
 import { loginImg } from '@public/assets/images'
 import { cn } from 'components/lib/utils'

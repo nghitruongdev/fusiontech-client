@@ -18,7 +18,7 @@ export default function ListPage() {
   return <BrandList />
 }
 
-export const BrandList: React.FC<IResourceComponentsProps> = () => {
+const BrandList: React.FC<IResourceComponentsProps> = () => {
   const columns = React.useMemo<ColumnDef<any>[]>(
     () => [
       {

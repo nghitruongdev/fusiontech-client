@@ -2,28 +2,29 @@
 
 'use client'
 import productAPI from '@/API/productAPI'
-import { useSearchParams } from 'next/navigation'
+import { usePathname, useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { IProduct } from 'types'
-import SearchResult from './search-result'
+import SearchResult from '../../search-result'
 
-export default function Page() {
-  const param = useSearchParams() // Lấy keyword từ URL
-  const keyword = param.get('keyword')
+const Page = () => {
   const [searchResults, setSearchResults] = useState<IProduct[]>([])
+  const { slug } = useParams()
 
   useEffect(() => {
+    const slugStr = slug as string
+    const cid = slugStr.substring(0, slugStr.indexOf('-'))
     const fetchSearchResults = async () => {
       try {
-        const responseByKeyword = await productAPI.searchByKeyword(keyword)
-        setSearchResults(responseByKeyword.data._embedded.products)
+        const responseByCid = await productAPI.searchByCategoryId(cid)
+        setSearchResults(responseByCid.data._embedded.products)
       } catch (error) {
         console.error('Error fetching search results:', error)
       }
     }
-
     fetchSearchResults()
-  }, [keyword])
-
+  }, [slug])
+  console.log(searchResults)
   return <SearchResult items={searchResults} />
 }
+export default Page

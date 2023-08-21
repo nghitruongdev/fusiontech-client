@@ -45,6 +45,7 @@ import React, {
   useState,
 } from 'react'
 import { useTable } from '@refinedev/react-table'
+import { useHeaders } from '@/hooks/useHeaders'
 import { ColumnDef } from '@tanstack/react-table'
 import { List } from '@refinedev/chakra-ui'
 import { TableContainer, Table } from '@chakra-ui/react'
@@ -66,6 +67,7 @@ import {
 } from '@components/buttons'
 import { variantTableColumns as columns } from 'app/admin/variants/(list)/columns'
 import { DeleteProductButton } from '../../(form)/DeleteProductButton'
+import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
 
 const ProductShowPage = () => {
   return (
@@ -491,6 +493,7 @@ const ContextProvider = ({ children }: PropsWithChildren) => {
   const showProps = useShow<IProduct>()
   const { data: { data: record } = {} } = showProps.queryResult
 
+  const { getAuthHeader } = useHeaders()
   const { replace, push } = useRouter()
   const params = useSearchParams()
   const pathname = usePathname()
@@ -540,6 +543,9 @@ const ContextProvider = ({ children }: PropsWithChildren) => {
         url: cleanUrl(record?._links?.variants.href ?? ''),
         query: {
           projection,
+        },
+        headers: {
+          ...getAuthHeader(),
         },
       },
     },
