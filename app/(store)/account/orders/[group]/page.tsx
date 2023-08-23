@@ -18,6 +18,7 @@ import Link from 'next/link'
 import React from 'react'
 import { Badge } from '@chakra-ui/react'
 import { onError } from '@/hooks/useCrudNotification'
+import { NoData } from '@components/no-result/NoData'
 const useGetOrderByGroup = (group: string) => {
   const { authHeader } = useHeaders()
   const {
@@ -41,9 +42,9 @@ const useGetOrderByGroup = (group: string) => {
   })
   const statusParam = statusList?.map((item) => item.name).join(',')
 
-  const { claims: { id } = {}, userProfile } = useAuthUser()
-  const { data: { data } = {} } = useCustom<IOrder[]>({
-    url: findOrderByUserAndStatus(id ?? userProfile?.id, statusParam),
+  const { userProfile } = useAuthUser()
+  const { data: { data: orders } = {}, status } = useCustom<IOrder[]>({
+    url: findOrderByUserAndStatus(userProfile?.id, statusParam),
     method: 'get',
     meta: {
       resource: 'orders',
@@ -57,14 +58,16 @@ const useGetOrderByGroup = (group: string) => {
       },
     },
     queryOptions: {
-      enabled: (!!id || !!userProfile?.id) && !!statusParam && !!authHeader,
+      enabled: !!userProfile?.id && !!statusParam && !!authHeader,
     },
   })
-  return data
+  return { orders, status }
 }
 
 const OrderByGroup = ({ params: { group } }: { params: { group: string } }) => {
-  const orders = useGetOrderByGroup(group)
+  const { orders, status } = useGetOrderByGroup(group)
+  if (!orders?.length && status !== 'loading')
+    return <NoData>Bạn vẫn chưa đặt đơn hàng nào :(</NoData>
   return (
     <div>
       <div className='bg-white rounded-lg overflow-y-auto'>
@@ -72,10 +75,10 @@ const OrderByGroup = ({ params: { group } }: { params: { group: string } }) => {
           <thead>
             <tr>
               <th className='px-4 py-4'>Mã đơn hàng</th>
-              <th className='px-4 py-4'>Ngày mua</th>
               <th className='px-4 py-4'>Tổng tiền</th>
               <th className='px-4 py-4'>Trạng thái</th>
               <th className='px-4 py-4'>Thanh Toán</th>
+              <th className='px-4 py-4'>Ngày mua</th>
             </tr>
           </thead>
           <tbody>

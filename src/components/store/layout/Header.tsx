@@ -16,6 +16,7 @@ import {
   VerifyMailBanner,
 } from './header-client'
 import { Phone } from 'lucide-react'
+import NextLinkContainer from '@components/ui/NextLinkContainer'
 
 const Header = async () => {
   return (
@@ -61,16 +62,15 @@ Header.Logo = function HeaderLogo() {
 
 Header.FavoriteButton = function HeaderFavoriteButton() {
   return (
-    <div className='navBarHover'>
+    <NextLinkContainer
+      href='/account/favorites'
+      className='navBarHover'>
       <AiOutlineHeart className='text-lg' />
       <div className=''>
-        {/* <p className='text-xs'>Sắp</p> */}
-        <div className=''>
-          <p className='text-xs'>Sản phẩm</p>
-          <h2 className='text-base font-semibold -mt-1'>yêu thích +</h2>
-        </div>
+        <p className='text-xs'>Sản phẩm</p>
+        <h2 className='text-base font-semibold -mt-1'>yêu thích +</h2>
       </div>
-    </div>
+    </NextLinkContainer>
   )
 }
 Header.Bottom = function HeaderBottom() {

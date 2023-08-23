@@ -9,7 +9,6 @@ import RevenueWidget from '@components/statistical/widget/revenue'
 import RevenueDayWidget from '@components/statistical/widget/revenueDay'
 
 import {
-  BarChart,
   Bar,
   XAxis,
   YAxis,
@@ -22,7 +21,8 @@ import {
   Area,
   ComposedChart,
 } from 'recharts'
-import React, { useEffect } from 'react'
+import React from 'react'
+
 const AdminDashboard = () => {
   const viewData = [
     { name: 'January', views: 30 },
@@ -71,6 +71,65 @@ const AdminDashboard = () => {
       amt: 1700,
     },
   ]
+
+  // const {
+  //   getSellingProducts,
+  //   resource: productResource,
+  //   projection: { full },
+  // } = API.products()
+
+  // const { getAuthHeader } = useHeaders()
+
+  // const startDate = new Date('2022-08-30')
+  // const endDate = new Date('2024-08-30')
+
+  // // Lấy dữ liệu bán hàng sản phẩm
+  // const { data: { data: sellingProduct } = {} } = useCustom<
+  //   { id: number; sold: number }[]
+  // >({
+  //   url: `${getSellingProducts(startDate, endDate)}`,
+  //   method: 'get',
+  //   meta: { productResource },
+  //   config: {
+  //     headers: {
+  //       ...getAuthHeader(),
+  //     },
+  //   },
+  // })
+
+  // const productRecord: Record<number, { id: number; sold: number }> = {}
+  // sellingProduct?.forEach((item) => {
+  //   productRecord[item.id] = { id: item.id, sold: item.sold }
+  // })
+  // const idss = Object.keys(productRecord)
+
+  // // Lấy thông tin các sản phẩm dựa trên các ID đã lấy từ sellingProduct
+  // const { data: { data: products = [] } = {}, isFetching } = useMany<IProduct>({
+  //   resource: 'products',
+  //   ids: idss,
+  //   meta: {
+  //     query: {
+  //       projection: full,
+  //     },
+  //     headers: {
+  //       ...getAuthHeader(),
+  //     },
+  //   },
+  //   queryOptions: {
+  //     enabled: !!idss.length,
+  //   },
+  // })
+
+  // // Chuyển đổi dữ liệu để phù hợp với ComposedChart
+  // const composedChartData = products.map((product) => {
+  //   // const soldInfo = productRecord[product.id]
+  //   return {
+  //     name: product.name, // Tên sản phẩm
+  //     // uv: soldInfo ? soldInfo.sold : 0, // Số lượt bán
+  //     pv: product.maxPrice, // Giá sản phẩm (hoặc một thuộc tính khác nếu muốn)
+  //     amt: product.minPrice, // Số lượng tồn kho (hoặc một thuộc tính khác nếu muốn)
+  //   }
+  // })
   return (
     <div className='w-full'>
       <div className='grid grid-cols-4 mb-4'>

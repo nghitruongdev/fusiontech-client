@@ -4,10 +4,8 @@ import Banner from '@components/store/front/Banner'
 import { Skeleton } from '@components/ui/Skeleton'
 import { Metadata } from 'next'
 import { Suspense } from 'react'
-import Banner1 from '@components/store/front/BannerSale'
 import Category from '@components/store/front/Category'
 import BannerSale from '@components/store/front/BannerSale'
-import Benefits from '@components/store/front/Benefits'
 
 import Brands from '@components/store/front/Brands'
 import CardSaleBody from '@components/store/front/CardSaleBody'
@@ -20,6 +18,7 @@ import {
   HotProduct,
   SellingProducts,
   AllProducts,
+  ProductListSuspense,
 } from '@components/store/front/product-list'
 
 import 'slick-carousel/slick/slick.css'
@@ -47,6 +46,7 @@ const ProductLoading = () => {
     </div>
   )
 }
+
 const HomePage = async () => {
   return (
     <>
@@ -57,18 +57,33 @@ const HomePage = async () => {
           </Suspense>
           <Suspense fallback={<ProductLoading />}>
             <div className='mx-20'>
-              <DiscountList />
+              <ProductListSuspense>
+                <DiscountList />
+              </ProductListSuspense>
               {/* @ts-expect-error Async Server Component */}
               <Category />
+
               <CardSaleBody />
-              <SellingProducts />
-              <HotProduct />
-              <Newest />
-              <AllProducts />
+
+              <ProductListSuspense>
+                <SellingProducts />
+              </ProductListSuspense>
+              <ProductListSuspense>
+                <HotProduct />
+              </ProductListSuspense>
+              <ProductListSuspense>
+                <Newest />
+              </ProductListSuspense>
+              <ProductListSuspense>
+                <AllProducts />
+              </ProductListSuspense>
+
               <BannerSale />
               {/* <Benefits /> */}
               <Brands />
-              <RecentProductView />
+              <ProductListSuspense>
+                <RecentProductView />
+              </ProductListSuspense>
               <FusionNews />
             </div>
           </Suspense>

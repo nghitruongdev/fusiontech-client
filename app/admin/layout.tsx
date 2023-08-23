@@ -2,21 +2,19 @@
 
 'use client'
 
+import { useAuthStore, useAuthUser } from '@/hooks/useAuth/useAuthUser'
+import theme from '@/lib/chakra-theme'
 import { firestoreProvider } from '@/lib/firebase'
 import { firebaseAuth } from '@/providers/firebaseAuthProvider'
 import { springDataProvider } from '@/providers/rest-data-provider'
 import { ChakraProvider, ColorModeScript } from '@chakra-ui/react'
 import { Breadcrumb } from '@components/breadcrumb'
 import { ThemedLayoutV2 } from '@components/themedLayout'
-import {
-  RefineThemes,
-  notificationProvider,
-  refineTheme,
-} from '@refinedev/chakra-ui'
-import { Refine, useCustom } from '@refinedev/core'
+import { RefineThemes, notificationProvider } from '@refinedev/chakra-ui'
+import { Refine, usePermissions } from '@refinedev/core'
 import routerProvider from '@refinedev/nextjs-router/app'
 import AuthenticatedPage from 'app/(others)/authenticated'
-import { BarChart3, UserCircle, Users } from 'lucide-react'
+import { BarChart3, GaugeCircle, UserCircle, Users } from 'lucide-react'
 import { Cpu, LucideLaptop2, MemoryStick, ShoppingCart } from 'lucide-react'
 import { Warehouse } from 'lucide-react'
 import { Monitor, Ticket } from 'lucide-react'
@@ -36,7 +34,7 @@ export default function LayoutPage({
   return (
     <AuthenticatedPage
       redirect={`/auth/login?callbackUrl=/admin`}
-      permissions={[ROLES.STAFF]}>
+      permissions={[ROLES.STAFF, ROLES.ADMIN]}>
       <Layout>{children}</Layout>
     </AuthenticatedPage>
   )
@@ -44,14 +42,15 @@ export default function LayoutPage({
 
 function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
+  const authProvider = firebaseAuth.authProvider(router)
+  const { roles } = useAuthStore()
+  const isAdmin = roles.some((role) => role === ROLES.ADMIN)
   return (
     <div className='font-roboto'>
       <ChakraProvider theme={RefineThemes.Blue}>
-        <ColorModeScript
-          initialColorMode={refineTheme.config.initialColorMode}
-        />
+        <ColorModeScript initialColorMode={theme.initialColorMode} />
         <Refine
-          authProvider={firebaseAuth.authProvider(router)}
+          authProvider={authProvider}
           dataProvider={{
             default: springDataProvider,
             firestore: firestoreProvider,
@@ -71,12 +70,25 @@ function Layout({ children }: { children: React.ReactNode }) {
             },
             disableTelemetry: true,
             breadcrumb: <Breadcrumb />,
+
             redirect: {
               afterCreate: 'show',
               afterEdit: 'show',
             },
           }}
           resources={[
+            {
+              name: 'orders',
+              list: '/admin/orders',
+              // create: "/admin/or/create",
+              // edit: "/admin/products/edit/:id",
+              show: '/admin/orders/show/:id',
+              meta: {
+                canDelete: false,
+                label: 'Đơn hàng',
+                icon: <ShoppingCart size={18} />,
+              },
+            },
             {
               name: 'categories',
               list: '/admin/categories',
@@ -136,18 +148,6 @@ function Layout({ children }: { children: React.ReactNode }) {
               },
             },
             {
-              name: 'orders',
-              list: '/admin/orders',
-              // create: "/admin/or/create",
-              // edit: "/admin/products/edit/:id",
-              show: '/admin/orders/show/:id',
-              meta: {
-                canDelete: false,
-                label: 'Đơn hàng',
-                icon: <ShoppingCart size={18} />,
-              },
-            },
-            {
               name: 'inventories',
               list: '/admin/inventories',
               create: '/admin/inventories/create',
@@ -173,13 +173,23 @@ function Layout({ children }: { children: React.ReactNode }) {
             {
               name: 'stat',
               list: '/admin/stat',
-              // create: '/admin/categories/create',
-              // edit: '/admin/categories/edit/:id',
-              // show: '/admin/categories/show/:id',
               meta: {
                 canDelete: true,
                 label: 'Thống kê',
                 icon: <BarChart3 size={18} />,
+                hide: !isAdmin,
+              },
+            },
+            {
+              name: 'users',
+              identifier: 'user-customer',
+              list: '/admin/users/customers',
+              show: '/admin/users/customers/show/:id',
+              meta: {
+                label: 'Khách hàng',
+                icon: <UserCircle size={18} />,
+                canDelete: false,
+                hide: isAdmin,
               },
             },
             {
@@ -187,6 +197,7 @@ function Layout({ children }: { children: React.ReactNode }) {
               meta: {
                 label: 'Quản lý người dùng',
                 icon: <UserCircle size={18} />,
+                hide: !isAdmin,
               },
             },
             {
@@ -215,8 +226,22 @@ function Layout({ children }: { children: React.ReactNode }) {
                 canDelete: false,
               },
             },
+            {
+              name: 'users',
+              identifier: 'user-roles',
+              list: '/admin/users/role',
+              meta: {
+                label: 'Phân quyền',
+                icon: <GaugeCircle size={18} />,
+                parent: 'users',
+                canDelete: false,
+              },
+            },
           ]}>
-          <ThemedLayoutV2>{children}</ThemedLayoutV2>
+          <ThemedLayoutV2>
+            {children}
+            {JSON.stringify(roles)}
+          </ThemedLayoutV2>
           <DynamicDialogProvider />
         </Refine>
       </ChakraProvider>

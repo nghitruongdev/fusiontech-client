@@ -92,7 +92,7 @@ export const onSuccess = (
   return {
     type: 'success',
     message: `${ActionText[action]} ${
-      resource && RESOURCE_LABEL[resource as ResourceName]
+      (resource && RESOURCE_LABEL[resource as ResourceName]) ?? ''
     } thành công`,
   }
 }

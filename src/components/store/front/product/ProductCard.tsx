@@ -15,7 +15,7 @@ type ContextState = {
   product: IProduct
 }
 
-type ProviderProps = ContextState & DivPropsType
+type ProviderProps = { showInactive?: boolean } & ContextState & DivPropsType
 
 const ProductCard = (props: ProviderProps) => {
   return (
@@ -42,11 +42,22 @@ ProductCard.useContext = () => {
 ProductCard.Provider = function CardProvider({
   children,
   product,
+  showInactive,
   ...props
 }: PropsWithChildren<ProviderProps>) {
+  if (showInactive)
+    return (
+      <ProductCard.Context.Provider value={{ product }}>
+        <div {...props}>{children}</div>
+      </ProductCard.Context.Provider>
+    )
+
   return (
     <ProductCard.Context.Provider value={{ product }}>
-      <div {...props}>{children}</div>
+      {!!product.active && <div {...props}>{children}</div>}
+      {/* {!product.active && (
+        <div {...props}>Sản phẩm không còn tồn tại(not active)</div>
+      )} */}
     </ProductCard.Context.Provider>
   )
 }
@@ -58,17 +69,17 @@ ProductCard.LinkContainer = function ProductLinkContainer({
     product: { name, id, slug },
   } = ProductCard.useContext()
   return (
-    <>
-      <div className='bg-white mx-2 rounded-lg border-gray-300 shadow'>
-        <div
-          aria-label={`Product Item:${name}`}
-          className='group cursor-pointer lg:min-w-[16.666667%] md:min-w-[25%] sm:min-w-[33.333333%] min-w-[50%]'>
-          <NextLinkContainer href={`/products/${id}-${slug}`}>
-            {children}
-          </NextLinkContainer>
-        </div>
+    <div className='bg-white mx-2 rounded-lg border-gray-300 shadow'>
+      <div
+        aria-label={`Product Item:${name}`}
+        className='group cursor-pointer lg:min-w-[16.666667%] md:min-w-[25%] sm:min-w-[33.333333%] min-w-[50%]'>
+        <NextLinkContainer
+          href={`/products/${id}-${slug}`}
+          className=''>
+          {children}
+        </NextLinkContainer>
       </div>
-    </>
+    </div>
   )
 }
 ProductCard.ProductContainer = function ProductContainer({
@@ -99,8 +110,8 @@ ProductCard.Image = function ProductImage() {
   return (
     <div
       className='
-        w-full h-auto overflow-y-hidden
-        ease-in-out duration-300 scale-90 hover:scale-95'>
+        w-full h-auto overflow-y-hidden ease-in-out duration-300 scale-90 hover:scale-95
+        '>
       <Image
         src={images?.[0] ?? Images.products}
         alt='Product image'
@@ -109,7 +120,7 @@ ProductCard.Image = function ProductImage() {
         loading='lazy'
         placeholder='blur'
         blurDataURL='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNMz4irBwAEGQGuUtJ+VQAAAABJRU5ErkJggg=='
-        className='w-full  aspect-square rounded-md max-w-[200px] mx-auto object-contain'
+        className='w-full h-auto aspect-square rounded-md max-w-[200px] mx-auto object-contain'
       />
       <ProductCard.FavoriteButton />
     </div>

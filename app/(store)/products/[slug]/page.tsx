@@ -26,7 +26,6 @@ import { Info } from 'lucide-react'
 import { v4 as uuidv4 } from 'uuid'
 import { Skeleton } from '@components/ui/Skeleton'
 import RecentProductView from '@components/store/front/section/RecentProductView'
-import { API, API_URL } from 'types/constants'
 
 type Props = {
   params: {
@@ -48,7 +47,6 @@ const Product = async ({ params: { slug } }: Props) => {
           <div className='grid grid-cols-3 gap-8'>
             <div className='col-span-2 relative'>
               <ProductImages />
-              <ProductFrequentBoughtTogether />
             </div>
             <div className='col-span-1 flex flex-col gap-2 '>
               <div className='p-4 pt-0 rounded-lg flex flex-col gap-6 shadow-lg border'>
@@ -69,6 +67,8 @@ const Product = async ({ params: { slug } }: Props) => {
           <div className=''>
             <ReviewComponent productId={id} />
           </div>
+          <ProductFrequentBoughtTogether />
+
           <RecentProductView />
         </div>
       </section>

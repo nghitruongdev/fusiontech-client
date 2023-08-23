@@ -22,6 +22,7 @@ import { Images, API } from 'types/constants'
 import { AppError } from 'types/error'
 import { onDefaultSuccess, onError } from '@/hooks/useCrudNotification'
 import { Stars } from 'lucide-react'
+import { useHeaders } from '@/hooks/useHeaders'
 
 export default function ListPage() {
   return <ProductList />
@@ -182,6 +183,7 @@ const ActiveToggle = ({
   const { resource } = API.products()
   const { mutateAsync, isLoading } = useUpdate<IProduct, AppError>()
   const [active, setActive] = useState<boolean>(defaultValue)
+  const { getAuthHeader } = useHeaders()
   return (
     <FormControl
       display='flex'
@@ -197,8 +199,14 @@ const ActiveToggle = ({
               resource,
               id,
               values: { active: !active },
+              meta: {
+                headers: {
+                  ...getAuthHeader(),
+                },
+              },
               invalidates: false as unknown as any,
               errorNotification: onError,
+
               successNotification: onDefaultSuccess('Cập nhật thành công'),
             },
             {

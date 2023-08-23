@@ -7,7 +7,7 @@ import {
 } from 'next/navigation'
 import { stringifyUrl } from 'query-string'
 import { KeyboardEvent, useCallback, useMemo } from 'react'
-import { Option } from 'types'
+import { Option, ROLES } from 'types'
 export const formatPrice = (amount?: number) => {
   if (!amount) return 0
   const formatted = new Number(amount).toLocaleString('vi-VN', {
@@ -224,5 +224,11 @@ export function handleNumericInput(event: KeyboardEvent<HTMLInputElement>) {
   if (!allowedKeys.includes(event.key)) {
     event.preventDefault()
   }
+}
+
+export function convertToRoles(roles: string[]) {
+  return roles
+    .map((item) => ROLES[item.toUpperCase() as keyof typeof ROLES])
+    .filter((item) => !!item)
 }
 export * from './slug-utils'

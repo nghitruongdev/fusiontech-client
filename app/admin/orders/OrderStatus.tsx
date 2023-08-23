@@ -91,10 +91,11 @@ export const EditableControls = ({
       {
         resource: 'orders',
         id: orderId,
-        values: selectedStatus?.name ?? '',
+        values: {
+          status: selectedStatus?.name ?? '',
+        },
         meta: {
           headers: {
-            // 'Content-Type': 'application/json',
             ...getAuthHeader(),
           },
         },
@@ -123,7 +124,7 @@ export const EditableControls = ({
             <option
               key={item.label}
               value={item.value.name}>
-              <Badge>{item.label}</Badge>
+              {item.label}
             </option>
           ))}
       </Select>

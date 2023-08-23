@@ -9,9 +9,11 @@ const reviewApi = {
     return axiosClient.get(url)
   },
 
-  create: (reviewData) => {
+  create: (reviewData, headers) => {
     const url = `${API_URL}/reviews`
-    return axiosClient.post(url, reviewData)
+    return axiosClient.post(url, reviewData, {
+      headers,
+    })
   },
 }
 

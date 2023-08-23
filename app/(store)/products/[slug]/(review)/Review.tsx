@@ -1,15 +1,13 @@
 /** @format */
 
 'use client'
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import reviewApi from '@/client-api/reviewAPI'
-import { FcBusinessman } from 'react-icons/fc'
 import { AiFillStar } from 'react-icons/ai'
 import Image from 'next/image'
 import { loginImg } from '@public/assets/images'
 import { IoIosArrowBack } from 'react-icons/io'
 import useMyToast from '@/hooks/useToast'
-import { format } from 'date-fns'
 import {
   Container,
   Box,
@@ -23,6 +21,8 @@ import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
 import { useRouter } from 'next/navigation'
 import useCallbackUrl from '@/hooks/useCallbackUrl'
 import { NEXT_PATH } from 'types/constants'
+import { useHeaders } from '@/hooks/useHeaders'
+import { useVisibleObserver } from '@/hooks/useVisibleObserver'
 
 const ReviewComponent = ({ productId }: { productId: string }) => {
   const [reviewList, setReviewList] = useState<any[]>([])
@@ -31,54 +31,13 @@ const ReviewComponent = ({ productId }: { productId: string }) => {
   const [rating, setRating] = useState<number>(0)
   const [comment, setComment] = useState<string>('')
   const [userReviewed, setUserReviewed] = useState<boolean>(false)
-  const { claims } = useAuthUser()
+  const { user, claims, userProfile } = useAuthUser()
   const sortedReviewList = [...reviewList]
-  const uid = claims?.id
-  const { user } = useAuthUser()
+  const uid = userProfile?.id
   const router = useRouter()
   const { callbackUrl } = useCallbackUrl()
-  /* Call api lấy các review từ product id */
-  useEffect(() => {
-    const fetchReviewList = async () => {
-      try {
-        const response = await reviewApi.get(`${productId}`)
-        setReviewList(response.data)
-        calculateAverageRating(response.data)
-      } catch (error) {
-        console.log('fail to fetch review list', error)
-      }
-    }
-    if (productId) {
-      fetchReviewList()
-    }
-  }, [productId]) // Khi giá trị ID thay đổi, sẽ gọi lại fetchReviewList
-  {
-    /* Hiển thị số sao dựa theo rating của user */
-  }
-  const renderRatingStars = (rating: number) => {
-    const stars = []
-    for (let i = 0; i < rating; i++) {
-      stars.push(
-        <AiFillStar
-          key={i}
-          className='w-5 h-5 text-yellow'
-        />,
-      )
-    }
-    return stars
-  }
-
-  {
-    /* Button bật / tắt form đánh giá */
-  }
-  const ReviewFormButtonClick = () => {
-    if (!user) {
-      const url = encodeURIComponent(`${callbackUrl}#review-section`)
-      router.push(`${NEXT_PATH['login']}?callbackUrl=${url}`)
-      return
-    }
-    setShowReviewForm(!showReviewForm)
-  }
+  const { getAuthHeader } = useHeaders()
+  //   const { isVisible, ref } = useVisibleObserver<HTMLDivElement>()
 
   const handleRatingSelect = (selectedRating: number) => {
     setRating(selectedRating)
@@ -89,13 +48,23 @@ const ReviewComponent = ({ productId }: { productId: string }) => {
   ) => {
     setComment(event.target.value)
   }
-
+  {
+    /* Button bật / tắt form đánh giá */
+  }
+  const handleReviewClick = () => {
+    if (!user) {
+      const url = encodeURIComponent(`${callbackUrl}#review-section`)
+      router.push(`${NEXT_PATH['login']}?callbackUrl=${url}`)
+      return
+    }
+    setShowReviewForm(!showReviewForm)
+  }
   // Tạo một instance của useToast()
   const toast = useMyToast()
   // call Post api review
   const createReview = async (reviewData: any) => {
     try {
-      const response = await reviewApi.create(reviewData)
+      const response = await reviewApi.create(reviewData, getAuthHeader())
       const newReview = response.data // Đánh giá mới được trả về từ API
       setReviewList((prevReviews) => [...prevReviews, newReview]) // Thêm đánh giá mới vào danh sách hiện tại
       console.log(response.data)
@@ -115,29 +84,7 @@ const ReviewComponent = ({ productId }: { productId: string }) => {
         .fire()
     }
   }
-  // gửi review khi user click button
-  const handleReviewSubmit = (event: any) => {
-    event.preventDefault()
 
-    const now = new Date().toISOString() // Sử dụng định dạng ISO 8601
-    const reviewData = {
-      product: {
-        id: productId,
-      },
-      user: {
-        id: uid,
-      },
-      rating: rating,
-      comment: comment,
-      createdAt: now,
-    }
-    console.log(reviewData)
-    createReview(reviewData)
-    ReviewFormButtonClick()
-
-    setRating(0)
-    setComment('')
-  }
   {
     /* Hàm tính đánh giá trung bình dựa trên rating */
   }
@@ -153,28 +100,83 @@ const ReviewComponent = ({ productId }: { productId: string }) => {
       setAverageRating(0)
     }
   }
+  // gửi review khi user click button
+  const handleReviewSubmit = (event: any) => {
+    event.preventDefault()
 
-  // tính phần trăm review của 1,2,3,4,5 sao
-  const calculatePercentage = (reviews: any[], rating: number) => {
-    const totalReviews = reviews.length
-    if (totalReviews === 0) {
-      return '0%'
+    const now = new Date().toISOString() // Sử dụng định dạng ISO 8601
+    const reviewData = {
+      headers: {
+        ...getAuthHeader(),
+      },
+      product: {
+        id: productId,
+      },
+      user: {
+        id: uid,
+      },
+      rating: rating,
+      comment: comment,
+      createdAt: now,
     }
+    console.log(reviewData)
+    createReview(reviewData)
+    handleReviewClick()
 
-    const ratingCount = reviews.filter(
-      (review) => review.rating === rating,
-    ).length
-    const percentage = Math.round((ratingCount / totalReviews) * 100)
-    return `${percentage}%`
+    setRating(0)
+    setComment('')
   }
 
-  const ratingSummary = [
-    { id: 1, rating: 5, percentage: calculatePercentage(reviewList, 5) },
-    { id: 2, rating: 4, percentage: calculatePercentage(reviewList, 4) },
-    { id: 3, rating: 3, percentage: calculatePercentage(reviewList, 3) },
-    { id: 4, rating: 2, percentage: calculatePercentage(reviewList, 2) },
-    { id: 5, rating: 1, percentage: calculatePercentage(reviewList, 1) },
-  ]
+  const ratingSummary = useMemo(
+    () =>
+      true
+        ? [
+            {
+              id: 1,
+              rating: 5,
+              percentage: calculatePercentage(reviewList, 5),
+            },
+            {
+              id: 2,
+              rating: 4,
+              percentage: calculatePercentage(reviewList, 4),
+            },
+            {
+              id: 3,
+              rating: 3,
+              percentage: calculatePercentage(reviewList, 3),
+            },
+            {
+              id: 4,
+              rating: 2,
+              percentage: calculatePercentage(reviewList, 2),
+            },
+            {
+              id: 5,
+              rating: 1,
+              percentage: calculatePercentage(reviewList, 1),
+            },
+          ]
+        : [],
+    [reviewList],
+  )
+
+  /* Call api lấy các review từ product id */
+  useEffect(() => {
+    // if (!isVisible) return
+    const fetchReviewList = async () => {
+      try {
+        const response = await reviewApi.get(`${productId}`)
+        setReviewList(response.data)
+        calculateAverageRating(response.data)
+      } catch (error) {
+        console.log('fail to fetch review list', error)
+      }
+    }
+    if (productId) {
+      fetchReviewList()
+    }
+  }, [productId]) // Khi giá trị ID thay đổi, sẽ gọi lại fetchReviewList
 
   // kiểm tra người dùng đã đánh giá hay chưa
   useEffect(() => {
@@ -196,7 +198,10 @@ const ReviewComponent = ({ productId }: { productId: string }) => {
   })
 
   return (
-    <div id='review-section'>
+    <div
+      id='review-section'
+      //   ref={ref}
+    >
       {/* Hiển thị bảng thống kê review */}
       <div className='mb-4'>
         <p className='font-bold text-2xl mt-12 mb-2'>Đánh giá sản phẩm</p>
@@ -278,7 +283,7 @@ const ReviewComponent = ({ productId }: { productId: string }) => {
             {/* <p>Bạn đánh giá sao sản phẩm này</p> */}
             <button
               className='bg-blue-500 text-white px-2 w-32 h-10 rounded-full hover:bg-blue-600'
-              onClick={ReviewFormButtonClick}>
+              onClick={handleReviewClick}>
               Đánh giá ngay
             </button>
           </div>
@@ -289,7 +294,7 @@ const ReviewComponent = ({ productId }: { productId: string }) => {
           <form className='flex flex-col w-1/3 p-4 bg-white rounded-lg '>
             <IoIosArrowBack
               className='flex justify-end items-end hover:bg-gray-200'
-              onClick={ReviewFormButtonClick}
+              onClick={handleReviewClick}
             />
             <div className='flex justify-center'>
               <Image
@@ -347,7 +352,7 @@ const ReviewComponent = ({ productId }: { productId: string }) => {
       )}
 
       {/* Hiển thị reviews */}
-      <div className='overflow-auto h-[500px]'>
+      <div className='overflow-auto'>
         {!!sortedReviewList?.length &&
           sortedReviewList.map((review) => (
             <div
@@ -379,6 +384,36 @@ const ReviewComponent = ({ productId }: { productId: string }) => {
       </div>
     </div>
   )
+}
+
+// tính phần trăm review của 1,2,3,4,5 sao
+const calculatePercentage = (reviews: any[], rating: number) => {
+  const totalReviews = reviews.length
+  if (totalReviews === 0) {
+    return '0%'
+  }
+
+  const ratingCount = reviews.filter(
+    (review) => review.rating === rating,
+  ).length
+  const percentage = Math.round((ratingCount / totalReviews) * 100)
+  return `${percentage}%`
+}
+
+{
+  /* Hiển thị số sao dựa theo rating của user */
+}
+const renderRatingStars = (rating: number) => {
+  const stars = []
+  for (let i = 0; i < rating; i++) {
+    stars.push(
+      <AiFillStar
+        key={i}
+        className='w-5 h-5 text-yellow'
+      />,
+    )
+  }
+  return stars
 }
 
 export default ReviewComponent

@@ -14,8 +14,9 @@ const userApi = {
     return axiosClient.get(url)
   },
   updateUser: (id, userData, headers) => {
-    const url = `${API_URL}/api/users/updateUser/${id}`
-    return axiosClient.put(url, userData, {
+    // const url = `${API_URL}/api/users/updateUser/${id}`
+    const url = `${API_URL}/users/${id}`
+    return axiosClient.patch(url, userData, {
       headers,
     })
   },

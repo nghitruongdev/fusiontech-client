@@ -10,9 +10,9 @@ const StatusTabs = ({ groups }: { groups: IOrderStatusGroup[] }) => {
   const route = usePathname()
 
   return (
-    <div className='w-full flex gap-4 justify-between mt-4 items-center'>
+    <div className='w-full flex gap-4 justify-between mt-4 items-center bg-white'>
       <p className='text-lg font-bold flex-shrink-0'>Quản lý đơn hàng</p>
-      <div className='flex flex-grow rounded-md shadow-md bg-red overflow-scroll'>
+      <div className='flex flex-grow rounded-md shadow-md bg-red overflow-hidden'>
         {groups.map(({ id, name, detailName }) => {
           const href = `/account/orders/${name}`
           const isActive = route == href

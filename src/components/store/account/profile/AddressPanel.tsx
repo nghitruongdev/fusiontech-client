@@ -33,10 +33,9 @@ export const AddressPanel = () => {
 const AddressContent = ({ showModal }: { showModal: boolean }) => {
   const { getAuthHeader, _isHydrated, authHeader } = useHeaders()
   const { userProfile, claims } = useAuthUser()
-  console.log('claims?.id', claims)
   const { defaultAddressByUserId } = API['shippingAddresses']()
   const { data } = useCustom<ShippingAddress>({
-    url: `${defaultAddressByUserId(claims?.id ?? userProfile?.id)}`,
+    url: `${defaultAddressByUserId(userProfile?.id)}`,
     method: 'get',
     config: {
       headers: {
@@ -46,8 +45,9 @@ const AddressContent = ({ showModal }: { showModal: boolean }) => {
     queryOptions: {
       enabled: !!authHeader && (!!claims?.id || !!userProfile?.id),
     },
+    errorNotification: false,
   })
-  console.log('getAuthHeader()', getAuthHeader())
+
   const { register, getValues } = useForm()
 
   const toast = useMyToast()

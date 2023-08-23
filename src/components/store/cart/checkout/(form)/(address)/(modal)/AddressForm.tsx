@@ -186,7 +186,7 @@ const ProvinceSelect = () => {
     address,
     resetField,
   } = useContextProvider()
-  const { data: { data: provinces } = {} } = useCustom<IAddress[]>({
+  const { data: { data: provinces } = {}, status } = useCustom<IAddress[]>({
     url: `${NEXT_API_URL}/${provincesApi}`,
     method: 'get',
   })
@@ -221,6 +221,8 @@ const ProvinceSelect = () => {
         noOptionsMessage={() => {
           return <>Không tìm thấy dữ liệu</>
         }}
+        isLoading={status === 'loading'}
+        loadingMessage={() => <p>Đang tải....</p>}
       />
       <FormErrorMessage>
         <FormErrorIcon />
@@ -241,7 +243,8 @@ const DistrictSelect = () => {
     getValues,
   } = useContextProvider()
   const provinceCode = watch(`provinceOption`)?.value.code
-  const { data: { data: districts } = {} } = useCustom<IAddress[]>({
+  const isValid = !!provinceCode
+  const { data: { data: districts } = {}, status } = useCustom<IAddress[]>({
     url: `${NEXT_API_URL}/${districtsApi(provinceCode)}`,
     method: 'get',
     queryOptions: {
@@ -291,6 +294,8 @@ const DistrictSelect = () => {
             ? 'Vui lòng chọn tỉnh/ thành phố trước'
             : 'Không tìm thấy dữ liệu'
         }}
+        isLoading={status === 'loading' && isValid}
+        loadingMessage={() => <p>Đang tải....</p>}
       />
       <FormErrorMessage>
         <FormErrorIcon />
@@ -312,7 +317,8 @@ const WardSelect = () => {
   } = useContextProvider()
   const districtCode = watch(`districtOption`)?.value.code
   const provinceCode = watch(`provinceOption`)?.value.code
-  const { data: { data: wards } = {} } = useCustom<IAddress[]>({
+  const isValid = !!districtCode && !!provinceCode
+  const { data: { data: wards } = {}, status } = useCustom<IAddress[]>({
     url: `${NEXT_API_URL}/${wardsApi(districtCode)}`,
     method: 'get',
     queryOptions: {
@@ -365,6 +371,8 @@ const WardSelect = () => {
                 ? 'Vui lòng chọn quận/ huyện trước'
                 : 'Không tìm thấy dữ liệu'
             }}
+            isLoading={status === 'loading' && isValid}
+            loadingMessage={() => <p>Đang tải....</p>}
           />
         )}
       />

@@ -11,9 +11,11 @@ import Image from 'next/image'
 import { PropsWithChildren, use, useEffect, useState } from 'react'
 import { IProduct, Page } from 'types'
 import { API } from 'types/constants'
+import { PaginationProps } from 'src/components/pagination/index'
+import { NoResultFound } from '@components/no-result'
 
 const {
-  getAllProducts,
+  getAllProductActive,
   getHotProducts,
   getProductsLastest,
   getSellingProducts,
@@ -23,28 +25,17 @@ const {
 
 const SearchResult = ({
   children,
-  totalPages,
   items,
-}: PropsWithChildren<{ totalPages: number; items?: IProduct[] }>) => {
-  const pageable = usePageable()
-
-  const [promise, setPromise] = useState<Promise<unknown>>(waitPromise(300))
+  ...props
+}: PropsWithChildren<PaginationProps & { items?: IProduct[] }>) => {
+  const [promise, setPromise] = useState<Promise<unknown>>(waitPromise(150))
   use(promise)
+  const { current, pageSize } = props
+  useEffect(() => {
+    setPromise(waitPromise(150))
+  }, [current, pageSize])
 
-  if (!items?.length)
-    return (
-      <div className='flex flex-col items-center justify-center gap-4 w-full h-[450px] bg-white'>
-        <Image
-          alt='no-result-found'
-          src='https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fno-result-found.png?alt=media&token=27af6304-ba76-445f-a2b0-59aa52815296'
-          width={'300'}
-          height={'300'}
-        />
-        <p className='text-3xl text-zinc-600 font-semibold'>
-          {'Không có kết quả :('}
-        </p>
-      </div>
-    )
+  if (!items?.length) return <NoResultFound />
 
   return (
     <div>
@@ -52,19 +43,25 @@ const SearchResult = ({
       <div className='bg-white'>
         <div className='grid grid-cols-5 gap-4'>
           {items?.map((item) => (
-            <ProductCard
+            <ProductCard.Provider
               key={item.id}
-              product={item}
-              className=''
-            />
+              product={item}>
+              <ProductCard.ProductContainer>
+                <ProductCard.Discount />
+                <ProductCard.Image />
+                <div className='px-2 flex flex-col'>
+                  <ProductCard.Brand />
+                  <ProductCard.Name />
+                  <ProductCard.Price />
+                  <ProductCard.Summary />
+                  <ProductCard.AvgRating />
+                </div>
+              </ProductCard.ProductContainer>
+            </ProductCard.Provider>
           ))}
         </div>
       </div>
-      <PaginationWithPageable
-        {...pageable}
-        pageCount={totalPages}
-        setPageSize={undefined}
-      />
+      <PaginationWithPageable {...props} />
     </div>
   )
 }
@@ -76,7 +73,7 @@ export const AllProduct = () => {
   const {
     data: { data: products = [], page } = {} as GetListResponse<IProduct>,
   } = useList<IProduct>({
-    resource: getAllProducts(),
+    resource: getAllProductActive,
     pagination: {
       pageSize,
       current,
@@ -87,15 +84,20 @@ export const AllProduct = () => {
         projection: full,
       },
     },
+    queryOptions: {
+      suspense: true,
+    },
   })
 
   return (
     <SearchResult
-      totalPages={(page as Page)?.totalPages}
+      {...pageable}
+      pageCount={(page as Page).totalPages}
       items={products}
     />
   )
 }
+
 export const HotProduct = () => {
   const pageable = usePageable()
   const { current, pageSize } = pageable
@@ -113,11 +115,15 @@ export const HotProduct = () => {
         projection: full,
       },
     },
+    queryOptions: {
+      suspense: true,
+    },
   })
 
   return (
     <SearchResult
-      totalPages={(page as Page)?.totalPages}
+      {...pageable}
+      pageCount={(page as Page)?.totalPages}
       items={products}
     />
   )
@@ -140,11 +146,15 @@ export const ProductLastest = () => {
         projection: full,
       },
     },
+    queryOptions: {
+      suspense: true,
+    },
   })
 
   return (
     <SearchResult
-      totalPages={(page as Page)?.totalPages}
+      {...pageable}
+      pageCount={(page as Page)?.totalPages}
       items={products}
     />
   )
@@ -179,9 +189,12 @@ export const SellingProducts = () => {
           projection: full,
         },
       },
+      queryOptions: {
+        suspense: true,
+      },
     })
   const ids = data?.map((item) => item.id) ?? []
-  const { data: { data: products = [] } = {}, isFetching } = useMany<IProduct>({
+  const { data: { data: products = [] } = {} } = useMany<IProduct>({
     resource: 'products',
     ids: ids,
     meta: {
@@ -191,12 +204,14 @@ export const SellingProducts = () => {
     },
     queryOptions: {
       enabled: !!ids.length,
+      suspense: true,
     },
   })
 
   return (
     <SearchResult
-      totalPages={(page as Page)?.totalPages}
+      {...pageable}
+      pageCount={(page as Page)?.totalPages}
       items={products}
     />
   )

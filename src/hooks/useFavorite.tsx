@@ -14,14 +14,13 @@ import favoriteApi from 'src/client-api/favoriteAPI'
 import { useRouter } from 'next/navigation'
 import { useCurrentUrl } from '../lib/utils'
 import { useHeaders } from '@/hooks/useHeaders'
-import { onError } from './useCrudNotification'
 
 const useFavorite = () => {
   const router = useRouter()
-  const { user, claims, userProfile } = useAuthUser() // Lấy thông tin user từ hook useAuthUser
+  const { user, userProfile } = useAuthUser() // Lấy thông tin user từ hook useAuthUser
   const { getAuthHeader } = useHeaders()
 
-  const uid = claims?.id ?? userProfile?.id
+  const uid = userProfile?.id
   const toast = useMyToast()
   const [addFavorite, removeFavorite, isFavorite] = useFavoriteStore(
     ({ addFavorite, removeFavorite, isFavorite }) => [
@@ -140,26 +139,32 @@ const updateUserFavoriteProduct = async (
   }
   if (!authHeader)
     return console.warn('AuthHeader not found while fetching favorite products')
-  const data = await springDataProvider.custom<IProduct[]>({
-    url: getFavoriteProductsByUser(userId),
-    method: 'get',
-    meta: {
-      resource,
-    },
-    headers: {
-      ...authHeader,
-    },
-  })
-  const products = data.data ?? []
-  const favoriteProducts = toRecord<IProduct, 'id'>(products, 'id')
-  useFavoriteStore.setState(() => ({ favoriteProducts }))
+  try {
+    const data = await springDataProvider.custom<IProduct[]>({
+      url: getFavoriteProductsByUser(userId),
+      method: 'get',
+      meta: {
+        resource,
+      },
+      headers: {
+        ...authHeader,
+      },
+    })
+    const products = data.data ?? []
+    const favoriteProducts = toRecord<IProduct, 'id'>(products, 'id')
+    useFavoriteStore.setState(() => ({ favoriteProducts }))
+  } catch (err) {
+    console.warn(err)
+  }
 }
 
 export const FavoriteProvider = () => {
   const { userProfile: { id } = {} } = useAuthUser()
   const { getAuthHeader } = useHeaders()
   useEffect(() => {
-    updateUserFavoriteProduct(id, getAuthHeader())
+    const authHeader = getAuthHeader()
+    console.debug('authHeader', authHeader)
+    updateUserFavoriteProduct(id, authHeader)
   }, [id, getAuthHeader])
 
   return <></>

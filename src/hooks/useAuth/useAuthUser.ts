@@ -3,13 +3,14 @@
 import { User } from '@firebase/auth'
 import { create } from 'zustand'
 import { IdTokenResult } from 'firebase/auth'
-import { IUser } from 'types'
+import { IUser, ROLES } from 'types'
 
 type State = {
   user: User | null
   metadata?: {
     isNew?: boolean
   }
+  roles: ROLES[]
   claims?:
     | Partial<IdTokenResult['claims']> & {
         /**
@@ -28,6 +29,7 @@ const store = create<State>()(() => ({
   user: null,
   userProfile: undefined,
   token: null,
+  roles: [],
 }))
 
 export const useAuthUser = () => {

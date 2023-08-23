@@ -33,7 +33,7 @@ async function Category() {
                   width={50}
                   height={50}
                   alt={'/'}
-                  className='w-full p-3  aspect-square rounded-md max-w-[200px] mx-auto object-cover'
+                  className='w-full rounded-3xl p-3  aspect-square  max-w-[200px] mx-auto object-cover'
                 />
                 <p className='"font-roboto font-normal text-base leading-5 text-gray-700"'>
                   {item.name}

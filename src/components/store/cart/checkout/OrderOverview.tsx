@@ -4,20 +4,16 @@
 import { Input } from '@components/ui/shadcn/input'
 import CartItemList from './CartItemList'
 import { Button } from '@components/ui/shadcn/button'
-// import { Separator } from '@components/ui/shadcn/separator'
 import { Badge } from '@components/ui/shadcn/badge'
-import {
-  useSelectedCartItemStore,
-  useValidSelectedCartItems,
-} from '@components/store/cart/useSelectedItemStore'
+import { useValidSelectedCartItems } from '@components/store/cart/useSelectedItemStore'
 import { useCheckoutContext } from './CheckoutProvider'
 import { Spinner, useBoolean } from '@chakra-ui/react'
 import { formatPrice } from '../../../../lib/utils'
 import {
-  BaseSyntheticEvent,
   FormEvent,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -29,140 +25,39 @@ import { useCustom } from '@refinedev/core'
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
 import { calculateTotalPayment } from './utils'
 import { useCountdown } from '@/hooks/useCountdown'
-
+import { useCartItems } from '../useCart'
+import Link from 'next/link'
 const OrderOverview = ({}: // isSubmitting,
 {}) => {
-  //   const { onCheckout, isSubmitting } = useCheckoutContext(
-  //     ({ onCheckout, formState: { isSubmitting } }) => ({
-  //       onCheckout,
-  //       isSubmitting,
-  //     }),
-  //   )
-  //   const [watch] = useCheckoutContext((state) => [state.watch])
-  const {
-    onCheckout,
-    formState: { isSubmitting },
-    watch,
-    setValue,
-  } = useCheckoutContext()
-  const voucher = watch(`voucher`)
-  const { code, maxDiscountAmount, discount: voucherDiscount } = voucher ?? {}
-  const cartItems = useValidSelectedCartItems()
-  const { total, discount, vDiscount, subTotal } = calculateTotalPayment(
-    cartItems,
-    voucher,
-  )
+  const validItems = useValidSelectedCartItems()
+  const cartItems = useCartItems()
 
-  useEffect(() => {
-    setValue(`items`, cartItems)
-  }, [cartItems, setValue])
+  const cartArray = useMemo(() => Object.values(cartItems), [cartItems])
 
-  return (
-    <>
-      <div className='flex items-end justify-between font-semibold text-lg mt-4 py-2 mx-2'>
-        <h2 className='text-2xl font-[700]'>Đơn hàng</h2>
-        {/* <p className="text-2xl font-semibold">Đơn hàng</p> */}
-        <a
-          className='text-blue-500 text-sm font-medium text-end mr-4'
-          href='/cart'>
-          Chỉnh sửa
-        </a>
-      </div>
-      <div className='bg-white p-4 mx-2 rounded-lg shadow-md space-y-2'>
-        <CartItemList />
-        <div className='grid gap-2'>
-          <div className='flex justify-between items-center'>
-            <p className='text-muted text-sm text-zinc-500'>Tổng tạm tính</p>
-            <p className='text-end font-bold text-zinc-600 text-lg'>
-              {formatPrice(subTotal)}
-            </p>
-          </div>
-          <div className='flex justify-between items-center'>
-            <p className='text-muted text-sm text-zinc-500'>Giảm giá</p>
-            <p className='font-medium text-sm text-green-600'>
-              {formatPrice(discount)}
-            </p>
-          </div>
-          <div className='flex justify-between'>
-            <p className='text-muted text-sm text-zinc-500'>Phí vận chuyển</p>
-            <p className='font-medium text-sm text-green-600'>Miễn phí</p>
-          </div>
-          {!!voucher && (
-            <div className='flex justify-between'>
-              <div className='flex gap-2 items-center'>
-                <p className='text-muted text-sm text-zinc-500'>Mã giảm giá</p>
-              </div>
-              <div className='font-medium text-sm'>
-                <Badge
-                  variant={'outline'}
-                  className='text-orange-600'>
-                  {/* <span className='text-sm ml-2 font-bold'>{`${code} - `}</span> */}
-                  {` ${formatPrice(vDiscount)}`}
-                </Badge>
-              </div>
-            </div>
-          )}
-        </div>
+  if (!validItems.length) {
+    let link = {
+      text: 'Quay trở lại giỏ hàng',
+      href: '/cart',
+      error: 'Bạn chưa chọn sản phẩm trong giỏ hàng',
+    }
+    if (!cartArray.length) {
+      link = {
+        text: 'Quay trở lại mua sắm',
+        href: '/',
+        error: 'Giỏ hàng trống',
+      }
+    }
+    return <OverviewNotValid link={link} />
+  }
 
-        <hr />
-        <div className='flex justify-between mb-3 mt-4 items-center'>
-          <p className='text-muted text-sm text-zinc-500'>Thành tiền</p>
-          <p className='text-end font-bold text-zinc-600 text-lg'>
-            {formatPrice(total)} <br />
-            <span className='text-sm text-muted text-zinc-500 font-normal leading-tight'>
-              (Đã bao gồm VAT)
-            </span>
-          </p>
-        </div>
-        <button
-          className='flex items-center justify-center gap-4 w-full rounded-md bg-blue-600 hover:bg-blue-700 px-4 py-2 text-white text-sm leading-loose font-[500] shadow-blue-500 shadow-md'
-          onClick={onCheckout}
-          disabled={isSubmitting}>
-          {isSubmitting ? 'Đang đặt hàng....' : 'Xác nhận đặt hàng'}
-          {isSubmitting && (
-            <Spinner
-              size={'sm'}
-              speed='0.3s'
-            />
-          )}
-        </button>
-      </div>
-
-      <div className='p-4 m-4 mx-2 rounded-lg bg-white shadow-md'>
-        <Voucher orderAmount={total} />
-      </div>
-    </>
-  )
+  return <OverviewValid />
 }
 
 const Voucher = ({ orderAmount }: { orderAmount: number }) => {
   const { findByCode, countUsage, countUserUsage } = API['vouchers']()
   const { userProfile } = useAuthUser()
   const [isError, { toggle }] = useBoolean()
-  //   const {
-  //     setError,
-  //     formState: { errors },
-  //     getFieldState,
-  //     resetField,
-  //     clearErrors,
-  //     setValue,
-  //   } = useCheckoutContext(
-  //     ({
-  //       setError,
-  //       formState,
-  //       getFieldState,
-  //       resetField,
-  //       clearErrors,
-  //       setValue,
-  //     }) => ({
-  //       setError,
-  //       formState,
-  //       resetField,
-  //       getFieldState,
-  //       clearErrors,
-  //       setValue,
-  //     }),
-  //   )
+
   const {
     setError,
     formState: { errors },
@@ -361,6 +256,130 @@ const Voucher = ({ orderAmount }: { orderAmount: number }) => {
           </p>
         </div>
       )}
+    </>
+  )
+}
+
+const OverviewNotValid = ({
+  link: { text, href, error },
+}: {
+  link: { text: string; href: string; error: string }
+}) => {
+  return (
+    <>
+      <div className='flex items-end justify-between font-semibold text-lg mt-4 py-2 mx-2'>
+        <h2 className='text-2xl font-[700]'>Đơn hàng</h2>
+        {/* <p className="text-2xl font-semibold">Đơn hàng</p> */}
+        <a
+          className='text-blue-500 text-sm font-medium text-end mr-4'
+          href='/cart'>
+          Chỉnh sửa
+        </a>
+      </div>
+      <div className='bg-white p-4 mx-2 rounded-lg shadow-md space-y-2'>
+        <p className='text-sm text-zinc-700'>{error}</p>
+        <Link
+          href={href}
+          className='flex items-center justify-center gap-4 w-full rounded-md bg-blue-600 hover:bg-blue-700 px-4 py-2 text-white text-sm leading-loose font-[500] shadow-blue-500 shadow-md'>
+          {text}
+        </Link>
+      </div>
+    </>
+  )
+}
+
+const OverviewValid = () => {
+  const {
+    onCheckout,
+    formState: { isSubmitting },
+    watch,
+    setValue,
+  } = useCheckoutContext()
+  const voucher = watch(`voucher`)
+  const validItems = useValidSelectedCartItems()
+  const { total, discount, vDiscount, subTotal } = calculateTotalPayment(
+    validItems,
+    voucher,
+  )
+
+  useEffect(() => {
+    setValue(`items`, validItems)
+  }, [validItems, setValue])
+
+  return (
+    <>
+      <div className='flex items-end justify-between font-semibold text-lg mt-4 py-2 mx-2'>
+        <h2 className='text-2xl font-[700]'>Đơn hàng</h2>
+        {/* <p className="text-2xl font-semibold">Đơn hàng</p> */}
+        <a
+          className='text-blue-500 text-sm font-medium text-end mr-4'
+          href='/cart'>
+          Chỉnh sửa
+        </a>
+      </div>
+      <div className='bg-white p-4 mx-2 rounded-lg shadow-md space-y-2'>
+        <CartItemList />
+        <div className='grid gap-2'>
+          <div className='flex justify-between items-center'>
+            <p className='text-muted text-sm text-zinc-500'>Tổng tạm tính</p>
+            <p className='text-end font-bold text-zinc-600 text-lg'>
+              {formatPrice(subTotal)}
+            </p>
+          </div>
+          <div className='flex justify-between items-center'>
+            <p className='text-muted text-sm text-zinc-500'>Giảm giá</p>
+            <p className='font-medium text-sm text-green-600'>
+              {formatPrice(discount)}
+            </p>
+          </div>
+          <div className='flex justify-between'>
+            <p className='text-muted text-sm text-zinc-500'>Phí vận chuyển</p>
+            <p className='font-medium text-sm text-green-600'>Miễn phí</p>
+          </div>
+          {!!voucher && (
+            <div className='flex justify-between'>
+              <div className='flex gap-2 items-center'>
+                <p className='text-muted text-sm text-zinc-500'>Mã giảm giá</p>
+              </div>
+              <div className='font-medium text-sm'>
+                <Badge
+                  variant={'outline'}
+                  className='text-orange-600'>
+                  {/* <span className='text-sm ml-2 font-bold'>{`${code} - `}</span> */}
+                  {` ${formatPrice(vDiscount)}`}
+                </Badge>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <hr />
+        <div className='flex justify-between mb-3 mt-4 items-center'>
+          <p className='text-muted text-sm text-zinc-500'>Thành tiền</p>
+          <p className='text-end font-bold text-zinc-600 text-lg'>
+            {formatPrice(total)} <br />
+            <span className='text-sm text-muted text-zinc-500 font-normal leading-tight'>
+              (Đã bao gồm VAT)
+            </span>
+          </p>
+        </div>
+        <button
+          className='flex items-center justify-center gap-4 w-full rounded-md bg-blue-600 hover:bg-blue-700 px-4 py-2 text-white text-sm leading-loose font-[500] shadow-blue-500 shadow-md'
+          onClick={onCheckout}
+          disabled={isSubmitting}>
+          {isSubmitting ? 'Đang đặt hàng....' : 'Xác nhận đặt hàng'}
+          {isSubmitting && (
+            <Spinner
+              size={'sm'}
+              speed='0.3s'
+            />
+          )}
+        </button>
+      </div>
+
+      <div className='p-4 m-4 mx-2 rounded-lg bg-white shadow-md'>
+        <Voucher orderAmount={total} />
+      </div>
     </>
   )
 }

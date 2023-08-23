@@ -1,7 +1,5 @@
 /** @format */
 
-/** @format */
-
 import { formatDate } from '@/lib/utils'
 import { Action } from '@refinedev/core'
 import { stringify } from 'query-string'
@@ -23,8 +21,7 @@ export const API_URL =
   throwIfMissing('NEXT_PUBLIC_RESOURCE_SERVER_URL')
 
 export const NEXT_API_URL =
-  process.env['NEXT_PUBLIC_RESOURCE_SERVER_URL'] ??
-  throwIfMissing('NEXT_PUBLIC_API_URL')
+  process.env['NEXT_PUBLIC_API_URL'] ?? throwIfMissing('NEXT_PUBLIC_API_URL')
 
 export const API = {
   orders: () => {
@@ -48,6 +45,8 @@ export const API = {
         !uid || !status
           ? ''
           : `${resource}/search/byUserIdAndStatusIn?uid=${uid}&st=${status}`,
+      findByStatus: (status: string | undefined) =>
+        `${resource}/search/find-by-status-in?list=${status}`,
     }
   },
   categories: () => {
@@ -103,13 +102,14 @@ export const API = {
       resource,
       projection: {
         full: 'full',
+        dynamic: 'dynamic',
         specifications: 'specifications',
         nameAndVariantCount: 'name-and-variant-count',
         nameWithVariants: 'name-with-variants',
       },
       hasImportInventory: (id: string | number | undefined) =>
         `${resource}/search/has-import-inventory?id=${id}`,
-      getAllProducts: () => `${resource}`,
+      //   getAllProducts: () => `${resource}`,
       getProductsDiscount: () => `${resource}/search/discount-products`,
       getHotProducts: (size: number) =>
         `${resource}/search/hot-products?size=${size}`,
@@ -151,6 +151,7 @@ export const API = {
           ? ''
           : `${resource}/search/find-by-slug?slug=${encodeURIComponent(slug)}`,
       findProductStatus: `${resource}/search/find-all-status`,
+      getAllProductActive: `${resource}/search/active`,
     }
   },
   specifications: () => {
@@ -249,21 +250,23 @@ export const API = {
 }
 
 export const RESOURCE_LABEL: { [key in ResourceName]: string } = {
-  'inventory-details': 'Chi tiết kho',
-  categories: 'Danh mục',
-  brands: 'Thương hiệu',
-  products: 'Sản phẩm',
-  variants: 'Biến thể sản phẩm',
-  orders: 'Đơn hàng',
-  users: 'Người dùng',
-  shippingAddresses: 'Địa chỉ',
-  specifications: 'Thông số',
-  vouchers: 'Voucher',
-  statistical: 'Thống kê',
+  'inventory-details': 'chi tiết kho',
+  categories: 'danh mục',
+  brands: 'thương hiệu',
+  products: 'sản phẩm',
+  variants: 'biến thể sản phẩm',
+  orders: 'đơn hàng',
+  users: 'người dùng',
+  shippingAddresses: 'địa chỉ',
+  specifications: 'thông số',
+  vouchers: 'voucher',
+  statistical: 'thống kê',
+  inventories: 'phiếu kho',
 }
 export const ROLES = {
   user: 'người dùng',
   admin: 'quản trị viên',
+  staff: 'nhân viên',
 }
 export const ROLE_LABEL: { [key in ROLE_TYPE]: { text: string } } = {
   user: {
@@ -342,6 +345,7 @@ export const Images: { [key in ResourceName]: string } = {
   'inventory-details': '',
   statistical:
     'https://firebasestorage.googleapis.com/v0/b/fusiontech-vnco4.appspot.com/o/images%2Fvariants%2FlogostuImage.png?alt=media&token=90709f04-0996-4779-ab80-f82e99c62041',
+  inventories: '',
 }
 
 export const statusColor = (status: IOrderStatus | undefined) => {
@@ -360,3 +364,36 @@ export const statusColor = (status: IOrderStatus | undefined) => {
       return 'purple'
   }
 }
+
+export const ORDER_STATUS_GROUP = [
+  {
+    id: 0,
+    name: 'VERIFY',
+    detailName: 'Chờ xác nhận',
+  },
+  {
+    id: 1,
+    name: 'PROCESSING',
+    detailName: 'Đang xử lý',
+  },
+  {
+    id: 2,
+    name: 'ON_DELIVERY',
+    detailName: 'Đang giao',
+  },
+  {
+    id: 3,
+    name: 'COMPLETED',
+    detailName: 'Hoàn thành',
+  },
+  {
+    id: 4,
+    name: 'FAILED',
+    detailName: 'Trả hàng',
+  },
+  {
+    id: 5,
+    name: 'CANCELLED',
+    detailName: 'Đã huỷ',
+  },
+]

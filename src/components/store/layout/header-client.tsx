@@ -1,10 +1,8 @@
 /** @format */
 
 'use client'
-import { CategoryDropDown, CategoryDropDownButton } from './CategoryDropdown'
-import { getCategoriesList } from '@/providers/server-data-provider/data/categories'
 import useCart, { useCartItems } from '@components/store/cart/useCart'
-import { Shield, ShieldAlert, ShoppingBag, UserCircle } from 'lucide-react'
+import { ShoppingBag, UserCircle } from 'lucide-react'
 import React, { useState, useEffect, use, Suspense } from 'react'
 import Link from 'next/link'
 import {
@@ -20,13 +18,11 @@ import { IoSearchOutline } from 'react-icons/io5'
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
 import dynamic from 'next/dynamic'
 import { Skeleton } from '@components/ui/Skeleton'
-import { User } from '@firebase/auth'
 // import useModals, { ModalProvider } from "@components/ui/AlertModals";
 import { useLogout, useNotification, usePermissions } from '@refinedev/core'
 import useCallbackUrl from '@/hooks/useCallbackUrl'
 import { useDialog } from '@components/ui/DialogProvider'
 import { useRouter } from 'next/navigation'
-import { suspensePromise, waitPromise } from '@/lib/promise'
 import {
   FaInfoCircle,
   FaBox,
@@ -42,9 +38,11 @@ export const HeaderClient = () => {}
 export const VerifyMailBanner = () => {
   const { user, metadata: { isNew } = {} } = useAuthUser()
   if (!user || user.emailVerified) return <></>
+
+  return <></>
   if (isNew)
     return (
-      <div className='h-8 w-full bg-orange-200'>
+      <div className='h-8 w-full bg-yellow'>
         Email xác thực đã được gửi đến địa chỉ e-mail của bạn. Xác thực tài
         khoản ngay để mở khoá nhiều tính năng hấp dẫn.
       </div>

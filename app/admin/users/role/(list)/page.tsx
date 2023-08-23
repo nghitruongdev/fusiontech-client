@@ -1,20 +1,26 @@
 /** @format */
 
 'use client'
-import React from 'react'
-import { IResourceComponentsProps } from '@refinedev/core'
+import React, { useEffect, useMemo, useState } from 'react'
+import {
+  IResourceComponentsProps,
+  useCustomMutation,
+  useUpdate,
+} from '@refinedev/core'
 import { useTable } from '@refinedev/react-table'
 import { ColumnDef } from '@tanstack/react-table'
 import { TableContainer, Table } from '@chakra-ui/react'
 import { useDefaultTableRender } from '@/hooks/useRenderTable'
 import { List } from '@components/crud'
-import Image from 'next/image'
-import { FirebaseImage, Gender, IUser, ROLES } from 'types'
-import { Images, ROLE_LABEL } from 'types/constants'
-import { GenderLabel } from 'types/constants'
+import { IUser, ROLES, Option } from 'types'
+import { ROLE_LABEL } from 'types/constants'
 import { useHeaders } from '@/hooks/useHeaders'
-import Select from 'react-select'
-import { toOptionString } from '@/lib/utils'
+import Select, { ActionMeta, MultiValue } from 'react-select'
+import {
+  onDefaultSuccess,
+  onError,
+  onSuccess,
+} from '@/hooks/useCrudNotification'
 const pageRole = () => {
   return <UserListRole />
 }
@@ -23,11 +29,6 @@ const UserListRole: React.FC<IResourceComponentsProps> = () => {
   const { getAuthHeader } = useHeaders()
   const columns = React.useMemo<ColumnDef<IUser>[]>(
     () => [
-      {
-        id: 'id',
-        accessorKey: 'id',
-        header: 'Id',
-      },
       {
         id: 'fullName',
         accessorKey: 'fullName',
@@ -38,13 +39,17 @@ const UserListRole: React.FC<IResourceComponentsProps> = () => {
         accessorKey: 'email',
         header: 'Email',
       },
-
       {
         id: 'actions',
         accessorKey: 'roles',
-        header: 'Hành động',
-        cell: function render({ getValue }) {
-          return <RoleSelect roles={getValue<string[]>() ?? []} />
+        header: 'Phân quyền',
+        cell: function render({ getValue, row }) {
+          return (
+            <RoleSelect
+              roles={getValue<string[]>() ?? []}
+              uid={row.original.firebaseUid}
+            />
+          )
         },
       },
     ],
@@ -77,7 +82,6 @@ const UserListRole: React.FC<IResourceComponentsProps> = () => {
       },
     },
   })
-  console.log('table data', tableData)
   setOptions((prev) => ({
     ...prev,
     meta: {
@@ -109,24 +113,64 @@ const UserListRole: React.FC<IResourceComponentsProps> = () => {
   )
 }
 
-const roleOptions = Object.entries(ROLES).map(([value, label]) => ({
-  label: ROLE_LABEL[label].text,
-  value: value,
-}))
-
-const RoleSelect = ({ roles }: { roles: string[] }) => {
-  console.log(roles)
-  const selected = roles.map((item) => ({
-    label: ROLE_LABEL[item as ROLES].text,
-    value: item,
+const roleOptions = Object.entries(ROLES)
+  .filter(([, value]) => value !== ROLES.USER)
+  .map(([value, label]) => ({
+    label: ROLE_LABEL[label].text,
+    value: value,
   }))
+const RoleSelect = ({ roles, uid }: { roles: string[]; uid: string }) => {
+  const { mutate, status } = useCustomMutation()
+  const { getAuthHeader, authHeader } = useHeaders()
+  const [values, setValues] = useState<MultiValue<Option<string>>>([])
+
+  useEffect(() => {
+    if (!roles) return
+    const value = roles
+      .filter((item) => !!item && item !== 'USER')
+      .map((item) => ({
+        label: ROLE_LABEL[item.toLowerCase() as ROLES]?.text,
+        value: item,
+      }))
+    setValues(value)
+  }, [roles])
+  const handleChange = (
+    newValue: MultiValue<Option<string>>,
+    action: ActionMeta<Option<string>>,
+  ) => {
+    const submitRoles = newValue?.map((item) => item.value) ?? []
+    mutate(
+      {
+        url: 'users/update-role',
+        method: 'patch',
+        values: {
+          firebaseUid: uid,
+          roles: ['USER', ...submitRoles],
+        },
+        config: {
+          headers: {
+            ...getAuthHeader(),
+          },
+        },
+        errorNotification: onError,
+        successNotification: () =>
+          onDefaultSuccess('Cập nhật quyền thành công'),
+      },
+      {
+        onSuccess() {
+          setValues(newValue)
+        },
+      },
+    )
+  }
   return (
     <>
-      {JSON.stringify(selected)}
       <Select
         isMulti
-        defaultValue={selected}
+        value={values}
         options={roleOptions}
+        onChange={handleChange}
+        isLoading={status === 'loading'}
       />
     </>
   )

@@ -44,11 +44,13 @@ const CartItem = ({ item }: { item: ICartItem }) => {
     </>
   )
 }
+// Khai báo context để lưu trạng thái mục và tình trạng hết hàng
 const ItemContext = createContext<{
   item: ICartItem
   isOutOfStock: boolean
 } | null>(null)
 
+// Hook để sử dụng context ItemContext
 const useItemContextProvider = () => {
   const ctx = useContext(ItemContext)
   if (!ctx) throw new Error('ItemContext is missing')
@@ -61,6 +63,7 @@ CartItem.Provider = function Provider({
   children: ReactNode
   item: ICartItem
 }) {
+  // Kiểm tra xem sản phẩm có hết hàng không
   const isOutOfStock = !!!item.variant?.availableQuantity
   return (
     <ItemContext.Provider
@@ -73,6 +76,7 @@ CartItem.Provider = function Provider({
   )
 }
 
+// Component hiển thị checkbox chọn mục
 CartItem.SelectedCheckbox = function Checkbox() {
   const [selectedItems, add, remove] = useSelectedCartItemStore((state) => [
     state.items,
@@ -101,6 +105,7 @@ CartItem.SelectedCheckbox = function Checkbox() {
   )
 }
 
+// Component hiển thị thông tin sản phẩm
 CartItem.ProductInfo = function ProductInfo() {
   const {
     item: { variant },
@@ -108,7 +113,7 @@ CartItem.ProductInfo = function ProductInfo() {
   } = useItemContextProvider()
   const product = variant?.product
   console.log('product', product)
-  const { control } = useForm()
+  const { control } = useForm() // Sử dụng hook useForm để quản lý form
   return (
     <div className='flex flex-grow justify-between gap-2'>
       <div className='w-3/4 flex items-center gap-4'>
@@ -149,6 +154,7 @@ CartItem.ProductInfo = function ProductInfo() {
   )
 }
 
+// Component hiển thị số lượng tồn kho
 CartItem.AvailableQuantity = function AvailableQuantity() {
   const { item, isOutOfStock } = useItemContextProvider()
   const { availableQuantity } = item?.variant ?? {}
@@ -161,28 +167,33 @@ CartItem.AvailableQuantity = function AvailableQuantity() {
   )
 }
 
+// Component hiển thị giá sản phẩm và thông tin giảm giá
 CartItem.ProductInfoPrice = function ProductPrice() {
   const { item } = useItemContextProvider()
-  const { price } = item?.variant ?? {}
-  const { discount } = item?.variant?.product ?? {}
-  const original = getTotalAmount([item])
-  const discountTotal = getDiscount([item])
+  const { price } = item?.variant ?? {} // Giá của sản phẩm
+  const { discount } = item?.variant?.product ?? {} // Giảm giá của sản phẩm
+  const original = getTotalAmount([item]) // Tổng giá trị ban đầu
+  const discountTotal = getDiscount([item]) // Tổng giá trị giảm giá
   return (
     <>
       <p className='font-semibold text-xl text-green-500 mt-2'>
         {formatPrice(original - discountTotal)}
+        {/* Hiển thị giá sau giảm giá */}
       </p>
       {!!true && (
         <>
           <p className='text-sm line-through text-zinc-500'>
             {formatPrice(original)}
+            {/* Hiển thị giá gốc */}
           </p>
           <div className='flex items-center text-xs gap-2'>
             <p className='bg-green-200 text-[8px] uppercase px-2 py-[1px]'>
               Tiết kiệm | {`-${discount}%`}
+              {/* Hiển thị thông tin tiết kiệm */}
             </p>
             <p className='text-[#2a8703] font-semibold'>
               {formatPrice(discountTotal)}
+              {/* Hiển thị giá trị tiết kiệm */}
             </p>
           </div>
         </>
@@ -194,17 +205,18 @@ CartItem.ProductInfoPrice = function ProductPrice() {
   )
 }
 
+// Component chứa nút để điều chỉnh số lượng sản phẩm trong giỏ hàng
 CartItem.CartButtonGroup = function ButtonGroup() {
   const { item } = useItemContextProvider()
-  const { removeItem, updateItem } = useCart()
-  const [quantity, setQuantity] = useState<number>(item.quantity)
-  const availableQuantity = item.variant?.availableQuantity
+  const { removeItem, updateItem } = useCart() // Sử dụng custom hook useCart để xoá và cập nhật sản phẩm
+  const [quantity, setQuantity] = useState<number>(item.quantity) // Số lượng sản phẩm
+  const availableQuantity = item.variant?.availableQuantity // Số lượng tồn kho
   const limit =
     availableQuantity && availableQuantity < ALLOW_QUANTITY
       ? availableQuantity
-      : ALLOW_QUANTITY
-  const isAddOk = quantity < limit
-  const isMinusOk = quantity > 1
+      : ALLOW_QUANTITY // Số lượng tối đa cho phép
+  const isAddOk = quantity < limit // Kiểm tra xem có thể thêm sản phẩm không
+  const isMinusOk = quantity > 1 // Kiểm tra xem có thể giảm sản phẩm không
 
   const removeItemHandler = () => {
     if (!!!item?.id) {
@@ -222,12 +234,14 @@ CartItem.CartButtonGroup = function ButtonGroup() {
       setTimeout(() => {
         console.log('item inside timeout', quantity)
         res(updateItem.bind(null, { ...item, quantity })())
-      }, 300)
+      }, 300) // Đợi 300ms trước khi cập nhật sản phẩm
     })
   }
 
+  // Thiết lập việc cập nhật số lượng sản phẩm sau một khoảng thời gian sử dụng custom hook useDebounceFn
   const [updateDebounce, , { isLoading }] = useDebounceFn(updateCartItem, 500)
 
+  // Xử lý khi người dùng thay đổi số lượng sản phẩm bằng cách thêm hoặc giảm
   const updateQuantityHandler = (isPlus: boolean) => {
     if (isPlus) {
       setQuantity((prev) => {
@@ -249,11 +263,15 @@ CartItem.CartButtonGroup = function ButtonGroup() {
     }
   }
 
+  // Sử dụng useEffect để cập nhật số lượng sản phẩm khi trạng thái item thay đổi
   useEffect(() => {
     setQuantity((prev) => (item.quantity !== prev ? item.quantity : prev))
   }, [item])
 
+  // Lấy thông tin số lượng tồn kho từ biến item
   const { variant: { availableQuantity: availQty } = {} } = item
+
+  // Hiển thị nút và thông báo khi sản phẩm đã hết hàng hoặc số lượng tồn kho là 0
   if (!availQty || availQty <= 0)
     return (
       <>
@@ -265,6 +283,7 @@ CartItem.CartButtonGroup = function ButtonGroup() {
         <p className='text-red-500 text-normal font-semibold'>Hết hàng</p>
       </>
     )
+  // Hiển thị nút để xoá sản phẩm khỏi giỏ hàng và điều chỉnh số lượng
   return (
     <>
       {isLoading && <LoadingOverlay />}
@@ -305,10 +324,12 @@ CartItem.CartButtonGroup = function ButtonGroup() {
   )
 }
 
+// Định nghĩa kiểu dữ liệu cho option của dropdown phiên bản
 type VariantOption = Option<IVariant>
 
+// Component cho việc chọn phiên bản sản phẩm
 CartItem.VariantSelect = function VariantSelect() {
-  const [shouldFetch, fetchAction] = useBoolean()
+  const [shouldFetch, fetchAction] = useBoolean() // Hook để quản lý trạng thái fetching
   const { item } = useItemContextProvider()
   const { product, id: variantId } = item?.variant ?? {}
   const { updateItem } = useCart()
@@ -316,7 +337,7 @@ CartItem.VariantSelect = function VariantSelect() {
   const { control, setValue } = useForm<{ variant: VariantOption }>()
 
   const { getSpecificationsByProduct, getVariants } = API['products']()
-  //fetch distinct names
+  // Lấy thông tin các specification của sản phẩm từ API
   const { data: { data: productSpecifications } = {} } = useCustom<
     { name: string; values: ISpecification[] }[]
   >({
@@ -332,7 +353,7 @@ CartItem.VariantSelect = function VariantSelect() {
     projection: { withSpecs },
   } = API.variants()
 
-  //fetch variant list by products
+  // Lấy thông tin danh sách các phiên bản sản phẩm từ API
   const { data: { data: variants } = {} } = useCustom<IVariant[]>({
     url: getVariants(product?.id),
     method: 'get',
@@ -349,6 +370,7 @@ CartItem.VariantSelect = function VariantSelect() {
     },
   })
 
+  // Lọc các tên specification có nhiều giá trị khác nhau
   const distinctNames = useMemo(
     () =>
       productSpecifications
@@ -356,7 +378,7 @@ CartItem.VariantSelect = function VariantSelect() {
         .map((spec) => spec.name) ?? [],
     [productSpecifications],
   )
-
+  // Tạo danh sách các phiên bản có thể chọn trong dropdown
   const variantOptions = useMemo(() => {
     const array = (variants ?? [])
       .map((v) => {
@@ -377,6 +399,7 @@ CartItem.VariantSelect = function VariantSelect() {
       .concat(array.filter((item) => item.__isDisabled__))
   }, [distinctNames, variants])
 
+  // Đặt giá trị mặc định cho dropdown khi biến item thay đổi
   useEffect(() => {
     if (!variantOptions) return
     const selected = variantOptions.find((item) => item.value.id === variantId)

@@ -28,7 +28,9 @@ const dataProvider = (
     const requestMethod = (method as MethodTypes) ?? 'get'
 
     const url: string = customUrl
-      ? customUrl
+      ? (customUrl as string)?.startsWith('http')
+        ? customUrl
+        : `${apiUrl}/${customUrl}`
       : `${apiUrl}/${resource}${mode === 'off' ? '/search/all' : ''}`
 
     if (!!filters) {

@@ -398,7 +398,7 @@ ProductInfo.Features = function Features() {
         </Text>
         <div className='overflow-x-auto overflow-y-auto shadow-bannerShadow sm:rounded-lg max-h-[310px]'>
           <Table
-            className='w-full normal-case text-base text-left dark:bg-gray-700'
+            className='w-full normal-case text-base text-left '
             fontWeight='medium'>
             <Tbody>
               {record?.features?.map((feature, index) => (

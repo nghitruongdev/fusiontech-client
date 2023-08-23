@@ -9,12 +9,26 @@ import { IProduct } from 'types'
 import Link from 'next/link'
 import { useCustom, useMany } from '@refinedev/core'
 import Slider from 'react-slick'
-import { useRef } from 'react'
+import { PropsWithChildren, Suspense, use, useEffect, useRef } from 'react'
 import SliderButton from '@components/ui/SliderButton'
 import { ChevronRight } from 'lucide-react'
 
 import { API } from 'types/constants'
 import ProductCard from './product/ProductCard'
+import { useIntersectionObserver } from 'usehooks-ts'
+import { Skeleton } from '@components/ui/Skeleton'
+import { cn } from 'components/lib/utils'
+import { useVisibleObserver } from '@/hooks/useVisibleObserver'
+
+const {
+  getAllProductActive,
+  getHotProducts,
+  getProductsLastest,
+  getProductsDiscount,
+  getSellingProducts,
+  resource,
+  projection: { full },
+} = API.products()
 
 const sliderSettings = {
   infinite: true,
@@ -51,19 +65,63 @@ const sliderSettings = {
   ],
 }
 
-const DiscountList = () => {
-  const {
-    getProductsDiscount,
-    resource,
-    projection: { full },
-  } = API.products()
+const Loading = ({
+  cols = 5,
+  rows = 1,
+  className,
+}: {
+  cols?: number
+  rows?: number
+  className?: string
+}) => {
+  return (
+    <div className={cn(`grid gap-4`, className)}>
+      {Array.from({ length: rows }).map((row, idx) => (
+        <div
+          key={idx}
+          className={`grid grid-cols-${cols}`}>
+          {Array.from({ length: cols }).map((col, colIdx) => (
+            <div
+              key={colIdx}
+              className={`flex flex-col gap-2 p-4`}>
+              <Skeleton className='w-full h-[150px]' />
+              <Skeleton className='w-2/5 h-4 rounded-none' />
+              <Skeleton className='w-full h-4 rounded-none' />
+              <Skeleton className='w-full h-4 rounded-none' />
+              <Skeleton className='w-full h-4 rounded-none' />
+              <Skeleton className='w-full h-16 rounded-none' />
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+}
 
+const ProductListSuspense = ({ children }: PropsWithChildren) => {
+  return (
+    <Suspense
+      fallback={
+        <Loading
+          cols={5}
+          className={'mt-5'}
+        />
+      }>
+      {children}
+    </Suspense>
+  )
+}
+
+const DiscountList = () => {
+  const { ref, isVisible } = useVisibleObserver<HTMLDivElement>()
   const { data: { data: products = [] } = {} } = useCustom<IProduct[]>({
-    // url: `http://100.82.6.136:8080/api/products/search/discount-products`,
     url: `${getProductsDiscount()}?projection=${full}`,
-    // url: getProductsDiscount(),
     method: 'get',
     meta: { resource },
+    queryOptions: {
+      enabled: !!isVisible,
+      suspense: true,
+    },
   })
   const sliderRef = useRef<Slider | null>(null)
   const backgroundImageURL =
@@ -71,6 +129,7 @@ const DiscountList = () => {
   return (
     <>
       <div
+        ref={ref}
         id='discount'
         className={`grid grid-cols-6 rounded-lg bg-cover bg-bottom`}
         style={{ backgroundImage: `url(${backgroundImageURL})` }}>
@@ -106,24 +165,20 @@ const DiscountList = () => {
 }
 
 const AllProducts = () => {
-  // const { width } = useWindowDimensions();
-  // let numProductToShow = 10
-  // const products = await getProductsWithDetails()
-
-  const {
-    getAllProducts,
-    resource,
-    projection: { full },
-  } = API.products()
-
+  const { ref, isVisible } = useVisibleObserver<HTMLDivElement>()
   const { data: { data: products = [] } = {} } = useCustom<IProduct[]>({
-    url: `${getAllProducts()}?projection=${full}`,
+    url: `${getAllProductActive}?projection=${full}`,
     method: 'get',
     meta: { resource },
+    queryOptions: {
+      enabled: isVisible,
+      suspense: true,
+    },
   })
 
   return (
     <div
+      ref={ref}
       className='bg-white rounded-lg '
       id='others'>
       <div className='flex  justify-between items-center px-3 pt-3 md:my-4 lg:mt-10  '>
@@ -166,23 +221,18 @@ const AllProducts = () => {
 }
 
 const Newest = () => {
-  // const { width } = useWindowDimensions();
-  // let numProductToShow = 10
-  // const products = await getProductsWithDetails()
-
-  const {
-    getProductsLastest,
-    resource,
-    projection: { full },
-  } = API.products()
-
+  const { ref, isVisible } = useVisibleObserver<HTMLDivElement>()
   const { data: { data: products = [] } = {} } = useCustom<IProduct[]>({
     url: `${getProductsLastest(10)}&projection=${full}`,
     method: 'get',
     meta: { resource },
+    queryOptions: {
+      enabled: isVisible,
+    },
   })
   return (
     <div
+      ref={ref}
       className='bg-white rounded-lg '
       id='newest'>
       <div className='flex  justify-between items-center px-3 pt-3 md:my-4 lg:mt-10  '>
@@ -225,23 +275,19 @@ const Newest = () => {
 }
 
 const HotProduct = () => {
-  // const { width } = useWindowDimensions();
-  // let numProductToShow = 10
-  // const products = await getProductsWithDetails()
-
-  const {
-    getHotProducts,
-    resource,
-    projection: { full },
-  } = API.products()
-
+  const { isVisible, ref } = useVisibleObserver<HTMLDivElement>()
   const { data: { data: products = [] } = {} } = useCustom<IProduct[]>({
     url: `${getHotProducts(10)}&projection=${full}`,
     method: 'get',
     meta: { resource },
+    queryOptions: {
+      enabled: isVisible,
+      suspense: true,
+    },
   })
   return (
     <div
+      ref={ref}
       className='bg-white rounded-lg '
       id='top-hot'>
       <div className='flex  justify-between items-center px-3 pt-3 md:my-4 lg:mt-10  '>
@@ -285,11 +331,7 @@ const HotProduct = () => {
 }
 
 const SellingProducts = () => {
-  const {
-    getSellingProducts,
-    resource,
-    projection: { full },
-  } = API.products()
+  const { ref, isVisible } = useVisibleObserver<HTMLDivElement>()
   const startDate = new Date('2022-08-30')
   const endDate = new Date('2024-08-30')
 
@@ -298,6 +340,10 @@ const SellingProducts = () => {
     url: `${getSellingProducts(startDate, endDate)}`,
     method: 'get',
     meta: { resource },
+    queryOptions: {
+      enabled: isVisible,
+      suspense: true,
+    },
   })
 
   const ids = data?.map((item) => item.id) ?? []
@@ -310,13 +356,14 @@ const SellingProducts = () => {
       },
     },
     queryOptions: {
-      enabled: !!ids.length,
+      enabled: !!ids.length && isVisible,
+      suspense: true,
     },
   })
 
-  // const { data: { data: products = [] } = {}, isFetching } = drop
   return (
     <div
+      ref={ref}
       className='bg-white rounded-lg '
       id='top-sell'>
       <div className='flex  justify-between items-center px-3 pt-3 md:my-4 lg:mt-10  '>
@@ -358,4 +405,11 @@ const SellingProducts = () => {
   )
 }
 
-export { DiscountList, Newest, HotProduct, SellingProducts, AllProducts }
+export {
+  DiscountList,
+  Newest,
+  HotProduct,
+  SellingProducts,
+  AllProducts,
+  ProductListSuspense,
+}

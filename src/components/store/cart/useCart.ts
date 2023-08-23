@@ -14,6 +14,7 @@ import { API } from 'types/constants'
 import { checkCartExists, createCart, deleteCart } from './utils'
 import { produce } from 'immer'
 import { toRecord } from '@/lib/utils'
+
 type ReturnProps = {
   addItem: (item: ICartItem) => void
   updateItem: (item: ICartItem) => void
@@ -38,7 +39,9 @@ const getAllowQuantity = (quantity: number) =>
     ? Math.round(quantity)
     : 0
 
+// useCart: Hook để quản lý giỏ hàng
 const useCart = (): ReturnProps => {
+  // Lấy thông tin về cartId và hàm setCartId từ useCartIdStore
   const { cartId, setCartId } = useCartIdStore(
     ({ cartId, cartUserId, setCartId, setCartUserId }) => ({
       cartId,
@@ -46,15 +49,19 @@ const useCart = (): ReturnProps => {
     }),
   )
 
+  // useRef để theo dõi thay đổi của cartId
   const cartIdRef = useRef(cartId)
 
+  // useEffect để cập nhật cartIdRef khi cartId thay đổi
   useEffect(() => {
     console.log('cartId changed', cartId)
     cartIdRef.current = cartId
   }, [cartId])
 
+  // Lấy thông tin user từ useAuthUser
   const { user } = useAuthUser()
 
+  // Lấy thông tin items và các hàm liên quan từ useCartStore
   const { items, clearItems, onItemsChange } = useCartStore(
     ({ items, onItemsChange, clearItems }) => ({
       items,
@@ -64,11 +71,13 @@ const useCart = (): ReturnProps => {
     shallow,
   )
 
+  // Hàm để xoá toàn bộ mục trong giỏ hàng hiện tại
   const clearCurrentCart = () => {
     if (!cartId) return
     Object.entries(items).forEach(([, { id }]) => id && deleteCartItem(id))
   }
 
+  // Hàm để xoá mục khỏi giỏ hàng
   const deleteCartItem = useCallback(
     (id: string) => {
       if (!cartId) {
@@ -83,6 +92,7 @@ const useCart = (): ReturnProps => {
     [cartId],
   )
 
+  // Hàm để cập nhật mục trong giỏ hàng
   const updateCartItem = useCallback(
     async ({ id, variantId, quantity, variant }: ICartItem) => {
       if (!cartId) {
@@ -99,6 +109,8 @@ const useCart = (): ReturnProps => {
       }
 
       console.count('before updating cart item in database')
+
+      // Hàm updateItem thực hiện việc cập nhật dữ liệu vào Firestore
       const updateItem = async (
         id: string,
         variantId: number,
@@ -114,6 +126,8 @@ const useCart = (): ReturnProps => {
           },
         })
       }
+
+      // Xử lý cập nhật dựa trên các điều kiện
       const availQty = variant?.availableQuantity
       const currentCartItemBasedOnVariantId = items[variantId]
       const validVariantQty =
@@ -143,10 +157,12 @@ const useCart = (): ReturnProps => {
     [cartId, deleteCartItem, items],
   )
 
+  // Hàm để thêm mục vào giỏ hàng
   const addCartItem = useCallback(
     async (addItem: ICartItem) => {
       if (!cartId) {
         try {
+          // Thử tạo giỏ hàng mới nếu chưa có
           await new Promise(async (res, rej) => {
             let count = 0
             const interval = setInterval(() => {
@@ -189,6 +205,7 @@ const useCart = (): ReturnProps => {
         })
         return
       }
+      // Tạo mục mới trong giỏ hàng
       firestoreProvider.create({
         resource: ITEMS_RESOURCE(cartIdRef.current ?? ''),
         variables: {
@@ -201,6 +218,7 @@ const useCart = (): ReturnProps => {
     [cartId, items, user?.uid, updateCartItem, setCartId],
   )
 
+  // Hàm để hợp nhất giỏ hàng cục bộ và giỏ hàng người dùng
   const mergeCart = useCallback(
     async (localCartId: string, userCart: ICart) => {
       console.debug('start to merge cart')
@@ -220,6 +238,7 @@ const useCart = (): ReturnProps => {
     [addCartItem, items, setCartId],
   )
 
+  // Trả về các hàm và giá trị cần thiết để quản lý giỏ hàng
   return {
     addItem: addCartItem,
     updateItem: updateCartItem,

@@ -10,10 +10,13 @@ import {
   useContext,
   useEffect,
   useState,
+  use,
+  useMemo,
+  Suspense,
 } from 'react'
 import { IProduct, IVariant } from 'types'
 import { API } from 'types/constants'
-import { useCustom } from '@refinedev/core'
+import { useCustom, useOne } from '@refinedev/core'
 import { cleanUrl, formatPrice } from '@/lib/utils'
 import { useOptionStore } from './product-options'
 import useCart, {
@@ -36,8 +39,18 @@ import { useRecentProductViewStore } from '@components/providers/RecentProductVi
 import { useIsFirstRender } from 'usehooks-ts'
 import { FavoriteButton } from '@components/store/front/product/FavoriteButton'
 import Link from 'next/link'
+import { notFound, redirect } from 'next/navigation'
+import ProductCard from '@components/store/front/product/ProductCard'
+import { suspensePromiseWithCleanup } from '../../../../src/lib/promise'
+import ProductListLoading from '@components/store/front/product/ProductListLoading'
+import { useVisibleObserver } from '@/hooks/useVisibleObserver'
+import Loading from 'app/loading'
 
-const { findTopFrequentBoughtTogether } = API['products']()
+const {
+  findTopFrequentBoughtTogether,
+  projection: { dynamic },
+  resource,
+} = API['products']()
 type ContextState = {
   product: IProduct
   variants: {
@@ -60,15 +73,28 @@ const ProductContextProvider = ({
   if (!product) {
     throw new Error('Product is missing in the context')
   }
+
+  const [[suspense, cleanup], setSuspense] = useState<
+    ReturnType<typeof suspensePromiseWithCleanup>
+  >(suspensePromiseWithCleanup(false))
+  const { data: { data: dynamicProduct } = {}, status } = useOne<IProduct>({
+    resource,
+    id: product.id,
+    meta: {
+      query: {
+        projection: dynamic,
+      },
+    },
+  })
   const { _links } = product
   const {
-    resource,
+    resource: variantResource,
     projection: { withSpecs: projection },
   } = API['variants']()
-  const { data, status } = useCustom<IVariant[]>({
+  const { data, status: variantStatus } = useCustom<IVariant[]>({
     url: `${cleanUrl(_links?.variants.href ?? '')}`,
     meta: {
-      resource,
+      resource: variantResource,
     },
     config: {
       query: { projection },
@@ -77,55 +103,56 @@ const ProductContextProvider = ({
     method: 'get',
     queryOptions: {
       enabled: !!_links,
+      retry: false,
     },
   })
 
+  useEffect(() => {
+    if (status === 'loading') return
+    if (status === 'error') redirect(`/`)
+    if (status === 'success') {
+      if (!dynamicProduct?.active) notFound()
+      setSuspense(suspensePromiseWithCleanup(true))
+    }
+  }, [status, dynamicProduct])
+
+  useEffect(() => {
+    return () => {
+      cleanup?.()
+    }
+  }, [cleanup])
+  const dynamicInfo = useMemo(() => {
+    if (!dynamicProduct) return {}
+    return Object.entries(dynamicProduct).reduce((acc, [key, value]) => {
+      if (!!value) acc[key] = value
+      return acc
+    }, {} as Record<string, any>)
+  }, [dynamicProduct])
   const addItems = useRecentProductViewStore((state) => state.addProduct)
   useEffect(() => {
     addItems(product)
   }, [addItems, product])
   return (
     <ProductContext.Provider
-      value={{ product, variants: { data: data?.data, status } }}>
-      {children}
+      value={{
+        product: {
+          ...product,
+          ...dynamicInfo,
+        },
+        variants: { data: data?.data, status: variantStatus },
+      }}>
+      <Suspense fallback={<Loading />}>
+        <SuspenseProduct suspense={suspense} />
+        {children}
+      </Suspense>
     </ProductContext.Provider>
   )
 }
 
-// export const ProductImages = () => {
-//   const {
-//     product: { images },
-//   } = useProductContext()
-//   return (
-//     <div className='flex border shadow rounded-lg gap-5 '>
-//       <div className='w-1/5 flex flex-col space-y-2 space-x-2 border-r-2 overflow-auto items-center bg-white '>
-//         {images?.map((item, idx, arr) => (
-//           <div
-//             key={`${idx}-${item}`}
-//             className='p-2 w-1/2 hover:border '>
-//             <Image
-//               src={item}
-//               width={'200'}
-//               height={'200'}
-//               alt='product image'
-//               className='cursor-move duration-500'
-//               priority
-//             />
-//           </div>
-//         ))}
-//       </div>
-//       <div className='w-3/5 bg-white  flex items-center justify-center'>
-//         <Image
-//           src={images?.[0] ?? ''}
-//           width={'200'}
-//           height={'200'}
-//           alt='product image'
-//           className='w-[80%] transform-origin-top-left cursor-move duration-500 '
-//         />
-//       </div>
-//     </div>
-//   )
-// }
+const SuspenseProduct = ({ suspense }: { suspense: Promise<unknown> }) => {
+  use(suspense)
+  return <></>
+}
 export const ProductImages = () => {
   const {
     product: { images },
@@ -146,7 +173,7 @@ export const ProductImages = () => {
             width={500}
             height={500}
             alt='product image'
-            className='h-[500px] w-auto object-center cursor-move duration-500 '
+            className=' w-auto object-center cursor-move duration-500 '
           />
         </div>
       </div>
@@ -386,37 +413,60 @@ export const ProductQuantity = () => {
 }
 
 export const ProductFrequentBoughtTogether = () => {
-  const firstRender = useIsFirstRender()
   const {
     product: { id },
   } = useProductContext()
+  const { isVisible, ref } = useVisibleObserver<HTMLDivElement>()
   const { data: { data: products } = {}, status } = useCustom<IProduct[]>({
     url: findTopFrequentBoughtTogether(id, 10),
     method: 'get',
     queryOptions: {
-      enabled: !!id && firstRender,
-      suspense: true,
+      enabled: !!id && isVisible,
+      retry: false,
     },
+    meta: {
+      resource,
+    },
+    errorNotification: false,
+    successNotification: false,
   })
 
   if (status === 'loading') {
-    return <div>Đang tải...</div>
+    return (
+      <div ref={ref}>
+        <ProductListLoading />
+      </div>
+    )
   }
 
   if (!products || !products?.length) return <></>
 
   return (
     <div>
-      <p>Sản phẩm thường được mua cùng</p>
-      <ul>
+      <p className='text-2xl font-semibold my-4'>
+        Sản phẩm thường được mua cùng
+      </p>
+      <div
+        className='flex flex-overflow-x-auto gap-4'
+        ref={ref}>
         {products.map((product) => (
-          <li key={product.id}>
-            <h3>{product.name}</h3>
-            <p>{product.summary}</p>
-            {/* Render other product information as needed */}
-          </li>
+          <ProductCard.Provider
+            key={product.id}
+            product={product}>
+            <ProductCard.ProductContainer>
+              <ProductCard.Discount />
+              <ProductCard.Image />
+              <div className='px-2 flex flex-col'>
+                <ProductCard.Brand />
+                <ProductCard.Name />
+                <ProductCard.Price />
+                <ProductCard.Summary />
+                <ProductCard.AvgRating />
+              </div>
+            </ProductCard.ProductContainer>
+          </ProductCard.Provider>
         ))}
-      </ul>
+      </div>
     </div>
   )
 }

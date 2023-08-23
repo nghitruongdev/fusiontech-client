@@ -1,5 +1,6 @@
 /** @format */
 
+import { notFound } from 'next/navigation'
 import { IProduct } from 'types'
 import { serverDataProvider as provider } from '../provider'
 const resource = 'products'
@@ -18,11 +19,15 @@ export const getProductsWithDetails = async () => {
 }
 
 export const getOneProduct = async (id: string | number) => {
-  return provider.getOne<IProduct>({
-    resource,
-    id: id,
-    query: {
-      projection: projection.full,
-    },
-  })
+  try {
+    return await provider.getOne<IProduct>({
+      resource,
+      id: id,
+      query: {
+        projection: projection.full,
+      },
+    })
+  } catch (err) {
+    notFound()
+  }
 }

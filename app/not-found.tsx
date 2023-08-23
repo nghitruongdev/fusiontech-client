@@ -6,14 +6,15 @@ import { errorImg } from '@public/assets/images'
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import StoreLayout from './(store)/layout'
+import { Button } from '@components/ui/shadcn/button'
 const NotFound = () => {
   return (
     <StoreLayout>
-      <div className='flex items-center justify-center'>
+      <div className='h-[600px] flex items-center justify-center'>
         <div className='flex items-center justify-center'>
           <div className='mr-8'>
             <div className=''>
-              <h1 className='font-extrabold text-8xl text-red-700'>
+              <h1 className='font-extrabold text-5xl text-yellow'>
                 FusionTech
               </h1>
             </div>
@@ -23,12 +24,17 @@ const NotFound = () => {
               </span>
               <br />
             </p>
-            <Link href='/'>
-              <div className='flex items-center mt-8 text-base  text-gray-900 hover:text-blue-700'>
+            <Button
+              variant={'link'}
+              className=''>
+              <Link
+                href='/'
+                className='flex'>
                 <ChevronLeft className='mr-1' />
                 Trở lại trang chủ
-              </div>
-            </Link>
+                {/* <div className='flex items-center mt-8 text-base  text-gray-900 hover:text-blue-700'></div> */}
+              </Link>
+            </Button>
           </div>
           <Image
             src={errorImg}

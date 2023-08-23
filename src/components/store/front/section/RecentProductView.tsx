@@ -23,7 +23,8 @@ const RecentProductView = () => {
           // eslint-disable-next-line react/jsx-key
           <ProductCard.Provider
             key={product.id}
-            product={product}>
+            product={product}
+            showInactive>
             <ProductCard.ProductContainer>
               <ProductCard.Discount />
               <ProductCard.Image />

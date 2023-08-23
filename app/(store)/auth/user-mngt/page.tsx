@@ -5,14 +5,12 @@ import {
   Button,
   FormControl,
   FormErrorMessage,
-  FormLabel,
-  Input,
   useBoolean,
 } from '@chakra-ui/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
-import { HttpError, useTranslate } from '@refinedev/core'
-import { verifyPasswordResetCode } from 'firebase/auth'
+import { useCustomMutation, useTranslate, useUpdate } from '@refinedev/core'
+import { verifyPasswordResetCode, applyActionCode } from 'firebase/auth'
 import { useEffect, useState } from 'react'
 import { firebaseAuth } from '@/providers/firebaseAuthProvider'
 import AuthPage from '../AuthPage'
@@ -23,7 +21,7 @@ import Image from 'next/image'
 import { loginImg } from '@public/assets/images'
 import PasswordInput from '@components/ui/PasswordInput'
 import { cn } from 'components/lib/utils'
-import { useCountdown, useIsFirstRender, useIsMounted } from 'usehooks-ts'
+import { useCountdown, useIsMounted } from 'usehooks-ts'
 type PasswordForm = {
   password: string
   confirmPassword: string
@@ -38,7 +36,7 @@ const UpdatePasswordPage = () => {
   } = useForm<PasswordForm>({})
 
   const translate = useTranslate()
-
+  const { mutate } = useCustomMutation()
   const mode = params.get('mode')
   const actionCode = params.get('oobCode') ?? ''
   const continueUrl = params.get('continueUrl')
@@ -57,14 +55,34 @@ const UpdatePasswordPage = () => {
       return
     }
 
-    const verifyAction = async () => {
+    const verifyEmail = async () => {
+      try {
+        await applyActionCode(firebaseAuth.auth, actionCode)
+        //todo: send request to database to update isVerified field
+        // mutate({
+        //   url: '',
+        //   method: 'patch',
+        //   values: {
+        //     id: firebaseAuth.auth.currentUser?.uid,
+        //     verified: true,
+        //   },
+        // })
+      } catch (err) {
+        console.log('error', err)
+      }
+      setError({
+        name: 'Đường dẫn không hợp lệ.',
+        message:
+          'Đường dẫn không hợp lệ hoặc đã hết hạn. Vui lòng tạo một yêu cầu mới.',
+        statusCode: 400,
+      })
+    }
+    const verifyPasswordResetAction = async () => {
       try {
         const result = await verifyPasswordResetCode(
           firebaseAuth.auth,
           actionCode,
         )
-        //show the login form
-        showFormOn()
       } catch (error) {
         console.log('error', error)
 
@@ -79,7 +97,14 @@ const UpdatePasswordPage = () => {
         })
       }
     }
-    verifyAction()
+
+    switch (mode) {
+      case 'verifyEmail':
+        verifyEmail()
+        break
+      case 'resetPassword':
+        verifyPasswordResetAction()
+    }
   }, [actionCode, mode, router, showFormOn])
 
   const submitHandler = async (data: PasswordForm) => {
@@ -89,8 +114,8 @@ const UpdatePasswordPage = () => {
       actionCode: actionCode,
       password: data.password,
     })
-
-    if (result?.success) {
+    //localhost:3000/auth/user-mngt?mode=action&oobCode=code
+    http: if (result?.success) {
       showSuccessOn()
     }
 

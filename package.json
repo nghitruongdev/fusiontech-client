@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "cross-env refine dev",
     "build": "next build && rm -rf .next/cache",
-    "start": "next start",
+    "start": "next start -p 4000",
     "test": "",
     "refine": "refine",
     "prepare": "husky install",

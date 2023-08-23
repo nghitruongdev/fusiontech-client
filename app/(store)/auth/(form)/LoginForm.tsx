@@ -42,10 +42,11 @@ const LoginForm = () => {
   const callbackParam = params.get('callbackUrl')
   const isLoading = formSubmitting
   const { user } = useAuthUser()
-  const callbackUrl = useMemo(
-    () => (callbackParam ? decodeURIComponent(callbackParam) : '/'),
-    [callbackParam],
-  )
+  const callbackUrl = useMemo(() => {
+    const notRedirect = ['/unauthorized']
+    const callback = callbackParam ? decodeURIComponent(callbackParam) : '/'
+    return notRedirect.includes(callback) ? '/' : callback
+  }, [callbackParam])
   useEffect(() => {
     console.log('callback url triggered rendered')
     if (user) {
@@ -151,9 +152,9 @@ const LoginForm = () => {
                 'disabled:cursor-not-allowed',
               )}>
               {isLoading || isRedirecting ? (
-                <p className='flex gap-2 justify-center'>
+                <div className='flex gap-2 justify-center'>
                   Đang đăng nhập <Spinner speed='0.5s' />
-                </p>
+                </div>
               ) : (
                 'Đăng nhập'
               )}

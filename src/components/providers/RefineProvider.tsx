@@ -4,11 +4,7 @@
 import { ChakraProvider, ColorModeScript } from '@chakra-ui/react'
 import { Refine } from '@refinedev/core'
 import routerProvider from '@refinedev/nextjs-router/app'
-import {
-  RefineThemes,
-  notificationProvider,
-  refineTheme,
-} from '@refinedev/chakra-ui'
+import { RefineThemes, notificationProvider } from '@refinedev/chakra-ui'
 import { springDataProvider } from '@/providers/rest-data-provider'
 import dynamic from 'next/dynamic'
 import { QueryClient } from '@tanstack/react-query'
@@ -16,6 +12,7 @@ import { firestoreProvider } from '@/lib/firebase'
 import { firebaseAuth } from '@/providers/firebaseAuthProvider'
 import { useRouter } from 'next/navigation'
 import CartProvider from './CartProvider'
+import theme from '@/lib/chakra-theme'
 
 const DynamicColorScript = dynamic(
   () => import('@chakra-ui/react').then((mod) => mod.ColorModeScript),
@@ -42,6 +39,7 @@ const DynamicFavoriteProvider = dynamic(
     ssr: false,
   },
 )
+
 const DynamicRecentProductProvider = dynamic(
   () => import('./RecentProductViewProvider'),
   {
@@ -50,9 +48,7 @@ const DynamicRecentProductProvider = dynamic(
 )
 
 export const ColorScriptProvider = () => {
-  return (
-    <ColorModeScript initialColorMode={refineTheme.config.initialColorMode} />
-  )
+  return <ColorModeScript initialColorMode={theme.initialColorMode} />
 }
 
 const DynamicColorMode = dynamic(

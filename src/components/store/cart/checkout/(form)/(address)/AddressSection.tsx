@@ -22,10 +22,11 @@ import { API, API_URL } from 'types/constants'
 import { Callback, checkIsCallback } from '@/lib/callback'
 import { RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query'
 import useCrudNotification from '@/hooks/useCrudNotification'
-import dynamic from 'next/dynamic'
+import dynamic, { DynamicOptionsLoadingProps } from 'next/dynamic'
 import { useCheckoutContext } from '../../CheckoutProvider'
 import { cn } from 'components/lib/utils'
 import { useHeaders } from '@/hooks/useHeaders'
+import LoadingOverlay from '@components/ui/LoadingOverlay'
 
 type RefetchFunction = (
   options?: RefetchOptions & RefetchQueryFilters<unknown>,
@@ -281,9 +282,16 @@ export const AddressSectionProvider = ({
   )
 }
 
-const DynamicListModal = dynamic(() => import('./(modal)/ListModal'))
-const DynamicCreateModal = dynamic(() => import('./(modal)/CreateModal'), {})
-const DynamicEditModal = dynamic(() => import('./(modal)/EditModal'), {})
+const DynamicListModal = dynamic(() => import('./(modal)/ListModal'), {
+  loading: () => <LoadingOverlay />,
+})
+const DynamicCreateModal = dynamic(() => import('./(modal)/CreateModal'), {
+  loading: () => <LoadingOverlay />,
+})
+const DynamicEditModal = dynamic(() => import('./(modal)/EditModal'), {
+  loading: () => <LoadingOverlay />,
+})
+
 const AddressSection = ({}: {}) => {
   const {
     editModalProps,

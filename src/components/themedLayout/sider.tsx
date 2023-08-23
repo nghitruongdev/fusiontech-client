@@ -57,7 +57,7 @@ export const ThemedSiderV2: React.FC<RefineThemedLayoutV2SiderProps> = ({
   const TitleFromContext = useTitle()
   const isExistAuthentication = useIsExistAuthentication()
   const t = useTranslate()
-  const { hasDashboard } = useRefineContext()
+  const { hasDashboard = true } = useRefineContext()
   const authProvider = useActiveAuthProvider()
   const { warnWhen, setWarnWhen } = useWarnAboutChange()
   const { mutate: mutateLogout } = useLogout({
@@ -188,7 +188,8 @@ export const ThemedSiderV2: React.FC<RefineThemedLayoutV2SiderProps> = ({
 
   const items = renderTreeView(menuItems)
 
-  const dashboard = hasDashboard ? (
+  //   const dashboard = hasDashboard ? (
+  const dashboard = true ? (
     <CanAccess
       resource='dashboard'
       action='list'>
@@ -203,15 +204,15 @@ export const ThemedSiderV2: React.FC<RefineThemedLayoutV2SiderProps> = ({
           fontWeight='normal'
           leftIcon={<IconDashboard size={16} />}
           variant='ghost'
-          isActive={selectedKey === '/'}
+          isActive={selectedKey === '/admin'}
           _active={{
             color: 'brand.200',
             backgroundColor: 'brand.900',
           }}
           as={Link}
-          to='/'>
+          to='/admin'>
           {(mobileSiderOpen || !siderCollapsed) &&
-            t('dashboard.title', 'Dashboard')}
+            t('dashboard.title', 'Trang chủ')}
         </Button>
       </Tooltip>
     </CanAccess>

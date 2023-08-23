@@ -10,9 +10,18 @@ type ReturnProps = {
   pageSize: number
   setPageSize: (pageSize: number) => void
 }
+const getOrDefault = (value: string | null, defaultVal: number) => {
+  const num = Number.parseInt(value ?? defaultVal + '')
+  return !isNaN(num) ? num : defaultVal
+}
 export function usePageable() {
-  const [current, setCurrent] = useState<number>(1)
-  const [pageSize, setPageSize] = useState<number>(5)
+  const { get } = useSearchParams()
+  const [current, setCurrent] = useState<number>(
+    getOrDefault(get(`current`), 1),
+  )
+  const [pageSize, setPageSize] = useState<number>(
+    getOrDefault(get(`size`), 10),
+  )
 
   return {
     current,

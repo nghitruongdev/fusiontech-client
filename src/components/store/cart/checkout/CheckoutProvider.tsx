@@ -14,6 +14,7 @@ import { waitPromise } from '@/lib/promise'
 import LoadingOverlay from '@components/ui/LoadingOverlay'
 import useCart from '../useCart'
 import { useHeaders } from '@/hooks/useHeaders'
+import { useBoolean } from '@chakra-ui/react'
 
 type State = {
   onCheckout: () => Promise<void>
@@ -24,13 +25,14 @@ type StoreState = State & UseFormReturnType<IOrder, HttpError, ICheckout>
 const Context = createContext<StoreState | null>(null)
 type ProviderProps = React.PropsWithChildren<{}>
 export const CheckoutProvider = ({ children }: ProviderProps) => {
+  const [isRedirecting, { on: redirectOn }] = useBoolean()
   const router = useRouter()
   const { getAuthHeader } = useHeaders()
+  const { removeItem } = useCart()
   const {
     onError,
     action: { open },
   } = useCrudNotification()
-  const { removeItem } = useCart()
   const formProps = useForm<IOrder, HttpError, ICheckout>({
     refineCoreProps: {
       action: 'create',
@@ -44,6 +46,7 @@ export const CheckoutProvider = ({ children }: ProviderProps) => {
       },
     },
   })
+
   const {
     handleSubmit,
     setValue,
@@ -51,14 +54,14 @@ export const CheckoutProvider = ({ children }: ProviderProps) => {
     formState: { isSubmitting, errors },
   } = formProps
 
-  const { claims, userProfile } = useAuthUser()
+  const { userProfile } = useAuthUser()
+
+  //update userId form
   useEffect(() => {
-    console.log('isSubmitting', isSubmitting)
-  }, [isSubmitting])
-  useEffect(() => {
-    const id = claims?.id ?? userProfile?.id
+    const id = userProfile?.id
     !!id && setValue(`userId`, id + '')
-  }, [claims?.id, setValue, userProfile?.id])
+  }, [setValue, userProfile?.id])
+
   const [promise, setPromise] = useState<Promise<any>>(Promise.resolve())
 
   const checkoutHandler = async () => {
@@ -87,28 +90,30 @@ export const CheckoutProvider = ({ children }: ProviderProps) => {
         behavior: 'smooth', // Smooth scrolling animation
       })
 
+      console.log('cartItems', cartItems)
       const items = cartItems.map(
         ({ variantId, variant: { price, product } = {}, quantity }) => ({
           variantId,
           quantity,
-          price: ((100 - (product?.discount ?? 0)) / 100) * (price ?? 0),
+          price,
+          ...(product?.discount && { discount: product?.discount }),
         }),
       )
-      await waitPromise(500)
+      const submitValue = {
+        ...data,
+        items,
+        payment: {
+          ...data.payment,
+          amount,
+        },
+      }
+      console.log('checkoutValue', submitValue)
+      await waitPromise(200)
       try {
-        const result = await onFinish({
-          ...data,
-          items,
-          payment: {
-            ...data.payment,
-            amount,
-          },
-        })
-        // console.warn('Have not cleared items in cart')
+        const result = await onFinish(submitValue)
+        redirectOn()
+        router.push(`/cart/checkout/success?oid=${result?.data}`)
         cartItems.forEach((item) => !!item.id && removeItem(item.id))
-        setTimeout(() => {
-          router.replace(`/cart/checkout/success?oid=${result?.data}`)
-        }, 300)
       } catch (err) {
         console.log('inside inner try catch')
         console.log('error', err)
@@ -121,7 +126,7 @@ export const CheckoutProvider = ({ children }: ProviderProps) => {
     }
     console.log('Outside handle submit')
   }
-  const isProcessing = isSubmitting
+  const isProcessing = isSubmitting || isRedirecting
   return (
     <Context.Provider
       value={{

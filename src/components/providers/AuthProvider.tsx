@@ -10,6 +10,7 @@ import {
   useAuthUser,
 } from '@/hooks/useAuth/useAuthUser'
 import { waitPromise } from '@/lib/promise'
+import { convertToRoles } from '@/lib/utils'
 import { firebaseAuth } from '@/providers/firebaseAuthProvider'
 import { springDataProvider } from '@/providers/rest-data-provider'
 import { User } from 'firebase/auth'
@@ -28,9 +29,13 @@ const unsub = firebaseAuth.auth.onIdTokenChanged(async (user) => {
 const updateToken = (user: User | null, refresh: boolean = false) => {
   if (user) {
     user.getIdTokenResult(refresh).then(({ token, claims }) => {
+      console.debug('start to udpate token')
+      const { roles } = claims
+      const rolesEnum = Array.isArray(roles) ? convertToRoles(roles ?? []) : []
       authStore.setState(({}) => ({
         claims,
         token,
+        roles: rolesEnum,
         _hasPermissionHydrated: true,
       }))
     })
@@ -56,12 +61,15 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!user) return
     const fetchUserFirebaseId = async () => {
-      const userProfile = await springDataProvider.custom<IUser>({
-        url: `${findByFirebaseId(user.uid)}`,
-        method: 'get',
-      })
-      console.log('userProfile', userProfile)
-      setUserProfile(userProfile.data)
+      try {
+        const userProfile = await springDataProvider.custom<IUser>({
+          url: `${findByFirebaseId(user.uid)}`,
+          method: 'get',
+        })
+        setUserProfile(userProfile.data)
+      } catch (err) {
+        console.error('AuthProvider fetch user profile error ', err)
+      }
     }
 
     // const fetchUser = async () => {

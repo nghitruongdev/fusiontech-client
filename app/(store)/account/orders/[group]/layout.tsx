@@ -1,7 +1,7 @@
 /** @format */
 
-import { API_URL } from 'types/constants'
-import StatusTabs from '../StatusTabs'
+import { API_URL, ORDER_STATUS_GROUP } from 'types/constants'
+import StatusTabs from './StatusTabs'
 import { IOrderStatusGroup } from 'types'
 
 const getStatusGroups = async () => {
@@ -15,7 +15,7 @@ const getStatusGroups = async () => {
 }
 
 const OrderLayout = async ({ children }: { children: React.ReactNode }) => {
-  const statusGroups = (await getStatusGroups()) as IOrderStatusGroup[]
+  const statusGroups = ORDER_STATUS_GROUP as IOrderStatusGroup[]
 
   return (
     <>

@@ -1,9 +1,6 @@
 /** @format */
 
 import { useAuthUser } from '@/hooks/useAuth/useAuthUser'
-import { useCustom, useUpdate } from '@refinedev/core'
-import { API } from 'types/constants'
-import { API_URL } from 'types/constants'
 import { useState, useEffect } from 'react'
 import useMyToast from '@/hooks/useToast'
 import { useForm } from 'react-hook-form'
@@ -12,46 +9,29 @@ import userApi from '@/client-api/userAPI'
 
 export const ProfileForm = () => {
   const { getAuthHeader } = useHeaders()
-  const { user, claims } = useAuthUser()
-  const { resource, findByFirebaseId } = API['users']()
-  const { data, status } = useCustom({
-    url: `${API_URL}/${findByFirebaseId(user?.uid ?? '')}`,
-    method: 'get',
-    queryOptions: {
-      enabled: !!user,
-    },
-    config: {
-      headers: {
-        ...getAuthHeader(),
-      },
-    },
-  })
-
+  const { user, userProfile } = useAuthUser()
+  const uid = userProfile?.id
   // Sử dụng Hook useState để lưu trạng thái thông tin người dùng trong form
   const [phoneNumber, setPhoneNumber] = useState<string>('')
   const [dateOfBirth, setDateOfBirth] = useState('')
   const [gender, setGender] = useState<string>('')
-
-  console.log(data?.data)
+  console.log(user?.uid)
   useEffect(() => {
-    if (data?.data.dateOfBirth) {
-      setDateOfBirth(formatDate(data?.data.dateOfBirth))
+    if (userProfile?.dateOfBirth) {
+      setDateOfBirth(formatDate(userProfile.dateOfBirth))
     }
-    if (data?.data.phoneNumber) {
-      setPhoneNumber(data.data.phoneNumber)
+    if (userProfile?.phoneNumber) {
+      setPhoneNumber(userProfile.phoneNumber)
     }
-    if (data?.data.gender) {
-      setGender(data.data.gender)
+    if (userProfile?.gender) {
+      setGender(userProfile.gender)
     }
-  }, [data?.data])
+  }, [userProfile])
 
   const toast = useMyToast()
-
-  const updateUser = async (id: string, userData: any) => {
+  const updateUser = async (id: any, userData: any) => {
     try {
-      const response = await userApi.updateUser(id, userData, {
-        ...getAuthHeader(),
-      })
+      const response = await userApi.updateUser(id, userData, getAuthHeader())
       const newUser = response.data // Đánh giá mới được trả về từ API
       toast
         .ok({
@@ -74,14 +54,14 @@ export const ProfileForm = () => {
   const handleUpdateUser = (event: any) => {
     event.preventDefault()
     const userData = {
-      email: data?.data.email,
+      email: userProfile?.email,
       firebaseUid: user?.uid,
-      firstName: data?.data.fullName,
+      firstName: userProfile?.fullName,
       phoneNumber: phoneNumber,
       dateOfBirth: dateOfBirth,
       gender: getValues('gender'),
     }
-    updateUser(user?.uid ?? '', userData)
+    updateUser(uid, userData)
   }
 
   const formatDate = (date: Date) => {
@@ -94,10 +74,10 @@ export const ProfileForm = () => {
 
   // Sử dụng Hook useEffect để cập nhật giá trị dateOfBirth vào ô đầu vào khi component được tạo
   useEffect(() => {
-    if (data?.data.dateOfBirth) {
-      setDateOfBirth(formatDate(data?.data.dateOfBirth))
+    if (userProfile?.dateOfBirth) {
+      setDateOfBirth(formatDate(userProfile.dateOfBirth))
     }
-  }, [data?.data.dateOfBirth])
+  }, [userProfile?.dateOfBirth])
 
   const {
     register,
@@ -120,7 +100,7 @@ export const ProfileForm = () => {
           <input
             type='text'
             id='fullName'
-            value={data?.data.fullName}
+            value={userProfile?.fullName}
             readOnly
             className='w-full border border-gray-300 rounded-md px-3 py-2'
             {...register('Full name', { required: true })}
@@ -135,7 +115,7 @@ export const ProfileForm = () => {
           <input
             type='email'
             id='email'
-            value={data?.data.email}
+            value={userProfile?.email}
             readOnly
             className='w-full border border-gray-300 rounded-md px-3 py-2'
             {...register('Email', { required: true, pattern: /^\S+@\S+$/i })}
@@ -148,14 +128,14 @@ export const ProfileForm = () => {
             Số điện thoại:
           </label>
           <input
-            type='number'
+            type='text'
             id='phone'
             value={phoneNumber}
             className='w-full border border-gray-300 rounded-md px-3 py-2'
             {...register('phoneNumber', {
               required: true,
               min: 10,
-              max: 10,
+              max: 11,
             })}
             onChange={(e) => setPhoneNumber(e.target.value)}
           />
@@ -190,17 +170,17 @@ export const ProfileForm = () => {
             onChange={(e) => setGender(e.target.value)}>
             <option
               value='MALE'
-              selected={data?.data.gender === 'MALE'}>
+              selected={userProfile?.gender === 'MALE'}>
               Nam
             </option>
             <option
               value='FEMALE'
-              selected={data?.data.gender === 'FEMALE'}>
+              selected={userProfile?.gender === 'FEMALE'}>
               Nữ
             </option>
             <option
               value='OTHER'
-              selected={data?.data.gender === 'OTHER'}>
+              selected={userProfile?.gender === 'OTHER'}>
               Khác
             </option>
           </select>

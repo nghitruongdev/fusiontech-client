@@ -28,7 +28,9 @@ import Link from 'next/link'
 import { v4 as uuidv4 } from 'uuid'
 import dynamic from 'next/dynamic'
 
+// Component `CartItemList` để hiển thị danh sách các mục trong giỏ hàng
 const CartItemList = () => {
+  // Sử dụng custom hook useFetch để lấy dữ liệu sản phẩm
   const data = useFetch<IVariant[]>('/api/products', {})
   return (
     <div about='Cart Item List'>
@@ -43,20 +45,26 @@ const CartItemList = () => {
   )
 }
 
+// Khởi tạo context cho trạng thái và hành động của danh sách các mục trong giỏ hàng
 type ContextProps = {
   status: string
   items: ICartItem[]
 }
 const useListContext = () => {
   const context = useContext(CartItemList.Context)
+  // Nếu context không tồn tại, báo lỗi
   if (!!!context) throw new Error('CartItemList.Context is not found')
   return context
 }
 
+// Tạo context với giá trị mặc định là undefined
 CartItemList.Context = createContext<ContextProps | undefined>(undefined)
+
+// Provider để cung cấp dữ liệu cho context
 CartItemList.Provider = function Provider({
   children,
 }: React.PropsWithChildren<{}>) {
+  // Sử dụng custom hook useCartItems để lấy danh sách mục trong giỏ hàng
   const items = Object.values(useCartItems()).reverse()
   const status = 'success'
   return (
@@ -66,6 +74,7 @@ CartItemList.Provider = function Provider({
   )
 }
 
+// Phần header của danh sách
 CartItemList.Header = function Header() {
   const items = useCartItems()
 
@@ -82,6 +91,7 @@ CartItemList.Header = function Header() {
   )
 }
 
+// Nút để xoá tất cả mục trong giỏ hàng
 CartItemList.ClearAllButton = function ClearAllButton() {
   const { confirm } = useDialog()
   const { clearCart } = useCart()
@@ -111,6 +121,7 @@ CartItemList.ClearAllButton = function ClearAllButton() {
   )
 }
 
+// Phần nội dung danh sách
 CartItemList.Body = function Body() {
   const { items, status } = useListContext()
   const [shouldShow, { on: showOn }] = useBoolean()
@@ -172,6 +183,7 @@ CartItemList.Body = function Body() {
   )
 }
 
+// Hiển thị loading khi danh sách đang được tải
 CartItemList.Loading = function CartItemLoading({
   children,
 }: PropsWithChildren) {
@@ -201,6 +213,8 @@ CartItemList.Loading = function CartItemLoading({
     </>
   )
 }
+
+// Nút chọn tất cả các mục trong danh sách
 CartItemList.SelectAllCheckbox = function AllCheckbox() {
   const allRef = useRef<HTMLInputElement>(null)
   const { items } = useListContext()

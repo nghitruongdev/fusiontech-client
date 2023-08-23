@@ -14,6 +14,7 @@ export type ResourceName =
   | 'vouchers'
   | 'statistical'
   | 'inventory-details'
+  | 'inventories'
 
 export type FirebaseImage = string
 
@@ -296,6 +297,7 @@ export interface IOrder {
     id: number
   }
   payment?: IPayment
+  items?: IOrderItem[]
   user?: IUser
   _links?: _links
 }
@@ -370,6 +372,7 @@ export interface IOrderItem {
   id: string
   price: number
   quantity: number
+  discount?: number
   variant: {
     id: number
   }

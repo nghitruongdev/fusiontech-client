@@ -2,34 +2,24 @@
 
 'use client'
 
-import React from 'react'
+import React, { useMemo } from 'react'
 import {
   IResourceComponentsProps,
   GetManyResponse,
   useMany,
-  useList,
   GetListResponse,
   useCustom,
 } from '@refinedev/core'
 import { useTable } from '@refinedev/react-table'
 import { useHeaders } from '@/hooks/useHeaders'
-import { ColumnDef, flexRender } from '@tanstack/react-table'
-import { DateField, NumberField, TextField } from '@refinedev/chakra-ui'
+import { ColumnDef } from '@tanstack/react-table'
+import { DateField, TextField } from '@refinedev/chakra-ui'
+import { TableContainer, Table, HStack, Badge } from '@chakra-ui/react'
+import { Button } from '@components/ui/shadcn/button'
+import { useState } from 'react'
+import { IOrderStatusGroup } from 'types'
+import { API, ORDER_STATUS_GROUP } from 'types/constants'
 import {
-  TableContainer,
-  Table,
-  Thead,
-  Tr,
-  Th,
-  Tbody,
-  Td,
-  HStack,
-  Badge,
-} from '@chakra-ui/react'
-
-import { Pagination } from '@components/pagination'
-import {
-  IBasicUser,
   IOrder,
   IOrderStatus,
   IPayment,
@@ -49,9 +39,14 @@ import { statusColor } from 'types/constants'
 export default function ListPage() {
   return <OrderList />
 }
-
+const statusGroups = ORDER_STATUS_GROUP as IOrderStatusGroup[]
+const { findByStatus, findAllStatusByGroup } = API.orders()
 const OrderList: React.FC<IResourceComponentsProps> = () => {
-  const { getAuthHeader } = useHeaders()
+  const { getAuthHeader, authHeader } = useHeaders()
+  const [group, setTab] = useState<IOrderStatusGroup>(
+    statusGroups[0] as IOrderStatusGroup,
+  )
+
   const columns = React.useMemo<ColumnDef<IOrder>[]>(
     () => [
       {
@@ -181,7 +176,22 @@ const OrderList: React.FC<IResourceComponentsProps> = () => {
     ],
     [],
   )
-
+  const { data: { data: statusList } = {} } = useCustom<IOrderStatus[]>({
+    url: findAllStatusByGroup(group.name),
+    method: 'get',
+    queryOptions: {
+      enabled: !!authHeader,
+    },
+    config: {
+      headers: {
+        ...authHeader,
+      },
+    },
+  })
+  const statusParam = useMemo(
+    () => statusList?.map((item) => item.name).join(',') ?? '',
+    [statusList],
+  )
   const {
     getHeaderGroups,
     getRowModel,
@@ -201,6 +211,10 @@ const OrderList: React.FC<IResourceComponentsProps> = () => {
         headers: {
           ...getAuthHeader(),
         },
+        url: findByStatus(statusParam),
+      },
+      queryOptions: {
+        enabled: !!statusParam,
       },
     },
   })
@@ -218,15 +232,6 @@ const OrderList: React.FC<IResourceComponentsProps> = () => {
     },
     errorNotification: onError,
   })
-
-  //   const userIds = tableData?.data?.map((item) => item?.userId) ?? []
-  //   const { data: userData } = useMany({
-  //     resource: 'users',
-  //     ids: userIds,
-  //     queryOptions: {
-  //       enabled: userIds.length > 0,
-  //     },
-  //   }).bind()
 
   const paymentIds = tableData?.data?.map((item) => item?.paymentId) ?? []
   const { data: paymentData } = useMany<IPayment>({
@@ -257,7 +262,17 @@ const OrderList: React.FC<IResourceComponentsProps> = () => {
     pagination: { current, setCurrent, pageCount, pageSize, setPageSize },
   })
   return (
-    <List>
+    <List
+      headerButtons={() => {
+        return (
+          <>
+            <OrderStatusTab
+              group={group}
+              setGroup={setTab}
+            />
+          </>
+        )
+      }}>
       <TableContainer whiteSpace='pre-line'>
         <Table variant='simple'>
           {headers}
@@ -266,5 +281,37 @@ const OrderList: React.FC<IResourceComponentsProps> = () => {
       </TableContainer>
       {pagination}
     </List>
+  )
+}
+
+const OrderStatusTab = ({
+  group,
+  setGroup,
+}: {
+  group: IOrderStatusGroup
+  setGroup: (newTab: IOrderStatusGroup) => void
+}) => {
+  return (
+    <div className='w-full flex gap-4 justify-between mt-4 items-center bg-white'>
+      <div className='flex flex-grow rounded-md shadow-md bg-red overflow-hidden'>
+        {statusGroups.map((item) => {
+          return (
+            <Button
+              key={item.id}
+              variant={'secondary'}
+              onClick={() => {
+                setGroup(item)
+              }}
+              className={`${
+                item.id === group.id
+                  ? 'bg-zinc-100 text-blue-600'
+                  : 'bg-white text-zinc-400'
+              } min-w-[100px] px-4 py-2 text-sm font-semibold text-center`}>
+              <p className='whitespace-nowrap'>{item.detailName}</p>
+            </Button>
+          )
+        })}
+      </div>
+    </div>
   )
 }
