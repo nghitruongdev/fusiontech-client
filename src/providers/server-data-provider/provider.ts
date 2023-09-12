@@ -6,6 +6,7 @@ import { toRecord } from '../../lib/utils'
 import { stringifyUrl } from 'query-string'
 import { _listLinks, _searchLinks } from 'types/_link'
 import { CustomResponse } from 'types/response'
+import { notFound } from 'next/navigation'
 
 type GetListProps<T, K extends keyof T> = {
   resource: string
@@ -123,7 +124,9 @@ export const serverDataProvider = {
     // Recommendation: handle errors
     if (!res.ok) {
       // This will activate the closest `error.js` Error Boundary
-      throw new Error(`Failed to fetch ${resource}`)
+      //   throw new Error(`Failed to fetch ${resource}`)
+      console.log('Fetch failed', resource)
+      notFound()
     }
     // await waitPromise(1000 * 20);
     const { _embedded: data } = (await res.json()) as ListDataResponse<T>
@@ -155,7 +158,9 @@ export const serverDataProvider = {
     // Recommendation: handle errors
     if (!res.ok) {
       // This will activate the closest `error.js` Error Boundary
-      throw new Error(`Failed to fetch ${resource} with id ${id}`)
+      console.log('Fetch failed with ID', resource)
+      notFound()
+      //   throw new Error(`Failed to fetch ${resource} with id ${id}`)
     }
 
     return res.json()
@@ -181,7 +186,10 @@ export const serverDataProvider = {
     // Recommendation: handle errors
     if (!res.ok) {
       // This will activate the closest `error.js` Error Boundary
-      throw new Error(`Failed to fetch ${resource}`)
+      console.log('Fetch failed with ID', resource)
+      notFound()
+      return
+      //   throw new Error(`Failed to fetch ${resource}`)
     }
 
     const response = (await res.json()) as SearchDataResponse<T>
@@ -221,7 +229,9 @@ export const serverDataProvider = {
     projecion,
   }: CustomProps<T>): Promise<T | ListData<T>> => {
     if (!url && !pathName) {
-      throw new Error('Url or Pathname is required')
+      console.log('Url or Pathname is required')
+      notFound()
+      //   throw new Error('Url or Pathname is required')
     }
 
     const href = stringifyUrl({
@@ -235,7 +245,9 @@ export const serverDataProvider = {
       cache,
     })
     if (!res.ok) {
-      throw new Error(`Failed to fetch ${href}`)
+      console.log('Failed to fetch', href)
+      notFound()
+      //   throw new Error(`Failed to fetch ${href}`)
     }
 
     const result = (await res.json()) as CustomResponse<T>

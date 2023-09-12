@@ -30,6 +30,7 @@ const AuthenticatedPage = ({
   ])
   const router = useRouter()
   const [promise, setPromise] = useState<Promise<unknown>>(waitPromise(500))
+
   const setSuspensePromise = useCallback((condition?: boolean) => {
     const [suspense, cleanup] = suspensePromiseWithCleanup(condition)
     setPromise(suspense)
@@ -60,8 +61,9 @@ const AuthenticatedPage = ({
         (p) => rolesEnum?.some((role) => role === p) ?? false,
       )
       if (!result) {
+        const result = setSuspensePromise(false)
         router.replace('/unauthorized')
-        return setSuspensePromise(false)
+        return result
       }
     }
     checkRole()
